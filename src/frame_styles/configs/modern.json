@@ -1,0 +1,24 @@
+{
+  "name": "modern",
+  "description": "现代简约风格",
+  "layout": {
+    "border_width": 5,
+    "border_position": "outer",
+    "info_position": "bottom",
+    "info_height_ratio": 0.08
+  },
+  "colors": {
+    "border": "#000000",
+    "background": "#FFFFFF",
+    "text": "#000000",
+    "accent": "#888888"
+  },
+  "fonts": {
+    "regular": "Futura-Medium",
+    "size_ratio": 0.02
+  },
+  "effects": [
+    "rounded_corners",
+    "shadow"
+  ]
+}

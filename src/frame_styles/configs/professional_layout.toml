@@ -1,0 +1,73 @@
+# Professional Layout Style Configuration
+# 专业布局样式配置
+
+name = "Professional Layout"
+description = "专业布局样式，具有扩展画布、多行信息显示和灵活的装饰元素"
+version = "1.0"
+
+[layout]
+  # 扩展画布配置（相对于原图尺寸的百分比）
+  [layout.expand_canvas]
+    enabled = true
+    top = 0.05    # 上方扩展5%
+    bottom = 0.2  # 下方扩展20%，用于显示多行信息
+    left = 0.05   # 左侧扩展5%
+    right = 0.05  # 右侧扩展5%
+
+  # 信息位置配置（可指定在内部或外部）
+  [layout.info_position]
+    # EXIF信息位置
+    [layout.info_position.exif]
+      position = "outside"  # 位置：inside（内部）或 outside（外部）
+      alignment = "center"  # 对齐方式：left, center, right
+      margin = 20           # 距离边缘的像素
+      
+    # 作者信息位置
+    [layout.info_position.author]
+      position = "inside"   # 位置：inside（内部）或 outside（外部）
+      alignment = "top-left"  # 对齐方式：top-left, top-right, bottom-left, bottom-right, center, left, right
+      margin = 15           # 距离边缘的像素
+      
+    # 位置信息位置
+    [layout.info_position.location]
+      position = "inside"   # 位置：inside（内部）或 outside（外部）
+      alignment = "top-right"  # 对齐方式
+      margin = 15           # 距离边缘的像素
+      
+    # 相机图标位置
+    [layout.info_position.camera_icon]
+      position = "outside"  # 位置：inside（内部）或 outside（外部）
+      alignment = "top-left"  # 对齐方式
+      margin = 10           # 距离边缘的像素
+
+[colors]
+  text = "#2C3E50"      # 文字颜色 (深蓝灰)
+  background = "#ECF0F1" # 背景颜色 (浅灰)
+  icon = "#34495E"      # 图标颜色 (深灰)
+
+[fonts]
+  regular = "Futura-Medium"  # 常规字体
+  size_ratio = 0.015         # 默认字体大小相对于画布宽度的比例
+  # 各类信息的独立字体大小
+  [fonts.sizes]
+    exif = 0.018              # EXIF信息字体大小比例
+    author = 0.014            # 作者信息字体大小比例
+    location = 0.014          # 位置信息字体大小比例
+  line_spacing = 1.8         # 行间距倍数
+
+[decorations]
+  [decorations.border]
+    enabled = true
+    width = 3
+    color = "#BDC3C7"
+
+  [decorations.watermark]
+    enabled = true
+    text = "© Professional Photo"
+    position = "bottom-right"
+    opacity = 30
+
+[background_fill]
+  type = "gaussian_white"      # 可选: pure_black, pure_white, gaussian_black, gaussian_white
+  gaussian_blur_radius = 200   # 高斯模糊半径
+  gaussian_blur_opacity = 40   # 高斯模糊叠加透明度 (%)

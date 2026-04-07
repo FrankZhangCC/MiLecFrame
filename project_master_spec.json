@@ -1,0 +1,346 @@
+{
+  "_metadata": {
+    "title": "Python照片相框程序 - 完整技术规范",
+    "version": "1.8",
+    "type": "master_specification",
+    "priority": "highest",
+    "description": "此为项目底层需求规范，所有开发工作必须严格遵循"
+  },
+  
+  "project": {
+    "name": "Python照片相框程序",
+    "description": "开发一个模块化、高可读性的Python程序，用于为照片添加包含EXIF信息的相框"
+  },
+  
+  "requirements": {
+    "core_functions": {
+      "modular_design": {
+        "description": "模块化设计，便于维护和调用",
+        "requirements": [
+          "代码高可读性，包含详细注释",
+          "核心处理逻辑与样式逻辑分离",
+          "软件本身支持命令行运行和GUI运行两种模式"
+        ]
+      },
+      "gui_implementation": {
+        "description": "GUI界面实现",
+        "requirements": [
+          "实现网页版GUI界面",
+          "可使用成熟的Web框架（如Flask、Streamlit、Gradio等）",
+          "GUI提供完整的配置选项：相框样式选择、背景填充选择、图标选择等",
+          "提供文件上传和图片预览功能",
+          "网页GUI应易于部署和使用"
+        ]
+      },
+      "exif_processing": {
+        "description": "EXIF信息处理",
+        "required_fields": [
+          "相机品牌",
+          "相机型号",
+          "镜头型号",
+          "等效35mm焦距",
+          "光圈",
+          "快门速度",
+          "感光度",
+          "拍摄时间"
+        ],
+        "rules": [
+          "EXIF缺失则拒绝处理并记录错误日志",
+          "相框数据格式：[焦距]mm, f/[光圈], [快门]s, ISO[感光度]",
+          "快门速度格式化：<1秒显示分数，≥1秒显示小数",
+          "拍摄时间格式化为：[yyyy].[mm].[dd] [hh]:[mm]:[ss]",
+          "相机品牌信息用于自动选择对应品牌图标"
+        ]
+      },
+      "device_mapping": {
+        "description": "设备名称映射数据库",
+        "requirements": [
+          "使用CSV格式数据库文件",
+          "全局共享设备映射数据库",
+          "每次启动时读取最新数据",
+          "用户通过编辑CSV文件维护映射关系"
+        ]
+      },
+      "user_input": {
+        "description": "用户输入信息",
+        "fields": {
+          "author": {
+            "required": true,
+            "description": "手动输入作者姓名",
+            "persistence": "保存到配置文件"
+          },
+          "location": {
+            "required": true,
+            "description": "手动输入拍摄地点",
+            "format_options": [
+              "从小到大：[地点], [市], [省]",
+              "从大到小：[省] [市] [地点]"
+            ],
+            "input_flexibility": "允许用户选择输入顺序",
+            "persistence": "不保存"
+          }
+        }
+      },
+      "image_support": {
+        "description": "图像格式与处理支持",
+        "supported_formats": ["JPEG", "PNG", "TIFF"],
+        "unsupported_formats": ["RAW"],
+        "special_features": {
+          "gainmap_hdr": {
+            "description": "支持Gainmap HDR JPEG格式",
+            "requirements": [
+              "读取Gainmap HDR JPEG文件",
+              "处理时保留HDR信息",
+              "输出时保持HDR特性"
+            ]
+          },
+          "ultra_hdr": {
+            "description": "支持谷歌UltraHDR标准图片",
+            "requirements": [
+              "支持Android 14+引入的UltraHDR格式",
+              "正确解析UltraHDR的主图像和增益映射",
+              "处理时保留UltraHDR的HDR元数据",
+              "输出时保持UltraHDR兼容性",
+              "UltraHDR与Gainmap HDR属于同一技术体系，需一并支持"
+            ]
+          }
+        }
+      },
+      "color_space": {
+        "description": "色彩空间处理",
+        "requirements": [
+          "自动识别sRGB、AdobeRGB、ProPhotoRGB",
+          "非sRGB时显示警告并自动转换至sRGB",
+          "输出为sRGB色彩空间"
+        ]
+      },
+      "image_size": {
+        "description": "图像尺寸处理",
+        "requirements": [
+          "支持自定义输出尺寸",
+          "输入最大尺寸：12000×12000像素",
+          "输出最大尺寸：8192×8192像素",
+          "超限时等比缩小"
+        ]
+      },
+      "output_settings": {
+        "description": "输出设置",
+        "default_format": "JPEG最高质量",
+        "requirements": [
+          "保留原始EXIF信息",
+          "输出文件名：[原文件名]_framed.jpg"
+        ]
+      }
+    },
+    
+    "frame_system": {
+      "frame_styles": {
+        "description": "相框样式系统",
+        "requirements": [
+          "支持多种格式的相框样式配置文件",
+          "不限定必须是Python文件，只要能工作即可",
+          "样式配置可以是JSON、YAML、TOML或Python文件",
+          "程序自动识别并加载支持的样式配置文件",
+          "样式选择器显示所有可用的相框样式",
+          "样式配置文件应包含：布局规则、尺寸参数、文字位置等"
+        ],
+        "supported_formats": ["JSON", "YAML", "TOML", "Python"],
+        "custom_output_size": {
+          "description": "自定义输出尺寸支持",
+          "rules": [
+            "原图片可以等比例缩放后置入",
+            "具体缩放尺寸在相框样式配置中定义",
+            "示例：将照片缩放到照片的长边是输出尺寸的90%",
+            "自定义输出尺寸非所有样式都支持，根据具体样式配置确定",
+            "样式配置文件中应包含 output_size_enabled 和 scaling_rules 字段"
+          ]
+        }
+      },
+      "layer_composition": {
+        "description": "图层组成结构（更新版）",
+        "layer_order_from_top_to_bottom": [
+          "1. 文字和图标层（最上层）",
+          "2. 装饰元素层",
+          "3. 原图层",
+          "4. 背景层（最下层，已合并扩展区域）"
+        ],
+        "principles": [
+          "背景层和扩展区域已合并为一个整体背景层",
+          "装饰元素独立出来，位于原图上方",
+          "文字和图标位于最上层，确保可读性",
+          "原图位于背景层之上、装饰元素之下"
+        ]
+      },
+      "background_fill": {
+        "description": "背景填充选项（已合并扩展区域）",
+        "available_options": [
+          {
+            "name": "纯黑色",
+            "description": "100%黑色背景填充，覆盖包括原扩展区域在内的整个画面"
+          },
+          {
+            "name": "纯白色",
+            "description": "100%白色背景填充，覆盖包括原扩展区域在内的整个画面"
+          },
+          {
+            "name": "高斯模糊叠加黑色 (65%)",
+            "description": "原图半径200像素高斯模糊，等比放大填充至包括原扩展区域在内的整个画面，叠加65%透明度黑色"
+          },
+          {
+            "name": "高斯模糊叠加白色 (65%)",
+            "description": "原图半径200像素高斯模糊，等比放大填充至包括原扩展区域在内的整个画面，叠加65%透明度白色"
+          },
+          {
+            "name": "高斯模糊叠加黑色 (35%)",
+            "description": "原图半径200像素高斯模糊，等比放大填充至包括原扩展区域在内的整个画面，叠加35%透明度黑色"
+          },
+          {
+            "name": "高斯模糊叠加白色 (35%)",
+            "description": "原图半径200像素高斯模糊，等比放大填充至包括原扩展区域在内的整个画面，叠加35%透明度白色"
+          }
+        ],
+        "gaussian_blur_specifications": {
+          "radius": "200像素",
+          "scaling_method": "等比放大",
+          "fill_target": "包括扩展区域在内的整个画面（背景层）",
+          "overlay_opacities": ["65%", "35%"],
+          "overlay_colors": ["黑色", "白色"]
+        }
+      },
+      "responsive_design": {
+        "description": "响应式相框设计（更新版）",
+        "principles": [
+          "以输出尺寸的百分比（或小数）作为参考比例",
+          "文字大小、边距等随输出尺寸自动调整",
+          "通过样式配置文件参数控制布局和尺寸",
+          "支持扩展到图片外部的设计"
+        ],
+        "reference_basis": "输出尺寸的百分比（或小数）"
+      },
+      "configuration_selector": {
+        "description": "配置选择系统",
+        "requirements": [
+          "提供相框样式选择功能",
+          "提供背景填充样式选择功能（从四种选项中选择）",
+          "提供颜色方案选择功能",
+          "提供图标选择功能",
+          "可通过命令行参数、配置文件或GUI界面进行配置"
+        ]
+      },
+      "text_rendering": {
+        "description": "文字渲染基础",
+        "fonts": {
+          "western_default": "Gotham Medium",
+          "chinese_default": "未来荧黑 Medium",
+          "embedding": "字体文件打包在程序fonts/目录"
+        },
+        "quality": "抗锯齿 + 边缘平滑",
+        "color_options": ["纯黑（0%黑色）", "50%灰色", "纯白（100%白色）"]
+      }
+    },
+    
+    "resource_management": {
+      "icon_support": {
+        "description": "PNG图标支持系统",
+        "requirements": [
+          "从指定文件夹读取PNG文件列表",
+          "用户通过增删PNG文件维护素材库",
+          "支持根据EXIF相机品牌信息自动选择对应品牌图标",
+          "支持手动选择图标功能"
+        ]
+      },
+      "gaussian_blur": {
+        "description": "高斯模糊模块",
+        "requirements": [
+          "独立的高斯模糊处理模块",
+          "支持半径参数配置（默认200像素）",
+          "支持透明度叠加（50%透明度）",
+          "支持效果等比放大填充至任意尺寸",
+          "可作为背景填充选项之一"
+        ]
+      },
+      "brand_icon_mapping": {
+        "description": "品牌图标自动映射",
+        "requirements": [
+          "从EXIF读取相机品牌信息",
+          "自动匹配对应的品牌PNG图标",
+          "支持品牌别名的映射"
+        ]
+      }
+    },
+    
+    "performance": {
+      "optimization": {
+        "description": "性能优化",
+        "requirements": [
+          "预留批量处理接口",
+          "支持GPU加速",
+          "GPU不可用时自动降级至CPU处理"
+        ]
+      },
+      "error_handling": {
+        "description": "错误日志系统",
+        "log_file": "error_log.txt",
+        "log_format": {
+          "required_fields": [
+            "时间戳（精确到秒）",
+            "错误文件全路径",
+            "详细错误原因"
+          ]
+        },
+        "user_notification": "程序结束时提示用户查看日志"
+      }
+    },
+    
+    "configuration": {
+      "management": {
+        "description": "配置管理",
+        "saved_items": ["作者名"],
+        "not_saved_items": ["拍摄地点", "字体选择"]
+      },
+      "extensibility": {
+        "description": "扩展性设计",
+        "reserved_interfaces": [
+          "相框样式配置加载接口",
+          "GUI扩展接口",
+          "多种样式格式解析接口"
+        ]
+      }
+    }
+  },
+  
+  "additional_notes": {
+    "layer_composition_update": {
+      "summary": "图层顺序已更新，从最上层到最下层为：文字图标层 → 装饰元素层 → 原图层 → 背景层",
+      "background_layer_note": "背景层已合并扩展区域，不再单独区分扩展区域背景",
+      "decoration_layer_note": "装饰元素独立于文字图标，位于原图之上"
+    },
+    "custom_output_size": {
+      "summary": "支持自定义输出尺寸，原图可等比例缩放后置入",
+      "implementation_notes": [
+        "每个相框样式可独立配置是否支持自定义输出尺寸",
+        "缩放规则在样式配置文件中定义（如：照片长边 = 输出尺寸 × 90%）",
+        "样式选择器应明确标注哪些样式支持自定义输出尺寸"
+      ]
+    },
+    "responsive_design_update": {
+      "summary": "响应式设计以输出尺寸的百分比为参考比例",
+      "example": "文字大小 = 输出宽度 × 0.02，内边距 = 输出高度 × 0.01"
+    },
+    "hdr_support_clarification": {
+      "gainmap_hdr": "支持Adobe提出的Gainmap HDR JPEG标准",
+      "ultra_hdr": "支持谷歌UltraHDR标准（Android 14+原生HDR格式）",
+      "common_ground": "两种格式均基于增益映射技术，可使用相似的底层处理逻辑"
+    },
+    "frame_style_flexibility": {
+      "multi_format_support": "支持JSON、YAML、TOML、Python等多种格式的样式配置文件",
+      "auto_detection": "程序自动识别文件格式并加载"
+    },
+    "web_gui_implementation": {
+      "recommended_frameworks": ["Streamlit（推荐）", "Gradio", "Flask"]
+    },
+    "background_fill_system": {
+      "four_options": "提供四种标准的背景填充选项，已合并扩展区域"
+    }
+  }
+}

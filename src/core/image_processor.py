@@ -1,0 +1,280 @@
+"""
+图像处理器模块
+负责图像的基本处理、色彩空间转换、尺寸调整等
+"""
+import os
+import sys
+from pathlib import Path
+
+# 添加项目根目录到sys.path
+project_root = Path(__file__).resolve().parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from PIL import Image, ImageDraw, ImageFont
+# 设置PIL最大图像像素限制，解决解压炸弹警告
+Image.MAX_IMAGE_PIXELS = 200000000  # 2亿像素，可根据需要调整
+
+from typing import Tuple, Optional, Dict, List
+from utils.exif_helper import ExifHelper
+from utils.device_mapper import DeviceMapper
+from frame_styles.style_manager import StyleManager
+from core.renderer import FrameRenderer
+from core.hdr_handler import HDRHandler
+import piexif
+import logging
+
+
+class ImageProcessor:
+    """图像处理器"""
+    
+    def __init__(self, style_config: Optional[str] = None):
+        """
+        初始化图像处理器
+        
+        Args:
+            style_config: 相框样式配置
+        """
+        self.style_config = style_config
+        self.supported_formats = ['JPEG', 'PNG', 'TIFF']
+        self.hdr_supported_formats = ['HEIF', 'HEIC', 'AVIF']  # HDR相关格式
+        self.max_input_size = (12000, 12000)  # 最大输入尺寸
+        self.max_output_size = (8192, 8192)   # 最大输出尺寸
+        
+        # 初始化组件
+        self.renderer = FrameRenderer()
+        self.style_manager = StyleManager()
+        self.device_mapper = DeviceMapper()
+        self.hdr_handler = HDRHandler()
+        
+        # 设置日志
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('error_log.txt', encoding='utf-8'),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def process(self, input_path: str, output_path: str, 
+                author: Optional[str] = None, 
+                location: Optional[str] = None,
+                style_name: Optional[str] = None,
+                bg_fill_type: str = "white",
+                decorations: Optional[List[Dict]] = None,
+                font_weight: Optional[str] = None) -> bool:
+        """
+        处理图像并添加相框
+        
+        Args:
+            input_path: 输入图像路径
+            output_path: 输出图像路径
+            author: 作者姓名
+            location: 拍摄地点
+            style_name: 样式名称
+            bg_fill_type: 背景填充类型
+            decorations: 装饰元素列表
+            font_weight: 字体字重 (light, regular, medium)
+            
+        Returns:
+            是否处理成功
+        """
+        try:
+            # 1. 验证输入文件
+            if not os.path.exists(input_path):
+                error_msg = f"错误: 输入文件不存在 - {input_path}"
+                self.logger.error(error_msg)
+                print(error_msg)
+                return False
+            
+            # 2. 检查图像格式支持
+            img_format = self._check_image_format(input_path)
+            if not img_format:
+                error_msg = f"错误: 不支持的图像格式 - {input_path}"
+                self.logger.error(error_msg)
+                print(error_msg)
+                return False
+            
+            # 3. 根据图像类型读取图像
+            if self.hdr_handler.is_hdr_format(input_path):
+                # 如果是HDR图像，使用HDR处理器
+                image = self.hdr_handler.process_hdr_image(input_path)
+                if image is None:
+                    error_msg = f"错误: 无法处理HDR图像 - {input_path}"
+                    self.logger.error(error_msg)
+                    print(error_msg)
+                    return False
+            else:
+                # 普通图像直接用PIL打开
+                image = Image.open(input_path)
+            
+            # 4. 检查EXIF信息
+            exif_data = ExifHelper.extract_exif_data(input_path)
+            if not exif_data:
+                warn_msg = f"警告: 未找到EXIF信息 - {input_path}"
+                self.logger.warning(warn_msg)
+                print(warn_msg)
+            
+            # 5. 验证图像尺寸
+            if not self._validate_image_size(image.size):
+                warn_msg = f"警告: 图像尺寸超出限制 - {image.size}"
+                self.logger.warning(warn_msg)
+                print(warn_msg)
+                # 缩放图像
+                image = self._resize_image_proportionally(image)
+            
+            # 6. 处理色彩空间
+            image = self._convert_colorspace(image)
+            
+            # 7. 获取样式配置
+            if style_name:
+                style_config = self.style_manager.get_style_config(style_name)
+            else:
+                style_config = self.style_manager.get_default_style()
+            
+            if not style_config:
+                error_msg = f"错误: 无法获取样式配置 - {style_name or 'default'}"
+                self.logger.error(error_msg)
+                print(error_msg)
+                return False
+            
+            # 8. 如果指定了字体字重，则更新样式配置
+            if font_weight:
+                # 设置字重
+                style_config['fonts']['weight'] = font_weight
+
+            # 渲染图像
+            rendered_image = self.renderer.render_frame(
+                image=image,
+                exif_data=exif_data,
+                author=author,
+                location=location,
+                style_config=style_config,
+                bg_fill_type=bg_fill_type,
+                decorations=decorations
+            )
+            
+            # 10. 保存图像
+            self._save_image(rendered_image, output_path, img_format)
+            
+            success_msg = f"成功处理图像: {input_path} -> {output_path}"
+            self.logger.info(success_msg)
+            print(success_msg)
+            return True
+            
+        except Exception as e:
+            error_msg = f"处理图像时出错: {str(e)}"
+            self.logger.error(error_msg)
+            print(error_msg)
+            # 记录详细错误信息
+            import traceback
+            self.logger.error(traceback.format_exc())
+            return False
+    
+    def _check_image_format(self, image_path: str) -> Optional[str]:
+        """
+        检查图像格式是否支持
+        
+        Args:
+            image_path: 图像路径
+            
+        Returns:
+            图像格式，如果不支持则返回None
+        """
+        try:
+            img_format = Image.open(image_path).format
+            if img_format and (img_format in self.supported_formats or 
+                              self.hdr_handler.is_hdr_format(image_path)):
+                return img_format
+            return None
+        except Exception:
+            return None
+    
+    def _validate_image_size(self, size: Tuple[int, int]) -> bool:
+        """
+        验证图像尺寸是否在支持范围内
+        
+        Args:
+            size: 图像尺寸 (宽, 高)
+            
+        Returns:
+            尺寸是否有效
+        """
+        width, height = size
+        max_width, max_height = self.max_input_size
+        return width <= max_width and height <= max_height
+    
+    def _resize_image_proportionally(self, image: Image.Image) -> Image.Image:
+        """
+        按比例缩放图像
+        
+        Args:
+            image: 原始图像
+            
+        Returns:
+            缩放后的图像
+        """
+        max_width, max_height = self.max_input_size
+        width, height = image.size
+        
+        # 计算缩放比例
+        scale_w = max_width / width
+        scale_h = max_height / height
+        scale = min(scale_w, scale_h)
+        
+        new_width = int(width * scale)
+        new_height = int(height * scale)
+        
+        return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    
+    def _convert_colorspace(self, image: Image.Image) -> Image.Image:
+        """
+        转换图像色彩空间到sRGB
+        
+        Args:
+            image: 原始图像
+            
+        Returns:
+            转换后的图像
+        """
+        if image.mode in ('RGBA', 'LA', 'P'):
+            # 保留透明通道的图像需要特殊处理
+            if image.mode == 'P':
+                image = image.convert('RGBA')
+            # 对于有透明通道的图像，我们先转为RGB
+            if image.mode in ('RGBA', 'LA'):
+                background = Image.new('RGB', image.size, (255, 255, 255))
+                if image.mode == 'RGBA':
+                    background.paste(image, mask=image.split()[-1])
+                else:
+                    background.paste(image, mask=image.split()[-1])
+                image = background
+        elif image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        return image
+    
+    def _save_image(self, image: Image.Image, output_path: str, 
+                    original_format: str) -> None:
+        """
+        保存图像
+        
+        Args:
+            image: 要保存的图像
+            output_path: 输出路径
+            original_format: 原始图像格式
+        """
+        try:
+            # 确保输出目录存在
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            # 保存图像
+            image.save(output_path, format=original_format, quality=95, optimize=True)
+        except Exception as e:
+            error_msg = f"保存图像时出错: {str(e)}"
+            self.logger.error(error_msg)
+            raise e

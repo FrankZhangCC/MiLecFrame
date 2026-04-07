@@ -1,0 +1,72 @@
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Local config
+config.ini
+*.ini
+
+# User data
+.user.ini
+
+# Compiled files
+*.exe
+*.dll
+*.class
+*.o
+
+# Large files
+*.bin
+*.dmg
+*.iso
+*.img
+
+# ML/DL related
+*.pth
+*.ckpt
+*.h5
+*.onnx
+
+# Assets that are tracked elsewhere
+assets/fonts/*
+!assets/fonts/.gitkeep
