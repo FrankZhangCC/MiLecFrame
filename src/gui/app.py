@@ -6,24 +6,24 @@ import streamlit as st
 import os
 import sys
 import tempfile
+import io
 from pathlib import Path
+from PIL import Image as PILImage
 
-# 添加项目根目录到sys.path（在任何导入之前）
-project_root = Path(__file__).resolve().parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+# 使用绝对导入
+from src.core.image_processor import ImageProcessor
+from src.frame_styles.style_manager import StyleManager
+from src.utils.config_manager import ConfigManager
+from src.utils.exif_helper import ExifHelper
+
 
 def run_app():
     """运行GUI应用程序"""
-    try:
-        # 导入模块
-        from core.image_processor import ImageProcessor
-        from frame_styles.style_manager import default_style_manager
-        from utils.config_manager import default_config_manager
-    except ImportError as e:
-        st.error(f"❌ 导入错误: {str(e)}")
-        st.error("程序因导入错误而终止，请检查安装和导入路径")
-        raise e
+    
+    # 初始化工具类实例
+    style_manager = StyleManager()
+    config_manager = ConfigManager()
+    exif_helper = ExifHelper()
     
     # 初始化session state变量
     if 'processing_result' not in st.session_state:
@@ -52,11 +52,11 @@ def run_app():
         st.header("⚙️ 配置选项")
         
         # 相框样式选择
-        available_styles = default_style_manager.get_available_styles()
+        available_styles = style_manager.get_available_styles()
         if not available_styles:
             # 如果没有样式，创建示例样式
-            default_style_manager.create_sample_styles()
-            available_styles = default_style_manager.get_available_styles()
+            style_manager.create_sample_styles()
+            available_styles = style_manager.get_available_styles()
         
         selected_style = st.selectbox("选择相框样式", available_styles, key='style_select')
         
@@ -118,13 +118,13 @@ def run_app():
         
         # 作者输入
         # 尝试从配置中获取保存的作者名
-        saved_author = default_config_manager.get_saved_author()
+        saved_author = config_manager.get_saved_author()
         default_author = saved_author if saved_author else ""
         author = st.text_input("作者姓名", value=default_author, placeholder="请输入作者姓名", key='author_input')
         
         # 保存作者名到配置
         if author:
-            default_config_manager.save_user_author(author)
+            config_manager.save_user_author(author)
         
         # 拍摄地点输入
         location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
@@ -160,131 +160,83 @@ def run_app():
             # 显示原始图片
             st.image(uploaded_file, caption="原始图片", width='stretch')
             
-            # 显示文件信息
-            import io
-            from PIL import Image as PILImage
+            # 显示文件信息和EXIF
+            # 保存临时文件以读取EXIF
+            temp_exif_path = None
             try:
-                import piexif
-            except ImportError:
-                piexif = None
-            
-            # 打开图片获取尺寸和EXIF信息
-            image = PILImage.open(io.BytesIO(uploaded_file.getvalue()))
-            width, height = image.size
-            
-            # 尝试获取EXIF信息
-            exif_data = {}
-            exif_dict = {}
-            try:
-                exif_bytes = image.info.get("exif")
-                if exif_bytes and piexif:
-                    exif_dict = piexif.load(exif_bytes)
-                    # 提取常用EXIF信息
-                    if "0th" in exif_dict:
-                        exif_0th = exif_dict["0th"]
-                        if piexif.ImageIFD.Make in exif_0th:
-                            try: exif_data["制造商"] = exif_0th[piexif.ImageIFD.Make].decode()
-                            except: pass
-                        if piexif.ImageIFD.Model in exif_0th:
-                            try: exif_data["型号"] = exif_0th[piexif.ImageIFD.Model].decode()
-                            except: pass
-                        if piexif.ImageIFD.DateTime in exif_0th:
-                            try: exif_data["拍摄时间"] = exif_0th[piexif.ImageIFD.DateTime].decode()
-                            except: pass
-                    if "Exif" in exif_dict:
-                        exif_exif = exif_dict["Exif"]
-                        if piexif.ExifIFD.LensModel in exif_exif:
-                            try: exif_data["镜头"] = exif_exif[piexif.ExifIFD.LensModel].decode()
-                            except: pass
-                        if piexif.ExifIFD.ExposureTime in exif_exif:
-                            exposure_time = exif_exif[piexif.ExifIFD.ExposureTime]
-                            if isinstance(exposure_time, tuple):
-                                try:
-                                    num, den = exposure_time
-                                    if den != 0:
-                                        val = num / den
-                                        if val < 1:
-                                            exif_data["曝光时间"] = f"1/{int(1/val)}s"
-                                        else:
-                                            exif_data["曝光时间"] = f"{val:.1f}s"
-                                except: exif_data["曝光时间"] = str(exposure_time)
-                            else:
-                                exif_data["曝光时间"] = str(exposure_time)
-                        if piexif.ExifIFD.FNumber in exif_exif:
-                            fnumber = exif_exif[piexif.ExifIFD.FNumber]
-                            if isinstance(fnumber, tuple):
-                                try: exif_data["光圈"] = f"f/{fnumber[0]/fnumber[1]:.1f}"
-                                except: pass
-                            else:
-                                # FNumber is usually a rational number stored as (num, den) but sometimes just float/int depending on loader
-                                # piexif usually returns tuple for rationals. If it's a raw value, it might need adjustment.
-                                # Standard EXIF FNumber is rational.
-                                if isinstance(fnumber, (int, float)):
-                                     exif_data["光圈"] = f"f/{fnumber:.1f}"
-                                else:
-                                     try: exif_data["光圈"] = f"f/{fnumber/100:.1f}" if fnumber > 100 else f"f/{fnumber:.1f}"
-                                     except: pass
-                        if piexif.ExifIFD.ISOSpeedRatings in exif_exif:
-                            exif_data["ISO"] = exif_exif[piexif.ExifIFD.ISOSpeedRatings]
-                        if piexif.ExifIFD.FocalLengthIn35mmFilm in exif_exif:
-                            focal_length_35mm = exif_exif[piexif.ExifIFD.FocalLengthIn35mmFilm]
-                            if isinstance(focal_length_35mm, tuple):
-                                try: exif_data["等效35mm焦距"] = f"{focal_length_35mm[0]/focal_length_35mm[1]}mm"
-                                except: pass
-                            else:
-                                exif_data["等效35mm焦距"] = f"{focal_length_35mm}mm"
-            except Exception as e:
-                # 如果无法解析EXIF信息，不显示错误，只是不显示EXIF数据
-                pass
-            
-            # 检测HDR特性
-            hdr_info = {}
-            try:
-                # 检查是否为HEIF/AVIF格式，这些格式可能包含HDR信息
-                file_extension = uploaded_file.name.lower()
-                if file_extension in ['.heic', '.avif', '.heif']:
-                    # 检查是否有HDR gain map信息
-                    try:
-                        import pillow_heif
-                        # 检查是否有HDR gain map信息
-                        if hasattr(image, '_getexif') and image._getexif():
-                            exif_tags = image._getexif()
-                            if 50839 in exif_tags:  # GainMap标签
-                                hdr_info["HDR格式"] = "Gain Map HDR (HEIF/AVIF)"
-                            else:
-                                hdr_info["HDR格式"] = "HEIF/AVIF格式"
-                        else:
-                            hdr_info["HDR格式"] = "HEIF/AVIF格式"
-                    except ImportError:
-                        hdr_info["HDR格式"] = "HEIF/AVIF格式"
-                # 检查普通图像格式中的HDR信息
+                with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp:
+                    tmp.write(uploaded_file.getvalue())
+                    temp_exif_path = tmp.name
+                
+                # 提取EXIF数据
+                exif_data = exif_helper.extract_exif_data(temp_exif_path)
+                
+                if exif_data:
+                    st.subheader("📸 EXIF信息")
+                    
+                    # 获取格式化后的EXIF数据
+                    formatted_exif = exif_helper.get_formatted_exif_for_display(exif_data)
+                    
+                    # 以更优雅的方式显示EXIF信息
+                    with st.container():
+                        # 设备信息部分
+                        st.markdown("#### 📷 设备信息")
+                        device_cols = st.columns(3)
+                        
+                        with device_cols[0]:
+                            if 'camera_make' in formatted_exif:
+                                st.markdown(f"**品牌**: {formatted_exif['camera_make']}")
+                        
+                        with device_cols[1]:
+                            if 'camera_model' in formatted_exif:
+                                st.markdown(f"**型号**: {formatted_exif['camera_model']}")
+                        
+                        with device_cols[2]:
+                            if 'lens_model' in formatted_exif:
+                                st.markdown(f"**镜头**: {formatted_exif['lens_model']}")
+                        
+                        # 拍摄参数部分
+                        st.markdown("#### 📐 拍摄参数")
+                        param_cols = st.columns(4)
+                        
+                        with param_cols[0]:
+                            if 'focal_length' in formatted_exif:
+                                st.markdown(f"**焦距**: {formatted_exif['focal_length']}mm")
+                        
+                        with param_cols[1]:
+                            if 'aperture' in formatted_exif:
+                                st.markdown(f"**光圈**: f/{formatted_exif['aperture']}")
+                        
+                        with param_cols[2]:
+                            if 'shutter_speed' in formatted_exif:
+                                st.markdown(f"**快门**: {formatted_exif['shutter_speed']}s")
+                        
+                        with param_cols[3]:
+                            if 'iso' in formatted_exif:
+                                st.markdown(f"**ISO**: {formatted_exif['iso']}")
+                        
+                        # 时间信息部分
+                        if 'datetime_original' in formatted_exif:
+                            st.markdown("#### 📅 拍摄时间")
+                            st.markdown(f"**{formatted_exif['datetime_original']}**")
+                        
+                        # 显示格式化的EXIF信息（用于相框显示）
+                        formatted_display = ExifHelper.format_exif_for_display(exif_data)
+                        if formatted_display:
+                            st.markdown("#### 💬 相框显示")
+                            st.markdown(f"`{formatted_display}`")
                 else:
-                    # 对于JPEG等格式，检查EXIF中是否有关于HDR的信息
-                    if exif_bytes:
-                        # 检查图像是否为多帧合成的HDR照片
-                        if "0th" in exif_dict:
-                            exif_0th = exif_dict["0th"]
-                            if piexif.ImageIFD.SceneCaptureType in exif_0th:
-                                capture_type = exif_0th[piexif.ImageIFD.SceneCaptureType]
-                                if capture_type == 1:  # 风景模式，有时用于HDR
-                                    hdr_info["HDR格式"] = "可能为合成HDR"
+                    # 如果没有EXIF，至少显示基本文件信息
+                    image = PILImage.open(io.BytesIO(uploaded_file.getvalue()))
+                    width, height = image.size
+                    st.info(f"📄 文件: {uploaded_file.name} | 尺寸: {width} x {height}px")
+                    
             except Exception as e:
-                # 忽略HDR检测错误
-                pass
-            
-            file_details = {
-                "文件名": uploaded_file.name,
-                "文件类型": uploaded_file.type,
-                "文件大小": f"{len(uploaded_file.getvalue()) / (1024 * 1024):.2f} MB",
-                "图片尺寸": f"{width} × {height}px"
-            }
-            
-            # 合并EXIF信息到详情中
-            file_details.update(exif_data)
-            # 合并HDR信息到详情中
-            file_details.update(hdr_info)
-            
-            st.json(file_details)
+                st.warning(f"读取EXIF信息时出错: {str(e)}")
+            finally:
+                if temp_exif_path and os.path.exists(temp_exif_path):
+                    os.unlink(temp_exif_path)
+                    
         else:
             st.info("👆 请先上传一张图片")
     
@@ -366,7 +318,7 @@ def run_app():
                             })
                         
                         # 处理图像
-                        processor = ImageProcessor()  # 修正初始化参数
+                        processor = ImageProcessor()
                         
                         success = processor.process(
                             input_path=temp_input_path,
@@ -392,7 +344,7 @@ def run_app():
                                     data=result_file,
                                     file_name=f"framed_{uploaded_file.name}",
                                     mime="image/jpeg" if output_format == "JPEG" else "image/png",
-                                    key="download_processed_image_new"  # 添加唯一key
+                                    key="download_processed_image_new"
                                 )
                             
                             st.success("✅ 图片处理成功！")
@@ -402,7 +354,6 @@ def run_app():
                     
                     except Exception as e:
                         st.error(f"❌ 处理过程中出现错误: {str(e)}")
-                        # 记录错误到日志
                         import traceback
                         error_details = traceback.format_exc()
                         st.code(error_details)
@@ -413,37 +364,32 @@ def run_app():
                             os.unlink(temp_input_path)
             
             # 如果已经处理过且没有配置变更，显示之前的预览
-            # 这里要确保不会和上面的实时结果显示同时出现
-            if (not st.session_state.button_clicked and  # 没有正在进行处理
+            if (not st.session_state.button_clicked and
                 st.session_state.processing_result and 
                 not config_changed and 
                 st.session_state.temp_output_path and 
                 os.path.exists(st.session_state.temp_output_path)):
                 
-                # 显示下载按钮
                 with open(st.session_state.temp_output_path, "rb") as result_file:
                     st.download_button(
                         label="💾 下载处理后的图片",
                         data=result_file,
                         file_name=f"framed_{uploaded_file.name}",
                         mime="image/jpeg" if output_format == "JPEG" else "image/png",
-                        key="download_processed_image_cached"  # 添加唯一key
+                        key="download_processed_image_cached"
                     )
                 
                 st.success("✅ 图片处理成功！")
                 st.image(st.session_state.temp_output_path, caption="添加相框后的图片", width='stretch')
             else:
-                # 只有在没有处理结果时才显示提示信息
-                # 由于此代码块在 uploaded_file is not None 内部，所以用户已上传图片
                 if not st.session_state.processing_result:
                     st.info("👆 请配置选项并点击“生成相框”按钮")
     
     # 底部信息
     st.markdown("---")
-    st.caption("💡 提示：本程序会自动提取并显示照片的EXIF信息，如相机型号、焦距、光圈等")
+    st.caption("💡 提示：本程序支持设备映射，自动识别并显示相机型号等信息")
     st.caption("📋 版权所有 © 2026 MiLeica Frame 项目组")
     
-    # 添加停止程序的说明
     with st.expander("🛑 如何停止程序"):
         st.write("当您完成使用后，请在终端中按 `Ctrl+C` 来停止服务。")
         st.code("# 在运行程序的终端中按 Ctrl+C\n^C", language="text")

@@ -231,3 +231,15 @@ AttributeError: 'FrameRenderer' object has no attribute '_calculate_text_positio
 2026-04-07 15:41:50,308 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmppsa8ysm9.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwe5tjd28.jpg
 2026-04-07 15:42:24,480 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyl2s5954.jpg -> C:\Users\frank\AppData\Local\Temp\tmp02lb7oql.jpg
 2026-04-07 15:56:42,923 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpzdv_8siu.jpg -> C:\Users\frank\AppData\Local\Temp\tmppyd8cd36.jpg
+2026-04-07 16:16:22,028 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn_44kb7b.jpg -> C:\Users\frank\AppData\Local\Temp\tmp11thq_8g.jpg
+2026-04-07 16:16:41,332 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp6970ubmx.JPG -> C:\Users\frank\AppData\Local\Temp\tmp4xxkgavg.jpg
+2026-04-07 16:40:03,102 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp9832vgl5.jpg -> C:\Users\frank\AppData\Local\Temp\tmp_zndbk3w.jpg
+2026-04-07 16:44:52,111 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp85l56v9c.JPG -> C:\Users\frank\AppData\Local\Temp\tmpu6kiohrt.jpg
+2026-04-07 17:04:54,908 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmptuvzjk15.jpg -> C:\Users\frank\AppData\Local\Temp\tmpzglrmq3b.jpg
+2026-04-07 17:05:18,177 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpkvhjqq9s.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwmtytl4o.jpg
+2026-04-07 17:05:52,756 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp3yrltknz.jpg -> C:\Users\frank\AppData\Local\Temp\tmpkbc4gvvr.jpg
+2026-04-07 17:06:08,397 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpkaj8dmnb.JPG -> C:\Users\frank\AppData\Local\Temp\tmprc3jyg1i.jpg
+2026-04-07 17:07:15,504 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp9nodsvec.JPG -> C:\Users\frank\AppData\Local\Temp\tmp4wu314o1.jpg
+2026-04-07 17:15:58,241 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpe6_lfw9r.jpg -> C:\Users\frank\AppData\Local\Temp\tmps5orsz3t.jpg
+2026-04-07 17:16:02,733 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpa_xf2wwi.jpg -> C:\Users\frank\AppData\Local\Temp\tmpaqcdgqiu.jpg
+2026-04-07 17:16:18,926 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp31ikl7sq.jpg -> C:\Users\frank\AppData\Local\Temp\tmp0ka5la2t.jpg

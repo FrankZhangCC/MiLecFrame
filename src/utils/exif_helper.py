@@ -6,13 +6,17 @@ import piexif
 from PIL import Image
 from datetime import datetime
 from typing import Dict, Optional, Tuple
+from .device_mapper import DeviceMapper
 
 
 class ExifHelper:
     """EXIF信息处理助手类"""
     
-    @staticmethod
-    def extract_exif_data(image_path: str) -> Optional[Dict[str, str]]:
+    def __init__(self):
+        """初始化EXIF助手，创建设备映射器实例"""
+        self.device_mapper = DeviceMapper()
+    
+    def extract_exif_data(self, image_path: str) -> Optional[Dict[str, str]]:
         """
         提取图像的EXIF数据
         
@@ -83,10 +87,152 @@ class ExifHelper:
                     formatted_date = ExifHelper._format_datetime(date_str)
                     exif_data['datetime_original'] = formatted_date
             
+            # 将设备信息记录到CSV文件中
+            self._record_device_info(exif_data)
+            
             return exif_data
         except Exception as e:
             print(f"EXIF提取错误: {str(e)}")
             return None
+    
+    def _record_device_info(self, exif_data: Dict[str, str]) -> None:
+        """
+        记录设备信息到CSV文件中
+        
+        Args:
+            exif_data: EXIF数据字典
+        """
+        import csv
+        from pathlib import Path
+        import os
+        from datetime import datetime
+        
+        # 确定记录文件路径
+        camera_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'camera_map.csv')
+        lens_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'lens_map.csv')
+        
+        # 添加时间戳
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 处理相机信息
+        if 'camera_make' in exif_data and 'camera_model' in exif_data:
+            original_brand = exif_data['camera_make']
+            original_model = exif_data['camera_model']
+            
+            # 检查相机信息是否已存在
+            camera_recorded = False
+            camera_map_file = Path(camera_map_path)
+            
+            if camera_map_file.exists():
+                with open(camera_map_file, 'r', encoding='utf-8') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for row in reader:
+                        if (
+                            row.get('original_brand') == original_brand and
+                            row.get('original_model') == original_model
+                        ):
+                            camera_recorded = True
+                            break
+            
+            # 如果未记录过，则添加新记录
+            if not camera_recorded:
+                header_exists = camera_map_file.exists()
+                with open(camera_map_path, 'a', newline='', encoding='utf-8') as csvfile:
+                    fieldnames = ['original_brand', 'original_model', 'mapped_brand', 'mapped_model', 'timestamp']
+                    writer = csv.writer(csvfile)
+                    
+                    if not header_exists:
+                        writer.writerow(fieldnames)
+                    
+                    # 默认情况下，映射值等于原始值
+                    writer.writerow([
+                        original_brand,
+                        original_model,
+                        original_brand,  # 默认映射品牌等于原始品牌
+                        original_model,  # 默认映射机型等于原始机型
+                        timestamp
+                    ])
+        
+        # 处理镜头信息
+        if 'lens_model' in exif_data:
+            original_lens = exif_data['lens_model']
+            
+            # 检查镜头信息是否已存在
+            lens_recorded = False
+            lens_map_file = Path(lens_map_path)
+            
+            if lens_map_file.exists():
+                with open(lens_map_file, 'r', encoding='utf-8') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for row in reader:
+                        if row.get('original_lens') == original_lens:
+                            lens_recorded = True
+                            break
+            
+            # 如果未记录过，则添加新记录
+            if not lens_recorded:
+                header_exists = lens_map_file.exists()
+                with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
+                    fieldnames = ['original_lens', 'mapped_lens']
+                    writer = csv.writer(csvfile)
+                    
+                    if not header_exists:
+                        writer.writerow(fieldnames)
+                    
+                    # 默认情况下，映射值等于原始值
+                    writer.writerow([original_lens, original_lens])
+    
+    def get_formatted_exif_for_display(self, exif_data: Dict[str, str]) -> Dict[str, str]:
+        """
+        获取格式化的EXIF数据，包含映射后的信息
+        
+        Args:
+            exif_data: 原始EXIF数据字典
+            
+        Returns:
+            包含原始和映射后数据的字典
+        """
+        if not exif_data:
+            return {}
+        
+        formatted_data = {}
+        
+        # 处理品牌和机型（一起处理，因为它们关联在一起）
+        if 'camera_make' in exif_data and 'camera_model' in exif_data:
+            original_make = exif_data['camera_make']
+            original_model = exif_data['camera_model']
+            
+            mapped_make, mapped_model = self.device_mapper.get_mapped_brand_and_model(original_make, original_model)
+            
+            if original_make != mapped_make:
+                formatted_data['camera_make'] = f"{original_make} → {mapped_make}"
+            else:
+                formatted_data['camera_make'] = original_make
+            
+            if original_model != mapped_model:
+                formatted_data['camera_model'] = f"{original_model} → {mapped_model}"
+            else:
+                formatted_data['camera_model'] = original_model
+        elif 'camera_make' in exif_data:
+            formatted_data['camera_make'] = exif_data['camera_make']
+        elif 'camera_model' in exif_data:
+            formatted_data['camera_model'] = exif_data['camera_model']
+        
+        # 处理镜头
+        if 'lens_model' in exif_data:
+            original_lens = exif_data['lens_model']
+            mapped_lens = self.device_mapper.get_mapped_lens(original_lens)
+            if original_lens != mapped_lens:
+                formatted_data['lens_model'] = f"{original_lens} → {mapped_lens}"
+            else:
+                formatted_data['lens_model'] = original_lens
+        
+        # 其他非设备信息保持不变
+        for key in ['focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original']:
+            if key in exif_data:
+                formatted_data[key] = exif_data[key]
+        
+        return formatted_data
     
     @staticmethod
     def _format_shutter_speed(shutter_speed: float) -> str:

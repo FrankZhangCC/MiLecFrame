@@ -220,6 +220,11 @@ version: "版本号"
    - 实现了CSV格式的设备映射数据库
    - 支持品牌名称和别名的映射
    - 提供了添加和查询功能
+   - **设备映射系统重构**：将原有的 `brand_map.csv`、`model_map.csv` 和 `device_records.csv` 合并为 `camera_map.csv`，简化数据管理结构
+     - `camera_map.csv` 结构：[原始品牌, 原始机型, 映射品牌, 映射机型, 时间戳]
+     - `lens_map.csv` 保持独立，存储镜头映射信息
+     - 新增 [get_mapped_brand_and_model](file:///d:/Coding/MiLeica_Frame/src/utils/device_mapper.py#L128-L145) 方法，同时获取品牌和机型的映射
+     - 自动记录新设备信息到映射数据库，便于用户后续编辑映射关系
 
 6. **配置管理** (`src/utils/config_manager.py`)
    - 实现了JSON格式的配置文件管理

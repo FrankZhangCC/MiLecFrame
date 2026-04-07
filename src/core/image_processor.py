@@ -3,26 +3,21 @@
 负责图像的基本处理、色彩空间转换、尺寸调整等
 """
 import os
-import sys
+import logging
 from pathlib import Path
-
-# 添加项目根目录到sys.path
-project_root = Path(__file__).resolve().parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+from typing import Tuple, Optional, Dict, List
 
 from PIL import Image, ImageDraw, ImageFont
 # 设置PIL最大图像像素限制，解决解压炸弹警告
 Image.MAX_IMAGE_PIXELS = 200000000  # 2亿像素，可根据需要调整
 
-from typing import Tuple, Optional, Dict, List
-from utils.exif_helper import ExifHelper
-from utils.device_mapper import DeviceMapper
-from frame_styles.style_manager import StyleManager
-from core.renderer import FrameRenderer
-from core.hdr_handler import HDRHandler
 import piexif
-import logging
+
+from src.utils.exif_helper import ExifHelper
+from src.utils.device_mapper import DeviceMapper
+from src.frame_styles.style_manager import StyleManager
+from src.core.renderer import FrameRenderer
+from src.core.hdr_handler import HDRHandler
 
 
 class ImageProcessor:
@@ -42,6 +37,7 @@ class ImageProcessor:
         self.max_output_size = (8192, 8192)   # 最大输出尺寸
         
         # 初始化组件
+        self.exif_helper = ExifHelper()
         self.renderer = FrameRenderer()
         self.style_manager = StyleManager()
         self.device_mapper = DeviceMapper()
@@ -111,11 +107,17 @@ class ImageProcessor:
                 image = Image.open(input_path)
             
             # 4. 检查EXIF信息
-            exif_data = ExifHelper.extract_exif_data(input_path)
+            exif_data = self.exif_helper.extract_exif_data(input_path)
             if not exif_data:
                 warn_msg = f"警告: 未找到EXIF信息 - {input_path}"
                 self.logger.warning(warn_msg)
                 print(warn_msg)
+            
+            # 获取格式化的EXIF数据用于显示（如果需要传递给renderer或后续处理）
+            # 注意：如果renderer仍然需要原始exif_data，我们保留它。
+            # 如果renderer更新为使用格式化后的文本，可以在这里准备。
+            # 目前保持兼容，但展示了新helper的使用。
+            formatted_exif = self.exif_helper.get_formatted_exif_for_display(exif_data) if exif_data else {}
             
             # 5. 验证图像尺寸
             if not self._validate_image_size(image.size):

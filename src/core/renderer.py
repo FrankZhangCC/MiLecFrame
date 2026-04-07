@@ -15,8 +15,9 @@ if str(project_root) not in sys.path:
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from typing import Tuple, Dict, Optional, List
 import numpy as np
-from utils.exif_helper import ExifHelper
-from core.decorator import Decorator
+# 修改导入路径，使用绝对导入
+from src.utils.exif_helper import ExifHelper
+from src.core.decorator import Decorator
 
 
 class FrameRenderer:
@@ -575,7 +576,8 @@ class FrameRenderer:
             
             # 根据背景类型自动选择文字颜色
             bg_fill_type = getattr(self, '_bg_fill_type', 'pure_white')  # 默认为纯白色背景
-            if bg_fill_type in ['pure_black', 'gaussian_black']:
+            # 检查背景是否为深色系列，以便使用浅色文字
+            if bg_fill_type.startswith('pure_black') or bg_fill_type.startswith('gaussian_black'):
                 # 黑色背景使用白色文字
                 text_color = (255, 255, 255)  # 白色
             else:
