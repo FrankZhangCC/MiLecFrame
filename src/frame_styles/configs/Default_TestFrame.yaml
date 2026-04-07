@@ -24,10 +24,10 @@ layout:
   border_width: 10
   expand_canvas:
     enabled: true
-    top: 0.1
-    bottom: 0.1
-    left: 0.1
-    right: 0.1
+    top: 0.08
+    bottom: 0.12
+    left: 0.03
+    right: 0.03
   info_height_ratio: 0.0125
   info_position:
     exif:
@@ -49,14 +49,14 @@ layout:
       alignment: "top-left"
       margin_top: 0.02    # 顶部边距
       margin_bottom: 0.01 # 底部边距
-      margin_left: 0.02   # 左边距
+      margin_left: 0.00   # 左边距
       margin_right: 0.01  # 右边距
     lens:
       position: "outside"
       alignment: "top-left"
       margin_top: 0.045   # 顶部边距
       margin_bottom: 0.01 # 底部边距
-      margin_left: 0.02   # 左边距
+      margin_left: 0.00   # 左边距
       margin_right: 0.01  # 右边距
     author:
       position: "outside"

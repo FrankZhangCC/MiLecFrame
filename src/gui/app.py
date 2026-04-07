@@ -171,60 +171,72 @@ def run_app():
                 # 提取EXIF数据
                 exif_data = exif_helper.extract_exif_data(temp_exif_path)
                 
+                # 显示EXIF信息
                 if exif_data:
-                    st.subheader("📸 EXIF信息")
-                    
-                    # 获取格式化后的EXIF数据
-                    formatted_exif = exif_helper.get_formatted_exif_for_display(exif_data)
+                    # 获取显示数据
+                    display_data = exif_helper.get_display_data(exif_data)
                     
                     # 以更优雅的方式显示EXIF信息
                     with st.container():
-                        # 设备信息部分
+                        # 设备信息部分 - 显示原始数据
                         st.markdown("#### 📷 设备信息")
                         device_cols = st.columns(3)
                         
                         with device_cols[0]:
-                            if 'camera_make' in formatted_exif:
-                                st.markdown(f"**品牌**: {formatted_exif['camera_make']}")
-                        
+                            if 'raw_camera_make' in display_data:
+                                # 显示原始品牌数据
+                                st.markdown(f"**品牌**: {display_data['raw_camera_make']}")
+
                         with device_cols[1]:
-                            if 'camera_model' in formatted_exif:
-                                st.markdown(f"**型号**: {formatted_exif['camera_model']}")
-                        
+                            if 'raw_camera_model' in display_data:
+                                # 显示原始型号数据
+                                st.markdown(f"**型号**: {display_data['raw_camera_model']}")
+
                         with device_cols[2]:
-                            if 'lens_model' in formatted_exif:
-                                st.markdown(f"**镜头**: {formatted_exif['lens_model']}")
-                        
+                            if 'raw_lens_model' in display_data:
+                                # 显示原始镜头数据
+                                st.markdown(f"**镜头**: {display_data['raw_lens_model']}")
+                            
                         # 拍摄参数部分
                         st.markdown("#### 📐 拍摄参数")
                         param_cols = st.columns(4)
                         
                         with param_cols[0]:
-                            if 'focal_length' in formatted_exif:
-                                st.markdown(f"**焦距**: {formatted_exif['focal_length']}mm")
+                            if 'raw_focal_length' in display_data:
+                                st.markdown(f"**焦距**: {display_data['raw_focal_length']}mm")
                         
                         with param_cols[1]:
-                            if 'aperture' in formatted_exif:
-                                st.markdown(f"**光圈**: f/{formatted_exif['aperture']}")
+                            if 'raw_aperture' in display_data:
+                                st.markdown(f"**光圈**: f/{display_data['raw_aperture']}")
                         
                         with param_cols[2]:
-                            if 'shutter_speed' in formatted_exif:
-                                st.markdown(f"**快门**: {formatted_exif['shutter_speed']}s")
+                            if 'raw_shutter_speed' in display_data:
+                                st.markdown(f"**快门**: {display_data['raw_shutter_speed']}s")
                         
                         with param_cols[3]:
-                            if 'iso' in formatted_exif:
-                                st.markdown(f"**ISO**: {formatted_exif['iso']}")
+                            if 'raw_iso' in display_data:
+                                st.markdown(f"**ISO**: {display_data['raw_iso']}")
                         
                         # 时间信息部分
-                        if 'datetime_original' in formatted_exif:
+                        if 'raw_datetime_original' in display_data:
                             st.markdown("#### 📅 拍摄时间")
-                            st.markdown(f"**{formatted_exif['datetime_original']}**")
+                            st.markdown(f"**{display_data['raw_datetime_original']}**")
                         
                         # 显示格式化的EXIF信息（用于相框显示）
-                        formatted_display = ExifHelper.format_exif_for_display(exif_data)
+                        formatted_display = display_data.get('exif_formatted', '')
                         if formatted_display:
                             st.markdown("#### 💬 相框显示")
-                            st.markdown(f"`{formatted_display}`")
+                            
+                            # 显示组合后的相机型号（品牌+型号）
+                            if 'camera_combined' in display_data:
+                                st.markdown(f"**相机型号**: {display_data['camera_combined']}")
+                            
+                            # 显示映射后的镜头型号
+                            if 'lens_model' in display_data:
+                                st.markdown(f"**镜头型号**: {display_data['lens_model']}")
+                            
+                            # 显示格式化的曝光参数
+                            st.markdown(f"**曝光参数**: {formatted_display}")
                 else:
                     # 如果没有EXIF，至少显示基本文件信息
                     image = PILImage.open(io.BytesIO(uploaded_file.getvalue()))

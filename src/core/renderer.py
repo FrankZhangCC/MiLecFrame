@@ -504,15 +504,17 @@ class FrameRenderer:
         # 获取原始图像尺寸
         original_image_size = getattr(self, '_original_image_size', image.size)
         
+        # 使用ExifHelper获取用于显示的数据
+        display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
+        
         # 准备要显示的文本
         text_elements = []
         
-        # EXIF信息
-        if exif_data:
-            exif_text = ExifHelper.format_exif_for_display(exif_data)
+        # EXIF信息（格式化的曝光参数）
+        if 'exif_formatted' in display_data and display_data['exif_formatted']:
+            exif_text = display_data['exif_formatted']
             print(f"格式化后的EXIF文本: '{exif_text}'")
-            if exif_text:  # 只有当EXIF文本不为空时才添加
-                text_elements.append(('exif', exif_text))
+            text_elements.append(('exif', exif_text))
         
         # 拍摄时间信息
         if exif_data and 'datetime_original' in exif_data:
@@ -520,15 +522,15 @@ class FrameRenderer:
             print(f"拍摄时间文本: '{timestamp_text}'")
             text_elements.append(('timestamp', timestamp_text))
         
-        # 相机型号信息
-        if exif_data and 'camera_model' in exif_data:
-            camera_text = f"{exif_data['camera_model']}"
+        # 相机型号信息 - 使用映射后的值，并包含品牌
+        if 'camera_combined' in display_data:
+            camera_text = display_data['camera_combined']
             print(f"相机型号文本: '{camera_text}'")
             text_elements.append(('camera', camera_text))
         
-        # 镜头型号信息
-        if exif_data and 'lens_model' in exif_data:
-            lens_text = f"{exif_data['lens_model']}"
+        # 镜头型号信息 - 使用映射后的值
+        if 'lens_model' in display_data:
+            lens_text = display_data['lens_model']
             print(f"镜头型号文本: '{lens_text}'")
             text_elements.append(('lens', lens_text))
         
