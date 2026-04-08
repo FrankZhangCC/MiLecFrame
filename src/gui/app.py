@@ -15,6 +15,7 @@ from src.core.image_processor import ImageProcessor
 from src.frame_styles.style_manager import StyleManager
 from src.utils.config_manager import ConfigManager
 from src.utils.exif_helper import ExifHelper
+from src.utils.logo_selector import LogoSelector  # 导入Logo选择器
 
 
 def run_app():
@@ -24,6 +25,7 @@ def run_app():
     style_manager = StyleManager()
     config_manager = ConfigManager()
     exif_helper = ExifHelper()
+    logo_selector = LogoSelector()  # 初始化Logo选择器
     
     # 初始化session state变量
     if 'processing_result' not in st.session_state:
@@ -116,6 +118,42 @@ def run_app():
             with col_w2:
                 watermark_opacity = st.slider("不透明度 (%)", 0, 100, 50, key="watermark_opacity")
         
+        # 获取当前样式配置以确定是否启用了Logo
+        current_style_config = style_manager.get_style_config(selected_style)
+        is_logo_enabled_by_config = current_style_config.get('logo', {}).get('enabled', False)
+        
+        # 如果样式配置中启用了Logo，则显示Logo选择器
+        selected_logo = None
+        if is_logo_enabled_by_config:
+            st.subheader("🏷️ Logo设置")
+            available_logos = ["自动匹配"] + logo_selector.scan_logos()
+            
+            # 检查是否有EXIF数据以确定相机品牌
+            camera_brand = None
+            if 'exif_data' in st.session_state and st.session_state.exif_data:
+                camera_brand = ExifHelper.get_camera_brand(st.session_state.exif_data)
+            if camera_brand:
+                matched_logo = logo_selector.auto_match_logo(camera_brand)
+                if matched_logo:
+                    # 如果找到匹配的logo，默认选择该logo
+                    default_logo_index = 0 if available_logos[0] == "自动匹配" else available_logos.index(matched_logo)
+                else:
+                    default_logo_index = 0  # 默认为"自动匹配"
+            else:
+                default_logo_index = 0  # 默认为"自动匹配"
+            
+            selected_logo_option = st.selectbox(
+                "选择Logo", 
+                available_logos,
+                index=default_logo_index,
+                key='logo_select'
+            )
+            # 如果选择了具体的logo文件而不是"自动匹配"，则使用该文件名
+            if selected_logo_option != "自动匹配":
+                selected_logo = selected_logo_option
+            else:
+                selected_logo = None
+        
         # 作者输入
         # 尝试从配置中获取保存的作者名
         saved_author = config_manager.get_saved_author()
@@ -170,6 +208,9 @@ def run_app():
                 
                 # 提取EXIF数据
                 exif_data = exif_helper.extract_exif_data(temp_exif_path)
+                
+                # 保存EXIF数据到session state
+                st.session_state.exif_data = exif_data
                 
                 # 显示EXIF信息
                 if exif_data:
@@ -267,6 +308,7 @@ def run_app():
                 'watermark_text': watermark_text,
                 'watermark_position': watermark_position,
                 'watermark_opacity': watermark_opacity,
+                'selected_logo': selected_logo,
                 'author': author,
                 'location': location,
                 'font_weight': selected_font_weight,
@@ -340,7 +382,8 @@ def run_app():
                             style_name=selected_style,
                             bg_fill_type=selected_bg_fill,
                             decorations=decorations if decorations else None,
-                            font_weight=selected_font_weight
+                            font_weight=selected_font_weight,
+                            logo_filename=selected_logo  # 传递logo参数
                         )
                         
                         if success:

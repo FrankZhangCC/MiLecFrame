@@ -43,7 +43,8 @@ class FrameRenderer:
         location: Optional[str],
         style_config: Dict,
         bg_fill_type: str = "white",
-        decorations: Optional[List[Dict]] = None
+        decorations: Optional[List[Dict]] = None,
+        logo_filename: Optional[str] = None
     ) -> Image.Image:
         """
         渲染带相框的图像
@@ -56,6 +57,7 @@ class FrameRenderer:
             style_config: 样式配置
             bg_fill_type: 背景填充类型
             decorations: 装饰元素列表
+            logo_filename: logo文件名
             
         Returns:
             渲染后的图像
@@ -65,6 +67,7 @@ class FrameRenderer:
         colors = style_config.get('colors', {})
         fonts = style_config.get('fonts', {})
         bg_fill_config = style_config.get('background_fill', {})
+        logo_config = style_config.get('logo', {})
         
         # 保存当前布局配置、原始图像尺寸和背景类型到实例属性
         self._current_layout = layout
@@ -89,6 +92,17 @@ class FrameRenderer:
             decorated_image = self.decorator.apply_decorations(positioned_image, decorations)
         else:
             decorated_image = positioned_image
+        
+        # 添加logo（如果启用）
+        if logo_config.get('enabled', False):
+            # 如果没有指定logo文件名，尝试自动匹配
+            if not logo_filename:
+                camera_brand = ExifHelper.get_camera_brand(exif_data) or ExifHelper.get_camera_model(exif_data)
+                if camera_brand:
+                    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+            
+            if logo_filename:
+                decorated_image = self._add_logo(decorated_image, logo_filename, logo_config)
         
         # 添加文字和图标层
         final_image = self._add_text_and_icons_flexible(
@@ -787,3 +801,138 @@ class FrameRenderer:
             y = orig_img_y + orig_img_height + margin_bottom
         
         return x, y
+    
+    def _add_logo(
+        self, 
+        image: Image.Image, 
+        logo_filename: str, 
+        logo_config: Dict
+    ) -> Image.Image:
+        """
+        在图像上添加logo
+        
+        Args:
+            image: 输入图像
+            logo_filename: logo文件名
+            logo_config: logo配置
+            
+        Returns:
+            添加logo后的图像
+        """
+        # 获取项目根目录
+        project_root = Path(__file__).resolve().parent.parent.parent
+        logo_path = project_root / 'assets' / 'logos' / logo_filename
+        
+        if not logo_path.exists():
+            print(f"警告: Logo文件不存在: {logo_path}")
+            return image
+        
+        try:
+            # 加载logo图像
+            logo = Image.open(logo_path)
+            if logo.mode != 'RGBA':
+                logo = logo.convert('RGBA')
+        except Exception as e:
+            print(f"错误: 无法加载logo文件: {e}")
+            return image
+        
+        # 获取原始图像尺寸
+        original_image_size = getattr(self, '_original_image_size', image.size)
+        longer_side = max(original_image_size)
+        
+        # 计算logo尺寸
+        size_ratio = logo_config.get('size_ratio', 0.05)  # 默认为原图长边的5%
+        logo_height = int(longer_side * size_ratio)
+        
+        # 保持宽高比缩放logo
+        logo_aspect_ratio = logo.width / logo.height
+        logo_width = int(logo_height * logo_aspect_ratio)
+        
+        logo = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
+        
+        # 获取logo位置和对齐方式
+        position = logo_config.get('position', 'top-right')
+        alignment = logo_config.get('alignment', 'top-right')
+        
+        # 获取独立的边距配置
+        margin_top = logo_config.get('margin_top', 0.01)
+        margin_bottom = logo_config.get('margin_bottom', 0.01)
+        margin_left = logo_config.get('margin_left', 0.01)
+        margin_right = logo_config.get('margin_right', 0.01)
+        
+        # 将比例边距转换为像素值
+        margin_top_px = int(longer_side * margin_top)
+        margin_bottom_px = int(longer_side * margin_bottom)
+        margin_left_px = int(longer_side * margin_left)
+        margin_right_px = int(longer_side * margin_right)
+        
+        # 计算logo位置
+        canvas_width, canvas_height = image.size
+        layout = getattr(self, '_current_layout', {})
+        expand_config = layout.get('expand_canvas', {})
+        
+        # 如果启用扩展画布，计算原始图像的位置
+        if expand_config.get('enabled', False):
+            # 获取扩展比例
+            top_exp = expand_config.get('top', 0)
+            left_exp = expand_config.get('left', 0)
+            
+            # 使用长边作为计算基准
+            longer_side = max(original_image_size)
+            
+            # 根据扩展比例计算原始图像在扩展画布中的位置
+            top_offset = int(longer_side * top_exp)
+            left_offset = int(longer_side * left_exp)
+            
+            orig_img_x = left_offset
+            orig_img_y = top_offset
+            orig_img_width = original_image_size[0]
+            orig_img_height = original_image_size[1]
+        else:
+            # 没有扩展画布，原始图像就是整个画布
+            orig_img_width = canvas_width
+            orig_img_height = canvas_height
+            orig_img_x = 0
+            orig_img_y = 0
+        
+        # 根据位置和对齐方式计算logo坐标
+        if position in ['top-left', 'tl']:
+            x = orig_img_x + margin_left_px
+            y = orig_img_y - logo_height - margin_top_px if orig_img_y >= logo_height + margin_top_px else orig_img_y + margin_top_px
+        elif position in ['top-right', 'tr']:
+            x = orig_img_x + orig_img_width - logo_width - margin_right_px
+            y = orig_img_y - logo_height - margin_top_px if orig_img_y >= logo_height + margin_top_px else orig_img_y + margin_top_px
+        elif position in ['bottom-left', 'bl']:
+            x = orig_img_x + margin_left_px
+            y = orig_img_y + orig_img_height + margin_bottom_px
+        elif position in ['bottom-right', 'br']:
+            x = orig_img_x + orig_img_width - logo_width - margin_right_px
+            y = orig_img_y + orig_img_height + margin_bottom_px
+        elif position == 'top':
+            x = orig_img_x + (orig_img_width - logo_width) // 2
+            y = orig_img_y - logo_height - margin_top_px if orig_img_y >= logo_height + margin_top_px else orig_img_y + margin_top_px
+        elif position == 'bottom':
+            x = orig_img_x + (orig_img_width - logo_width) // 2
+            y = orig_img_y + orig_img_height + margin_bottom_px
+        elif position == 'left':
+            x = orig_img_x + margin_left_px
+            y = orig_img_y + (orig_img_height - logo_height) // 2
+        elif position == 'right':
+            x = orig_img_x + orig_img_width - logo_width - margin_right_px
+            y = orig_img_y + (orig_img_height - logo_height) // 2
+        else:  # center
+            x = (canvas_width - logo_width) // 2
+            y = (canvas_height - logo_height) // 2
+        
+        # 确保logo在画布范围内
+        x = max(0, min(x, canvas_width - logo_width))
+        y = max(0, min(y, canvas_height - logo_height))
+        
+        # 将logo粘贴到图像上
+        result = image.copy()
+        if logo.mode == 'RGBA':
+            result.paste(logo, (x, y), logo)
+        else:
+            result.paste(logo, (x, y))
+        
+        return result

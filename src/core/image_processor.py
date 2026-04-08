@@ -60,7 +60,8 @@ class ImageProcessor:
                 style_name: Optional[str] = None,
                 bg_fill_type: str = "white",
                 decorations: Optional[List[Dict]] = None,
-                font_weight: Optional[str] = None) -> bool:
+                font_weight: Optional[str] = None,
+                logo_filename: Optional[str] = None) -> bool:
         """
         处理图像并添加相框
         
@@ -73,6 +74,7 @@ class ImageProcessor:
             bg_fill_type: 背景填充类型
             decorations: 装饰元素列表
             font_weight: 字体字重 (light, regular, medium)
+            logo_filename: logo文件名
             
         Returns:
             是否处理成功
@@ -155,7 +157,8 @@ class ImageProcessor:
                 location=location,
                 style_config=style_config,
                 bg_fill_type=bg_fill_type,
-                decorations=decorations
+                decorations=decorations,
+                logo_filename=logo_filename  # 传递logo参数
             )
             
             # 10. 保存图像

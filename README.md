@@ -101,20 +101,36 @@ MiLeica_Frame/
 │   │   ├── renderer.py         # 渲染引擎
 │   │   ├── hdr_handler.py      # HDR处理
 │   │   ├── decorator.py        # 装饰元素处理
-│   │   └── batch_processor.py  # 批量处理
+│   │   ├── batch_processor.py  # 批量处理
+│   │   └── ...
 │   ├── gui/                # GUI界面相关
+│   │   ├── __init__.py
+│   │   ├── app.py          # Streamlit GUI主文件
+│   │   └── ...
 │   ├── utils/              # 工具函数
+│   │   ├── __init__.py
+│   │   ├── exif_helper.py  # EXIF数据处理
+│   │   ├── device_mapper.py # 设备映射数据库
+│   │   ├── config_manager.py # 配置管理
+│   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件
-│   │   └── style_manager.py # 样式管理器
+│   │   ├── __init__.py
+│   │   ├── style_manager.py # 样式管理器
+│   │   └── ...
+│   ├── frames/             # 相框基类
+│   │   └── base_frame.py   # 相框基类定义
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
 │   ├── icons/              # 图标文件
 │   └── fonts/              # 字体文件
 ├── data/                   # 数据文件
+│   ├── camera_map.csv      # 相机品牌型号映射
+│   └── lens_map.csv        # 镜头映射
 ├── tests/                  # 测试文件
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
+├── streamlit_app.py       # Streamlit应用入口
 └── README.md
 ```
 
@@ -297,6 +313,17 @@ version: "版本号"
 - **拍摄时间信息**：显示在EXIF信息下方，格式为"yyyy.mm.dd hh:mm:ss"
 - **相机型号信息**：显示在原图外侧扩展区域的左上角
 - **镜头型号信息**：显示在相机型号信息下方，同样在原图外侧扩展区域的左上角
+
+### 统一数据处理与展示
+- **分层架构**：采用三层架构处理EXIF数据
+  - **底层解析层**（EXIF Helper）：仅负责读取和解析原始二进制数据，返回纯净的原始字段
+  - **业务映射层**（Device Mapper/Service）：负责执行品牌/机型映射、字符串拼接（如`品牌 + " " + 型号`）、格式化等业务逻辑
+  - **展示层**（GUI/Renderer）：仅负责接收处理后的最终数据对象进行渲染
+- **统一数据出口**：通过`exif_helper.get_display_data()`方法提供统一的展示数据
+  - 返回标准化的数据结构，包含`raw_value`（原始数据）和`display_value`（映射后数据）
+  - 在"相框预览"和"最终渲染"中使用相同的`display_value`，确保一致性
+  - GUI的"设备信息"部分显示`raw_value`，"相框显示"部分显示`display_value`
+- **结构化排版**：将数据按逻辑类别拆分，使用Markdown标题、分隔线等组织内容，采用"标签+内容"换行展示，每项独立占行，使用明确中文标签（如"相机型号："、"镜头型号："）
 
 ### 图像支持格式
 - **支持格式**：JPEG、PNG、TIFF

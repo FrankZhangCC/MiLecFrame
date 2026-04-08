@@ -12,12 +12,12 @@ fonts:
   regular: Gotham-Medium
   size_ratio: 0.02
   sizes:
-    exif: 0.02  # 改为2%原图长边
-    timestamp: 0.02  # 拍摄时间的字体大小
+    exif: 0.015  # 改为2%原图长边
+    timestamp: 0.015  # 拍摄时间的字体大小
     camera: 0.015   # 相机型号的字体大小
     lens: 0.015     # 镜头型号的字体大小
-    author: 0.02
-    location: 0.02
+    author: 0.015
+    location: 0.015
   line_spacing: 1.5
 layout:
   border_position: inner
@@ -83,4 +83,13 @@ background_fill:
   type: "gaussian_black_35"  # 35%透明度
   gaussian_blur_radius: 200
   gaussian_blur_opacity: 35
+logo:
+  enabled: true
+  position: "top-right"
+  alignment: "top-right"
+  size_ratio: 0.04  # Logo高度为原图长边的3%
+  margin_top: 0.02
+  margin_bottom: 0.01
+  margin_left: 0.01
+  margin_right: 0    # 右边距设为0
 name: Default_TestFrame
