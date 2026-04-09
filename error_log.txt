@@ -385,3 +385,27 @@ AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
 
 2026-04-09 14:40:35,484 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpa0p4fv7a.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwpe9i3e7.jpg
 2026-04-09 14:40:41,959 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmptwnxur7d.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5u6wu4a3.jpg
+2026-04-09 14:55:55,153 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpwxhxdulu.jpg -> C:\Users\frank\AppData\Local\Temp\tmpgmis3xe5.jpg
+2026-04-09 14:56:04,200 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmphmd7a6h5.jpg -> C:\Users\frank\AppData\Local\Temp\tmpqpn3ls3l.jpg
+2026-04-09 16:14:20,108 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyytm28yh.jpg -> C:\Users\frank\AppData\Local\Temp\tmpec1q7e2x.jpg
+2026-04-09 16:15:34,000 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpzzmw6u2s.jpg -> C:\Users\frank\AppData\Local\Temp\tmpt9iih37o.jpg
+2026-04-09 16:15:54,729 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpb381gi02.JPG -> C:\Users\frank\AppData\Local\Temp\tmpn4alzq_i.jpg
+2026-04-09 17:01:12,388 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpo7a_18sp.JPG -> C:\Users\frank\AppData\Local\Temp\tmpecpm3rgw.jpg
+2026-04-09 17:02:23,760 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpa22ry_vk.JPG -> C:\Users\frank\AppData\Local\Temp\tmpv_efwxbm.jpg
+2026-04-09 17:02:52,241 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmphno0wz02.JPG -> C:\Users\frank\AppData\Local\Temp\tmpm9bsu318.jpg
+2026-04-09 17:03:29,185 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp_no97zcm.JPG -> C:\Users\frank\AppData\Local\Temp\tmpdt5i10p6.jpg
+2026-04-09 20:01:04,731 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp9vgubkzg.JPG -> C:\Users\frank\AppData\Local\Temp\tmpf8n4bhh5.jpg
+2026-04-09 20:01:39,363 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpajy5jqgz.JPG -> C:\Users\frank\AppData\Local\Temp\tmp031hhe8s.jpg
+2026-04-09 20:15:17,602 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpowqmbhfm.jpg -> C:\Users\frank\AppData\Local\Temp\tmp3_1b6uix.jpg
+2026-04-09 20:15:37,713 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmprtp5784j.jpg -> C:\Users\frank\AppData\Local\Temp\tmpbawcdn_3.jpg
+2026-04-09 20:19:37,462 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp0tloh3v5.jpg -> C:\Users\frank\AppData\Local\Temp\tmpj36hj0jj.jpg
+2026-04-09 20:23:00,566 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp47hlty9a.jpg -> C:\Users\frank\AppData\Local\Temp\tmpm9g0y_0_.jpg
+2026-04-09 20:25:55,320 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpnl_resqk.jpg -> C:\Users\frank\AppData\Local\Temp\tmp0fxogg69.jpg
+2026-04-09 20:26:04,952 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpi180f47r.jpg -> C:\Users\frank\AppData\Local\Temp\tmpard9lw7s.jpg
+2026-04-09 20:26:59,409 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpbh95d31t.jpg -> C:\Users\frank\AppData\Local\Temp\tmpj2bve224.jpg
+2026-04-09 20:28:20,899 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpni9z_jlr.jpg -> C:\Users\frank\AppData\Local\Temp\tmpt3ijck4i.jpg
+2026-04-09 20:32:12,110 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpuhwm3_oa.jpg -> C:\Users\frank\AppData\Local\Temp\tmp9yc20y1b.jpg
+2026-04-09 20:32:15,422 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpcy4vzvty.jpg -> C:\Users\frank\AppData\Local\Temp\tmp58gjxp9i.jpg
+2026-04-09 20:32:39,724 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyyrv37wc.jpg -> C:\Users\frank\AppData\Local\Temp\tmp2gi42s_u.jpg
+2026-04-09 20:33:01,789 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpimn0330j.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6uqtrj_e.jpg
+2026-04-09 20:33:06,360 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp1a00krpk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpgi_nebud.jpg

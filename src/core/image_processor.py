@@ -72,7 +72,9 @@ class ImageProcessor:
             location: 拍摄地点
             style_name: 样式名称
             bg_fill_type: 背景填充类型
-            decorations: 装饰元素列表
+            decorations: 装饰元素列表。每个元素是一个字典，包含 'type' 和 'params'。
+                         例如水印: {'type': 'watermark', 'params': {'text': '...', 'position': '...', 'opacity': 0.5, 'color': '#FFFFFF'}}
+                         例如边框: {'type': 'border', 'params': {'width': 10, 'color': '#000000'}}
             font_weight: 字体字重 (light, regular, medium)
             logo_filename: logo文件名
             
@@ -149,7 +151,7 @@ class ImageProcessor:
                 # 设置字重
                 style_config['fonts']['weight'] = font_weight
 
-            # 渲染图像
+            # 9. 渲染图像
             rendered_image = self.renderer.render_frame(
                 image=image,
                 exif_data=exif_data,
@@ -158,7 +160,7 @@ class ImageProcessor:
                 style_config=style_config,
                 bg_fill_type=bg_fill_type,
                 decorations=decorations,
-                logo_filename=logo_filename  # 传递logo参数
+                logo_filename=logo_filename
             )
             
             # 10. 保存图像

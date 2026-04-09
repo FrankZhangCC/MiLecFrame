@@ -93,7 +93,7 @@ class FrameRenderer:
         
         # 保存当前布局配置、原始图像尺寸和背景类型到实例属性
         self._current_layout = layout
-        self._original_image_size = image.size
+        self._original_image_size = image.size  # 保存原始图像尺寸
         self._bg_fill_type = bg_fill_type
         
         # 计算最终画布尺寸（考虑扩展画布）
@@ -111,7 +111,12 @@ class FrameRenderer:
         
         # 添加装饰元素（如果有的话）
         if decorations:
-            decorated_image = self.decorator.apply_decorations(positioned_image, decorations)
+            decorated_image = self.decorator.apply_decorations(
+                positioned_image, 
+                decorations, 
+                self._original_image_size,
+                self._current_layout  # 传递布局配置
+            )
         else:
             decorated_image = positioned_image
         
