@@ -17,6 +17,7 @@ from typing import Tuple, Dict, Optional, List
 import numpy as np
 # 修改导入路径，使用绝对导入
 from src.utils.exif_helper import ExifHelper
+from src.utils.logo_selector import LogoSelector  # 导入LogoSelector
 from src.core.decorator import Decorator
 
 
@@ -49,6 +50,12 @@ class FrameRenderer:
         
         # 初始化装饰器
         self.decorator = Decorator()
+    
+    def _get_logo_selector(self):
+        """获取LogoSelector实例"""
+        if not hasattr(self, '_logo_selector'):
+            self._logo_selector = LogoSelector()
+        return self._logo_selector
     
     def render_frame(
         self, 
@@ -114,7 +121,9 @@ class FrameRenderer:
             if not logo_filename:
                 camera_brand = ExifHelper.get_camera_brand(exif_data) or ExifHelper.get_camera_model(exif_data)
                 if camera_brand:
-                    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+                    # 使用LogoSelector类的实例来自动匹配logo
+                    logo_selector_instance = self._get_logo_selector()
+                    logo_filename = logo_selector_instance.auto_match_logo(camera_brand)
             
             if logo_filename:
                 decorated_image = self._add_logo(decorated_image, logo_filename, logo_config)

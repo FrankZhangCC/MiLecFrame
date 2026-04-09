@@ -353,3 +353,35 @@ AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
 2026-04-09 13:58:45,336 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpmv19684b.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5yku8k1m.jpg
 2026-04-09 14:00:23,794 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn5ajy5fb.jpg -> C:\Users\frank\AppData\Local\Temp\tmpf7fu6h4b.jpg
 2026-04-09 14:00:33,682 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpri0ppot6.jpg -> C:\Users\frank\AppData\Local\Temp\tmpuig119hu.jpg
+2026-04-09 14:00:42,754 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpsbuo68bu.jpg -> C:\Users\frank\AppData\Local\Temp\tmpeqmiyb47.jpg
+2026-04-09 14:13:14,655 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpxve_fbas.jpg -> C:\Users\frank\AppData\Local\Temp\tmp4s31yxbb.jpg
+2026-04-09 14:13:24,798 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpf7xn7gxa.jpg -> C:\Users\frank\AppData\Local\Temp\tmpfmn1t0_k.jpg
+2026-04-09 14:27:13,504 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute 'logo_selector'
+2026-04-09 14:27:13,506 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 153, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename  # 传递logo参数
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 117, in render_frame
+    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+                    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
+
+2026-04-09 14:27:20,721 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpjqdi7tzs.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwsl5zosr.jpg
+2026-04-09 14:38:15,693 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute 'logo_selector'
+2026-04-09 14:38:15,695 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 153, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename  # 传递logo参数
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 117, in render_frame
+    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+                    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
+
+2026-04-09 14:40:35,484 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpa0p4fv7a.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwpe9i3e7.jpg
+2026-04-09 14:40:41,959 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmptwnxur7d.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5u6wu4a3.jpg
