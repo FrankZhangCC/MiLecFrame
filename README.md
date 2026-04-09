@@ -52,6 +52,23 @@ streamlit run src/gui/app.py
 
 ## 最新功能更新
 
+### 文字颜色自定义与背景类型管理
+- **自定义文字颜色**：现在可以在样式配置文件中通过 `custom_text_color` 字段指定文字颜色
+  - 如果配置了 `custom_text_color`，将优先使用此颜色
+  - 如果未配置 `custom_text_color` 或设置为 `null`，则使用自适应颜色逻辑
+  - 支持十六进制颜色格式（如 "#FF6B6B"）和 RGB 元组格式
+- **针对背景类型的自定义颜色**：支持为亮色和暗色背景分别设置不同的自定义颜色
+  - 使用 `custom_[text_type]_light_color` 和 `custom_[text_type]_dark_color` 格式配置特定文本类型的亮/暗色背景颜色
+  - 例如 `custom_timestamp_light_color` 和 `custom_timestamp_dark_color` 为时间戳分别设置亮色和暗色背景下的颜色
+  - 例如 `custom_location_light_color` 和 `custom_location_dark_color` 为地点分别设置亮色和暗色背景下的颜色
+- **背景类型管理**：使用预定义的深色和浅色背景类型列表进行管理
+  - 深色背景类型包括：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
+  - 浅色背景类型包括：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 未来添加新背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
+- **自适应颜色逻辑**：
+  - 深色背景（包括纯黑和黑色高斯模糊）→ 白色文字
+  - 浅色背景（包括纯白和白色高斯模糊）→ 黑色文字
+
 ### 字体渲染增强
 - **智能字体选择**：根据文本内容自动检测，西文使用Gotham Medium字体，中文使用Glow Sans SC Medium字体
 - **字体大小调整**：文字高度现为原图长度的2%，提供更合适的视觉比例
@@ -163,7 +180,15 @@ version: "版本号"
       - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
 
 ### 颜色配置 (colors)
-- `text`: 文字颜色
+- `text`: 文字颜色（传统颜色设置，保留向后兼容性）
+- `custom_text_color`: 通用自定义文字颜色（新功能，如果设置将优先使用此颜色）
+  - 支持十六进制颜色格式（如 "#FF6B6B"）
+  - 支持 RGB 元组格式（如 [255, 107, 107]）
+  - 如设置为 `null`，则使用自适应颜色逻辑
+- `custom_text_light_color`: 亮色背景下通用自定义文字颜色
+- `custom_text_dark_color`: 暗色背景下通用自定义文字颜色
+- `custom_[text_type]_light_color`: 亮色背景下特定文本类型的自定义颜色（如 `custom_timestamp_light_color`, `custom_location_light_color`）
+- `custom_[text_type]_dark_color`: 暗色背景下特定文本类型的自定义颜色（如 `custom_timestamp_dark_color`, `custom_location_dark_color`）
 - `background`: 背景颜色
 - `icon`: 图标颜色
 
@@ -253,6 +278,10 @@ version: "版本号"
    - 支持多种背景填充选项（纯黑、纯白、高斯模糊叠加黑白）
    - 实现了响应式设计，尺寸和字体大小随输出尺寸自动调整
    - 集成了文字渲染和图标显示功能
+   - **新增自定义文字颜色功能**：可在样式配置中通过 `custom_text_color` 指定文字颜色，如果未指定则使用自适应颜色逻辑
+   - **增强自定义颜色功能**：支持针对亮色和暗色背景分别设置不同的自定义颜色
+   - **背景类型管理优化**：使用预定义的深色和浅色背景类型列表进行管理，便于后续扩展新背景类型
+   - **特定文本类型颜色配置**：支持为特定文本类型（如时间戳、地点等）配置针对不同背景的自定义颜色
 
 2. **HDR图像处理** (`src/core/hdr_handler.py`)
    - 支持Gainmap HDR JPEG格式和UltraHDR标准图片
@@ -367,6 +396,10 @@ version: "版本号"
 - **高斯模糊叠加白色 (65%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度白色 (`gaussian_white_65`)
 - **高斯模糊叠加黑色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度黑色 (`gaussian_black_35`)
 - **高斯模糊叠加白色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度白色 (`gaussian_white_35`)
+- **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
+  - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
+  - 浅色背景类型：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 新增背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
 - **命令行选择**：通过 `--bg-fill` 参数指定
 - **GUI选择**：在界面上提供选项
 

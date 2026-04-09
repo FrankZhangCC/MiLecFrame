@@ -1,9 +1,9 @@
-# Modern Expanded Frame Style Configuration
-# 现代扩展相框样式配置
+# Modern Custom Color Frame Style Configuration
+# 现代自定义颜色相框样式配置
 
 # 样式基本信息
-name: "Modern Expanded"
-description: "现代风格扩展相框，具有可调节的扩展画布和灵活的文字布局"
+name: "Modern Custom Color"
+description: "现代风格自定义颜色相框，支持在配置中指定文字颜色"
 version: "1.0"
 
 # 布局配置
@@ -50,10 +50,10 @@ layout:
 
 # 颜色配置
 colors:
-  text: "#000000"      # 文字颜色 (黑色) - 传统颜色设置
-  custom_text_color: null  # 自定义文字颜色，如果不设置则使用自适应颜色
-  background: "#FFFFFF" # 背景颜色 (白色)
-  icon: "#333333"      # 图标颜色 (深灰)
+  text: "#000000"              # 文字颜色 (黑色) - 传统颜色设置
+  custom_text_color: "#FF6B6B"  # 自定义文字颜色 (珊瑚红)，如果设置了此选项将优先使用
+  background: "#FFFFFF"         # 背景颜色 (白色)
+  icon: "#333333"              # 图标颜色 (深灰)
 
 # 字体配置
 fonts:

@@ -32,6 +32,21 @@ class FrameRenderer:
             "gray": (128, 128, 128)
         }
         
+        # 定义深色和浅色背景类型列表，便于后续扩展
+        self.dark_bg_types = [
+            'pure_black',
+            'gaussian_black_65',
+            'gaussian_black_35',
+            'gaussian_black'
+        ]
+        
+        self.light_bg_types = [
+            'pure_white',
+            'gaussian_white_65',
+            'gaussian_white_35',
+            'gaussian_white'
+        ]
+        
         # 初始化装饰器
         self.decorator = Decorator()
     
@@ -479,6 +494,74 @@ class FrameRenderer:
         # 如果找不到字体文件，使用默认字体
         return ImageFont.load_default()
 
+    def _determine_text_color(self, bg_fill_type: str, colors_config: Dict, text_type: str = None) -> Tuple[int, int, int]:
+        """
+        根据背景类型和配置确定文字颜色
+        如果配置中有自定义文字颜色，优先使用；否则根据背景类型使用自适应颜色
+        
+        Args:
+            bg_fill_type: 背景填充类型
+            colors_config: 颜色配置字典
+            text_type: 文本类型（如 'timestamp', 'location' 等），用于特定类型的颜色设置
+            
+        Returns:
+            RGB格式的文字颜色元组
+        """
+        # 检查是否有特定文本类型的自定义颜色（区分亮色和暗色背景）
+        if text_type:
+            # 检查暗色背景下特定文本类型的自定义颜色
+            dark_color_key = f'custom_{text_type}_dark_color'
+            light_color_key = f'custom_{text_type}_light_color'
+            
+            if dark_color_key in colors_config and light_color_key in colors_config:
+                # 根据背景类型选择对应的颜色
+                if any(bg_fill_type.startswith(dark_type) for dark_type in self.dark_bg_types):
+                    # 深色背景使用亮色文字
+                    custom_color = colors_config[dark_color_key]
+                else:
+                    # 浅色背景使用暗色文字
+                    custom_color = colors_config[light_color_key]
+                
+                if custom_color:
+                    # 处理自定义颜色格式
+                    if isinstance(custom_color, str) and custom_color.startswith('#'):
+                        # 转换十六进制颜色为RGB
+                        return tuple(int(custom_color[i:i+2], 16) for i in (1, 3, 5))
+                    elif isinstance(custom_color, (tuple, list)) and len(custom_color) == 3:
+                        # RGB元组或列表
+                        return tuple(custom_color)
+
+        # 检查是否有通用的自定义颜色（区分亮色和暗色背景）
+        dark_color_key = 'custom_text_dark_color'
+        light_color_key = 'custom_text_light_color'
+        
+        if dark_color_key in colors_config and light_color_key in colors_config:
+            # 根据背景类型选择对应的颜色
+            if any(bg_fill_type.startswith(dark_type) for dark_type in self.dark_bg_types):
+                # 深色背景使用亮色文字
+                custom_color = colors_config[dark_color_key]
+            else:
+                # 浅色背景使用暗色文字
+                custom_color = colors_config[light_color_key]
+            
+            if custom_color:
+                # 处理自定义颜色格式
+                if isinstance(custom_color, str) and custom_color.startswith('#'):
+                    # 转换十六进制颜色为RGB
+                    return tuple(int(custom_color[i:i+2], 16) for i in (1, 3, 5))
+                elif isinstance(custom_color, (tuple, list)) and len(custom_color) == 3:
+                    # RGB元组或列表
+                    return tuple(custom_color)
+
+        # 根据背景类型列表判断使用什么颜色的文字
+        # 检查是否为深色背景（直接匹配或以深色背景类型开头）
+        if any(bg_fill_type.startswith(dark_type) for dark_type in self.dark_bg_types):
+            # 深色背景使用白色文字
+            return (255, 255, 255)  # 白色
+        else:
+            # 其他情况（包括浅色背景）使用黑色文字
+            return (0, 0, 0)  # 黑色
+
     def _add_text_and_icons_flexible(
         self, 
         image: Image.Image, 
@@ -590,15 +673,9 @@ class FrameRenderer:
             # 使用原始图像长边作为基准加载字体，传递文本内容以智能选择字体
             font = self._load_font_responsive_with_longer_side(fonts, original_image_size, text_specific_size_ratio, text)
             
-            # 根据背景类型自动选择文字颜色
+            # 根据背景类型和配置确定文字颜色
             bg_fill_type = getattr(self, '_bg_fill_type', 'pure_white')  # 默认为纯白色背景
-            # 检查背景是否为深色系列，以便使用浅色文字
-            if bg_fill_type.startswith('pure_black') or bg_fill_type.startswith('gaussian_black'):
-                # 黑色背景使用白色文字
-                text_color = (255, 255, 255)  # 白色
-            else:
-                # 白色背景使用黑色文字
-                text_color = (0, 0, 0)  # 黑色
+            text_color = self._determine_text_color(bg_fill_type, colors, text_type)
             
             print(f"背景类型: {bg_fill_type}, 文本颜色: {text_color}")
             

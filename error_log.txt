@@ -302,3 +302,54 @@ AttributeError: 'FrameRenderer' object has no attribute '_calculate_text_positio
 2026-04-08 14:00:23,885 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn_54cwlz.jpg -> C:\Users\frank\AppData\Local\Temp\tmpv1oa288q.jpg
 2026-04-08 14:00:41,564 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp89ihf7mi.jpg -> C:\Users\frank\AppData\Local\Temp\tmph0lqb6db.jpg
 2026-04-08 14:01:40,466 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpscw21t8x.jpg -> C:\Users\frank\AppData\Local\Temp\tmpk6qgszl2.jpg
+2026-04-08 14:01:47,612 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpg6zljmny.jpg -> C:\Users\frank\AppData\Local\Temp\tmpnawxllpz.jpg
+2026-04-08 14:12:09,732 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpcyml9blk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpsns256ob.jpg
+2026-04-08 14:12:17,051 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyfe6f9js.jpg -> C:\Users\frank\AppData\Local\Temp\tmpyxksc6qn.jpg
+2026-04-08 14:14:03,002 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpvmil07kk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpyafl7y_e.jpg
+2026-04-08 19:48:42,860 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute 'logo_selector'
+2026-04-08 19:48:42,862 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 153, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename  # 传递logo参数
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 102, in render_frame
+    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+                    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
+
+2026-04-08 19:49:19,400 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmprxb48z79.jpg -> C:\Users\frank\AppData\Local\Temp\tmp612t5rim.jpg
+2026-04-09 00:02:13,331 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp8b40tft4.jpg -> C:\Users\frank\AppData\Local\Temp\tmpvn2573zt.jpg
+2026-04-09 00:02:30,273 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpcz8qn6bh.jpg -> C:\Users\frank\AppData\Local\Temp\tmpl7pgl2dy.jpg
+2026-04-09 00:02:40,541 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp4prag_u3.jpg -> C:\Users\frank\AppData\Local\Temp\tmpblvhu1zk.jpg
+2026-04-09 00:03:23,871 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp8c36jvrm.jpg -> C:\Users\frank\AppData\Local\Temp\tmpu_e7r00k.jpg
+2026-04-09 00:03:31,417 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp4zq9tq1x.jpg -> C:\Users\frank\AppData\Local\Temp\tmpnbl8t_6y.jpg
+2026-04-09 00:04:57,277 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp5ybv9z3h.jpg -> C:\Users\frank\AppData\Local\Temp\tmpy9zivqj8.jpg
+2026-04-09 00:05:03,287 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpxifyh5nj.jpg -> C:\Users\frank\AppData\Local\Temp\tmpqx4rqy0w.jpg
+2026-04-09 00:05:08,733 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpik4vwcl4.jpg -> C:\Users\frank\AppData\Local\Temp\tmp33sjg_a2.jpg
+2026-04-09 13:49:47,380 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp1oxno9pw.jpg -> C:\Users\frank\AppData\Local\Temp\tmpanj2jy2g.jpg
+2026-04-09 13:50:17,567 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpekunf307.jpg -> C:\Users\frank\AppData\Local\Temp\tmp_gthndnd.jpg
+2026-04-09 13:56:47,880 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute 'logo_selector'
+2026-04-09 13:56:47,882 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 153, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename  # 传递logo参数
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 117, in render_frame
+    logo_filename = self.logo_selector.auto_match_logo(camera_brand)
+                    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
+
+2026-04-09 13:57:04,617 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpwtn940vn.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwfybz646.jpg
+2026-04-09 13:57:19,915 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp9lpq1oeq.jpg -> C:\Users\frank\AppData\Local\Temp\tmpbirtgfmq.jpg
+2026-04-09 13:57:55,504 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp3mnybgj9.jpg -> C:\Users\frank\AppData\Local\Temp\tmpvplhyaj3.jpg
+2026-04-09 13:58:08,139 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp_eu5c6wf.jpg -> C:\Users\frank\AppData\Local\Temp\tmps7__u98u.jpg
+2026-04-09 13:58:18,740 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmphdq6xix9.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5ougudxh.jpg
+2026-04-09 13:58:29,572 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp7y5afkz1.jpg -> C:\Users\frank\AppData\Local\Temp\tmprs1w45f3.jpg
+2026-04-09 13:58:37,744 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpnvhpax3_.jpg -> C:\Users\frank\AppData\Local\Temp\tmpo_flcv42.jpg
+2026-04-09 13:58:45,336 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpmv19684b.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5yku8k1m.jpg
+2026-04-09 14:00:23,794 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn5ajy5fb.jpg -> C:\Users\frank\AppData\Local\Temp\tmpf7fu6h4b.jpg
+2026-04-09 14:00:33,682 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpri0ppot6.jpg -> C:\Users\frank\AppData\Local\Temp\tmpuig119hu.jpg
