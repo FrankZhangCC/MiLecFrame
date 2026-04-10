@@ -50,7 +50,13 @@ class FrameRenderer:
         
         # 初始化装饰器
         self.decorator = Decorator()
-    
+        
+        # 字体缓存，避免重复加载相同配置的字体
+        self.font_cache = {}
+        
+        # 用于存储已渲染元素的位置信息
+        self.element_positions = {}
+
     def _get_logo_selector(self):
         """获取LogoSelector实例"""
         if not hasattr(self, '_logo_selector'):
@@ -95,6 +101,9 @@ class FrameRenderer:
         self._current_layout = layout
         self._original_image_size = image.size  # 保存原始图像尺寸
         self._bg_fill_type = bg_fill_type
+        
+        # 清空元素位置记录
+        self.element_positions = {}
         
         # 计算最终画布尺寸（考虑扩展画布）
         canvas_width, canvas_height = self._calculate_canvas_size_with_expansion(
@@ -435,14 +444,28 @@ class FrameRenderer:
     
         # 获取当前字重的字体名称
         weight_config = font_weight_mapping.get(font_weight, font_weight_mapping['medium'])
-        font_name = weight_config['regular']
-
+        
         # 使用特定的字体大小比例，否则使用通用的
         size_ratio = specific_size_ratio if specific_size_ratio is not None else fonts.get('size_ratio', 0.015)
 
         # 根据项目规范，使用原始图像的长边作为计算基准
         longer_side = max(original_image_size)
         font_size = max(12, int(longer_side * size_ratio))
+
+        # 构建缓存键，包括所有会影响字体加载的参数
+        cache_key = (
+            font_base_name, 
+            font_weight, 
+            font_size, 
+            text_content
+        )
+        
+        # 检查字体是否已在缓存中
+        if cache_key in self.font_cache:
+            print(f"从缓存中加载字体: {cache_key}")
+            return self.font_cache[cache_key]
+        
+        font_name = weight_config['regular']
 
         print(f"使用长边基准字体大小计算: 比例={size_ratio}, 长边={longer_side}, 最终字体大小={font_size}")
         print(f"字重: {font_weight}, 字体名称: {font_name}")
@@ -491,6 +514,9 @@ class FrameRenderer:
                             print(f"警告：字体高度异常小，可能加载了低分辨率字体")
                             continue
                         
+                        # 将字体添加到缓存
+                        self.font_cache[cache_key] = font
+                        print(f"字体已添加到缓存: {cache_key}")
                         return font
                     else:
                         print(f"加载的可能是bitmap字体，跳过: {font_path}")
@@ -506,7 +532,10 @@ class FrameRenderer:
 
         print("警告：所有字体加载失败，使用默认字体")
         # 如果找不到字体文件，使用默认字体
-        return ImageFont.load_default()
+        default_font = ImageFont.load_default()
+        # 也将默认字体添加到缓存中，避免重复尝试加载失败的字体
+        self.font_cache[cache_key] = default_font
+        return default_font
 
     def _determine_text_color(self, bg_fill_type: str, colors_config: Dict, text_type: str = None) -> Tuple[int, int, int]:
         """
@@ -715,8 +744,22 @@ class FrameRenderer:
             else:
                 print(f"文本位置在画布范围内")
             
+            # 使用基线定位修正Y坐标
+            ascent, descent = font.getmetrics()
+            baseline_offset = descent
+            y -= baseline_offset  # 调整Y坐标，使文本以其基线为准
+            
             # 绘制文本
             draw.text((x, y), text, fill=text_color, font=font)
+            
+            # 记录元素位置，用于相对定位
+            self.element_positions[text_type] = {
+                'x': x,
+                'y': y,
+                'width': text_width,
+                'height': text_height,
+                'text': text
+            }
         
         print("文字图层添加完成")
         return result
@@ -746,6 +789,13 @@ class FrameRenderer:
         Returns:
             (x, y) 文本绘制坐标
         """
+        # 检查是否存在相对定位配置
+        relative_to = text_config.get('relative_to', None)
+        if relative_to:
+            return self._calculate_relative_position(
+                image, text, text_config, font, position, alignment, margin
+            )
+        
         # 获取文本边界框
         bbox = font.getbbox(text)
         text_width = bbox[2] - bbox[0]
@@ -892,7 +942,140 @@ class FrameRenderer:
             y = orig_img_y + orig_img_height + margin_bottom
         
         return x, y
-    
+
+    def _calculate_relative_position(
+        self, 
+        image: Image.Image, 
+        text: str, 
+        text_config: Dict, 
+        font: ImageFont.FreeTypeFont, 
+        position: str, 
+        alignment: str, 
+        margin: int
+    ) -> Tuple[int, int]:
+        """
+        计算相对于另一个元素的位置
+        
+        Args:
+            image: 原始图像
+            text: 要绘制的文本
+            text_config: 文本配置
+            font: 字体对象
+            position: 位置 ('inside', 'outside', 'top', 'bottom', 'left', 'right', 'tl', 'tr', 'bl', 'br')
+            alignment: 对齐方式 ('left', 'center', 'right')
+            margin: 边距
+        
+        Returns:
+            (x, y) 文本绘制坐标
+        """
+        # 获取相对定位配置
+        relative_to = text_config.get('relative_to')
+        relative_position = text_config.get('relative_position', 'after')  # 默认在目标元素后面
+        relative_margin = text_config.get('relative_margin', 0.01)  # 默认为原图长边的1%
+        
+        # 获取偏移配置
+        offset_x_ratio = text_config.get('offset_x_ratio', 0.0)
+        offset_y_ratio = text_config.get('offset_y_ratio', 0.0)
+        
+        # 获取原始图像尺寸
+        original_image_size = getattr(self, '_original_image_size', image.size)
+        original_longer_side = max(original_image_size)
+        
+        # 将相对边距转换为像素值
+        relative_margin_px = int(original_longer_side * relative_margin)
+        
+        # 计算当前文本的尺寸
+        bbox = font.getbbox(text)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        
+        # 计算相对于哪个元素
+        target_element_coords = self._find_element_coordinates(image, relative_to)
+        
+        if target_element_coords is None:
+            # 如果找不到目标元素，回退到默认位置计算
+            return self._calculate_text_position(image, text, text_config, font, position, alignment, margin)
+        
+        target_x, target_y, target_width, target_height = target_element_coords
+        
+        # 根据相对位置计算新的坐标
+        if relative_position in ['after', 'below']:  # 在目标元素之后（下方）
+            y = target_y + target_height + relative_margin_px
+            # 根据对齐方式设置x坐标
+            if alignment == 'left':
+                x = target_x
+            elif alignment == 'right':
+                x = target_x + target_width - text_width
+            else:  # center
+                x = target_x + (target_width - text_width) // 2
+        elif relative_position in ['before', 'above']:  # 在目标元素之前（上方）
+            y = target_y - text_height - relative_margin_px
+            # 根据对齐方式设置x坐标
+            if alignment == 'left':
+                x = target_x
+            elif alignment == 'right':
+                x = target_x + target_width - text_width
+            else:  # center
+                x = target_x + (target_width - text_width) // 2
+        elif relative_position == 'right-of':  # 在目标元素右边
+            x = target_x + target_width + relative_margin_px
+            # 根据对齐方式设置y坐标
+            if alignment == 'top':
+                y = target_y
+            elif alignment == 'bottom':
+                y = target_y + target_height - text_height
+            else:  # center
+                y = target_y + (target_height - text_height) // 2
+        elif relative_position == 'left-of':  # 在目标元素左边
+            x = target_x - text_width - relative_margin_px
+            # 根据对齐方式设置y坐标
+            if alignment == 'top':
+                y = target_y
+            elif alignment == 'bottom':
+                y = target_y + target_height - text_height
+            else:  # center
+                y = target_y + (target_height - text_height) // 2
+        else:
+            # 默认行为，回到普通位置计算
+            return self._calculate_text_position(image, text, text_config, font, position, alignment, margin)
+        
+        # 应用偏移
+        offset_x = int(original_longer_side * offset_x_ratio)
+        offset_y = int(original_longer_side * offset_y_ratio)
+        
+        x += offset_x
+        y += offset_y
+        
+        # 检查边界，确保元素在画布内
+        canvas_width, canvas_height = image.size
+        x = max(0, min(x, canvas_width - text_width))
+        y = max(0, min(y, canvas_height - text_height))
+        
+        return x, y
+
+    def _find_element_coordinates(self, image: Image.Image, element_name: str):
+        """
+        查找指定元素的坐标
+        
+        Args:
+            image: 图像对象
+            element_name: 元素名称
+            
+        Returns:
+            (x, y, width, height) 或 None
+        """
+        if element_name in self.element_positions:
+            pos_data = self.element_positions[element_name]
+            return pos_data['x'], pos_data['y'], pos_data['width'], pos_data['height']
+        
+        # 如果没找到元素，尝试使用其他元素类型名称
+        # 因为配置可能使用了不同的名称约定
+        for key, pos_data in self.element_positions.items():
+            if key == element_name or key.endswith(element_name) or element_name.endswith(key):
+                return pos_data['x'], pos_data['y'], pos_data['width'], pos_data['height']
+        
+        return None
+
     def _add_logo(
         self, 
         image: Image.Image, 
@@ -941,6 +1124,56 @@ class FrameRenderer:
         
         logo = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
         
+        # 检查是否配置了相对定位
+        relative_to = logo_config.get('relative_to', None)
+        if relative_to:
+            x, y = self._calculate_logo_relative_position(image, logo_config, logo_width, logo_height)
+        else:
+            # 使用原有定位逻辑
+            x, y = self._calculate_logo_absolute_position(image, logo_config, logo_width, logo_height)
+    
+        # 确保logo在画布范围内
+        canvas_width, canvas_height = image.size
+        x = max(0, min(x, canvas_width - logo_width))
+        y = max(0, min(y, canvas_height - logo_height))
+        
+        # 将logo粘贴到图像上
+        result = image.copy()
+        if logo.mode == 'RGBA':
+            result.paste(logo, (x, y), logo)
+        else:
+            result.paste(logo, (x, y))
+        
+        # 记录logo位置，用于其他元素的相对定位
+        self.element_positions['logo'] = {
+            'x': x,
+            'y': y,
+            'width': logo_width,
+            'height': logo_height,
+            'filename': logo_filename
+        }
+        
+        return result
+
+    def _calculate_logo_absolute_position(
+        self, 
+        image: Image.Image, 
+        logo_config: Dict, 
+        logo_width: int, 
+        logo_height: int
+    ) -> Tuple[int, int]:
+        """
+        计算logo的绝对位置（原有逻辑）
+        
+        Args:
+            image: 输入图像
+            logo_config: logo配置
+            logo_width: logo宽度
+            logo_height: logo高度
+            
+        Returns:
+            (x, y) logo绘制坐标
+        """
         # 获取logo位置和对齐方式
         position = logo_config.get('position', 'top-right')
         alignment = logo_config.get('alignment', 'top-right')
@@ -952,6 +1185,9 @@ class FrameRenderer:
         margin_right = logo_config.get('margin_right', 0.01)
         
         # 将比例边距转换为像素值
+        original_image_size = getattr(self, '_original_image_size', image.size)
+        longer_side = max(original_image_size)
+        
         margin_top_px = int(longer_side * margin_top)
         margin_bottom_px = int(longer_side * margin_bottom)
         margin_left_px = int(longer_side * margin_left)
@@ -1020,16 +1256,107 @@ class FrameRenderer:
         else:  # center
             x = (canvas_width - logo_width) // 2
             y = (canvas_height - logo_height) // 2
+    
+        return x, y
+
+    def _calculate_logo_relative_position(
+        self, 
+        image: Image.Image, 
+        logo_config: Dict, 
+        logo_width: int, 
+        logo_height: int
+    ) -> Tuple[int, int]:
+        """
+        计算logo相对于另一个元素的位置
         
-        # 确保logo在画布范围内
+        Args:
+            image: 输入图像
+            logo_config: logo配置
+            logo_width: logo宽度
+            logo_height: logo高度
+            
+        Returns:
+            (x, y) logo绘制坐标
+        """
+        # 获取相对定位配置
+        relative_to = logo_config.get('relative_to')
+        relative_position = logo_config.get('relative_position', 'right-of')  # 默认在目标元素右边
+        relative_margin = logo_config.get('relative_margin', 0.01)  # 默认为原图长边的1%
+        
+        # 获取偏移配置
+        offset_x_ratio = logo_config.get('offset_x_ratio', 0.0)
+        offset_y_ratio = logo_config.get('offset_y_ratio', 0.0)
+        
+        # 获取对齐方式
+        alignment = logo_config.get('alignment', 'top-right')
+        
+        # 获取原始图像尺寸
+        original_image_size = getattr(self, '_original_image_size', image.size)
+        original_longer_side = max(original_image_size)
+        
+        # 将相对边距转换为像素值
+        relative_margin_px = int(original_longer_side * relative_margin)
+        
+        # 计算相对于哪个元素
+        target_element_coords = self._find_element_coordinates(image, relative_to)
+        
+        if target_element_coords is None:
+            # 如果找不到目标元素，回退到默认位置计算
+            return self._calculate_logo_absolute_position(image, logo_config, logo_width, logo_height)
+        
+        target_x, target_y, target_width, target_height = target_element_coords
+        
+        # 根据相对位置计算新的坐标
+        if relative_position in ['after', 'below']:  # 在目标元素之后（下方）
+            y = target_y + target_height + relative_margin_px
+            # 根据对齐方式设置x坐标
+            if 'left' in alignment:
+                x = target_x
+            elif 'right' in alignment:
+                x = target_x + target_width - logo_width
+            else:  # center
+                x = target_x + (target_width - logo_width) // 2
+        elif relative_position in ['before', 'above']:  # 在目标元素之前（上方）
+            y = target_y - logo_height - relative_margin_px
+            # 根据对齐方式设置x坐标
+            if 'left' in alignment:
+                x = target_x
+            elif 'right' in alignment:
+                x = target_x + target_width - logo_width
+            else:  # center
+                x = target_x + (target_width - logo_width) // 2
+        elif relative_position == 'right-of':  # 在目标元素右边
+            x = target_x + target_width + relative_margin_px
+            # 根据对齐方式设置y坐标
+            if 'top' in alignment:
+                y = target_y
+            elif 'bottom' in alignment:
+                y = target_y + target_height - logo_height
+            else:  # center
+                y = target_y + (target_height - logo_height) // 2
+        elif relative_position == 'left-of':  # 在目标元素左边
+            x = target_x - logo_width - relative_margin_px
+            # 根据对齐方式设置y坐标
+            if 'top' in alignment:
+                y = target_y
+            elif 'bottom' in alignment:
+                y = target_y + target_height - logo_height
+            else:  # center
+                y = target_y + (target_height - logo_height) // 2
+        else:
+            # 默认行为，回到普通位置计算
+            return self._calculate_logo_absolute_position(image, logo_config, logo_width, logo_height)
+        
+        # 应用偏移
+        offset_x = int(original_longer_side * offset_x_ratio)
+        offset_y = int(original_longer_side * offset_y_ratio)
+        
+        x += offset_x
+        y += offset_y
+        
+        # 检查边界，确保元素在画布内
+        canvas_width, canvas_height = image.size
         x = max(0, min(x, canvas_width - logo_width))
         y = max(0, min(y, canvas_height - logo_height))
         
-        # 将logo粘贴到图像上
-        result = image.copy()
-        if logo.mode == 'RGBA':
-            result.paste(logo, (x, y), logo)
-        else:
-            result.paste(logo, (x, y))
-        
-        return result
+        return x, y

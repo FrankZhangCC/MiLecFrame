@@ -251,6 +251,11 @@
   - **size_ratio**: Logo大小相对于画布的比例 (数字)
   - **position**: 位置 ('top-left', 'top-right', 'bottom-left', 'bottom-right', **'top-center', 'bottom-center'**, 'center', 'top', 'bottom', 'left', 'right')
   - **margin_top/bottom/left/right**: 各方向的边距 (数字或比例)
+  - **relative_to**: 相对于哪个元素定位 (字符串，如 "exif", "timestamp", "camera", "lens", "author", "location")
+  - **relative_position**: 相对位置关系 ('after', 'before', 'below', 'above', 'right-of', 'left-of')
+  - **relative_margin**: 与目标元素的间距 (浮点数，相对于原图长边的比例)
+  - **offset_x_ratio**: X轴偏移量 (浮点数，相对于原图长边的比例)
+  - **offset_y_ratio**: Y轴偏移量 (浮点数，相对于原图长边的比例)
 - **编写方式**:
   - JSON:
     ```json
@@ -274,6 +279,66 @@
       margin_bottom: 0.01
       margin_left: 0.01
       margin_right: 0.01
+      relative_to: "exif"              # 相对于哪个元素
+      relative_position: "right-of"    # 相对位置关系
+      relative_margin: 0.01            # 与目标元素的间距（原图长边的1%）
+      offset_x_ratio: 0.005            # X轴偏移（原图长边的0.5%）
+      offset_y_ratio: 0.005            # Y轴偏移（原图长边的0.5%）
+    ```
+
+### 10. info_position (信息位置配置)
+- **含义**: 控制各类信息元素的位置，支持绝对定位和相对定位
+- **类型**: 对象/字典
+- **子参数**:
+  - **exif, timestamp, camera, lens, author, location**: 各类信息的定位配置
+    - **position**: 位置 ('inside', 'outside', 'top', 'bottom', 'left', 'right', 'tl', 'tr', 'bl', 'br')
+    - **alignment**: 对齐方式 ('left', 'center', 'right', 'top-left', 'top-right')
+    - **margin**: 传统边距 (数字或比例，用于向后兼容)
+    - **margin_top/bottom/left/right**: 各方向独立边距 (数字或比例)
+    - **relative_to**: 相对于哪个元素定位 (字符串)
+    - **relative_position**: 相对位置关系 ('after', 'before', 'below', 'above', 'right-of', 'left-of')
+    - **relative_margin**: 与目标元素的间距 (浮点数，相对于原图长边的比例)
+    - **offset_x_ratio**: X轴偏移量 (浮点数，相对于原图长边的比例)
+    - **offset_y_ratio**: Y轴偏移量 (浮点数，相对于原图长边的比例)
+- **编写方式**:
+  - JSON:
+    ```json
+    "info_position": {
+      "exif": {
+        "position": "outside",
+        "alignment": "center",
+        "margin_bottom": 0.015,
+        "relative_to": null
+      },
+      "timestamp": {
+        "position": "outside",
+        "alignment": "center",
+        "margin_bottom": 0.01,
+        "relative_to": "exif",           # 相对于exif元素
+        "relative_position": "below",    # 位于exif下方
+        "relative_margin": 0.01,         # 与exif的间距为原图长边的1%
+        "offset_x_ratio": 0.0,           # X轴无偏移
+        "offset_y_ratio": 0.01           # Y轴偏移原图长边的1%
+      }
+    }
+    ```
+  - YAML:
+    ```yaml
+    info_position:
+      exif:
+        position: "outside"
+        alignment: "center"
+        margin_bottom: 0.015
+        relative_to: null
+      timestamp:
+        position: "outside"
+        alignment: "center"
+        margin_bottom: 0.01
+        relative_to: "exif"              # 相对于exif元素
+        relative_position: "below"       # 位于exif下方
+        relative_margin: 0.01            # 与exif的间距为原图长边的1%
+        offset_x_ratio: 0.0              # X轴无偏移
+        offset_y_ratio: 0.01             # Y轴偏移原图长边的1%
     ```
 
 ## 开发参考

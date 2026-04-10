@@ -409,3 +409,104 @@ AttributeError: 'FrameRenderer' object has no attribute 'logo_selector'
 2026-04-09 20:32:39,724 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyyrv37wc.jpg -> C:\Users\frank\AppData\Local\Temp\tmp2gi42s_u.jpg
 2026-04-09 20:33:01,789 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpimn0330j.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6uqtrj_e.jpg
 2026-04-09 20:33:06,360 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp1a00krpk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpgi_nebud.jpg
+2026-04-10 13:51:48,869 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn1xvz3oq.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6bsjxis2.jpg
+2026-04-10 13:52:00,341 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpquye9e11.jpg -> C:\Users\frank\AppData\Local\Temp\tmp4iu25p1m.jpg
+2026-04-10 13:52:59,399 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyr0o63s9.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6m2zxtd5.jpg
+2026-04-10 13:53:16,804 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpgbp74_93.jpg -> C:\Users\frank\AppData\Local\Temp\tmpepi2yijd.jpg
+2026-04-10 13:56:47,976 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpzt0azbe1.jpg -> C:\Users\frank\AppData\Local\Temp\tmpvq7kr2lb.jpg
+2026-04-10 13:58:53,424 - WARNING - 警告: 未找到EXIF信息 - C:\Users\frank\AppData\Local\Temp\tmpif8ewnwk.jpg
+2026-04-10 13:58:55,094 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpif8ewnwk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpscj8uoi6.jpg
+2026-04-10 13:58:57,036 - WARNING - 警告: 未找到EXIF信息 - C:\Users\frank\AppData\Local\Temp\tmpkq57zv81.jpg
+2026-04-10 13:58:57,371 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpkq57zv81.jpg -> C:\Users\frank\AppData\Local\Temp\tmp_ampggwo.jpg
+2026-04-10 13:59:12,626 - WARNING - 警告: 未找到EXIF信息 - C:\Users\frank\AppData\Local\Temp\tmp2aeyhhts.jpg
+2026-04-10 13:59:12,947 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp2aeyhhts.jpg -> C:\Users\frank\AppData\Local\Temp\tmpj6j_l7bd.jpg
+2026-04-10 13:59:16,163 - WARNING - 警告: 未找到EXIF信息 - C:\Users\frank\AppData\Local\Temp\tmpg7h0axpr.jpg
+2026-04-10 13:59:16,484 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpg7h0axpr.jpg -> C:\Users\frank\AppData\Local\Temp\tmppxojwm9v.jpg
+2026-04-10 14:00:53,454 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpat7_fh64.jpg -> C:\Users\frank\AppData\Local\Temp\tmp05uunq1i.jpg
+2026-04-10 14:01:08,003 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp6xf94cp2.jpg -> C:\Users\frank\AppData\Local\Temp\tmpb4qojlzo.jpg
+2026-04-10 14:01:30,426 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpziz3c3hf.jpg -> C:\Users\frank\AppData\Local\Temp\tmp7fqii6kh.jpg
+2026-04-10 14:02:16,624 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpi4oqzsx1.jpg -> C:\Users\frank\AppData\Local\Temp\tmpc2ncfvf9.jpg
+2026-04-10 14:02:32,483 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp32hvs6vc.jpg -> C:\Users\frank\AppData\Local\Temp\tmp4qer3olk.jpg
+2026-04-10 14:02:52,458 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpqlp01pnc.jpg -> C:\Users\frank\AppData\Local\Temp\tmpixl0xsmk.jpg
+2026-04-10 14:03:09,469 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpiiu08r9f.jpg -> C:\Users\frank\AppData\Local\Temp\tmpxd6g9dmo.jpg
+2026-04-10 14:03:27,834 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpy5x8rg5t.jpg -> C:\Users\frank\AppData\Local\Temp\tmp0cu1vm8h.jpg
+2026-04-10 16:04:10,089 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpuqnj655l.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6bmmb91a.jpg
+2026-04-10 16:19:06,944 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmps1042og0.jpg -> C:\Users\frank\AppData\Local\Temp\tmp5_gph7gr.jpg
+2026-04-10 16:38:07,226 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpoe7eg4ku.jpg -> C:\Users\frank\AppData\Local\Temp\tmpusegpdvi.jpg
+2026-04-10 16:38:18,866 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp3qozb8w2.jpg -> C:\Users\frank\AppData\Local\Temp\tmppeomajfy.jpg
+2026-04-10 16:40:17,454 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpitqvmv_1.jpg -> C:\Users\frank\AppData\Local\Temp\tmpkgeml3dm.jpg
+2026-04-10 16:40:26,033 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpn6xzkotv.jpg -> C:\Users\frank\AppData\Local\Temp\tmpampitfxd.jpg
+2026-04-10 16:42:46,790 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpy649de5b.jpg -> C:\Users\frank\AppData\Local\Temp\tmpgwk9prvg.jpg
+2026-04-10 16:43:36,194 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpo0j35so3.jpg -> C:\Users\frank\AppData\Local\Temp\tmp17f1oumb.jpg
+2026-04-10 16:43:50,920 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpbj507yyj.jpg -> C:\Users\frank\AppData\Local\Temp\tmp33sezef2.jpg
+2026-04-10 16:45:35,463 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpclaef4wp.jpg -> C:\Users\frank\AppData\Local\Temp\tmp7u1y9ve6.jpg
+2026-04-10 16:47:02,950 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpm5k8vffj.jpg -> C:\Users\frank\AppData\Local\Temp\tmpqx2qtgjo.jpg
+2026-04-10 16:47:12,005 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpp_peusfk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpc7tzfp8w.jpg
+2026-04-10 16:50:34,022 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpj2ufz2fb.jpg -> C:\Users\frank\AppData\Local\Temp\tmpkowsr9my.jpg
+2026-04-10 16:50:44,860 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpoads4uwg.jpg -> C:\Users\frank\AppData\Local\Temp\tmp7p3vuy9y.jpg
+2026-04-10 16:56:05,683 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp49q3pfbp.jpg -> C:\Users\frank\AppData\Local\Temp\tmpoo5f9_mr.jpg
+2026-04-10 16:56:22,594 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpfzblk2vv.jpg -> C:\Users\frank\AppData\Local\Temp\tmpsfjusof9.jpg
+2026-04-10 16:56:28,225 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpqfd2770p.jpg -> C:\Users\frank\AppData\Local\Temp\tmpoz9izkue.jpg
+2026-04-10 22:01:49,198 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpx6yl6s9g.jpg -> C:\Users\frank\AppData\Local\Temp\tmpewfx32t4.jpg
+2026-04-10 22:02:06,696 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpbqx63te5.jpg -> C:\Users\frank\AppData\Local\Temp\tmpqrctf4gn.jpg
+2026-04-10 22:04:30,065 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp_qfe5ze7.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwtcl8et_.jpg
+2026-04-10 22:04:39,165 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpismj9gdm.jpg -> C:\Users\frank\AppData\Local\Temp\tmpy978ln5n.jpg
+2026-04-10 22:04:47,402 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp17p_arkh.jpg -> C:\Users\frank\AppData\Local\Temp\tmp3l4plmxh.jpg
+2026-04-10 22:04:53,115 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp89z_pa55.jpg -> C:\Users\frank\AppData\Local\Temp\tmpem4x8nxu.jpg
+2026-04-10 22:06:09,291 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpdg12k7ao.jpg -> C:\Users\frank\AppData\Local\Temp\tmp0luakbmj.jpg
+2026-04-10 22:06:21,722 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpqocv6d4f.jpg -> C:\Users\frank\AppData\Local\Temp\tmpltq_h1eg.jpg
+2026-04-10 22:06:26,788 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp062siutk.jpg -> C:\Users\frank\AppData\Local\Temp\tmpg6bzceii.jpg
+2026-04-10 22:09:08,864 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpiqtwfsds.jpg -> C:\Users\frank\AppData\Local\Temp\tmp8zp9tjzc.jpg
+2026-04-10 22:38:00,956 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpdu77l1nm.jpg -> C:\Users\frank\AppData\Local\Temp\tmp2jwm5y7k.jpg
+2026-04-10 22:46:58,503 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp8g9bf3i_.jpg -> C:\Users\frank\AppData\Local\Temp\tmpif30tp4y.jpg
+2026-04-10 22:47:48,012 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp4zo73eo2.jpg -> C:\Users\frank\AppData\Local\Temp\tmp_lci2awh.jpg
+2026-04-10 22:49:35,848 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpz363rh9_.jpg -> C:\Users\frank\AppData\Local\Temp\tmpqcv_244w.jpg
+2026-04-10 22:49:59,971 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmppakppoyb.jpg -> C:\Users\frank\AppData\Local\Temp\tmp2x97d87a.jpg
+2026-04-10 22:51:35,627 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp92uk2d3r.jpg -> C:\Users\frank\AppData\Local\Temp\tmp3fwm8zpv.jpg
+2026-04-10 22:51:44,500 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp5e4b7myx.jpg -> C:\Users\frank\AppData\Local\Temp\tmp9iwk2m_0.jpg
+2026-04-10 22:51:55,959 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpfo55f0qj.jpg -> C:\Users\frank\AppData\Local\Temp\tmpse_4sbw6.jpg
+2026-04-10 22:56:05,196 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp08yey6yd.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6ylpynqp.jpg
+2026-04-10 23:07:38,612 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute '_calculate_relative_position'
+2026-04-10 23:07:38,614 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 155, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 146, in render_frame
+    final_image = self._add_text_and_icons_flexible(
+        decorated_image, exif_data, author, location, layout, colors, fonts
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 726, in _add_text_and_icons_flexible
+    x, y = self._calculate_text_position(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        image, text, text_config, font, position, alignment, margin
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 795, in _calculate_text_position
+    return self._calculate_relative_position(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute '_calculate_relative_position'. Did you mean: '_calculate_text_position'?
+
+2026-04-10 23:09:04,736 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpkd573u7r.jpg -> C:\Users\frank\AppData\Local\Temp\tmpt9iixcq7.jpg
+2026-04-10 23:10:00,358 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmplh6_phft.jpg -> C:\Users\frank\AppData\Local\Temp\tmpwklyy7es.jpg
+2026-04-10 23:10:10,783 - ERROR - 处理图像时出错: 'FrameRenderer' object has no attribute '_calculate_logo_absolute_position'
+2026-04-10 23:10:10,786 - ERROR - Traceback (most recent call last):
+  File "D:\Coding\MiLeica_Frame\src\core\image_processor.py", line 155, in process
+    rendered_image = self.renderer.render_frame(
+        image=image,
+    ...<6 lines>...
+        logo_filename=logo_filename
+    )
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 143, in render_frame
+    decorated_image = self._add_logo(decorated_image, logo_filename, logo_config)
+  File "D:\Coding\MiLeica_Frame\src\core\renderer.py", line 1121, in _add_logo
+    x, y = self._calculate_logo_absolute_position(image, logo_config, logo_width, logo_height)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'FrameRenderer' object has no attribute '_calculate_logo_absolute_position'
+
+2026-04-10 23:10:42,904 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp4aopwhim.jpg -> C:\Users\frank\AppData\Local\Temp\tmpmaidi1hk.jpg
+2026-04-10 23:13:29,147 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpggm3s_z5.jpg -> C:\Users\frank\AppData\Local\Temp\tmpua3of5oz.jpg
+2026-04-10 23:13:45,225 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpq96st_pu.jpg -> C:\Users\frank\AppData\Local\Temp\tmpdvn5ryg2.jpg

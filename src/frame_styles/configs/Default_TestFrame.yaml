@@ -16,12 +16,12 @@ fonts:
   regular: Gotham-Medium
   size_ratio: 0.02
   sizes:
-    exif: 0.015  # 改为2%原图长边
-    timestamp: 0.015  # 拍摄时间的字体大小
-    camera: 0.015   # 相机型号的字体大小
-    lens: 0.015     # 镜头型号的字体大小
-    author: 0.015
-    location: 0.015
+    exif: 0.02  # 改为2%原图长边
+    timestamp: 0.02  # 拍摄时间的字体大小
+    camera: 0.02   # 相机型号的字体大小
+    lens: 0.02     # 镜头型号的字体大小
+    author: 0.02
+    location: 0.02
   line_spacing: 1.5
 layout:
   border_position: inner
@@ -48,6 +48,9 @@ layout:
       margin_bottom: 0.06 # 底部边距
       margin_left: 0.01   # 左边距
       margin_right: 0.01  # 右边距
+      relative_to: "exif"        # 相对于exif元素
+      relative_position: "below" # 位于exif下方
+      relative_margin: 0.02      # 与exif的间距为原图长边的2%
     camera:
       position: "outside"
       alignment: "top-left"
@@ -66,14 +69,14 @@ layout:
       position: "outside"
       alignment: "left"
       margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.01 # 底部边距
+      margin_bottom: 0.03 # 底部边距
       margin_left: 0      # 左边距 - 修改为0
       margin_right: 0.01  # 右边距
     location:
       position: "outside"
       alignment: "right"
       margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.01 # 底部边距
+      margin_bottom: 0.03 # 底部边距
       margin_left: 0.01   # 左边距
       margin_right: 0     # 右边距 - 修改为0
     camera_icon:
