@@ -405,17 +405,23 @@ class Decorator:
         if position == 'center':
             x = (img_width - elem_width) // 2
             y = (img_height - elem_height) // 2
-        elif position == 'top-left':
+        elif position in ['top-left', 'tl']:
             x = 10
             y = 10
-        elif position == 'top-right':
+        elif position in ['top-right', 'tr']:
             x = img_width - elem_width - 10
             y = 10
-        elif position == 'bottom-left':
+        elif position in ['bottom-left', 'bl']:
             x = 10
             y = img_height - elem_height - 10
-        elif position == 'bottom-right':
+        elif position in ['bottom-right', 'br']:
             x = img_width - elem_width - 10
+            y = img_height - elem_height - 10
+        elif position in ['top-center', 'tc']:  # 新增顶部居中选项
+            x = (img_width - elem_width) // 2
+            y = 10
+        elif position in ['bottom-center', 'bc']:  # 新增底部居中选项
+            x = (img_width - elem_width) // 2
             y = img_height - elem_height - 10
         else:
             # 默认居中

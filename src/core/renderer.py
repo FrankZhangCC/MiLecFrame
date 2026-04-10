@@ -999,6 +999,12 @@ class FrameRenderer:
         elif position in ['bottom-right', 'br']:
             x = orig_img_x + orig_img_width - logo_width - margin_right_px
             y = orig_img_y + orig_img_height + margin_bottom_px
+        elif position in ['top-center', 'tc']:  # 新增顶部居中选项
+            x = orig_img_x + (orig_img_width - logo_width) // 2
+            y = orig_img_y - logo_height - margin_top_px if orig_img_y >= logo_height + margin_top_px else orig_img_y + margin_top_px
+        elif position in ['bottom-center', 'bc']:  # 新增底部居中选项
+            x = orig_img_x + (orig_img_width - logo_width) // 2
+            y = orig_img_y + orig_img_height + margin_bottom_px
         elif position == 'top':
             x = orig_img_x + (orig_img_width - logo_width) // 2
             y = orig_img_y - logo_height - margin_top_px if orig_img_y >= logo_height + margin_top_px else orig_img_y + margin_top_px

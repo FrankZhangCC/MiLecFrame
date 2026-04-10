@@ -186,7 +186,7 @@
   - **watermark**: 水印配置
     - **enabled**: 是否启用 (布尔值)
     - **text**: 水印文本 (字符串)
-    - **position**: 位置 ('top-left', 'top-right', 'bottom-left', 'bottom-right', 'center')
+    - **position**: 位置 ('top-left', 'top-right', 'bottom-left', 'bottom-right', 'center', **'top-center', 'bottom-center'**)
     - **opacity**: 透明度 (0-100之间的数字)
 - **编写方式**:
   - JSON:
@@ -249,7 +249,7 @@
 - **子参数**:
   - **enabled**: 是否启用 (布尔值)
   - **size_ratio**: Logo大小相对于画布的比例 (数字)
-  - **position**: 位置 ('top-left', 'top-right', 'bottom-left', 'bottom-right')
+  - **position**: 位置 ('top-left', 'top-right', 'bottom-left', 'bottom-right', **'top-center', 'bottom-center'**, 'center', 'top', 'bottom', 'left', 'right')
   - **margin_top/bottom/left/right**: 各方向的边距 (数字或比例)
 - **编写方式**:
   - JSON:
