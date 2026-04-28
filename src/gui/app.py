@@ -4,6 +4,9 @@ GUI应用程序模块
 """
 import streamlit as st
 
+from src.utils.logging_config import setup_logging
+setup_logging()
+
 # 使用绝对导入
 from src.gui.image_processing_page import render_image_processing_page
 from src.gui.camera_mapping_page import render_camera_mapping_page

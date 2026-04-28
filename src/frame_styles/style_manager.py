@@ -27,15 +27,6 @@ class StyleManager:
             # 默认配置目录为当前目录下的configs子目录
             self.config_dir = os.path.join(os.path.dirname(__file__), 'configs')
         
-        # 设置日志
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('error_log.txt', encoding='utf-8'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger(__name__)
     
     def get_available_styles(self) -> List[str]:

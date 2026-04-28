@@ -20,6 +20,9 @@ import subprocess
 
 def main():
     """程序主入口点"""
+    from utils.logging_config import setup_logging
+    setup_logging()
+
     parser = argparse.ArgumentParser(description="MiLeica照片相框程序")
     parser.add_argument("--input", "-i", help="输入图片路径")
     parser.add_argument("--output", "-o", help="输出图片路径")

@@ -43,15 +43,6 @@ class ImageProcessor:
         self.device_mapper = DeviceMapper()
         self.hdr_handler = HDRHandler()
         
-        # 设置日志
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('error_log.txt', encoding='utf-8'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger(__name__)
     
     def process(self, input_path: str, output_path: str, 

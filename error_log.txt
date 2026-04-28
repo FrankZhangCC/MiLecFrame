@@ -5619,3 +5619,9 @@ AttributeError: 'FrameRenderer' object has no attribute 'color_options'
 2026-04-28 17:10:37,846 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpekyz0313.jpg -> C:\Users\frank\AppData\Local\Temp\tmp24tjns9m.jpg
 2026-04-28 17:10:43,182 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp8du6uaz4.jpg -> C:\Users\frank\AppData\Local\Temp\tmp1u_f7_kj.jpg
 2026-04-28 17:29:05,048 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpycz602n8.jpg -> C:\Users\frank\AppData\Local\Temp\tmp6dz424mw.jpg
+2026-04-28 17:29:12,047 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpayy16zjh.jpg -> C:\Users\frank\AppData\Local\Temp\tmp4c7ahh4s.jpg
+2026-04-28 18:19:51,998 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp3_y92i8j.jpg -> C:\Users\frank\AppData\Local\Temp\tmpzo6tb2di.jpg
+2026-04-28 18:19:55,814 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpclmx5tae.jpg -> C:\Users\frank\AppData\Local\Temp\tmpssxo79wz.jpg
+2026-04-28 18:19:59,733 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpgkqxkrh9.jpg -> C:\Users\frank\AppData\Local\Temp\tmpejk85bea.jpg
+2026-04-28 18:20:04,564 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp1oiuidc0.jpg -> C:\Users\frank\AppData\Local\Temp\tmpsgmv9dks.jpg
+2026-04-28 18:20:10,513 - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp37cyz5o8.jpg -> C:\Users\frank\AppData\Local\Temp\tmpx3r1_77k.jpg
