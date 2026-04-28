@@ -28,7 +28,9 @@ def run_app():
         st.session_state.current_page = "🖼️ 图像处理"
     
     # 侧边栏导航
-    st.sidebar.title("🧭 导航")
+    st.sidebar.title("MiLeica相框水印 by FrankZ")
+    st.sidebar.markdown("---")
+    st.sidebar.caption("🧭 导航")
     
     # 使用按钮进行页面切换
     if st.sidebar.button("🖼️ 图像处理", use_container_width=True):
@@ -38,6 +40,32 @@ def run_app():
     if st.sidebar.button("🔭 镜头映射管理", use_container_width=True):
         st.session_state.current_page = "🔭 镜头映射管理"
     
+    # 侧边栏停止按钮
+    st.sidebar.markdown("---")
+    if 'confirm_stop' not in st.session_state:
+        st.session_state.confirm_stop = False
+    
+    if not st.session_state.confirm_stop:
+        if st.sidebar.button("🛑 停止程序", use_container_width=True):
+            st.session_state.confirm_stop = True
+            st.rerun()
+    else:
+        col_stop1, col_stop2 = st.sidebar.columns(2)
+        with col_stop1:
+            if st.button("✅ 确认停止", use_container_width=True, type="primary"):
+                import os, sys, subprocess
+                if sys.platform == "win32":
+                    server_pid = os.getppid()
+                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(server_pid)], capture_output=True)
+                else:
+                    import signal
+                    os.kill(os.getppid(), signal.SIGTERM)
+                os._exit(0)
+        with col_stop2:
+            if st.button("❌ 取消", use_container_width=True):
+                st.session_state.confirm_stop = False
+                st.rerun()
+
     # 根据当前页面状态渲染相应页面
     if st.session_state.current_page == "🖼️ 图像处理":
         render_image_processing_page()
@@ -50,10 +78,6 @@ def run_app():
     st.markdown("---")
     st.caption("💡 提示：本程序支持设备映射，自动识别并显示相机型号等信息")
     st.caption("📋 版权所有 © 2026 MiLeica Frame 项目组")
-    
-    with st.expander("🛑 如何停止程序"):
-        st.write("当您完成使用后，请在终端中按 `Ctrl+C` 来停止服务。")
-        st.code("# 在运行程序的终端中按 Ctrl+C\n^C", language="text")
 
 
 if __name__ == "__main__":
