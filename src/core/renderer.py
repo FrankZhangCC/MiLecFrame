@@ -10,14 +10,14 @@ project_root = Path(__file__).resolve().parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 from typing import Tuple, Dict, Optional, List
-import numpy as np
 # 修改导入路径，使用绝对导入
 from src.utils.exif_helper import ExifHelper
 from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector  # 导入LogoSelector
+from src.utils.gaussian_blur import apply_gaussian_blur_overlay_expansion
 from src.core.decorator import Decorator
 
 
@@ -167,149 +167,28 @@ class FrameRenderer:
         elif bg_fill_type == "pure_white":
             return Image.new('RGB', (canvas_width, canvas_height), color='white')
         elif bg_fill_type == "gaussian_black_65":
-            return self._apply_gaussian_blur_overlay_expansion(
+            return apply_gaussian_blur_overlay_expansion(
                 image, canvas_width, canvas_height, 'black', 
                 65  # 65%透明度
             )
         elif bg_fill_type == "gaussian_white_65":
-            return self._apply_gaussian_blur_overlay_expansion(
+            return apply_gaussian_blur_overlay_expansion(
                 image, canvas_width, canvas_height, 'white', 
                 65  # 65%透明度
             )
         elif bg_fill_type == "gaussian_black_35":
-            return self._apply_gaussian_blur_overlay_expansion(
+            return apply_gaussian_blur_overlay_expansion(
                 image, canvas_width, canvas_height, 'black', 
                 35  # 35%透明度
             )
         elif bg_fill_type == "gaussian_white_35":
-            return self._apply_gaussian_blur_overlay_expansion(
+            return apply_gaussian_blur_overlay_expansion(
                 image, canvas_width, canvas_height, 'white', 
                 35  # 35%透明度
             )
         else:
             # 默认使用白色背景
             return Image.new('RGB', (canvas_width, canvas_height), color='white')
-    
-    def _apply_gaussian_blur_overlay_expansion(
-        self, 
-        image: Image.Image, 
-        canvas_width: int, 
-        canvas_height: int, 
-        overlay_color: str, 
-        opacity: int
-    ) -> Image.Image:
-        """
-        应用高斯模糊叠加效果（适用于扩展画布）
-        
-        Args:
-            image: 原始图像
-            canvas_width: 画布宽度
-            canvas_height: 画布高度
-            overlay_color: 叠加颜色
-            opacity: 透明度百分比
-            
-        Returns:
-            应用效果后的背景图像
-        """
-        # 创建一个与原图相同大小的副本用于模糊处理
-        blur_img = image.copy()
-        
-        # 计算缩放因子，用于优化大图处理性能
-        original_width, original_height = blur_img.size
-        target_size = min(canvas_width, canvas_height)
-        
-        # 如果目标尺寸很大，先缩小图像进行模糊处理以提高性能
-        scale_factor = min(1.0, 2000.0 / max(target_size, 2000))
-        scaled_width = max(int(original_width * scale_factor), 512)  # 限制最小尺寸
-        scaled_height = max(int(original_height * scale_factor), 512)
-        
-        if scale_factor < 1.0:
-            # 缩小图像进行模糊处理
-            blur_img = blur_img.resize((scaled_width, scaled_height), Image.Resampling.LANCZOS)
-        
-        # 应用高斯模糊
-        blur_radius = 200 * scale_factor  # 按比例调整模糊半径
-        blur_img = blur_img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-        
-        # 调整模糊图像大小以适应整个画布
-        blur_img = blur_img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
-        
-        # 创建颜色叠加层
-        overlay = Image.new('RGBA', (canvas_width, canvas_height), 
-                           color=(*self.color_options.get(overlay_color, (255, 255, 255)), int(255 * opacity / 100)))
-        
-        # 将模糊图像转换为RGBA模式
-        if blur_img.mode != 'RGBA':
-            blur_img = blur_img.convert('RGBA')
-        
-        # 将颜色叠加层应用到模糊图像上
-        result = Image.alpha_composite(blur_img, overlay)
-        
-        # 转回RGB模式
-        result = result.convert('RGB')
-        
-        # 应用抖动算法以减少色彩断层
-        result = self._apply_dithering(result)
-        
-        return result
-    
-    def _apply_dithering(self, image: Image.Image) -> Image.Image:
-        """
-        应用抖动算法以减少色彩断层
-        
-        Args:
-            image: 输入图像
-            
-        Returns:
-            应用抖动后的图像
-        """
-        # 将PIL图像转换为numpy数组以进行像素操作
-        img_array = np.array(image, dtype=np.float64)
-        
-        # 获取图像尺寸
-        height, width, channels = img_array.shape
-        
-        # 为性能优化，只对较大图像应用抖动
-        if height * width > 2000000:  # 如果超过2百万像素，跳过抖动处理
-            return image
-        
-        # 遍历每个像素应用抖动算法（Floyd-Steinberg抖动算法）
-        for y in range(height - 1):  # 减1是为了避免越界
-            for x in range(width - 1):  # 减1是为了避免越界
-                # 获取当前像素值
-                old_pixel = img_array[y, x].copy()
-                
-                # 四舍五入到0-255范围内的整数
-                new_pixel = np.round(np.clip(old_pixel, 0, 255))
-                
-                # 将新像素值设置回去
-                img_array[y, x] = new_pixel
-                
-                # 计算量化误差
-                quant_error = old_pixel - new_pixel
-                
-                # 将误差扩散到相邻像素
-                # 右侧像素 (7/16)
-                img_array[y, x + 1] += quant_error * (7 / 16)
-                
-                # 下方像素 (5/16)
-                img_array[y + 1, x] += quant_error * (5 / 16)
-                
-                # 下左像素 (3/16)
-                if x > 0:
-                    img_array[y + 1, x - 1] += quant_error * (3 / 16)
-                
-                # 下右像素 (1/16)
-                img_array[y + 1, x + 1] += quant_error * (1 / 16)
-        
-        # 确保所有值都在有效范围内
-        img_array = np.clip(img_array, 0, 255)
-        
-        # 转换回uint8类型
-        img_array = img_array.astype(np.uint8)
-        
-        # 转换回PIL图像
-        return Image.fromarray(img_array, mode='RGB')
     
     def _determine_text_color(self, bg_fill_type: str, colors_config: Dict, text_type: str = None) -> Tuple[int, int, int]:
         """
