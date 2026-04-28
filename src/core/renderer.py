@@ -4,7 +4,6 @@
 """
 import os
 import sys
-import re
 from pathlib import Path
 
 # 添加项目根目录到sys.path
@@ -17,6 +16,7 @@ from typing import Tuple, Dict, Optional, List
 import numpy as np
 # 修改导入路径，使用绝对导入
 from src.utils.exif_helper import ExifHelper
+from src.utils.font_manager import FontManager
 from src.utils.logo_selector import LogoSelector  # 导入LogoSelector
 from src.core.decorator import Decorator
 
@@ -51,8 +51,8 @@ class FrameRenderer:
         # 初始化装饰器
         self.decorator = Decorator()
         
-        # 字体缓存，避免重复加载相同配置的字体
-        self.font_cache = {}
+        # 字体管理器
+        self.font_manager = FontManager()
         
         # 用于存储已渲染元素的位置信息
         self.element_positions = {}
@@ -409,134 +409,6 @@ class FrameRenderer:
         
         return result
     
-    def _load_font_responsive_with_longer_side(self, fonts: Dict, original_image_size: Tuple[int, int], specific_size_ratio: float = None, text_content: str = "") -> ImageFont.FreeTypeFont:
-        """
-        加载响应式字体，使用原始图像的长边作为计算基准
-
-        Args:
-            fonts: 字体配置
-            original_image_size: 原始图像尺寸
-            specific_size_ratio: 特定的字体大小比例（可选）
-            text_content: 文本内容，用于判断使用哪种字体
-
-        Returns:
-            字体对象
-        """
-        # 优先使用配置中的字体名称和字重
-        font_weight = fonts.get('weight', 'medium')  # 默认为中等字重
-        font_base_name = fonts.get('family', 'Gotham')  # 默认字体系列
-    
-        # 根据字重选择对应的字体名称
-        font_weight_mapping = {
-            'light': {
-                'regular': f'{font_base_name}-Light',
-                'chinese': 'GlowSansSC-Normal-Light.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Light.otf'
-            },
-            'medium': {
-                'regular': f'{font_base_name}-Medium',
-                'chinese': 'GlowSansSC-Normal-Medium.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Medium.otf'
-            },
-            'regular': {
-                'regular': f'{font_base_name}-Book',  # Gotham Regular 映射到 Gotham-Book
-                'chinese': 'GlowSansSC-Normal-Regular.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Regular.otf'
-            }
-        }
-    
-        # 获取当前字重的字体名称
-        weight_config = font_weight_mapping.get(font_weight, font_weight_mapping['medium'])
-        
-        # 使用特定的字体大小比例，否则使用通用的
-        size_ratio = specific_size_ratio if specific_size_ratio is not None else fonts.get('size_ratio', 0.015)
-
-        # 根据项目规范，使用原始图像的长边作为计算基准
-        longer_side = max(original_image_size)
-        font_size = max(12, int(longer_side * size_ratio))
-
-        # 构建缓存键，包括所有会影响字体加载的参数
-        cache_key = (
-            font_base_name, 
-            font_weight, 
-            font_size, 
-            text_content
-        )
-        
-        # 检查字体是否已在缓存中
-        if cache_key in self.font_cache:
-            print(f"从缓存中加载字体: {cache_key}")
-            return self.font_cache[cache_key]
-        
-        font_name = weight_config['regular']
-
-        print(f"使用长边基准字体大小计算: 比例={size_ratio}, 长边={longer_side}, 最终字体大小={font_size}")
-        print(f"字重: {font_weight}, 字体名称: {font_name}")
-
-        # 构建字体路径列表 - 使用相对于当前文件的路径
-        base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'assets', 'fonts')
-
-        # 根据文本内容判断使用哪种字体
-        contains_chinese = bool(re.search(r'[\u4e00-\u9fff]', text_content))  # 检查是否包含中文字符
-        if contains_chinese:
-            # 包含中文，优先使用中文字体
-            font_candidates = [
-                weight_config['chinese'],  # 根据字重选择的中文字体
-                font_name + '.otf',
-                font_name + '.ttf',
-            ]
-        else:
-            # 不包含中文，优先使用西文字体
-            font_candidates = [
-                font_name + '.otf',  # 根据字重选择的西文字体
-                font_name + '.ttf',
-            ]
-
-        font_paths = [os.path.join(base_path, font) for font in font_candidates]
-
-        # 按优先级尝试加载字体
-        for font_path in font_paths:
-            print(f"尝试加载字体: {font_path}")  # 调试信息
-            if os.path.exists(font_path):
-                try:
-                    print(f"字体文件存在，尝试加载: {font_path}")
-                    font = ImageFont.truetype(font_path, size=font_size)
-                    
-                    # 检查字体类型，确保不是bitmap字体
-                    if hasattr(font, 'getmetrics'):
-                        print(f"成功加载 FreeType 字体: {font_path}，大小: {font_size}px")
-                        
-                        # 验证字体大小是否正确
-                        test_text = "Test"
-                        bbox = font.getbbox(test_text)
-                        actual_height = bbox[3] - bbox[1]
-                        print(f"字体测试 - 请求大小: {font_size}px, 实际渲染高度: {actual_height}px")
-                        
-                        # 如果实际渲染高度远小于请求大小，则可能存在字体问题
-                        if actual_height < font_size * 0.3:  # 如果实际高度小于请求大小的30%
-                            print(f"警告：字体高度异常小，可能加载了低分辨率字体")
-                            continue
-                        
-                        # 将字体添加到缓存
-                        self.font_cache[cache_key] = font
-                        print(f"字体已添加到缓存: {cache_key}")
-                        return font
-                    else:
-                        print(f"加载的可能是bitmap字体，跳过: {font_path}")
-                        continue
-                except OSError as e:
-                    print(f"加载字体失败 (OSError) {font_path}: {e}")
-                    continue
-                except Exception as e:
-                    print(f"加载字体失败 (Exception) {font_path}: {e}")
-                    continue
-            else:
-                print(f"字体文件不存在: {font_path}")
-
-        print("警告：所有字体加载失败，使用默认字体")
-        # 如果找不到字体文件，使用默认字体
-        default_font = ImageFont.load_default()
-        # 也将默认字体添加到缓存中，避免重复尝试加载失败的字体
-        self.font_cache[cache_key] = default_font
-        return default_font
-
     def _determine_text_color(self, bg_fill_type: str, colors_config: Dict, text_type: str = None) -> Tuple[int, int, int]:
         """
         根据背景类型和配置确定文字颜色
@@ -714,7 +586,7 @@ class FrameRenderer:
             print(f"字体大小比例: {text_specific_size_ratio}")
             
             # 使用原始图像长边作为基准加载字体，传递文本内容以智能选择字体
-            font = self._load_font_responsive_with_longer_side(fonts, original_image_size, text_specific_size_ratio, text)
+            font = self.font_manager.load_font(fonts, original_image_size, text_specific_size_ratio, text)
             
             # 根据背景类型和配置确定文字颜色
             bg_fill_type = getattr(self, '_bg_fill_type', 'pure_white')  # 默认为纯白色背景

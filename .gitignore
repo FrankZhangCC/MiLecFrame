@@ -90,3 +90,5 @@ config.ini
 # Assets that are tracked elsewhere
 assets/fonts/*
 !assets/fonts/.gitkeep
+data/camera_map.csv
+data/lens_map.csv
