@@ -408,23 +408,9 @@ div.stButton > button:first-child {{
                         )
                         
                         if success:
-                            # 保存处理结果到session state
                             st.session_state.temp_input_path = temp_input_path
                             st.session_state.temp_output_path = temp_output_path
                             st.session_state.processing_result = temp_output_path
-                            
-                            # 显示下载按钮
-                            with open(temp_output_path, "rb") as result_file:
-                                st.download_button(
-                                    label="💾 下载处理后的图片",
-                                    data=result_file,
-                                    file_name=f"framed_{uploaded_file.name}",
-                                    mime="image/jpeg" if output_format == "JPEG" else "image/png",
-                                    key="download_processed_image_new"
-                                )
-                            
-                            st.success("✅ 图片处理成功！")
-                            st.image(temp_output_path, caption="添加相框后的图片", width='stretch')
                         else:
                             st.error("❌ 图片处理失败，请查看错误日志")
                     
@@ -439,13 +425,11 @@ div.stButton > button:first-child {{
                         if 'temp_input_path' in locals() and os.path.exists(temp_input_path):
                             os.unlink(temp_input_path)
             
-            # 如果已经处理过且没有配置变更，显示之前的预览
-            if (not st.session_state.button_clicked and
-                st.session_state.processing_result and 
-                not config_changed and 
-                st.session_state.temp_output_path and 
+            # 已有处理结果时始终显示预览
+            if (st.session_state.processing_result and
+                st.session_state.temp_output_path and
                 os.path.exists(st.session_state.temp_output_path)):
-                
+
                 with open(st.session_state.temp_output_path, "rb") as result_file:
                     st.download_button(
                         label="💾 下载处理后的图片",
@@ -454,9 +438,13 @@ div.stButton > button:first-child {{
                         mime="image/jpeg" if output_format == "JPEG" else "image/png",
                         key="download_processed_image_cached"
                     )
-                
-                st.success("✅ 图片处理成功！")
+
+                if config_changed:
+                    st.warning('⚠️ 配置已更改，请点击"重新生成"按钮更新预览')
+                else:
+                    st.success("✅ 图片处理成功！")
+
                 st.image(st.session_state.temp_output_path, caption="添加相框后的图片", width='stretch')
             else:
                 if not st.session_state.processing_result:
-                    st.info("👆 请配置选项并点击“生成相框”按钮")
+                    st.info('👆 请配置选项并点击"生成相框"按钮')
