@@ -92,3 +92,4 @@ assets/fonts/*
 !assets/fonts/.gitkeep
 data/camera_map.csv
 data/lens_map.csv
+debug_log.txt

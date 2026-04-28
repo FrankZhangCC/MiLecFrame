@@ -143,9 +143,12 @@ class FrameRenderer:
         if bg_fill_type.startswith('gaussian_'):
             parts = bg_fill_type.split('_')
             color = parts[1]
-            opacity = int(parts[2]) if len(parts) >= 3 else 50
+            opacity = int(parts[2]) if len(parts) >= 3 else bg_fill_config.get('gaussian_blur_opacity', 50)
+            blur_radius = bg_fill_config.get('gaussian_blur_radius', 200)
             return apply_gaussian_blur_overlay_expansion(
-                image, canvas_width, canvas_height, color, opacity
+                image, canvas_width, canvas_height, color,
+                opacity=opacity,
+                blur_radius=blur_radius,
             )
         elif bg_fill_type.startswith('pure_'):
             color = bg_fill_type.split('_')[1]

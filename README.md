@@ -52,6 +52,32 @@ streamlit run src/gui/app.py
 
 ## 最新功能更新
 
+### 高斯模糊模块独立化
+- **独立模块**：将高斯模糊叠加和 Floyd-Steinberg 抖动算法从 `renderer.py` 抽取为 `src/utils/gaussian_blur.py` 独立模块
+- **可复用性**：`apply_gaussian_blur_overlay_expansion()` 和 `apply_dithering()` 作为独立函数，不再依赖 `FrameRenderer` 实例
+- **精简渲染器**：`renderer.py` 移除约 120 行高斯模糊相关代码，依赖更清晰
+
+### 高斯模糊模块性能优化
+- **Box Blur 替代 GaussianBlur**：用 3-pass `ImageFilter.BoxBlur` 近似高斯模糊，时间复杂度从 O(n²) 降至 O(n)，视觉效果几乎一致
+- **内置量化替代 Python dithering**：`apply_dithering` 改用 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，由 C 层实现，消除逐像素纯 Python 循环，移除 200 万像素阈值限制
+- **自适应缩放**：中间分辨率根据原图长边动态调整——≤1200px 不降采样，超过 1200px 固定缩放到 1200px 计算模糊，替代硬编码的 2000/512 常量
+- **Float 空间混合**：overlay 叠加从 8-bit `alpha_composite` 改为 float32 numpy 混合后统一量化，减少中间色彩断层
+- **配置参数生效**：`gaussian_blur_radius` 和 `gaussian_blur_opacity` 现在真正从 `bg_fill_config` 读取并传入函数（之前配置定义后被忽略）
+- **新增 `blur_radius` 参数**：`apply_gaussian_blur_overlay_expansion()` 接受 `blur_radius` 参数（默认 200），支持运行时调整模糊强度
+
+### 渲染器代码优化
+- **死代码清理**：移除高斯模糊提取后不再使用的 `self.color_options`
+- **显式传参**：`bg_fill_type` 和 `layout_engine` 从隐式实例属性改为显式参数传递，消除跨方法耦合
+- **颜色解析复用**：提取 `_parse_color_value()` 和 `_resolve_color_from_config()` 方法，消除 40 行重复的十六进制/RGB 解析逻辑
+- **分支精简**：`_create_background_with_expansion` 用字符串解析替代 6 分支 if/elif，从 28 行缩减为 12 行，且自动兼容未来的 `gaussian_*_*` 类型
+- **全局日志**：调试 `print()` 替换为 `logging` 模块调用，支持通过日志级别控制输出
+
+### 日志系统统一化
+- **集中配置**：新增 `src/utils/logging_config.py`，提供 `setup_logging()` 函数统一初始化日志
+- **分级输出**：DEBUG 级别日志输出到 `debug_log.txt`，INFO 及以上输出到控制台
+- **幂等守卫**：多次调用不会重复配置，各入口（CLI `main.py` / GUI `app.py`）安全调用
+- **清理重复**：移除 `image_processor.py` 和 `style_manager.py` 中重复的 `logging.basicConfig()` 调用
+
 ### 文字颜色自定义与背景类型管理
 - **自定义文字颜色**：现在可以在样式配置文件中通过 `custom_text_color` 字段指定文字颜色
   - 如果配置了 `custom_text_color`，将优先使用此颜色
@@ -196,12 +222,14 @@ MiLeica_Frame/
 │   │   └── ...
 │   ├── utils/              # 工具函数
 │   │   ├── __init__.py
-│   │   ├── exif_helper.py  # EXIF数据处理
-│   │   ├── device_mapper.py # 设备映射数据库
-│   │   ├── config_manager.py # 配置管理
-│   │   ├── font_manager.py   # 字体管理器
-│   │   ├── layout_engine.py  # 布局引擎
-│   │   ├── logo_selector.py  # Logo选择器
+│   │   ├── exif_helper.py       # EXIF数据处理
+│   │   ├── device_mapper.py     # 设备映射数据库
+│   │   ├── config_manager.py    # 配置管理
+│   │   ├── font_manager.py      # 字体管理器
+│   │   ├── layout_engine.py     # 布局引擎
+│   │   ├── logo_selector.py     # Logo选择器
+│   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
+│   │   ├── logging_config.py    # 日志配置
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件
@@ -282,9 +310,9 @@ version: "版本号"
 - `watermark`: 水印配置
 
 ### 背景填充配置 (background_fill)
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35）
-- `gaussian_blur_radius`: 高斯模糊半径
-- `gaussian_blur_opacity`: 高斯模糊叠加透明度
+- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
+- `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
+- `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
 
 ## 命令行选项
 
@@ -465,10 +493,10 @@ version: "版本号"
 ### 背景样式运行时选择
 - **纯黑色**：100%黑色背景填充，覆盖包括扩展区域在内的整个画面
 - **纯白色**：100%白色背景填充，覆盖包括扩展区域在内的整个画面
-- **高斯模糊叠加黑色 (65%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度黑色 (`gaussian_black_65`)
-- **高斯模糊叠加白色 (65%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度白色 (`gaussian_white_65`)
-- **高斯模糊叠加黑色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度黑色 (`gaussian_black_35`)
-- **高斯模糊叠加白色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度白色 (`gaussian_white_35`)
+- **高斯模糊叠加黑色 (65%)**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度黑色 (`gaussian_black_65`)
+- **高斯模糊叠加白色 (65%)**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度白色 (`gaussian_white_65`)
+- **高斯模糊叠加黑色 (35%)**：同上，叠加35%透明度黑色 (`gaussian_black_35`)
+- **高斯模糊叠加白色 (35%)**：同上，叠加35%透明度白色 (`gaussian_white_35`)
 - **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
   - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
   - 浅色背景类型：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
@@ -478,16 +506,17 @@ version: "版本号"
 
 ### 资源管理
 - **图标支持**：从指定文件夹读取PNG文件列表，支持根据EXIF相机品牌信息自动选择对应品牌图标
-- **高斯模糊**：支持半径参数配置（默认200像素），支持透明度叠加（50%透明度）
+- **高斯模糊**：使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），支持半径参数配置，通过 `gaussian_blur_radius` 和 `gaussian_blur_opacity` 在样式配置中自定义模糊强度和叠加透明度。大图自动降采样至1200px中间分辨率计算以优化性能。模糊叠加混合在 float32 空间完成，通过 PIL 内置 Floyd-Steinberg 量化消除色彩断层
 
 ### 用户输入
 - **作者**：手动输入作者姓名，保存到配置文件
 - **地点**：手动输入拍摄地点，格式选项包括"从小到大"或"从大到小"，不保存
 
 ### 错误日志系统
-- **日志文件**：error_log.txt
-- **日志格式**：时间戳（精确到秒）、错误文件全路径、详细错误原因
-- **用户通知**：程序结束时提示用户查看日志
+- **调试日志**：`debug_log.txt` — 包含所有 DEBUG 级别日志（渲染流程、定位计算等详细信息）
+- **日志格式**：`时间 - 模块名 - 级别 - 消息`
+- **控制台输出**：INFO 及以上级别的日志同步输出到 stderr
+- **配置入口**：`src/utils/logging_config.py` 中的 `setup_logging()` 函数统一管理，CLI 和 GUI 入口均已集成
 
 ## 后续开发计划
 

@@ -342,8 +342,19 @@ def render_image_processing_page():
             button_label = "重新生成" if config_changed and st.session_state.processing_result else "生成相框"
             
             # 按钮样式
-            button_style = f"<style>div.stButton > button:first-child {{ background-color: {'#ff6b6b' if config_changed and st.session_state.processing_result else '#80ed99'}; }}</style>"
-            st.markdown(button_style, unsafe_allow_html=True)
+            button_color = '#ff6b6b' if config_changed and st.session_state.processing_result else '#80ed99'
+            st.markdown(f"""
+<style>
+div.stButton > button:first-child {{
+    background-color: {button_color} !important;
+}}
+[data-testid="stSidebar"] div.stButton > button:first-child {{
+    background-color: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+}}
+</style>
+            """, unsafe_allow_html=True)
             
             # 生成相框按钮
             if st.button(button_label, key='process_button'):
