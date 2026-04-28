@@ -100,7 +100,7 @@ def render_camera_mapping_page():
         filtered_camera_df,
         key="camera_editor",
         num_rows="dynamic",  # 允许添加和删除行
-        use_container_width=True,
+        width='stretch',
         height=600,
         column_config={
             "original_brand": st.column_config.TextColumn("原始品牌", width="medium"),

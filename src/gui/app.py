@@ -33,11 +33,11 @@ def run_app():
     st.sidebar.caption("🧭 导航")
     
     # 使用按钮进行页面切换
-    if st.sidebar.button("🖼️ 图像处理", use_container_width=True):
+    if st.sidebar.button("🖼️ 图像处理", width='stretch'):
         st.session_state.current_page = "🖼️ 图像处理"
-    if st.sidebar.button("📸 相机映射管理", use_container_width=True):
+    if st.sidebar.button("📸 相机映射管理", width='stretch'):
         st.session_state.current_page = "📸 相机映射管理"
-    if st.sidebar.button("🔭 镜头映射管理", use_container_width=True):
+    if st.sidebar.button("🔭 镜头映射管理", width='stretch'):
         st.session_state.current_page = "🔭 镜头映射管理"
     
     # 侧边栏停止按钮
@@ -46,13 +46,13 @@ def run_app():
         st.session_state.confirm_stop = False
     
     if not st.session_state.confirm_stop:
-        if st.sidebar.button("🛑 停止程序", use_container_width=True):
+        if st.sidebar.button("🛑 停止程序", width='stretch'):
             st.session_state.confirm_stop = True
             st.rerun()
     else:
         col_stop1, col_stop2 = st.sidebar.columns(2)
         with col_stop1:
-            if st.button("✅ 确认停止", use_container_width=True, type="primary"):
+            if st.button("✅ 确认停止", width='stretch', type="primary"):
                 import os, sys, subprocess
                 if sys.platform == "win32":
                     server_pid = os.getppid()
@@ -62,7 +62,7 @@ def run_app():
                     os.kill(os.getppid(), signal.SIGTERM)
                 os._exit(0)
         with col_stop2:
-            if st.button("❌ 取消", use_container_width=True):
+            if st.button("❌ 取消", width='stretch'):
                 st.session_state.confirm_stop = False
                 st.rerun()
 

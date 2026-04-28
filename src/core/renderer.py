@@ -280,28 +280,86 @@ class FrameRenderer:
             font_size_config = fonts.get('sizes', {})
             text_specific_size_ratio = font_size_config.get(text_type, fonts.get('size_ratio', 0.02))
 
-            font = self.font_manager.load_font(fonts, original_image_size, text_specific_size_ratio, text)
-
             text_color = self._determine_text_color(bg_fill_type, colors, text_type)
 
-            bbox = font.getbbox(text)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
+            segments = FontManager.split_mixed_text(text)
 
-            x, y = layout_engine.calculate_position(text_width, text_height, text_config)
+            if len(segments) <= 1:
+                font = self.font_manager.load_font(fonts, original_image_size, text_specific_size_ratio, text)
 
-            logger.debug(
-                f"[Pos] {text_type}: calc=({x}, {y}), bbox=({text_width}x{text_height}), "
-                f"config={text_config.get('position', '?')}/{text_config.get('alignment', '?')} "
-                f"marg={layout_engine._resolve_margins(text_config)}"
-            )
+                bbox = font.getbbox(text)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
 
-            ascent, descent = font.getmetrics()
-            y -= descent
+                x, y = layout_engine.calculate_position(text_width, text_height, text_config)
 
-            draw.text((x, y), text, fill=text_color, font=font)
+                logger.debug(
+                    f"[Pos] {text_type}: calc=({x}, {y}), bbox=({text_width}x{text_height}), "
+                    f"config={text_config.get('position', '?')}/{text_config.get('alignment', '?')} "
+                    f"marg={layout_engine._resolve_margins(text_config)}"
+                )
 
-            layout_engine.register_element(text_type, x, y, text_width, text_height)
+                ascent, descent = font.getmetrics()
+                y -= descent
+
+                draw.text((x, y), text, fill=text_color, font=font)
+
+                layout_engine.register_element(text_type, x, y, text_width, text_height)
+            else:
+                # 中英文混排：按 CJK / 拉丁片段拆分，分别加载对应字体，
+                # 以拉丁字体（Gotham）的基线为基准对齐所有片段
+                drawn_fonts = {}
+
+                def _get_segment_font(is_cjk):
+                    key = 'cjk' if is_cjk else 'latin'
+                    if key not in drawn_fonts:
+                        drawn_fonts[key] = self.font_manager.load_font(
+                            fonts, original_image_size, text_specific_size_ratio,
+                            force_chinese=is_cjk
+                        )
+                    return drawn_fonts[key]
+
+                seg_info = []
+                total_width = 0
+                for seg_text, is_cjk in segments:
+                    font = _get_segment_font(is_cjk)
+                    bbox = font.getbbox(seg_text)
+                    seg_width = bbox[2] - bbox[0]
+                    ascent, descent = font.getmetrics()
+                    seg_info.append((seg_text, font, seg_width, ascent, descent))
+                    total_width += seg_width
+
+                # 以拉丁字体（Gotham）为参考基准，使混排位置与纯英文一致
+                ref_font = drawn_fonts.get('latin') or drawn_fonts.get('cjk')
+                ref_ascent, ref_descent = ref_font.getmetrics()
+
+                # 块高度取各片段的最大值，确保 CJK 字体的高出部不被裁切
+                max_ascent = max(s[3] for s in seg_info)
+                max_descent = max(s[4] for s in seg_info)
+                text_height = max_ascent + max_descent
+
+                x, y = layout_engine.calculate_position(total_width, text_height, text_config)
+
+                logger.debug(
+                    f"[Pos] {text_type}: calc=({x}, {y}), bbox=({total_width}x{text_height}), "
+                    f"config={text_config.get('position', '?')}/{text_config.get('alignment', '?')} "
+                    f"marg={layout_engine._resolve_margins(text_config)}"
+                )
+
+                # 应用 refer 字体的 descent 偏移（与单字体路径一致），
+                # 然后以 refer 字体的 ascent 确定共享基线
+                y -= ref_descent
+                baseline_y = y + ref_ascent
+
+                # 逐片段绘制，各片段基线对齐到共享基线
+                # CJK 字体 ascent 较大时自动上移，适配拉丁基线
+                current_x = x
+                for seg_text, font, seg_width, ascent, descent in seg_info:
+                    seg_y = baseline_y - ascent
+                    draw.text((current_x, seg_y), seg_text, fill=text_color, font=font)
+                    current_x += seg_width
+
+                layout_engine.register_element(text_type, x, y, total_width, text_height)
         
         logger.debug("文字图层添加完成")
         return result

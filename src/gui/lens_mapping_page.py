@@ -42,7 +42,7 @@ def render_lens_mapping_page():
         filtered_lens_df,
         key="lens_editor",
         num_rows="dynamic",  # 允许添加和删除行
-        use_container_width=True,
+        width='stretch',
         height=600,
         column_config={
             "original_lens": st.column_config.TextColumn("原始镜头", width="medium"),

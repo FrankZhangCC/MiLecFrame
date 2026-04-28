@@ -5,9 +5,15 @@
 import os
 import re
 from pathlib import Path
-from typing import Dict, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 from PIL import ImageFont
+
+_CJK_CHAR_RE = re.compile(
+    r'[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff'
+    r'\u3040-\u309f\u30a0-\u30ff\u31f0-\u31ff'  # 日文仮名
+    r'\u3000-\u303f\uff00-\uffef]+'
+)
 
 
 class FontManager:
@@ -21,6 +27,25 @@ class FontManager:
             self.fonts_base_path = os.path.join(project_root, 'assets', 'fonts')
 
         self.font_cache: Dict[tuple, ImageFont.FreeTypeFont] = {}
+
+    @staticmethod
+    def split_mixed_text(text: str) -> List[Tuple[str, bool]]:
+        """
+        将混排文本拆分为 CJK / 非 CJK 片段序列
+        返回 [(segment_text, is_cjk), ...]
+        """
+        if not text:
+            return []
+        segments = []
+        pos = 0
+        for match in _CJK_CHAR_RE.finditer(text):
+            if match.start() > pos:
+                segments.append((text[pos:match.start()], False))
+            segments.append((match.group(), True))
+            pos = match.end()
+        if pos < len(text):
+            segments.append((text[pos:], False))
+        return segments
 
     def _build_font_weight_mapping(self, font_base_name: str) -> Dict[str, Dict[str, str]]:
         return {
@@ -43,7 +68,8 @@ class FontManager:
         fonts_config: Dict,
         original_image_size: Tuple[int, int],
         specific_size_ratio: float = None,
-        text_content: str = ""
+        text_content: str = "",
+        force_chinese: bool = None
     ) -> ImageFont.FreeTypeFont:
         """
         加载响应式字体，使用原始图像的长边作为计算基准
@@ -53,6 +79,7 @@ class FontManager:
             original_image_size: 原始图像尺寸
             specific_size_ratio: 特定的字体大小比例（可选）
             text_content: 文本内容，用于判断使用哪种字体
+            force_chinese: 强制使用/不使用中文字体（None 则自动检测）
 
         Returns:
             字体对象
@@ -68,19 +95,22 @@ class FontManager:
         longer_side = max(original_image_size)
         font_size = max(12, int(longer_side * size_ratio))
 
+        if force_chinese is not None:
+            contains_chinese = force_chinese
+        else:
+            contains_chinese = bool(_CJK_CHAR_RE.search(text_content))
+
         cache_key = (
             font_base_name,
             font_weight,
             font_size,
-            text_content
+            contains_chinese
         )
 
         if cache_key in self.font_cache:
             return self.font_cache[cache_key]
 
         font_name = weight_config['regular']
-
-        contains_chinese = bool(re.search(r'[\u4e00-\u9fff]', text_content))
         if contains_chinese:
             font_candidates = [
                 weight_config['chinese'],
