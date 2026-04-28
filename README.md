@@ -106,6 +106,28 @@ streamlit run src/gui/app.py
 - **配置驱动**：通过YAML配置文件灵活管理字体、颜色和布局参数
 - **独立边距设置**：左对齐文字（如author）的左margin设为0，右对齐文字（如location）的右margin设为0，实现更紧密的对齐效果
 
+### 模块化重构 — FontManager 与 LayoutEngine
+
+#### FontManager（字体管理器）
+- **独立字体模块**：将字体加载逻辑从渲染引擎中抽取为独立的 `FontManager` 类（`src/utils/font_manager.py`）
+- **核心能力**：
+  - 智能字体选择：根据文本内容自动检测中西文字符，选择对应字体
+  - 字重映射：支持 light、medium、regular 三种字重，Gotham regular 自动映射到 Gotham-Book
+  - 字体缓存：基于 `(字体系列, 字重, 字号, 文本内容)` 键值缓存，避免重复加载
+  - 响应式字号：以原始图像长边为基准，按比例计算字号（最小12px）
+  - 自动回退：所有字体加载失败时使用 PIL 默认字体
+
+#### LayoutEngine（布局引擎）
+- **统一布局模块**：将定位逻辑从渲染引擎中抽取为独立的 `LayoutEngine` 类（`src/utils/layout_engine.py`）
+- **核心能力**：
+  - 画布尺寸计算：根据 `expand_canvas` 配置自动计算扩展后的画布尺寸
+  - 原图边界计算：统一提供原始图像在画布中的位置和尺寸，消除代码重复
+  - 统一绝对定位：支持 `top-left`, `top-right`, `bottom-left`, `bottom-right`, `top-center`, `bottom-center`, `top`, `bottom`, `left`, `right`, `center`, `inside`, `outside` 等位置
+  - 统一相对定位：支持 `after`, `before`, `below`, `above`, `right-of`, `left-of` 等相对位置，配合 `offset_x_ratio`/`offset_y_ratio` 偏移微调
+  - 位置注册表：元素渲染后自动注册坐标，后续元素可通过 `relative_to` 引用
+  - **文字与非文字元素统一接口**：`calculate_position(width, height, config)` 适用于任何元素类型，便于后续扩展
+- **重构效果**：`renderer.py` 从 1234 行精简至 570 行，减少 664 行
+
 ## 开发历史
 
 ### 早期版本
@@ -177,6 +199,9 @@ MiLeica_Frame/
 │   │   ├── exif_helper.py  # EXIF数据处理
 │   │   ├── device_mapper.py # 设备映射数据库
 │   │   ├── config_manager.py # 配置管理
+│   │   ├── font_manager.py   # 字体管理器
+│   │   ├── layout_engine.py  # 布局引擎
+│   │   ├── logo_selector.py  # Logo选择器
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件
