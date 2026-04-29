@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.1.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
 
 ## 快速开始
 
@@ -50,12 +50,13 @@ streamlit run src/gui/app.py
 - EXIF处理：piexif
 - GUI界面：Streamlit
 
-## 最近更新 (v1.1.0)
+## 最近更新 (v1.2.0)
 
-- **中英日混排渲染**：混合字符串按 CJK / 拉丁片段自动拆分，各片段使用对应字体，基线统一对齐；日文假名码位全覆盖
-- **高斯模糊性能优化**：3-pass Box Blur 替代 GaussianBlur，内置 C 层量化替代 Python dithering，float32 空间混合
-- **渲染器模块化重构**：FontManager 和 LayoutEngine 独立抽取，`renderer.py` 从 1234 行精简至 570 行
-- **自定义文字颜色**：支持按背景类型、文本类型细分配置文字颜色
+- **相对定位元素溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
+- **三阶段渲染管线**：Phase 1 测量 → Phase 2 拓扑序计算+注册 → Phase 3 绘制，彻底解决依赖顺序问题
+- **拓扑依赖解析**：通过 Kahn 算法自动解析 `relative_to` 依赖关系，无需手动调整元素注册顺序
+- **Padding 安全区域**：新增 `padding` 配置，控制叠加元素的绘制边界，优先级高于 margin
+- **绝对定位边界约束**：绝对定位元素同样受 padding 边界截断保护
 
 > 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
@@ -92,8 +93,6 @@ MiLeica_Frame/
 │   │   ├── __init__.py
 │   │   ├── style_manager.py # 样式管理器
 │   │   └── ...
-│   ├── frames/             # 相框基类
-│   │   └── base_frame.py   # 相框基类定义
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
 │   ├── icons/              # 图标文件
@@ -123,18 +122,31 @@ version: "版本号"
 - `expand_canvas`: 扩展画布配置
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
+- `padding`: 叠加元素安全区域配置（v1.2.0 新增，优先级高于 margin）
+  - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于原图长边），默认值为 0（= 画布边界）
+  - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
+  - 绝对定位与相对定位元素均受 padding 约束
 - `info_position`: 信息位置配置
   - `exif`, `timestamp`, `camera`, `lens`, `author`, `location`, `camera_icon`: 各项信息的位置
-    - `position`: 位置（inside 或 outside）
-    - `alignment`: 对齐方式（left, center, right, top-left, top-right 等）
-    - `margin`: 传统边距（可选，用于向后兼容）
-    - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
-      - **顶部文字**（如 camera, lens, camera_icon）：必须定义 `margin_top`
-      - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
-      - **左对齐文字**（如 author, camera, lens, camera_icon）：必须定义 `margin_left`
-      - **右对齐文字**（如 location）：必须定义 `margin_right`
-      - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
-      - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
+    - **绝对定位**：
+      - `position`: 位置（inside, outside, top-left, top-right, bottom-left, bottom-right, top-center, bottom-center, top, bottom, left, right, center）
+      - `alignment`: 对齐方式（left, center, right, top-left, top-right, top, bottom）
+      - `margin`: 传统边距（可选，用于向后兼容）
+      - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
+        - **顶部文字**（如 camera, lens, camera_icon）：必须定义 `margin_top`
+        - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
+        - **左对齐文字**（如 author, camera, lens, camera_icon）：必须定义 `margin_left`
+        - **右对齐文字**（如 location）：必须定义 `margin_right`
+        - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
+        - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
+    - **相对定位**（v1.2.0 新增）：
+      - `relative_to`: 参考元素名称（如 `"exif"`, `"author"`），设置后 `position` 和独立 margin 失效
+      - `relative_position`: 相对位置，可选 `after`/`below`（下方）、`before`/`above`（上方）、`right-of`（右侧）、`left-of`（左侧）
+      - `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 0.01
+      - `alignment`: 在相对方向垂直轴上的对齐（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
+      - `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（默认 0）
+      - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
+      - 元素注册顺序由拓扑排序自动解析，无需手动调整
 
 ### 颜色配置 (colors)
 - `text`: 文字颜色（传统颜色设置，保留向后兼容性）
@@ -222,6 +234,9 @@ version: "版本号"
 - **扩展画布**：支持以原图尺寸百分比为基础的画布扩展，上下左右可分别设置
 - **响应式设计**：以输出尺寸的百分比作为参考比例，文字大小、边距等随输出尺寸自动调整
 - **图层顺序**（从上到下）：文字和图标层 → 装饰元素层 → 原图层 → 背景层（含扩展区域）
+- **相对定位**（v1.2.0）：支持将元素相对于其他已注册元素定位（after/below/before/above/right-of/left-of），由拓扑排序自动解析依赖顺序
+- **Padding 安全区域**（v1.2.0）：叠加元素的绘制边界约束，优先级高于 margin
+- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素整体平移，确保不超出安全区域
 
 ### 装饰元素系统
 - **边框**：可自定义宽度和颜色
@@ -241,6 +256,7 @@ version: "版本号"
 - **文字布局**：支持行间距设置，文字位置可灵活配置
 - **字体适配**：字体大小随画布尺寸自适应调整
 - **背景填充**：扩展区域支持多种填充方式
+- **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 统一绘制，确保依赖有序、溢出可修正
 
 ### 独立信息字体大小
 - **EXIF信息**：可独立设置字体大小
