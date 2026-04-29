@@ -66,6 +66,6 @@ logo:
   relative_position: "left-of"
   alignment: "center"
   relative_margin: 0.012
-  size_ratio: 0.032
-  offset_y_ratio: 0.011
+  size_ratio: 0.034
+  offset_y_ratio: 0.012
 name: 照片底部信息水印

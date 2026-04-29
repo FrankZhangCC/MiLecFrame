@@ -129,6 +129,13 @@ layout:
 - CLI `--bg-fill` 可选值同步更新
 - `renderer.py` 中 `light_bg_types` 列表同步更新
 
+### Bug 修复
+
+#### 相对定位受特殊字符干扰
+- 文字元素在 Phase 1 测量时存储的 `height` 由字形级 `bbox[3] - bbox[1]` 改为字体度量 `ascent + descent`
+- 此前包含 `|`、`/` 等纵向跨度较大的字符时 bbox 变大，导致 `ty + th` 计算的下方元素间距异常增大
+- 混排文本（`max_ascent + max_descent`）本身即基于字体度量，不受此问题影响
+
 ### 代码清理
 
 - 移除 `src/frames/base_frame.py` 及 `src/frames/` 目录：该文件仅有孤立法且无类定义，全项目零引用，功能已由 `LayoutEngine` + `FontManager` 替代

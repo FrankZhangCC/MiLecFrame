@@ -333,7 +333,7 @@ class FrameRenderer:
 
                 draw_items[text_type] = {
                     'text': text, 'font': font, 'color': text_color,
-                    'width': text_width, 'height': text_height,
+                    'width': text_width, 'height': ascent + descent,
                     'descent': descent, 'mixed': False
                 }
             else:

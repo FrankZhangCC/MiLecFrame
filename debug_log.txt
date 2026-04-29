@@ -9759,3 +9759,402 @@
 2026-04-29 22:05:40,025 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
 2026-04-29 22:05:40,025 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 62 8192
 2026-04-29 22:05:40,339 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpqtkn7weu.JPG -> C:\Users\frank\AppData\Local\Temp\tmp_3gmbjn6.jpg
+2026-04-29 22:08:20,140 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:20,141 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:20,142 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:21,968 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:21,969 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:21,969 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:21,969 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:21,969 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:21,969 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:21,970 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:21,971 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:22,465 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:22,466 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:22,467 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:22,468 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:22,468 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:25,150 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 22:08:25,150 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M5', 'lens_model': 'FE 85mm F1.4 GM', 'focal_length': '85.0', 'aperture': '5.6', 'shutter_speed': '1/60', 'iso': '200', 'datetime_original': '2025.12.15 13:31:28'}
+2026-04-29 22:08:25,150 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 22:08:25,150 - src.core.renderer - DEBUG - 地点: None
+2026-04-29 22:08:25,151 - src.core.renderer - DEBUG - 图像尺寸: (7428, 6073)
+2026-04-29 22:08:25,151 - src.core.renderer - DEBUG - 原始图像尺寸: (7008, 4672)
+2026-04-29 22:08:25,151 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '85mm, f/5.6, 1/60s, ISO200'), ('timestamp', '2025.12.15 13:31:28'), ('camera', 'SONY a7 V'), ('lens', 'FE 85mm F1.4 GM'), ('author', 'Frank Zhang')]
+2026-04-29 22:08:25,152 - src.core.renderer - DEBUG - [Pos] exif: calc=(5161, 5442), bbox=(1917x130), config=bottom-right/center marg={'top': 70, 'bottom': 210, 'left': 70, 'right': 70}
+2026-04-29 22:08:25,152 - src.core.renderer - DEBUG - [Pos] camera: calc=(350, 318), bbox=(773x102), config=outside/top-left marg={'top': 140, 'bottom': 70, 'left': 0, 'right': 70}
+2026-04-29 22:08:25,152 - src.core.renderer - DEBUG - [Pos] lens: calc=(350, 143), bbox=(1254x102), config=outside/top-left marg={'top': 315, 'bottom': 70, 'left': 0, 'right': 70}
+2026-04-29 22:08:25,152 - src.core.renderer - DEBUG - [Pos] author: calc=(350, 5442), bbox=(881x126), config=outside/left marg={'top': 70, 'bottom': 210, 'left': 0, 'right': 70}
+2026-04-29 22:08:25,152 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(350, 5674), bbox=(1250x102), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 22:08:25,160 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 22:08:25,161 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2026-04-29 22:08:25,161 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2026-04-29 22:08:25,161 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 62 8192
+2026-04-29 22:08:25,722 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp4rrmwu72.JPG -> C:\Users\frank\AppData\Local\Temp\tmpy5v6t1lg.jpg
+2026-04-29 22:08:27,689 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:27,689 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:27,690 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:27,691 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:27,691 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:27,691 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:27,691 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:27,691 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:27,692 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:27,693 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:27,693 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:27,693 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:31,337 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:31,338 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:31,339 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:33,126 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:33,126 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:33,126 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:33,126 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,126 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,127 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:33,128 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:33,642 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:33,643 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:33,644 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 146 - value: b'SONY\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 152 - value: b'ILCE-7M5\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 162 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 170 - value: b'^\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 178 - value: b'ILCE-7M5 v1.00\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 194 - value: b'2025:12:15 13:31:28\x00'
+2026-04-29 22:08:33,645 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:33,646 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'@\x01\x00\x00'
+2026-04-29 22:08:33,646 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 142 - Data Location: 214 - value: <table: 106 bytes>
+2026-04-29 22:08:33,646 - PIL.TiffImagePlugin - DEBUG - tag: MPFVersion (45056) - type: undefined (7) - value: b'0100'
+2026-04-29 22:08:33,646 - PIL.TiffImagePlugin - DEBUG - tag: NumberOfImages (45057) - type: long (4) - value: b'\x02\x00\x00\x00'
+2026-04-29 22:08:33,646 - PIL.TiffImagePlugin - DEBUG - tag: MPEntry (45058) - type: undefined (7) Tag Location: 46 - Data Location: 50 - value: b'\x00\x00\x03\xa0\xba\x99d\x01\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x01@\xbeF\x06\x005\xc4c\x01\x00\x00\x00\x00'
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M5', 'lens_model': 'FE 85mm F1.4 GM', 'focal_length': '85.0', 'aperture': '5.6', 'shutter_speed': '1/60', 'iso': '200', 'datetime_original': '2025.12.15 13:31:28'}
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - 地点: London, UK
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - 图像尺寸: (7008, 5232)
+2026-04-29 22:08:36,008 - src.core.renderer - DEBUG - 原始图像尺寸: (7008, 4672)
+2026-04-29 22:08:36,009 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '85mm, f/5.6, 1/60s, ISO200'), ('timestamp_author', '2025.12.15 13:31:28 by Frank Zhang'), ('camera_lens', 'SONY a7 V | FE 85mm F1.4 GM'), ('location', 'London, UK')]
+2026-04-29 22:08:36,010 - src.core.renderer - DEBUG - [Pos] exif: calc=(5457, 4826), bbox=(1341x91), config=bottom-right/right marg={'top': 70, 'bottom': 154, 'left': 70, 'right': 140}
+2026-04-29 22:08:36,010 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(210, 4826), bbox=(1504x91), config=bottom-left/left marg={'top': 70, 'bottom': 154, 'left': 140, 'right': 70}
+2026-04-29 22:08:36,010 - src.core.renderer - DEBUG - [Pos] location: calc=(5457, 4963), bbox=(490x73), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 22:08:36,010 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(210, 4963), bbox=(1432x76), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 22:08:36,015 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 22:08:36,016 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2026-04-29 22:08:36,016 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2026-04-29 22:08:36,016 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 62 8192
+2026-04-29 22:08:36,507 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpjxka5xxu.JPG -> C:\Users\frank\AppData\Local\Temp\tmpd1p83tds.jpg
+2026-04-29 22:08:49,786 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:49,786 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:49,786 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:49,787 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:49,788 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:49,789 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:51,716 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:51,716 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:51,716 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:51,716 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:51,717 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:51,718 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:51,719 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,719 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:51,719 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:51,719 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:51,719 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:51,969 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:51,969 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:51,969 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:51,970 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:51,971 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:51,971 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:51,971 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:51,971 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:51,972 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:51,973 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:51,974 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:51,974 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:51,974 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:51,974 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'FUJIFILM', 'camera_model': 'X-HF1', 'focal_length': '10.8', 'aperture': '4.0', 'shutter_speed': '1/160', 'iso': '200', 'datetime_original': '2025.06.27 11:41:41'}
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - 地点: London, UK
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - 图像尺寸: (4864, 4037)
+2026-04-29 22:08:53,250 - src.core.renderer - DEBUG - 原始图像尺寸: (4864, 3648)
+2026-04-29 22:08:53,251 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '11mm, f/4.0, 1/160s, ISO200'), ('timestamp_author', '2025.06.27 11:41:41 by Frank Zhang'), ('camera_lens', 'FUJIFILM X Half'), ('location', 'London, UK')]
+2026-04-29 22:08:53,251 - src.core.renderer - DEBUG - [Pos] exif: calc=(3789, 3755), bbox=(930x63), config=bottom-right/right marg={'top': 48, 'bottom': 107, 'left': 48, 'right': 97}
+2026-04-29 22:08:53,251 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(145, 3755), bbox=(544x51), config=bottom-left/left marg={'top': 48, 'bottom': 107, 'left': 97, 'right': 48}
+2026-04-29 22:08:53,251 - src.core.renderer - DEBUG - [Pos] location: calc=(3789, 3849), bbox=(338x51), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 22:08:53,251 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(145, 3837), bbox=(1006x52), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 22:08:53,254 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 22:08:53,254 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2026-04-29 22:08:53,254 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2026-04-29 22:08:53,254 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 62 8192
+2026-04-29 22:08:53,576 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpu_0sipzm.JPG -> C:\Users\frank\AppData\Local\Temp\tmpm609b3av.jpg
+2026-04-29 22:08:56,338 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:56,338 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:56,339 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 182 - value: b'FUJIFILM\x00\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 192 - value: b'X-HF1\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 58 - Data Location: 198 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 70 - Data Location: 206 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 22:08:56,340 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 94 - Data Location: 214 - value: b'Digital Camera X-HF1 Ver1.00\x00\x00\x00\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 106 - Data Location: 246 - value: b'2025:06:27 11:41:41\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 118 - Data Location: 266 - value: <table: 256 bytes>
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x02\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 142 - Data Location: 522 - value: <table: 512 bytes>
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'&\x04\x00\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'B\x0b\x00\x00'
+2026-04-29 22:08:56,341 - PIL.TiffImagePlugin - DEBUG - tag: unknown (50341) - type: undefined (7) Tag Location: 178 - Data Location: 1034 - value: b'PrintIM\x000250\x00\x00\x02\x00\x02\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00'
