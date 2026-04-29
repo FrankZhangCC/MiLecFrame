@@ -12,6 +12,12 @@
 - 平移量由溢出方向计算：左/上溢出取负偏移修正，右/下溢出取边界差值修正
 - 安全夹持 `max(pad_left, min(x, pad_right - w))` 兜底
 
+#### 依赖簇级联平移
+- 多个元素 `relative_to` 同一参考时，组合盒自动扩展至全部已注册从属元素，防止先注册的从属被后续移位甩开
+- `register_element()` 新增 `relative_to` 参数，自动维护 `self._dependents` 反向映射表
+- 新增 `_shift_dependents()` 递归级联平移：移位参考元素时自动沿依赖树向下传播至所有从属
+- 处理顺序示例：A(绝对) → B(relative_to=A) → C(relative_to=A)，C 计算时组合盒 = A ∪ B ∪ C，移位 A 时 B 和 C 同步平移
+
 #### Padding 安全区域
 - 新增 `_calculate_padding_bounds()` 方法，从 `layout.padding` 配置计算 `(left, top, right, bottom)` 边界
 - padding 值以 `original_longer_side` 比例计算，未配置时默认 0（= 画布边界），向后兼容
@@ -33,6 +39,21 @@
   - **Phase 3 (绘制)**：从 `layout_engine.positions` 读取最终坐标（含溢出修正后的变更）统一绘制
 - 解决了旧版"边算边画"模式中参考元素已被绘制无法回写的问题
 
+#### 渲染顺序修正
+- Logo 渲染移至文字层之后，确保 `relative_to` 可正确引用已注册的文字元素（如 `relative_to: "exif"`）
+- 此前 Logo 先于文字层执行，`get_element_bounds` 返回 `None` 导致回退到绝对定位
+
+#### 相机+镜头合并
+- `get_display_data()` 新增 `camera_lens_combined` 字段，格式 `"品牌 型号 | 镜头"`
+- 渲染器按 `info_position` 中是否有 `camera_lens` 键决定使用合并或分开模式
+
+#### timestamp_author 合并元素
+- 新增 `timestamp_author` 元素，按 `info_position` 声明驱动，输出格式 `"时间 by 作者"`
+
+#### 配置驱动渲染
+- 所有文字元素改为由 `info_position` 声明驱动：配置中有对应键则渲染，否则跳过
+- `author`、`location`、`exif`、`timestamp` 不再无条件渲染
+
 ### 样式配置
 
 #### 相对定位字段
@@ -47,6 +68,15 @@ info_position:
     offset_y_ratio: 0.0          # Y 轴微调（可选）
 ```
 
+#### 新增元素类型
+- `camera_lens`：相机+镜头合并单行输出（格式 `"品牌 型号 | 镜头"`），配置后替代 `camera` + `lens` 分开模式
+- `timestamp_author`：时间+作者合并输出（格式 `"时间 by 作者"`），配置后替代独立 `timestamp`
+- 以上均通过 `info_position` 中声明驱动，配置即渲染
+
+#### 配置驱动渲染
+- `info_position` 中声明的元素才渲染，未声明自动跳过
+- `style_manager._validate_config` 移除默认条目注入（此前强行添加 `exif`/`author`/`location`/`camera_icon`）
+
 #### Padding 配置
 ```yaml
 layout:
@@ -58,6 +88,14 @@ layout:
 ```
 - 独立于 `expand_canvas` 和 `margin`，不影响原始图像位置
 - 默认四边均为 0，与旧版行为完全兼容
+
+#### 配置精简
+- `colors`：移除无效字段 `background`、`accent`、`border`、`icon`（均零引用）；颜色系统改为 `custom_{text_type}_{dark/light}_color` + `custom_text_{dark/light}_color` 两级覆盖
+- `fonts`：移除无效字段 `regular`、`line_spacing`；拆分为 `family`（字体族名）+ `weight`（字重 light/regular/medium），可通过 `--font-weight` 运行时覆盖
+- `layout`：移除无效字段 `border_position`、`border_width`（边框由 decorator 独立处理）、`info_height_ratio`（零引用）
+- `effects`：整节移除（零引用）
+- `description`：移除（非必需元数据）
+- `style_manager.py` 默认值与示例配置同步更新，移除 `_validate_config` 中的默认条目注入
 
 ### 代码清理
 
@@ -107,9 +145,8 @@ layout:
 
 ### 文字颜色
 
-- 支持样式配置文件中的 `custom_text_color`，优先于自适应逻辑
-- 支持为亮色/暗色背景分别设置颜色：`custom_text_light_color` / `custom_text_dark_color`
-- 支持按文本类型细分配置：`custom_timestamp_light_color`、`custom_location_dark_color` 等
+- 支持样式配置文件中的 `custom_text_dark_color` / `custom_text_light_color`，根据背景类型自动选择
+- 支持按文本类型细分配置：`custom_timestamp_light_color`、`custom_exif_dark_color` 等（`{text_type}` 可选 exif/timestamp/camera/lens/author/location）
 - 背景类型使用预定义深色/浅色列表管理，新增类型只需添加名称
 
 ### 布局引擎

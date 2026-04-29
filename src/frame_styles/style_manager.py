@@ -137,32 +137,22 @@ class StyleManager:
                 'camera_icon': {'position': 'outside', 'alignment': 'top-left', 'margin': 10}
             }
         else:
-            # 确保所有必需的信息位置都有默认值
-            default_positions = {
-                'exif': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'author': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'location': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'camera_icon': {'position': 'outside', 'alignment': 'top-left', 'margin': 10}
-            }
-            
-            for key, default_value in default_positions.items():
-                if key not in layout['info_position'] or not isinstance(layout['info_position'][key], dict):
-                    layout['info_position'][key] = default_value
+            # info_position 已有配置，不再注入默认条目
+            # 渲染器按 info_position 中实际配置的元素驱动渲染
+            pass
         
         # 检查颜色配置
         if 'colors' not in config or not isinstance(config['colors'], dict):
             config['colors'] = {
-                'text': '#000000',
-                'background': '#FFFFFF',
-                'icon': '#333333'
+                'text': '#000000'
             }
         
         # 检查字体配置
         if 'fonts' not in config or not isinstance(config['fonts'], dict):
             config['fonts'] = {
-                'regular': 'Futura-Medium',
-                'size_ratio': 0.02,
-                'line_spacing': 1.5
+                'family': 'Gotham',
+                'weight': 'medium',
+                'size_ratio': 0.02
             }
         else:
             # 确保字体大小配置存在
@@ -235,25 +225,16 @@ class StyleManager:
                 }
             },
             "colors": {
-                "text": "#000000",
-                "background": "#FFFFFF",
-                "icon": "#333333"
+                "text": "#000000"
             },
             "fonts": {
-                "regular": "Futura-Medium",
+                "family": "Gotham",
+                "weight": "medium",
                 "size_ratio": 0.02,
                 "sizes": {
                     "exif": 0.02,
                     "author": 0.018,
                     "location": 0.018
-                },
-                "line_spacing": 1.5
-            },
-            "decorations": {
-                "border": {
-                    "enabled": False,
-                    "width": 2,
-                    "color": "#000000"
                 }
             },
             "background_fill": {

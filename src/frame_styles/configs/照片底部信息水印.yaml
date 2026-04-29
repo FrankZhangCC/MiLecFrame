@@ -1,0 +1,67 @@
+colors:
+  text: '#000000'
+fonts:
+  family: Gotham
+  weight: medium
+  size_ratio: 0.016
+  sizes:
+    camera_lens: 0.016
+    timestamp_author: 0.013
+    exif: 0.016
+    location: 0.012
+layout:
+  expand_canvas:
+    enabled: true
+    top: 0.0
+    bottom: 0.08
+    left: 0.00
+    right: 0.00
+  padding:
+    left: 0.03
+    right: 0.03
+    top: 0.00
+    bottom: 0.00
+  info_position:
+    camera_lens:
+      position: "bottom-left"
+      alignment: "left"
+      margin_top: 0.01
+      margin_bottom: 0.022
+      margin_left: 0.02
+      margin_right: 0.01
+    timestamp_author:
+      relative_to: "camera_lens"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.010
+    exif:
+      position: "bottom-right"
+      alignment: "right"
+      margin_top: 0.01
+      margin_bottom: 0.022
+      margin_left: 0.01
+      margin_right: 0.02
+    location:
+      relative_to: "exif"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.010
+    camera_icon:
+      relative_to: "exif"
+      relative_position: "left-of"
+      alignment: "left"
+      relative_margin: 0.01
+      offset_y_ratio: 0.01
+background_fill:
+  type: "gaussian_black_35"
+  gaussian_blur_radius: 200
+  gaussian_blur_opacity: 35
+logo:
+  enabled: true
+  relative_to: "exif"
+  relative_position: "left-of"
+  alignment: "center"
+  relative_margin: 0.01
+  size_ratio: 0.04
+  offset_y_ratio: 0.012
+name: 照片底部信息水印

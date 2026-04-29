@@ -1,31 +1,23 @@
 # 验证此配置是否被使用：此配置文件设置了非常大的字体大小比例
 # 如果渲染结果中文字仍然很小，说明此配置文件可能未被使用
 colors:
-  accent: '#A52A2A'
-  background: '#F5F5DC'
-  border: '#8B4513'
   text: '#000000'
-  custom_timestamp_light_color: [51, 51, 51]   # 亮色背景下时间戳颜色
-  custom_timestamp_dark_color: [204, 204, 204]    # 暗色背景下时间戳颜色
-  custom_location_light_color: [51, 51, 51]  # 亮色背景下地点颜色
-  custom_location_dark_color: [204, 204, 204]     # 暗色背景下地点颜色
-description: 经典复古风格 - 默认样式
-effects:
-- vintage_filter
+  custom_timestamp_light_color: [51, 51, 51]
+  custom_timestamp_dark_color: [204, 204, 204]
+  custom_location_light_color: [51, 51, 51]
+  custom_location_dark_color: [204, 204, 204]
 fonts:
-  regular: Gotham-Medium
+  family: Gotham
+  weight: medium
   size_ratio: 0.02
   sizes:
-    exif: 0.02  # 改为2%原图长边
-    timestamp: 0.02  # 拍摄时间的字体大小
-    camera: 0.02   # 相机型号的字体大小
-    lens: 0.02     # 镜头型号的字体大小
+    exif: 0.02
+    timestamp: 0.02
+    camera: 0.02
+    lens: 0.02
     author: 0.02
     location: 0.02
-  line_spacing: 1.5
 layout:
-  border_position: inner
-  border_width: 10
   expand_canvas:
     enabled: true
     top: 0.08
@@ -33,68 +25,67 @@ layout:
     left: 0.03
     right: 0.03
   padding:
-    left: 0.05     # X: 与原图左侧对齐，叠加元素不超出原图左边界
-    right: 0.05    # X: 与原图右侧对齐，叠加元素不超出原图右边界
-    top: 0.00         
-    bottom: 0.00      
-  info_height_ratio: 0.0125
+    left: 0.05
+    right: 0.05
+    top: 0.00
+    bottom: 0.00
   info_position:
     exif:
-      position: "bottom-right"  # 原图外侧右下角
+      position: "bottom-right"
       alignment: "center"
-      margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.03 # 底部边距
-      margin_left: 0.01   # 左边距
-      margin_right: 0.01  # 右边距
+      margin_top: 0.01
+      margin_bottom: 0.03
+      margin_left: 0.01
+      margin_right: 0.01
     timestamp:
-      relative_to: "author"        # 相对于作者名称定位
-      relative_position: "below"   # 位于作者名称下方
-      alignment: "left"            # 左对齐（相对于作者名称左侧）
-      relative_margin: 0.02        # 与作者名称的间距为原图长边的2%
+      relative_to: "author"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.02
     camera:
       position: "outside"
       alignment: "top-left"
-      margin_top: 0.02    # 顶部边距
-      margin_bottom: 0.01 # 底部边距
-      margin_left: 0.00   # 左边距
-      margin_right: 0.01  # 右边距
+      margin_top: 0.02
+      margin_bottom: 0.01
+      margin_left: 0.00
+      margin_right: 0.01
     lens:
       position: "outside"
       alignment: "top-left"
-      margin_top: 0.045   # 顶部边距
-      margin_bottom: 0.01 # 底部边距
-      margin_left: 0.00   # 左边距
-      margin_right: 0.01  # 右边距
+      margin_top: 0.045
+      margin_bottom: 0.01
+      margin_left: 0.00
+      margin_right: 0.01
     author:
       position: "outside"
       alignment: "left"
-      margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.03 # 底部边距
-      margin_left: 0      # 左边距 - 修改为0
-      margin_right: 0.01  # 右边距
+      margin_top: 0.01
+      margin_bottom: 0.03
+      margin_left: 0
+      margin_right: 0.01
     location:
-      relative_to: "exif"          # 相对于EXIF信息定位
-      relative_position: "below"   # 位于EXIF下方
-      alignment: "left"            # 相对于EXIF左侧对齐
-      relative_margin: 0.02        # 间距与timestamp一致
+      relative_to: "exif"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.02
     camera_icon:
       position: "outside"
       alignment: "top-left"
-      margin_top: 0.02    # 顶部边距
-      margin_bottom: 0.01 # 底部边距
-      margin_left: 0.02   # 左边距
-      margin_right: 0.01  # 右边距
+      margin_top: 0.02
+      margin_bottom: 0.01
+      margin_left: 0.02
+      margin_right: 0.01
 background_fill:
-  type: "gaussian_black_35"  # 35%透明度
+  type: "gaussian_black_35"
   gaussian_blur_radius: 200
   gaussian_blur_opacity: 35
 logo:
   enabled: true
   position: "top-right"
   alignment: "top-right"
-  size_ratio: 0.04  # Logo高度为原图长边的3%
+  size_ratio: 0.04
   margin_top: 0.02
   margin_bottom: 0.01
   margin_left: 0.01
-  margin_right: 0    # 右边距设为0
+  margin_right: 0
 name: Default_TestFrame

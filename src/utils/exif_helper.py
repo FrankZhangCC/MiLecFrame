@@ -293,6 +293,16 @@ class ExifHelper:
         if 'lens_model' in formatted_exif:
             display_data['lens_model'] = formatted_exif['lens_model']
         
+        # 合并相机+镜头为单行输出（用于样式配置中 camera_lens 元素）
+        camera_str = display_data.get('camera_combined', '')
+        lens_str = display_data.get('lens_model', '')
+        if camera_str and lens_str:
+            display_data['camera_lens_combined'] = f"{camera_str} | {lens_str}"
+        elif camera_str:
+            display_data['camera_lens_combined'] = camera_str
+        elif lens_str:
+            display_data['camera_lens_combined'] = lens_str
+        
         # 添加格式化的曝光参数
         display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)
         

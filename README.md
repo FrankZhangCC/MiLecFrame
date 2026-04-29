@@ -52,11 +52,17 @@ streamlit run src/gui/app.py
 
 ## 最近更新 (v1.2.0)
 
-- **相对定位元素溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
+- **相对定位溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
+- **依赖簇级联平移**：多个元素 `relative_to` 同一参考时，组合盒自动扩展至全部已注册从属，移位时递归级联确保整体不脱钩
 - **三阶段渲染管线**：Phase 1 测量 → Phase 2 拓扑序计算+注册 → Phase 3 绘制，彻底解决依赖顺序问题
 - **拓扑依赖解析**：通过 Kahn 算法自动解析 `relative_to` 依赖关系，无需手动调整元素注册顺序
 - **Padding 安全区域**：新增 `padding` 配置，控制叠加元素的绘制边界，优先级高于 margin
 - **绝对定位边界约束**：绝对定位元素同样受 padding 边界截断保护
+- **样式配置精简**：清理 `effects`、`fonts.regular`、`line_spacing`、`border_*` 等无效参数；字体配置拆分为 `family` + `weight`；颜色改为按文本类型独立覆盖
+- **配置驱动渲染**：仅渲染 `info_position` 中声明的元素，未声明自动跳过；不再通过 `style_manager` 注入默认条目
+- **相机+镜头合并**：`camera_lens` 合并输出格式 "品牌 型号 | 镜头"，同时保留 `camera`/`lens` 分开排版
+- **时间作者合并**：`timestamp_author` 合并输出 "时间 by 作者"
+- **Logo 相对定位**：Logo 渲染移至文字层后，使其 `relative_to` 可引用已注册的文字元素坐标
 
 > 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
@@ -113,9 +119,7 @@ MiLeica_Frame/
 
 ### 基本信息
 ```yaml
-name: "样式名称"
-description: "样式描述"
-version: "版本号"
+name: "样式名称"         # 必需字段，用于标识样式
 ```
 
 ### 布局配置 (layout)
@@ -127,7 +131,10 @@ version: "版本号"
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - 绝对定位与相对定位元素均受 padding 约束
 - `info_position`: 信息位置配置
-  - `exif`, `timestamp`, `camera`, `lens`, `author`, `location`, `camera_icon`: 各项信息的位置
+  - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
+  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`, `camera_icon`
+  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
+  - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
     - **绝对定位**：
       - `position`: 位置（inside, outside, top-left, top-right, bottom-left, bottom-right, top-center, bottom-center, top, bottom, left, right, center）
       - `alignment`: 对齐方式（left, center, right, top-left, top-right, top, bottom）
@@ -149,33 +156,37 @@ version: "版本号"
       - 元素注册顺序由拓扑排序自动解析，无需手动调整
 
 ### 颜色配置 (colors)
-- `text`: 文字颜色（传统颜色设置，保留向后兼容性）
-- `custom_text_color`: 通用自定义文字颜色（新功能，如果设置将优先使用此颜色）
-  - 支持十六进制颜色格式（如 "#FF6B6B"）
-  - 支持 RGB 元组格式（如 [255, 107, 107]）
-  - 如设置为 `null`，则使用自适应颜色逻辑
-- `custom_text_light_color`: 亮色背景下通用自定义文字颜色
-- `custom_text_dark_color`: 暗色背景下通用自定义文字颜色
-- `custom_[text_type]_light_color`: 亮色背景下特定文本类型的自定义颜色（如 `custom_timestamp_light_color`, `custom_location_light_color`）
-- `custom_[text_type]_dark_color`: 暗色背景下特定文本类型的自定义颜色（如 `custom_timestamp_dark_color`, `custom_location_dark_color`）
-- `background`: 背景颜色
-- `icon`: 图标颜色
+
+颜色由背景类型自动适配，支持按文本类型分别覆盖：
+
+- **通用自定义颜色（作为所有文本类型的兜底）**：
+  - `custom_text_light_color`: 亮色背景下的文字颜色
+  - `custom_text_dark_color`: 暗色背景下的文字颜色
+  - 支持十六进制格式（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+- **按文本类型独立覆盖**：`custom_{text_type}_light_color` / `custom_{text_type}_dark_color`
+  - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+  - 示例：`custom_exif_light_color: [51, 51, 51]`、`custom_timestamp_dark_color: "#CCCCCC"`
+- **最终兜底**：若以上均未设置，深色背景使用白色 `(255,255,255)`，浅色背景使用黑色 `(0,0,0)`
 
 ### 字体配置 (fonts)
-- `regular`: 字体名称
-- `size_ratio`: 默认字体大小相对于画布宽度的比例
-- `sizes`: 各类信息的独立字体大小
-  - `exif`: EXIF信息字体大小比例
-  - `timestamp`: 拍摄时间信息字体大小比例
-  - `camera`: 相机型号信息字体大小比例
-  - `lens`: 镜头型号信息字体大小比例
-  - `author`: 作者信息字体大小比例
-  - `location`: 位置信息字体大小比例
-- `line_spacing`: 行间距倍数
+
+- `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
+- `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
+  - 可通过命令行 `--font-weight` 参数运行时覆盖
+- `size_ratio`: 默认字体大小比例（相对于原图长边像素数）
+- `sizes`: 各类信息的独立字体大小比例（相对于原图长边）
+  - `exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+  - 未设置的字段默认使用 `size_ratio`
 
 ### 装饰元素配置 (decorations)
-- `border`: 边框配置
-- `watermark`: 水印配置
+
+装饰元素（边框、水印、Logo、角落标记）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+- `border`: 边框（可自定义宽度和颜色）
+- `watermark`: 水印
+- `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
+- `corner_mark`: 角落标记
+
+在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
 
 ### 背景填充配置 (background_fill)
 - `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
@@ -192,6 +203,7 @@ version: "版本号"
 - `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35)
 - `--batch`: 批量处理模式
 - `--recursive`: 递归处理子文件夹（仅批量模式）
+- `--font-weight`: 字体字重 (light, regular, medium，默认 medium)
 - `--gui`: 启动GUI界面
 
 > 完整开发历史请参见 [CHANGELOG.md](./CHANGELOG.md)
@@ -230,13 +242,13 @@ version: "版本号"
 - **尺寸处理**：输入最大尺寸12000×12000像素，输出最大尺寸8192×8192像素，超限时等比缩小
 
 ### 相框样式系统
-- **多格式支持**：支持JSON、YAML、TOML或Python文件作为样式配置
+- **多格式支持**：支持JSON、YAML、TOML文件作为样式配置
 - **扩展画布**：支持以原图尺寸百分比为基础的画布扩展，上下左右可分别设置
 - **响应式设计**：以输出尺寸的百分比作为参考比例，文字大小、边距等随输出尺寸自动调整
 - **图层顺序**（从上到下）：文字和图标层 → 装饰元素层 → 原图层 → 背景层（含扩展区域）
 - **相对定位**（v1.2.0）：支持将元素相对于其他已注册元素定位（after/below/before/above/right-of/left-of），由拓扑排序自动解析依赖顺序
 - **Padding 安全区域**（v1.2.0）：叠加元素的绘制边界约束，优先级高于 margin
-- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素整体平移，确保不超出安全区域
+- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素（及其全部已注册从属）合并为组合盒，整体平移确保不超出安全区域
 
 ### 装饰元素系统
 - **边框**：可自定义宽度和颜色
@@ -253,14 +265,15 @@ version: "版本号"
 
 ### 响应式设计特性
 - **扩展画布**：以原图尺寸的百分比为基准进行扩展
-- **文字布局**：支持行间距设置，文字位置可灵活配置
+- **文字布局**：文字位置可灵活配置
 - **字体适配**：字体大小随画布尺寸自适应调整
 - **背景填充**：扩展区域支持多种填充方式
 - **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 统一绘制，确保依赖有序、溢出可修正
 
 ### 独立信息字体大小
 - **EXIF信息**：可独立设置字体大小
-- **作者信息**：可独立设置字体大小
+- **相机/镜头**：可独立或合并（`camera_lens`）设置
+- **时间作者**：可独立或合并（`timestamp_author`）设置
 - **位置信息**：可独立设置字体大小
 
 ### 背景样式系统
@@ -289,8 +302,7 @@ version: "版本号"
 ## 后续开发计划
 
 1. **GPU加速** - 实现图像处理的GPU加速功能
-
-02. **更多相框样式** - 开发更多样式的相框模板
+2. **更多相框样式** - 开发更多样式的相框模板
 3. **测试和优化** - 编写单元测试，优化性能
 
 ## 开发规范
