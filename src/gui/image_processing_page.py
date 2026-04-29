@@ -59,12 +59,12 @@ def render_image_processing_page():
             "纯白背景": "pure_white",
             "纯黑背景": "pure_black", 
             "模糊背景 (深色 65%)": "gaussian_black_65",
-            "模糊背景 (浅色 65%)": "gaussian_white_65",
+            "模糊背景 (浅色 80%)": "gaussian_white_80",
             "模糊背景 (深色 35%)": "gaussian_black_35",
-            "模糊背景 (浅色 35%)": "gaussian_white_35"
+            "模糊背景 (浅色 50%)": "gaussian_white_50"
         }
-        # 设置默认选项为"模糊背景 (浅色 65%)"
-        default_bg_label = "模糊背景 (浅色 65%)"
+        # 设置默认选项为"模糊背景 (浅色 80%)"
+        default_bg_label = "模糊背景 (浅色 80%)"
         default_bg_index = list(bg_fill_options.keys()).index(default_bg_label)
         selected_bg_fill_label = st.selectbox("背景样式", list(bg_fill_options.keys()), index=default_bg_index, key='bg_fill_select')
         selected_bg_fill = bg_fill_options[selected_bg_fill_label]

@@ -97,9 +97,26 @@ layout:
 - `description`：移除（非必需元数据）
 - `style_manager.py` 默认值与示例配置同步更新，移除 `_validate_config` 中的默认条目注入
 
+### 高斯模糊
+
+#### 色彩断层修复
+- `apply_dithering()` 由 Python 逐像素 Floyd-Steinberg 循环（O(n²)，且限制 ≤200万像素）改为 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，支持任意分辨率
+- 叠加混合从 8-bit `Image.alpha_composite()` 改为 float32 numpy 逐通道混合，消除色彩量化断层
+- 模糊计算由 PIL `GaussianBlur`（O(n²)）替换为 3-pass `BoxBlur`（O(n)），视觉效果几乎一致，性能大幅提升
+- 新增 `_compute_scale_factor()` 自动降采样逻辑：原图长边 ≤1200px 不降采样，超过则缩放到 1200px，下限保护 512px
+- `blur_radius` 按缩放比例动态递减，配置值（默认 200）始终代表全分辨率等效半径
+
+#### 浅色背景模糊透明度调整
+- 浅色模糊背景默认透明度调整：`gaussian_white_35` → `gaussian_white_50`，`gaussian_white_65` → `gaussian_white_80`
+- GUI 下拉选项标签同步更新："模糊背景 (浅色 35%)" → "模糊背景 (浅色 50%)"，"模糊背景 (浅色 65%)" → "模糊背景 (浅色 80%)"
+- 默认选项由 "模糊背景 (浅色 65%)" 改为 "模糊背景 (浅色 80%)"
+- CLI `--bg-fill` 可选值同步更新
+- `renderer.py` 中 `light_bg_types` 列表同步更新
+
 ### 代码清理
 
 - 移除 `src/frames/base_frame.py` 及 `src/frames/` 目录：该文件仅有孤立法且无类定义，全项目零引用，功能已由 `LayoutEngine` + `FontManager` 替代
+- 移除 `examples/` 目录（5 个历史残留示例文件），实际示例由 `src/frame_styles/configs/Default_TestFrame.yaml` 担任
 
 ---
 

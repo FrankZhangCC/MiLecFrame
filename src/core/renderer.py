@@ -37,8 +37,8 @@ class FrameRenderer:
         
         self.light_bg_types = [
             'pure_white',
-            'gaussian_white_65',
-            'gaussian_white_35',
+            'gaussian_white_80',
+            'gaussian_white_50',
             'gaussian_white'
         ]
         

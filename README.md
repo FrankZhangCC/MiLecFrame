@@ -18,12 +18,12 @@
 
 ##### 单张图片处理
 ```bash
-python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_65
+python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_80
 ```
 
 ##### 批量处理
 ```bash
-python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_65 --recursive
+python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive
 ```
 
 ##### GUI模式
@@ -189,7 +189,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
 
 ### 背景填充配置 (background_fill)
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
+- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
 - `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
 - `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
 
@@ -200,7 +200,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 - `--style`, `-s`: 相框样式
 - `--author`: 作者名
 - `--location`: 拍摄地点
-- `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35)
+- `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50)
 - `--batch`: 批量处理模式
 - `--recursive`: 递归处理子文件夹（仅批量模式）
 - `--font-weight`: 字体字重 (light, regular, medium，默认 medium)
@@ -279,10 +279,10 @@ name: "样式名称"         # 必需字段，用于标识样式
 ### 背景样式系统
 - **纯黑色**：100%黑色背景填充，覆盖包括扩展区域在内的整个画面
 - **纯白色**：100%白色背景填充，覆盖包括扩展区域在内的整个画面
-- **高斯模糊叠加**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面；叠加透明度支持 35% / 65% / 自定义，如在 `gaussian_{color}_{opacity}` 中编码
+- **高斯模糊叠加**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面；叠加透明度支持 50% / 80% / 自定义，如在 `gaussian_{color}_{opacity}` 中编码
 - **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
   - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
-  - 浅色背景类型：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 浅色背景类型：`pure_white`, `gaussian_white_80`, `gaussian_white_50`, `gaussian_white`
   - 新增背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
 - **性能优化**：大图自动降采样至1200px中间分辨率计算模糊；模糊叠加混合在 float32 空间完成，通过 PIL 内置 Floyd-Steinberg 量化消除色彩断层
 - **配置参数**：通过 `gaussian_blur_radius` 和 `gaussian_blur_opacity` 在样式配置中自定义模糊强度和叠加透明度
