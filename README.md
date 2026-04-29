@@ -52,17 +52,10 @@ streamlit run src/gui/app.py
 
 ## 最近更新 (v1.2.0)
 
+- **渲染上下文模块**：新增 `RenderContext`，统一所有显示文本的数据入口，`get_text(key)` 一行调用闭环所有条件逻辑（数据校验、合并/替换、拼接等）
+- **竖向自适应**：`camera_lens` 检测到竖向/方形构图时自动替换为 `camera`，仅显示相机型号，避免竖幅窄图空间不足
+- **扩展友好**：新增显示字段只需在 `RenderContext.get_text()` 加分叉 + YAML 声明配置，renderer 零改动
 - **相对定位溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
-- **依赖簇级联平移**：多个元素 `relative_to` 同一参考时，组合盒自动扩展至全部已注册从属，移位时递归级联确保整体不脱钩
-- **三阶段渲染管线**：Phase 1 测量 → Phase 2 拓扑序计算+注册 → Phase 3 绘制，彻底解决依赖顺序问题
-- **拓扑依赖解析**：通过 Kahn 算法自动解析 `relative_to` 依赖关系，无需手动调整元素注册顺序
-- **Padding 安全区域**：新增 `padding` 配置，控制叠加元素的绘制边界，优先级高于 margin
-- **绝对定位边界约束**：绝对定位元素同样受 padding 边界截断保护
-- **样式配置精简**：清理 `effects`、`fonts.regular`、`line_spacing`、`border_*` 等无效参数；字体配置拆分为 `family` + `weight`；颜色改为按文本类型独立覆盖
-- **配置驱动渲染**：仅渲染 `info_position` 中声明的元素，未声明自动跳过；不再通过 `style_manager` 注入默认条目
-- **相机+镜头合并**：`camera_lens` 合并输出格式 "品牌 型号 | 镜头"，同时保留 `camera`/`lens` 分开排版
-- **时间作者合并**：`timestamp_author` 合并输出 "时间 by 作者"
-- **Logo 相对定位**：Logo 渲染移至文字层后，使其 `relative_to` 可引用已注册的文字元素坐标
 
 > 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
@@ -93,6 +86,7 @@ MiLeica_Frame/
 │   │   ├── logo_selector.py     # Logo选择器
 │   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
 │   │   ├── logging_config.py    # 日志配置
+│   │   ├── render_context.py    # 渲染上下文（统一文本数据入口）
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件
@@ -152,8 +146,53 @@ name: "样式名称"         # 必需字段，用于标识样式
       - `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 0.01
       - `alignment`: 在相对方向垂直轴上的对齐（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
       - `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（默认 0）
-      - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
-      - 元素注册顺序由拓扑排序自动解析，无需手动调整
+  - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
+  - 元素注册顺序由拓扑排序自动解析，无需手动调整
+
+### 渲染上下文 (RenderContext)
+
+`src/utils/render_context.py` 是渲染文本数据的**统一入口**。它将原本分散在 `renderer.py` 中的数据准备逻辑集中管理，实现样式配置与数据供给的解耦。
+
+#### 核心接口
+
+```python
+context = RenderContext(image.size, exif_data, author, location)
+text = context.get_text('camera_lens')  # 一行调用获取显示文本
+```
+
+- `get_text(key)` 根据 `info_position` 中声明的 key 返回对应的显示文本，无数据时返回 `None`
+- 所有条件逻辑（数据校验、相机+镜头合并/替换、时间+作者拼接等）在内部闭环，渲染器无需感知数据来源
+
+#### 支持的 key
+
+| key | 输出格式 | 数据来源 |
+|-----|----------|---------|
+| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | EXIF 格式化 |
+| `timestamp` | `"2025.01.15 14:30:00"` | EXIF 拍摄时间 |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | 时间 + 作者合并 |
+| `camera_lens` | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera` | `"Leica Q3"` | 相机品牌+型号 |
+| `lens` | `"Summilux 28mm f/1.7"` | 镜头型号 |
+| `author` | `"Frank"` | 用户输入 |
+| `location` | `"Shanghai"` | 用户输入 |
+
+#### 竖向/方形图片自动适配
+
+当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
+
+此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+- 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
+- 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
+
+#### 新增显示字段指南
+
+后续若需新增显示字段（如 GPS 坐标、海拔高度等），遵循以下步骤：
+
+1. **`RenderContext.get_text()`** — 添加 `elif key == 'xxx':` 分支，组装并返回文本
+2. **样式 YAML** — 在 `info_position` 中声明字段及其位置/字体配置
+3. **`fonts.sizes`** — 按需为新字段添加独立字体大小（可选，回退到 `size_ratio`）
+
+渲染器 (`renderer.py`) 无需任何修改——它只遍历 `info_position` 的 key 并通过 `context.get_text()` 取值。
 
 ### 颜色配置 (colors)
 

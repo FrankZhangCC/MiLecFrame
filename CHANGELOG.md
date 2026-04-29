@@ -54,6 +54,17 @@
 - 所有文字元素改为由 `info_position` 声明驱动：配置中有对应键则渲染，否则跳过
 - `author`、`location`、`exif`、`timestamp` 不再无条件渲染
 
+#### 渲染上下文 (RenderContext)
+- 新增 `src/utils/render_context.py`，将文字数据准备逻辑从 `renderer.py` 中解耦为独立模块
+- `RenderContext.get_text(key)` 根据样式配置声明的 key 返回显示文本，内部闭环所有条件逻辑
+- `_add_text_and_icons_flexible` 签名从 `(exif_data, author, location)` 简化为 `(context)`，17 行 if-elif 链替换为 for 循环遍历 `info_position` 的 key
+- 新增显示字段只需在 `RenderContext.get_text()` 添加分支 + YAML 声明配置，renderer 零改动
+
+#### 竖向/方形图片 camera_lens 自动替换
+- `camera_lens` 检测到原始图片纵边 ≥ 横边（竖向或方形构图）时，自动替换为 `camera`，仅显示相机型号
+- 横向图片保持原有 `"品牌 型号 | 镜头"` 合并格式
+- 判断逻辑内聚于 `RenderContext` 内部，对外透明
+
 ### Logo
 
 #### Logo 选择器增加"无"选项

@@ -18,6 +18,7 @@ from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector
 from src.utils.gaussian_blur import apply_gaussian_blur_overlay_expansion
+from src.utils.render_context import RenderContext
 from src.core.decorator import Decorator
 
 logger = logging.getLogger(__name__)
@@ -91,6 +92,8 @@ class FrameRenderer:
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
+        context = RenderContext(image.size, exif_data, author, location)
+
         background = self._create_background_with_expansion(
             image, canvas_width, canvas_height, bg_fill_type, bg_fill_config
         )
@@ -114,7 +117,7 @@ class FrameRenderer:
         
         # 文字层先处理（注册元素位置供 Logo 相对定位引用）
         image_with_text = self._add_text_and_icons_flexible(
-            decorated_image, exif_data, author, location, colors, fonts,
+            decorated_image, context, colors, fonts,
             bg_fill_type, layout_engine
         )
         
@@ -251,9 +254,7 @@ class FrameRenderer:
     def _add_text_and_icons_flexible(
         self, 
         image: Image.Image, 
-        exif_data: Optional[Dict], 
-        author: Optional[str], 
-        location: Optional[str],
+        context: RenderContext,
         colors: Dict,
         fonts: Dict,
         bg_fill_type: str,
@@ -266,44 +267,24 @@ class FrameRenderer:
         draw = ImageDraw.Draw(result)
         
         logger.debug("开始添加文字图层...")
-        logger.debug(f"EXIF数据: {exif_data}")
-        logger.debug(f"作者: {author}")
-        logger.debug(f"地点: {location}")
+        logger.debug(f"EXIF数据: {context.exif_data}")
+        logger.debug(f"作者: {context.author}")
+        logger.debug(f"地点: {context.location}")
         logger.debug(f"图像尺寸: {image.size}")
         logger.debug(f"原始图像尺寸: {layout_engine.original_image_size}")
         
         original_image_size = layout_engine.original_image_size
-        display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
         
         text_elements = []
         
         info_positions = layout_engine.layout_config.get('info_position', {})
-
-        if 'exif' in info_positions and 'exif_formatted' in display_data and display_data['exif_formatted']:
-            text_elements.append(('exif', display_data['exif_formatted']))
         
-        if 'timestamp' in info_positions and exif_data and 'datetime_original' in exif_data:
-            text_elements.append(('timestamp', f"{exif_data['datetime_original']}"))
-
-        if 'timestamp_author' in info_positions and exif_data and 'datetime_original' in exif_data:
-            ts = exif_data['datetime_original']
-            auth = author if author else ''
-            combined = f"{ts} by {auth}" if auth else ts
-            text_elements.append(('timestamp_author', combined))
-
-        if 'camera_lens' in info_positions and 'camera_lens_combined' in display_data and display_data['camera_lens_combined']:
-            text_elements.append(('camera_lens', display_data['camera_lens_combined']))
-        else:
-            if 'camera' in info_positions and 'camera_combined' in display_data:
-                text_elements.append(('camera', display_data['camera_combined']))
-            if 'lens' in info_positions and 'lens_model' in display_data:
-                text_elements.append(('lens', display_data['lens_model']))
-
-        if 'author' in info_positions and author:
-            text_elements.append(('author', f"{author}"))
-
-        if 'location' in info_positions and location:
-            text_elements.append(('location', f"{location}"))
+        for key in info_positions:
+            if key == 'camera_icon':
+                continue
+            text = context.get_text(key)
+            if text:
+                text_elements.append((key, text))
         
         if not text_elements:
             logger.debug("没有需要显示的文本信息")
