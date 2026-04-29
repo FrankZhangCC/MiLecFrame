@@ -159,7 +159,7 @@ def render_image_processing_page():
         # 如果样式配置中启用了Logo，则显示Logo选择器
         selected_logo = None
         if is_logo_enabled_by_config:
-            available_logos = ["自动匹配"] + logo_selector.scan_logos()
+            available_logos = ["自动匹配", "无"] + logo_selector.scan_logos()
             
             # 检查是否有EXIF数据以确定相机品牌
             camera_brand = None
@@ -176,9 +176,12 @@ def render_image_processing_page():
                 key='logo_select'
             )
             
+            # 如果选择了"无"，则不显示Logo
             # 如果选择了具体的logo文件而不是"自动匹配"，则使用该文件名
             # 如果选择了"自动匹配"，则尝试自动匹配
-            if selected_logo_option != "自动匹配":
+            if selected_logo_option == "无":
+                selected_logo = ""
+            elif selected_logo_option != "自动匹配":
                 selected_logo = selected_logo_option
             else:
                 # 自动匹配模式，只有在成功匹配时才设置logo

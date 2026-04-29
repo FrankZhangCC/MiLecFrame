@@ -120,7 +120,7 @@ class FrameRenderer:
         
         # Logo 后处理（可依赖文字层已注册的坐标）
         if logo_config.get('enabled', False):
-            if not logo_filename:
+            if logo_filename is None:
                 camera_brand = ExifHelper.get_camera_brand(exif_data) or ExifHelper.get_camera_model(exif_data)
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()

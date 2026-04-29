@@ -31,7 +31,7 @@ class ImageProcessor:
             style_config: 相框样式配置
         """
         self.style_config = style_config
-        self.supported_formats = ['JPEG', 'PNG', 'TIFF']
+        self.supported_formats = ['JPEG', 'PNG', 'TIFF', 'MPO']
         self.hdr_supported_formats = ['HEIF', 'HEIC', 'AVIF']  # HDR相关格式
         self.max_input_size = (12000, 12000)  # 最大输入尺寸
         self.max_output_size = (8192, 8192)   # 最大输出尺寸

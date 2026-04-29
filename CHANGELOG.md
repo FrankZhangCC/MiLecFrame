@@ -54,6 +54,22 @@
 - 所有文字元素改为由 `info_position` 声明驱动：配置中有对应键则渲染，否则跳过
 - `author`、`location`、`exif`、`timestamp` 不再无条件渲染
 
+### Logo
+
+#### Logo 选择器增加"无"选项
+- GUI 下拉菜单新增 "无" 选项，允许用户显式禁用 Logo
+- 选中"无"时 `logo_filename` 传递空字符串 `""`，renderer 跳过自动匹配和渲染
+- "无"与自动匹配行为解耦：前者显式跳过，后者 `None` 仍触发子串匹配
+
+#### 自动匹配逻辑优化
+- `auto_match_logo()` 简化为双向子串匹配（`brand_lower in logo_name or logo_name in brand_lower`），不区分大小写
+- 移除 `_normalize_brand_name()` 方法（曾剥离特殊字符，可能导致误剔除有效匹配片段）及不再使用的 `re` 导入
+- 文件名中包含品牌名称片段即可匹配（如品牌 "NIKON CORPORATION" 可匹配 `Nikon.png`）
+
+#### 渲染器匹配守卫修正
+- Logo 自动匹配条件由 `if not logo_filename` 改为 `if logo_filename is None`
+- 空字符串（GUI "无"选项）不再触发自动匹配回退，仅 `None`（自动匹配模式）执行品牌匹配
+
 ### 样式配置
 
 #### 相对定位字段
