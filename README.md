@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.3.0-blue)
 
 ## 快速开始
 
@@ -50,12 +50,12 @@ streamlit run src/gui/app.py
 - EXIF处理：piexif
 - GUI界面：Streamlit
 
-## 最近更新 (v1.2.0)
+## 最近更新 (v1.3.0)
 
-- **渲染上下文模块**：新增 `RenderContext`，统一所有显示文本的数据入口，`get_text(key)` 一行调用闭环所有条件逻辑（数据校验、合并/替换、拼接等）
-- **竖向自适应**：`camera_lens` 检测到竖向/方形构图时自动替换为 `camera`，仅显示相机型号，避免竖幅窄图空间不足
-- **扩展友好**：新增显示字段只需在 `RenderContext.get_text()` 加分叉 + YAML 声明配置，renderer 零改动
-- **相对定位溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
+- **样式变体系统**：支持文件夹级样式组织，一个样式名下可包含多个变体配置文件（如 `default.yaml`、`no_location.yaml`），根据运行时上下文（数据可用性）自动选择最佳匹配的变体
+- **上下文感知匹配**：`StyleManager.get_style_config()` 新增 `context` 参数，传入 `{'location': ..., 'author': ...}` 后自动从文件夹中选取最匹配的变体配置；命名规则 `no_{field}.yaml` 清晰可扩展
+- **动态布局切换**：当 `location` 字段无数据时，`timestamp_author` 自动从左侧列移动到右侧列（exif 下方），exif 同时下移以保持视觉平衡
+- **变体配置精简规范**：变体文件中与缺失字段相关的颜色、字体、布局配置应全部移除，仅保留实际生效的配置项
 
 > 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
@@ -89,9 +89,13 @@ MiLeica_Frame/
 │   │   ├── render_context.py    # 渲染上下文（统一文本数据入口）
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
-│   │   ├── configs/        # 样式配置文件
+│   │   ├── configs/        # 样式配置文件（支持单文件样式和文件夹变体样式）
+│   │   │   ├── 照片底部信息水印/  # 文件夹变体样式（示例）
+│   │   │   │   ├── default.yaml       # 默认变体（所有字段有数据）
+│   │   │   │   └── no_location.yaml   # location 缺失时的变体
+│   │   │   └── ...
 │   │   ├── __init__.py
-│   │   ├── style_manager.py # 样式管理器
+│   │   ├── style_manager.py # 样式管理器（含变体匹配引擎）
 │   │   └── ...
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
@@ -109,9 +113,65 @@ MiLeica_Frame/
 
 ## 样式配置规范
 
-样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。每个配置文件包含以下部分：
+样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
+
+### 文件夹变体样式 (v1.3.0)
+
+当需要根据数据可用性动态切换布局时，可将样式组织为**文件夹**（文件夹名 = 样式名），内放多个变体配置文件：
+
+```
+configs/
+  照片底部信息水印/
+    default.yaml              # 默认配置（兜底，所有字段有数据时使用）
+    no_location.yaml          # location 缺失时的变体
+    no_author.yaml            # author 缺失时的变体
+    no_location_no_author.yaml # 多字段同时缺失时的变体（越具体越优先）
+  OtherStyle.yaml             # 传统单文件样式（向后兼容）
+```
+
+#### 命名规则
+
+| 文件名 | 匹配条件 |
+|-------|---------|
+| `default.yaml` | 兜底，无可匹配变体时使用 |
+| `no_{field}.yaml` | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
+| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体 |
+
+支持的 `{field}` 名称与 `RenderContext.get_text()` 的 key 一致：`location`、`author` 等。
+
+#### 匹配算法
+
+1. 从上下文（`{'location': ..., 'author': ...}`）提取**实际缺失的字段集合**
+2. 扫描文件夹内所有变体文件（排除 `default.*`），解析每个文件所需缺失字段
+3. 选择**缺失字段集是实际缺失子集**且**匹配字段数最多**（最具体）的变体
+4. 无匹配变体时回退到 `default.*`
+
+#### 变体配置精简规范
+
+变体文件中**与缺失字段相关的所有配置项应全部移除**，包括但不限于：
+- `colors` 中的 `custom_{field}_{light/dark}_color`
+- `fonts.sizes` 中的 `{field}` 条目
+- `layout.info_position` 中的 `{field}` 条目
+
+仅保留实际渲染时会生效的配置。这既是代码清洁要求，也是可维护性保障。
+
+#### 调用方式
+
+```python
+# 运行时自动选择变体
+style_config = style_manager.get_style_config(
+    '照片底部信息水印',
+    context={'location': location, 'author': author}
+)
+# location=None → 自动选取 no_location.yaml
+# location='北京' → 自动选取 default.yaml
+
+# 不带 context 时（如 GUI 预览）返回 default.yaml，确保向后兼容
+style_config = style_manager.get_style_config('照片底部信息水印')
+```
 
 ### 基本信息
+
 ```yaml
 name: "样式名称"         # 必需字段，用于标识样式
 ```

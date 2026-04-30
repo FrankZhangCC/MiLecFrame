@@ -125,9 +125,10 @@ class ImageProcessor:
             # 6. 处理色彩空间
             image = self._convert_colorspace(image)
             
-            # 7. 获取样式配置
+            # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
-                style_config = self.style_manager.get_style_config(style_name)
+                context = {'location': location, 'author': author}
+                style_config = self.style_manager.get_style_config(style_name, context)
             else:
                 style_config = self.style_manager.get_default_style()
             
