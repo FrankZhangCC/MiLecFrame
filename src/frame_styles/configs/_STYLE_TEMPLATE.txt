@@ -1,0 +1,121 @@
+=============================================================================
+  相框样式配置文件模板
+  使用方式：复制此文件，填写各项参数，发给AI即可生成 YAML 配置
+  参考: README.md 样式配置规范章节
+=============================================================================
+
+【1. 基本信息】
+  - 样式名称: [________________]  (如: Polaroid / 经典白框 / Modern ...)
+  - 文件名:   [________________]  (如: Polaroid.yaml)
+  - 变体:     □ 单文件  □ 文件夹变体（需要时在【9】中列出变体列表）
+
+
+【2. 画布扩展 expand_canvas】（相对于原图长边的比例）
+  - 是否启用: □ 是  □ 否
+  - top:    [____]  (例: 0.03 = 长边的 3%)
+  - bottom: [____]
+  - left:   [____]
+  - right:  [____]
+
+
+【3. 安全区域 padding】（从画布边缘向内收缩的比例，约束所有叠加元素）
+  - top:    [____]  (常用 0.02)
+  - bottom: [____]
+  - left:   [____]
+  - right:  [____]
+
+
+【4. 字体 fonts】
+  - 字体族: [________]  (默认 Gotham)
+  - 字重:   [________]  (light / regular / medium)
+  - 默认尺寸 size_ratio: [____]  (例: 0.015)
+  - 各元素独立尺寸（留空则使用 size_ratio）:
+      exif: [________]
+      timestamp: [________]
+      timestamp_author: [________]
+      camera: [________]
+      lens: [________]
+      camera_lens: [________]
+      author: [________]
+      location: [________]
+
+
+【5. 元素布局 info_position】
+
+说明:
+  绝对定位元素 = 填写 position / alignment / margin_*
+  相对定位元素 = 填写 relative_to / relative_position / alignment / relative_margin
+  系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location, camera_icon
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 元素1: [______________]  (key)                                       │
+  │   定位方式: □ 绝对  □ 相对                                          │
+  │   [绝对] position: [______________]  (bottom-left / bottom-right / ...)
+  │          alignment: [______________]  (left / center / right / ...)
+  │          margin_top: [____]  margin_bottom: [____]                   │
+  │          margin_left: [____]  margin_right: [____]                   │
+  │   [相对] relative_to: [______________]                              │
+  │          relative_position: [______________]  (below / above / left-of / right-of)
+  │          alignment: [______________]                                 │
+  │          relative_margin: [____]  (默认 0.01)                        │
+  │          offset_x_ratio: [____]  offset_y_ratio: [____]  (可选, 默认 0)
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 元素2: [______________]  (key)                                       │
+  │   定位方式: □ 绝对  □ 相对                                          │
+  │   ...
+  └─────────────────────────────────────────────────────────────────────┘
+
+
+【6. 颜色 colors】（按文本类型独立覆盖，留空则使用系统兜底）
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 通用兜底:                                                           │
+  │   custom_text_light_color: [______________]  (例: [51,51,51] 或 "#333")
+  │   custom_text_dark_color:  [______________]  (例: [204,204,204] 或 "#CCC")
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 按类型覆盖（如需）:                                                 │
+  │   custom_exif_light_color: [____]   dark: [____]                    │
+  │   custom_timestamp_light_color: [____]   dark: [____]               │
+  │   custom_timestamp_author_light_color: [____]   dark: [____]        │
+  │   custom_camera_light_color: [____]   dark: [____]                  │
+  │   custom_lens_light_color: [____]   dark: [____]                    │
+  │   custom_camera_lens_light_color: [____]   dark: [____]             │
+  │   custom_author_light_color: [____]   dark: [____]                  │
+  │   custom_location_light_color: [____]   dark: [____]                │
+  └─────────────────────────────────────────────────────────────────────┘
+
+
+【7. 背景填充 background_fill】
+  - type: [__________________________]
+    (可选: pure_black / pure_white / gaussian_black_65 / gaussian_white_80 /
+           gaussian_black_35 / gaussian_white_50 / gaussian_{color}_{opacity})
+  - gaussian_blur_radius: [____]  (默认 200)
+  - gaussian_blur_opacity: [____]  (0-100, 高斯模糊叠加透明度)
+
+
+【8. Logo】
+  - 启用: □ 是  □ 否
+  - 若启用:
+      position: [______________]  (bottom-right / top-left / ...)
+      alignment: [______________]
+      size_ratio: [____]
+      margin_top: [____]  margin_bottom: [____]
+      margin_left: [____]  margin_right: [____]
+      或使用相对定位:
+      relative_to: [______________]
+      relative_position: [______________]
+      alignment: [______________]
+      relative_margin: [____]
+
+
+【9. 变体配置】（仅当【1】选择"文件夹变体"时填写）
+  - 需要支持的缺失字段: □ location  □ author  □ 其他 [______]
+  - 自动生成的变体文件名:
+      default.yaml               (兜底)
+      no_location.yaml           (location 缺失)
+      no_author.yaml             (author 缺失)
+      no_location_no_author.yaml (两者均缺失)
+  - 变体配置精简规则: 移除与缺失字段相关的 colors / fonts.sizes / info_position 条目
+
+=============================================================================
+  填写完毕后直接发给AI，我会按模板生成 YAML 配置文件。
+=============================================================================

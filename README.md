@@ -5,6 +5,7 @@
 ### 启动程序
 
 #### 环境搭建
+
 1. 克隆项目
 2. 创建虚拟环境并安装依赖：
    ```bash
@@ -17,16 +18,19 @@
 #### 使用方法
 
 ##### 单张图片处理
+
 ```bash
 python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_80
 ```
 
 ##### 批量处理
+
 ```bash
 python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive
 ```
 
 ##### GUI模式
+
 ```bash
 streamlit run src/gui/app.py
 ```
@@ -35,29 +39,31 @@ streamlit run src/gui/app.py
 
 #### 命令行选项
 
-| 参数 | 简写 | 说明 |
-|------|------|------|
-| `--input` | `-i` | 输入图片路径 |
-| `--output` | `-o` | 输出图片路径 |
-| `--style` | `-s` | 相框样式名称 |
-| `--author` | | 作者姓名 |
-| `--location` | | 拍摄地点 |
-| `--bg-fill` | | 背景填充类型 |
-| `--batch` | | 启用批量处理模式 |
-| `--recursive` | | 递归处理子文件夹（仅批量模式） |
-| `--font-weight` | | 字体字重：`light` / `regular` / `medium` |
-| `--gui` | | 启动 Streamlit GUI 界面 |
+| 参数              | 简写   | 说明                                           |
+| ----------------- | ------ | ---------------------------------------------- |
+| `--input`       | `-i` | 输入图片路径                                   |
+| `--output`      | `-o` | 输出图片路径                                   |
+| `--style`       | `-s` | 相框样式名称                                   |
+| `--author`      |        | 作者姓名                                       |
+| `--location`    |        | 拍摄地点                                       |
+| `--bg-fill`     |        | 背景填充类型                                   |
+| `--batch`       |        | 启用批量处理模式                               |
+| `--recursive`   |        | 递归处理子文件夹（仅批量模式）                 |
+| `--font-weight` |        | 字体字重：`light` / `regular` / `medium` |
+| `--gui`         |        | 启动 Streamlit GUI 界面                        |
 
 `--bg-fill` 可选值：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
 
 ## 功能特性
 
 ### 图像处理
+
 - **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间
 - **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF 等 HDR 格式
 - **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB 自动识别并转换至 sRGB
 
 ### 相框与布局
+
 - **多种相框样式**：JSON / YAML / TOML 配置文件，支持单文件或文件夹变体组织
 - **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
 - **响应式布局**：画布扩展、文字大小、边距、间距均以原图长边比例为基准自适应
@@ -65,12 +71,14 @@ streamlit run src/gui/app.py
 - **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色
 
 ### 装饰元素
+
 - **边框**：可自定义宽度与颜色
 - **水印**：可自定义文字、位置、透明度与颜色
 - **Logo**：支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
 - **角落标记**：可自定义文本、位置与样式
 
 ### 使用方式
+
 - **CLI 命令行**：单张图片或批量文件夹处理
 - **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载
 - **批量处理**：多线程并发、递归子文件夹、实时进度统计、单文件失败不中断其余任务
@@ -96,7 +104,11 @@ MiLeica_Frame/
 │   │   └── ...
 │   ├── gui/                # GUI界面相关
 │   │   ├── __init__.py
-│   │   ├── app.py          # Streamlit GUI主文件
+│   │   ├── app.py                    # Streamlit GUI主文件
+│   │   ├── image_processing_page.py  # 图像处理页面
+│   │   ├── camera_mapping_page.py    # 相机映射管理页面
+│   │   ├── lens_mapping_page.py      # 镜头映射管理页面
+│   │   ├── style_creator_page.py     # 样式编辑器页面
 │   │   └── ...
 │   ├── utils/              # 工具函数
 │   │   ├── __init__.py
@@ -112,6 +124,7 @@ MiLeica_Frame/
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件（支持单文件样式和文件夹变体样式）
+│   │   │   ├── _STYLE_TEMPLATE.txt   # 规格化填空模板
 │   │   │   ├── 照片底部信息水印/  # 文件夹变体样式（示例）
 │   │   │   │   ├── default.yaml       # 默认变体（所有字段有数据）
 │   │   │   │   └── no_location.yaml   # location 缺失时的变体
@@ -137,6 +150,8 @@ MiLeica_Frame/
 
 样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
 
+> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
+
 ### 文件夹变体样式 (v1.3.0)
 
 当需要根据数据可用性动态切换布局时，可将样式组织为**文件夹**（文件夹名 = 样式名），内放多个变体配置文件：
@@ -153,11 +168,11 @@ configs/
 
 #### 命名规则
 
-| 文件名 | 匹配条件 |
-|-------|---------|
-| `default.yaml` | 兜底，无可匹配变体时使用 |
-| `no_{field}.yaml` | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
-| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体 |
+| 文件名                           | 匹配条件                                        |
+| -------------------------------- | ----------------------------------------------- |
+| `default.yaml`                 | 兜底，无可匹配变体时使用                        |
+| `no_{field}.yaml`              | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
+| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体  |
 
 支持的 `{field}` 名称与 `RenderContext.get_text()` 的 key 一致：`location`、`author` 等。
 
@@ -171,6 +186,7 @@ configs/
 #### 变体配置精简规范
 
 变体文件中**与缺失字段相关的所有配置项应全部移除**，包括但不限于：
+
 - `colors` 中的 `custom_{field}_{light/dark}_color`
 - `fonts.sizes` 中的 `{field}` 条目
 - `layout.info_position` 中的 `{field}` 条目
@@ -199,6 +215,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 ```
 
 ### 布局配置 (layout)
+
 - `expand_canvas`: 扩展画布配置
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
@@ -247,22 +264,23 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 
 #### 支持的 key
 
-| key | 输出格式 | 数据来源 |
-|-----|----------|---------|
-| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | EXIF 格式化 |
-| `timestamp` | `"2025.01.15 14:30:00"` | EXIF 拍摄时间 |
-| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | 时间 + 作者合并 |
-| `camera_lens` | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
-| `camera` | `"Leica Q3"` | 相机品牌+型号 |
-| `lens` | `"Summilux 28mm f/1.7"` | 镜头型号 |
-| `author` | `"Frank"` | 用户输入 |
-| `location` | `"Shanghai"` | 用户输入 |
+| key                  | 输出格式                                         | 数据来源           |
+| -------------------- | ------------------------------------------------ | ------------------ |
+| `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化        |
+| `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间      |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并    |
+| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera`           | `"Leica Q3"`                                   | 相机品牌+型号      |
+| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号           |
+| `author`           | `"Frank"`                                      | 用户输入           |
+| `location`         | `"Shanghai"`                                   | 用户输入           |
 
 #### 竖向/方形图片自动适配
 
 当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
 
 此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+
 - 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
 - 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
 
@@ -302,6 +320,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 ### 装饰元素配置 (decorations)
 
 装饰元素（边框、水印、Logo、角落标记）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+
 - `border`: 边框（可自定义宽度和颜色）
 - `watermark`: 水印
 - `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
@@ -310,6 +329,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
 
 ### 背景填充配置 (background_fill)
+
 - `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
 - `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
 - `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
@@ -324,19 +344,21 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 
 **格式规则**：
 
-| 字段 | 输出格式 | 说明 |
-|------|---------|------|
-| 曝光参数 | `35mm, f/2.8, 1/125s, ISO200` | 逗号分隔，单行字符串 |
-| 快门速度 | `<1s` 显示分数（`1/125`），`≥1s` 显示小数（`2.5`） | `_format_shutter_speed()` |
-| 拍摄时间 | `yyyy.mm.dd hh:mm:ss` | 原始 EXIF 格式 `yyyy:mm:dd HH:MM:SS` |
-| 相机品牌 | 经 `_safe_decode()` 多编码（utf-8 / latin-1 / shift-jis 等）兼容处理后，小写化用于 Logo 逐词匹配 | `get_camera_brand()` |
+| 字段     | 输出格式                                                                                           | 说明                                   |
+| -------- | -------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 曝光参数 | `35mm, f/2.8, 1/125s, ISO200`                                                                    | 逗号分隔，单行字符串                   |
+| 快门速度 | `<1s` 显示分数（`1/125`），`≥1s` 显示小数（`2.5`）                                        | `_format_shutter_speed()`            |
+| 拍摄时间 | `yyyy.mm.dd hh:mm:ss`                                                                            | 原始 EXIF 格式 `yyyy:mm:dd HH:MM:SS` |
+| 相机品牌 | 经 `_safe_decode()` 多编码（utf-8 / latin-1 / shift-jis 等）兼容处理后，小写化用于 Logo 逐词匹配 | `get_camera_brand()`                 |
 
 **三层数据处理架构**：
+
 ```
 EXIF Helper（解析原始二进制 → 纯净字段，_safe_decode 多编码容错）
   → Device Mapper（品牌/机型/镜头映射、字符串拼接 "品牌 型号"、格式化）
     → Renderer / GUI（展示层，仅消费最终数据，不感知数据来源）
 ```
+
 统一数据出口 `exif_helper.get_display_data()`，同时提供 `raw_*`（原始值，GUI 设备信息区展示）和映射后字段（相机/镜头组合、格式化曝光参数），确保 GUI 预览与最终渲染数据一致。
 
 #### 渲染上下文（RenderContext）
@@ -352,16 +374,16 @@ text = context.get_text('camera_lens')  # 一行调用获取最终显示文本
 
 **支持的 key**：
 
-| key | 输出格式 | 说明 |
-|-----|---------|------|
-| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | EXIF 格式化曝光参数 |
-| `timestamp` | `"2025.01.15 14:30:00"` | EXIF 拍摄时间 |
-| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | 时间 + 作者合并（作者为空时仅显示时间） |
-| `camera_lens` | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 相机+镜头合并，竖向/方形图片自动替换为仅相机 |
-| `camera` | `"Leica Q3"` | 相机品牌+型号 |
-| `lens` | `"Summilux 28mm f/1.7"` | 镜头型号 |
-| `author` | `"Frank"` | 用户输入 |
-| `location` | `"Shanghai"` | 用户输入 |
+| key                  | 输出格式                                         | 说明                                         |
+| -------------------- | ------------------------------------------------ | -------------------------------------------- |
+| `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化曝光参数                          |
+| `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间                                |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并（作者为空时仅显示时间）      |
+| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 相机+镜头合并，竖向/方形图片自动替换为仅相机 |
+| `camera`           | `"Leica Q3"`                                   | 相机品牌+型号                                |
+| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号                                     |
+| `author`           | `"Frank"`                                      | 用户输入                                     |
+| `location`         | `"Shanghai"`                                   | 用户输入                                     |
 
 **竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`camera_lens` 自动替换为 `camera`（仅显示相机型号），避免竖幅窄图空间不足。
 
@@ -379,18 +401,18 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 #### 支持的格式
 
-| 类别 | 格式 | 处理方式 |
-|------|------|---------|
-| 常规 | JPEG、PNG、TIFF、MPO | PIL 直接打开 |
-| HDR | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR |
-| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB | 自动识别，非 sRGB 警告并转换至 sRGB |
+| 类别     | 格式                                         | 处理方式                            |
+| -------- | -------------------------------------------- | ----------------------------------- |
+| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                        |
+| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR     |
+| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB                  | 自动识别，非 sRGB 警告并转换至 sRGB |
 
 #### 尺寸限制
 
-| 阶段 | 上限 | 超限行为 |
-|------|------|---------|
+| 阶段 | 上限            | 超限行为         |
+| ---- | --------------- | ---------------- |
 | 输入 | 12000×12000 px | 等比缩小至限制内 |
-| 输出 | 8192×8192 px | 等比缩小至限制内 |
+| 输出 | 8192×8192 px   | 等比缩小至限制内 |
 
 #### 处理管线
 
@@ -465,25 +487,30 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **输出格式**：JPEG / PNG 可选
 - **结果下载**：处理后图片预览 + 一键下载
 - **设备映射管理**：独立的相机/镜头映射表界面，支持品牌筛选、表格内编辑实时保存
+- **样式编辑器**：可视化表单页面，支持新建与编辑已有样式配置文件，填参后可一键生成 YAML
 
 ## 开发规范
 
 ### 项目开发环境
+
 - 所有开发必须在虚拟环境(venv)中进行
 - Windows PowerShell激活命令: `.\venv\Scripts\activate`
 - 确保在激活虚拟环境后执行依赖安装或脚本运行
 
 ### 代码规范
+
 - 代码采用模块化设计，各模块职责明确
 - 使用适当的错误处理机制，避免程序挂起
 - 添加充分的日志记录以便调试
 
 ### 调试规范
+
 - 在PowerShell环境中调试
 - 使用绝对路径执行Python脚本
-- 避免使用`&&`作为命令连接符
+- 避免使用 `&&`作为命令连接符
 
 ### 技术规范参考
+
 - 项目技术规范详细内容请参见 [project_master_spec.json](./project_master_spec.json)，后续开发必须严格遵循此规范
 
 ## 贡献
