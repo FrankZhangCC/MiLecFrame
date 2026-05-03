@@ -45,7 +45,7 @@
 说明:
   绝对定位元素 = 填写 position / alignment / margin_*
   相对定位元素 = 填写 relative_to / relative_position / alignment / relative_margin
-  系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location, camera_icon
+   系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location
 
   ┌─────────────────────────────────────────────────────────────────────┐
   │ 元素1: [______________]  (key)                                       │
@@ -84,15 +84,7 @@
   └─────────────────────────────────────────────────────────────────────┘
 
 
-【7. 背景填充 background_fill】
-  - type: [__________________________]
-    (可选: pure_black / pure_white / gaussian_black_65 / gaussian_white_80 /
-           gaussian_black_35 / gaussian_white_50 / gaussian_{color}_{opacity})
-  - gaussian_blur_radius: [____]  (默认 200)
-  - gaussian_blur_opacity: [____]  (0-100, 高斯模糊叠加透明度)
-
-
-【8. Logo】
+【7. Logo】
   - 启用: □ 是  □ 否
   - 若启用:
       position: [______________]  (bottom-right / top-left / ...)

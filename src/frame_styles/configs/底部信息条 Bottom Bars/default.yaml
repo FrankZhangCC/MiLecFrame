@@ -27,6 +27,7 @@ layout:
     bottom: 0.00
   info_position:
     camera_lens:
+      placement: outside
       position: "bottom-left"
       alignment: "left"
       margin_top: 0.01
@@ -39,6 +40,7 @@ layout:
       alignment: "left"
       relative_margin: 0.010
     exif:
+      placement: outside
       position: "bottom-right"
       alignment: "right"
       margin_top: 0.01
@@ -50,16 +52,6 @@ layout:
       relative_position: "below"
       alignment: "left"
       relative_margin: 0.010
-    camera_icon:
-      relative_to: "exif"
-      relative_position: "left-of"
-      alignment: "left"
-      relative_margin: 0.01
-      offset_y_ratio: 0.01
-background_fill:
-  type: "gaussian_black_35"
-  gaussian_blur_radius: 200
-  gaussian_blur_opacity: 35
 logo:
   enabled: true
   relative_to: "exif"

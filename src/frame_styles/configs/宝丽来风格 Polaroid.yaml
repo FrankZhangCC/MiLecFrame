@@ -50,10 +50,6 @@ layout:
       relative_position: "below"
       alignment: "right"
       relative_margin: 0.01
-background_fill:
-  type: "gaussian_black_35"
-  gaussian_blur_radius: 200
-  gaussian_blur_opacity: 35
 logo:
   enabled: false
 name: 宝丽来风格 Polaroid

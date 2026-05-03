@@ -13,11 +13,13 @@ import glob as glob_module
 # ── 常量 ────────────────────────────────────────────────────
 
 ELEMENT_KEYS = ['exif', 'timestamp', 'timestamp_author', 'camera', 'lens',
-                'camera_lens', 'author', 'location', 'camera_icon']
+                'camera_lens', 'author', 'location']
 
-POSITION_OPTIONS = ['bottom-left', 'bottom-right', 'top-left', 'top-right',
-                    'bottom-center', 'top-center', 'center', 'inside', 'outside',
-                    'top', 'bottom', 'left', 'right']
+PLACEMENT_OPTIONS = ['outside', 'inside']
+
+ANCHOR_POSITION_OPTIONS = ['bottom-left', 'bottom-center', 'bottom-right',
+                            'top-left', 'top-center', 'top-right',
+                            'left', 'right', 'top', 'bottom', 'center']
 
 ALIGNMENT_OPTIONS = ['left', 'center', 'right', 'top-left', 'top-right', 'top', 'bottom']
 
@@ -25,12 +27,6 @@ RELATIVE_POSITION_OPTIONS = ['below', 'above', 'left-of', 'right-of']
 
 WEIGHT_OPTIONS = ['medium', 'regular', 'light']
 FAMILY_OPTIONS = ['Gotham']
-
-BG_TYPE_OPTIONS = [
-    'gaussian_black_35', 'gaussian_white_50',
-    'gaussian_black_65', 'gaussian_white_80',
-    'pure_black', 'pure_white',
-]
 
 CONFIGS_DIR = os.path.normpath(os.path.join(
     os.path.dirname(__file__), '..', 'frame_styles', 'configs'))
@@ -41,6 +37,7 @@ DEFAULT_ELEMENT = {
     'id': 0,
     'key': 'exif',
     'mode': 'absolute',
+    'placement': 'outside',
     'position': 'bottom-left',
     'alignment': 'left',
     'margin_top': 0.0,
@@ -165,11 +162,14 @@ def _init_new_style():
         'sc_pad_left': 0.02, 'sc_pad_right': 0.02,
         'sc_font_family': 'Gotham', 'sc_font_weight': 'medium',
         'sc_font_size': 0.015,
-        'sc_bg_type': 'gaussian_black_35', 'sc_bg_radius': 200, 'sc_bg_opacity': 35,
         'sc_logo_enabled': False,
-        'sc_logo_position': 'top-right', 'sc_logo_alignment': 'top-right',
+        'sc_logo_placement': 'outside', 'sc_logo_position': 'top-right',
+        'sc_logo_alignment': 'top-right',
         'sc_logo_size': 0.04, 'sc_logo_mt': 0.0, 'sc_logo_mb': 0.0,
         'sc_logo_ml': 0.0, 'sc_logo_mr': 0.0,
+        'sc_logo_relative_to': '', 'sc_logo_relative_position': 'below',
+        'sc_logo_relative_margin': 0.01, 'sc_logo_offset_x': 0.0, 'sc_logo_offset_y': 0.0,
+        'sc_logo_mode': 'absolute',
         'sc_color_light': '', 'sc_color_dark': '',
         'style_elements': [DEFAULT_ELEMENT.copy()],
         'sc_loaded_style': NEW_STYLE_PLACEHOLDER,
@@ -269,6 +269,7 @@ def _load_existing_style(filename: str):
                 'id': elem_id,
                 'key': key,
                 'mode': 'relative',
+                'placement': str(entry.get('placement', 'outside')),
                 'relative_to': str(entry.get('relative_to', 'exif')),
                 'relative_position': str(entry.get('relative_position', 'below')),
                 'alignment': str(entry.get('alignment', 'left')),
@@ -285,6 +286,7 @@ def _load_existing_style(filename: str):
                 'id': elem_id,
                 'key': key,
                 'mode': 'absolute',
+                'placement': str(entry.get('placement', 'outside')),
                 'position': str(entry.get('position', 'bottom-left')),
                 'alignment': str(entry.get('alignment', 'left')),
                 'margin_top': float(entry.get('margin_top', 0.0)),
@@ -301,16 +303,11 @@ def _load_existing_style(filename: str):
         elem_id += 1
     st.session_state.style_elements = elements if elements else [DEFAULT_ELEMENT.copy()]
 
-    # background_fill
-    bg = config.get('background_fill', {})
-    st.session_state.sc_bg_type = str(bg.get('type', 'gaussian_black_35'))
-    st.session_state.sc_bg_radius = int(bg.get('gaussian_blur_radius', 200))
-    st.session_state.sc_bg_opacity = int(bg.get('gaussian_blur_opacity', 35))
-
     # logo
     logo = config.get('logo', {})
     if isinstance(logo, dict):
         st.session_state.sc_logo_enabled = bool(logo.get('enabled', False))
+        st.session_state.sc_logo_placement = str(logo.get('placement', 'outside'))
         st.session_state.sc_logo_position = str(logo.get('position', 'top-right'))
         st.session_state.sc_logo_alignment = str(logo.get('alignment', 'top-right'))
         st.session_state.sc_logo_size = float(logo.get('size_ratio', 0.04))
@@ -318,6 +315,12 @@ def _load_existing_style(filename: str):
         st.session_state.sc_logo_mb = float(logo.get('margin_bottom', 0.0))
         st.session_state.sc_logo_ml = float(logo.get('margin_left', 0.0))
         st.session_state.sc_logo_mr = float(logo.get('margin_right', 0.0))
+        st.session_state.sc_logo_relative_to = str(logo.get('relative_to', ''))
+        st.session_state.sc_logo_relative_position = str(logo.get('relative_position', 'below'))
+        st.session_state.sc_logo_relative_margin = float(logo.get('relative_margin', 0.01))
+        st.session_state.sc_logo_offset_x = float(logo.get('offset_x_ratio', 0.0))
+        st.session_state.sc_logo_offset_y = float(logo.get('offset_y_ratio', 0.0))
+        st.session_state.sc_logo_mode = 'relative' if logo.get('relative_to') else 'absolute'
     else:
         st.session_state.sc_logo_enabled = False
 
@@ -396,48 +399,67 @@ def _render_fonts():
             st.text_input(k, key=f'sc_font_{k}', placeholder='留空=默认')
 
 
-def _render_background():
-    """背景填充"""
-    st.subheader('背景填充 background_fill')
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.selectbox('type', BG_TYPE_OPTIONS, key='sc_bg_type')
-    with c2:
-        st.number_input('gaussian_blur_radius', min_value=0, max_value=500,
-                        step=10, key='sc_bg_radius')
-    with c3:
-        st.number_input('gaussian_blur_opacity', min_value=0, max_value=100,
-                        step=5, key='sc_bg_opacity')
-
-
 def _render_logo():
     """Logo 配置"""
     st.subheader('Logo')
     st.checkbox('启用 Logo', key='sc_logo_enabled')
 
     if st.session_state.get('sc_logo_enabled'):
-        c1, c2, c3 = st.columns(3)
+        # 定位方式
+        mode_options = ['absolute', 'relative']
+        mode_idx = mode_options.index(st.session_state.get('sc_logo_mode', 'absolute'))
+        logo_mode = st.radio('定位方式', mode_options, index=mode_idx,
+                             horizontal=True, key='sc_logo_mode')
+
+        c1, c2 = st.columns(2)
         with c1:
-            st.selectbox('position', POSITION_OPTIONS, key='sc_logo_position')
-        with c2:
-            st.selectbox('alignment', ALIGNMENT_OPTIONS, key='sc_logo_alignment')
-        with c3:
             st.number_input('size_ratio', min_value=0.001, max_value=0.2,
                             step=0.001, format='%.3f', key='sc_logo_size')
+        with c2:
+            st.selectbox('alignment', ALIGNMENT_OPTIONS, key='sc_logo_alignment')
 
-        cols = st.columns(4)
-        with cols[0]:
-            st.number_input('margin_top', min_value=0.0, max_value=1.0,
-                            step=0.005, format='%.3f', key='sc_logo_mt')
-        with cols[1]:
-            st.number_input('margin_bottom', min_value=0.0, max_value=1.0,
-                            step=0.005, format='%.3f', key='sc_logo_mb')
-        with cols[2]:
-            st.number_input('margin_left', min_value=0.0, max_value=1.0,
-                            step=0.005, format='%.3f', key='sc_logo_ml')
-        with cols[3]:
-            st.number_input('margin_right', min_value=0.0, max_value=1.0,
-                            step=0.005, format='%.3f', key='sc_logo_mr')
+        if logo_mode == 'absolute':
+            c1, c2 = st.columns(2)
+            with c1:
+                st.selectbox('placement', PLACEMENT_OPTIONS, key='sc_logo_placement')
+            with c2:
+                st.selectbox('position', ANCHOR_POSITION_OPTIONS, key='sc_logo_position')
+
+            cols = st.columns(4)
+            with cols[0]:
+                st.number_input('margin_top', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_logo_mt')
+            with cols[1]:
+                st.number_input('margin_bottom', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_logo_mb')
+            with cols[2]:
+                st.number_input('margin_left', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_logo_ml')
+            with cols[3]:
+                st.number_input('margin_right', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_logo_mr')
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.selectbox('relative_to', ELEMENT_KEYS,
+                             index=ELEMENT_KEYS.index(st.session_state.get('sc_logo_relative_to', 'exif'))
+                             if st.session_state.get('sc_logo_relative_to', 'exif') in ELEMENT_KEYS else 0,
+                             key='sc_logo_relative_to')
+            with c2:
+                st.selectbox('relative_position', RELATIVE_POSITION_OPTIONS, key='sc_logo_relative_position')
+
+            c1, c2 = st.columns(2)
+            with c1:
+                st.number_input('relative_margin', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_logo_relative_margin')
+            with c2:
+                st.write('')
+
+            c1, c2 = st.columns(2)
+            with c1:
+                st.number_input('offset_x', step=0.001, format='%.3f', key='sc_logo_offset_x')
+            with c2:
+                st.number_input('offset_y', step=0.001, format='%.3f', key='sc_logo_offset_y')
 
 
 def _render_one_element(idx: int, elem: dict):
@@ -466,17 +488,27 @@ def _render_one_element(idx: int, elem: dict):
         if mode == 'absolute':
             c1, c2 = st.columns(2)
             with c1:
-                pos = st.selectbox('position', POSITION_OPTIONS,
-                                   index=POSITION_OPTIONS.index(elem['position'])
-                                   if elem['position'] in POSITION_OPTIONS else 0,
+                placement = st.selectbox('placement', PLACEMENT_OPTIONS,
+                                         index=PLACEMENT_OPTIONS.index(elem.get('placement', 'outside'))
+                                         if elem.get('placement', 'outside') in PLACEMENT_OPTIONS else 0,
+                                         key=f'elem_placement_{eid}')
+                st.session_state.style_elements[idx]['placement'] = placement
+            with c2:
+                pos = st.selectbox('position', ANCHOR_POSITION_OPTIONS,
+                                   index=ANCHOR_POSITION_OPTIONS.index(elem['position'])
+                                   if elem['position'] in ANCHOR_POSITION_OPTIONS else 0,
                                    key=f'elem_pos_{eid}')
                 st.session_state.style_elements[idx]['position'] = pos
-            with c2:
+
+            c1, c2 = st.columns(2)
+            with c1:
                 al = st.selectbox('alignment', ALIGNMENT_OPTIONS,
                                   index=ALIGNMENT_OPTIONS.index(elem['alignment'])
                                   if elem['alignment'] in ALIGNMENT_OPTIONS else 0,
                                   key=f'elem_align_{eid}')
                 st.session_state.style_elements[idx]['alignment'] = al
+            with c2:
+                st.write('')
 
             cols = st.columns(4)
             for j, (label, field) in enumerate(
@@ -650,6 +682,7 @@ def _collect_config() -> dict:
         key = elem['key']
         if elem['mode'] == 'absolute':
             entry = {
+                'placement': elem.get('placement', 'outside'),
                 'position': elem['position'],
                 'alignment': elem['alignment'],
                 'margin_top': elem.get('margin_top', 0.0),
@@ -673,26 +706,30 @@ def _collect_config() -> dict:
 
     data['layout'] = layout
 
-    # background_fill
-    data['background_fill'] = {
-        'type': st.session_state.get('sc_bg_type', 'gaussian_black_35'),
-        'gaussian_blur_radius': st.session_state.get('sc_bg_radius', 200),
-        'gaussian_blur_opacity': st.session_state.get('sc_bg_opacity', 35),
-    }
-
     # logo
     logo_enabled = st.session_state.get('sc_logo_enabled', False)
     if logo_enabled:
+        logo_mode = st.session_state.get('sc_logo_mode', 'absolute')
         logo = {
             'enabled': True,
-            'position': st.session_state.get('sc_logo_position', 'top-right'),
             'alignment': st.session_state.get('sc_logo_alignment', 'top-right'),
             'size_ratio': st.session_state.get('sc_logo_size', 0.04),
-            'margin_top': st.session_state.get('sc_logo_mt', 0.0),
-            'margin_bottom': st.session_state.get('sc_logo_mb', 0.0),
-            'margin_left': st.session_state.get('sc_logo_ml', 0.0),
-            'margin_right': st.session_state.get('sc_logo_mr', 0.0),
         }
+        if logo_mode == 'relative' and st.session_state.get('sc_logo_relative_to'):
+            logo['relative_to'] = st.session_state.get('sc_logo_relative_to', '')
+            logo['relative_position'] = st.session_state.get('sc_logo_relative_position', 'below')
+            logo['relative_margin'] = st.session_state.get('sc_logo_relative_margin', 0.01)
+            if st.session_state.get('sc_logo_offset_x', 0.0) != 0.0:
+                logo['offset_x_ratio'] = st.session_state.get('sc_logo_offset_x', 0.0)
+            if st.session_state.get('sc_logo_offset_y', 0.0) != 0.0:
+                logo['offset_y_ratio'] = st.session_state.get('sc_logo_offset_y', 0.0)
+        else:
+            logo['placement'] = st.session_state.get('sc_logo_placement', 'outside')
+            logo['position'] = st.session_state.get('sc_logo_position', 'top-right')
+            logo['margin_top'] = st.session_state.get('sc_logo_mt', 0.0)
+            logo['margin_bottom'] = st.session_state.get('sc_logo_mb', 0.0)
+            logo['margin_left'] = st.session_state.get('sc_logo_ml', 0.0)
+            logo['margin_right'] = st.session_state.get('sc_logo_mr', 0.0)
     else:
         logo = {'enabled': False}
     data['logo'] = logo
@@ -787,11 +824,7 @@ def render_style_creator_page():
     _render_fonts()
 
     st.markdown('---')
-    c1, c2 = st.columns(2)
-    with c1:
-        _render_background()
-    with c2:
-        _render_logo()
+    _render_logo()
 
     st.markdown('---')
     _render_colors()

@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.3.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
 
 ## 快速开始
 
@@ -52,7 +52,7 @@ streamlit run src/gui/app.py
 | `--font-weight` |        | 字体字重：`light` / `regular` / `medium` |
 | `--gui`         |        | 启动 Streamlit GUI 界面                        |
 
-`--bg-fill` 可选值：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
+`--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
 
 ## 功能特性
 
@@ -68,14 +68,13 @@ streamlit run src/gui/app.py
 - **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
 - **响应式布局**：画布扩展、文字大小、边距、间距均以原图长边比例为基准自适应
 - **绝对与相对定位**：元素可固定位置或相对于其他元素排列（after / below / left-of 等），拓扑排序自动解析依赖
-- **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色
+- **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
 
 ### 装饰元素
 
 - **边框**：可自定义宽度与颜色
 - **水印**：可自定义文字、位置、透明度与颜色
 - **Logo**：支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
-- **角落标记**：可自定义文本、位置与样式
 
 ### 使用方式
 
@@ -117,6 +116,7 @@ MiLeica_Frame/
 │   │   ├── config_manager.py    # 配置管理
 │   │   ├── font_manager.py      # 字体管理器
 │   │   ├── layout_engine.py     # 布局引擎
+│   │   ├── background_fill.py   # 背景填充管理器（v1.4.0）
 │   │   ├── logo_selector.py     # Logo选择器
 │   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
 │   │   ├── logging_config.py    # 日志配置
@@ -225,17 +225,18 @@ name: "样式名称"         # 必需字段，用于标识样式
   - 绝对定位与相对定位元素均受 padding 约束
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
-  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`, `camera_icon`
+  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`
   - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
     - **绝对定位**：
-      - `position`: 位置（inside, outside, top-left, top-right, bottom-left, bottom-right, top-center, bottom-center, top, bottom, left, right, center）
-      - `alignment`: 对齐方式（left, center, right, top-left, top-right, top, bottom）
+      - `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
+      - `position`: 锚点相对于原图边界的位置（`top-left`, `top-center`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom-center`, `bottom-right`, `top`, `bottom`）
+      - `alignment`: 元素自身对齐到锚点的方式（`left` 左对齐 / `center` 居中 / `right` 右对齐 / `top` / `bottom` / `top-left` / `top-right`）
       - `margin`: 传统边距（可选，用于向后兼容）
       - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
-        - **顶部文字**（如 camera, lens, camera_icon）：必须定义 `margin_top`
+        - **顶部文字**（如 camera, lens）：必须定义 `margin_top`
         - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
-        - **左对齐文字**（如 author, camera, lens, camera_icon）：必须定义 `margin_left`
+        - **左对齐文字**（如 author, camera, lens）：必须定义 `margin_left`
         - **右对齐文字**（如 location）：必须定义 `margin_right`
         - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
         - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
@@ -319,20 +320,13 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 
 ### 装饰元素配置 (decorations)
 
-装饰元素（边框、水印、Logo、角落标记）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+装饰元素（边框、水印、Logo）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
 
 - `border`: 边框（可自定义宽度和颜色）
 - `watermark`: 水印
 - `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
-- `corner_mark`: 角落标记
 
 在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
-
-### 背景填充配置 (background_fill)
-
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
-- `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
-- `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
 
 ## 核心功能规格
 
@@ -437,10 +431,11 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 - **画布扩展**：以原图长边比例扩展四边（`expand_canvas`），上下左右独立设置
 - **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
-- **绝对定位**：支持 `top-left` / `bottom-right` / `center` 等 14 种位置 + `left` / `center` / `right` 等对齐方式，独立四周 margin（比例或像素）
+- **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
 - **相对定位**（v1.2.0）：`relative_to` + `relative_position`（`below` / `above` / `right-of` / `left-of`），`relative_margin` 间距 + `offset` 微调
 - **拓扑排序**：基于 `relative_to` 依赖关系自动解析处理顺序（Kahn 算法），无需手动调整元素声明顺序
 - **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 从注册表读取最终坐标统一绘制，确保依赖有序、溢出可修正
+- **缺失参考元素保护**（v1.4.0）：当 `relative_to` 指向的元素因无文本被跳过时，自动以 0x0 尺寸预注册其绝对位置锚点，避免依赖元素降级为绝对定位导致位置偏移
 - **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素（及其全部从属）合并为组合盒，超出 padding 边界时整体平移，保持对齐关系不变
 
 #### 渲染器（FrameRenderer）
@@ -448,16 +443,55 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 `src/core/renderer.py` 负责图层合成与元素绘制：
 
 - **背景填充**：
+  - 由 `BackgroundFillManager` 统一管理（`src/utils/background_fill.py`），所有填充类型在 `FILL_TYPES` 注册表中集中定义
   - 纯色：`pure_black` / `pure_white`，覆盖含扩展区域的全画布
-  - 高斯模糊叠加：3-pass Box Blur 近似（O(n)），全分辨率等效半径默认 200px，大图自动降采样至 1200px 计算；float32 混合 + PIL 内置 Floyd-Steinberg 量化消除色彩断层
-  - 深色背景类型：`pure_black` / `gaussian_black_65` / `gaussian_black_35` / `gaussian_black`
-  - 浅色背景类型：`pure_white` / `gaussian_white_80` / `gaussian_white_50` / `gaussian_white`
-  - 新增类型只需加入对应列表，无需修改条件判断逻辑
+  - 高斯模糊叠加：3-pass Box Blur 近似（O(n)），全分辨率等效半径 200px，大图自动降采样至 1200px 计算；float32 混合 + PIL 内置 Floyd-Steinberg 量化消除色彩断层
+  - 每种填充类型同时声明 `text_scheme`（`dark`/`light`），渲染器通过 `BackgroundFillManager.is_dark_bg()` 自动适配文字颜色
+  - 支持运行时覆盖 `color`、`opacity`、`blur_radius` 参数，预留自定义背景注册接口 `register()`
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
 - **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
-- **Logo 渲染**：支持 PNG（需 RGBA 正方形），根据 `logo.size_ratio` 缩放，通过 `relative_to` 绝对/相对定位；Logo 在文字层之后渲染，确保可引用文字元素坐标
+- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 原图长边`），长边自动限制 ≤ `3 * size_ratio * 原图长边`（即隐含要求 Logo 长宽比 ≤ 3:1）。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
 - **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名
+
+#### 背景填充管理器 (BackgroundFillManager) (v1.4.0)
+
+`src/utils/background_fill.py` 是背景填充功能的**唯一入口**，集中管理所有填充类型的注册、查询和渲染。
+
+##### 核心职责
+
+- **类型注册**：所有可用背景类型在 `FILL_TYPES` 类属性中统一定义，包括纯色和高斯模糊两种方法
+- **GUI/CLI 统一**：`get_choices()` 返回 `{label: key}` 供 GUI 下拉框使用，`get_keys()` 返回 key 列表供 CLI argparse 使用
+- **深色/浅色判断**：`is_dark_bg(key)` 根据注册的 `text_scheme` 判断，供渲染器自动适配文字颜色
+- **背景渲染**：`render(image, w, h, fill_type)` 根据注册表配置创建背景图像
+- **预留扩展**：`register()` 方法支持运行时动态添加新填充类型
+
+##### 注册表结构
+
+```python
+FILL_TYPES = {
+    'pure_black': {
+        'label': '纯黑背景', 'method': 'solid',
+        'color': (0, 0, 0), 'text_scheme': 'dark'
+    },
+    'gaussian_black_65': {
+        'label': '模糊背景 (深色 65%)', 'method': 'gaussian',
+        'overlay_color': 'black', 'opacity': 65, 'blur_radius': 200,
+        'text_scheme': 'dark'
+    },
+    # ...
+}
+```
+
+##### 扩展方式
+
+```python
+# 新增背景类型只需注册，GUI 下拉和 CLI 自动同步
+BackgroundFillManager.register(
+    'pure_gray', label='纯灰背景', method='solid',
+    text_scheme='dark', color=(128, 128, 128)
+)
+```
 
 #### 装饰器（Decorator）
 
@@ -465,7 +499,6 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 - **边框**：自定义宽度（px）与颜色（RGB 元组），作用于原图外缘
 - **水印**：自定义文字内容、位置（9 种锚点）、不透明度（0-100%）、颜色
-- **角落标记**：自定义文本、位置与样式
 
 #### 样式变体系统（v1.3.0）
 

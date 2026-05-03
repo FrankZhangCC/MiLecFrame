@@ -31,6 +31,7 @@ layout:
     bottom: 0.00
   info_position:
     exif:
+      placement: outside
       position: "bottom-right"
       alignment: "center"
       margin_top: 0.01
@@ -43,21 +44,24 @@ layout:
       alignment: "left"
       relative_margin: 0.02
     camera:
-      position: "outside"
-      alignment: "top-left"
+      placement: outside
+      position: "top-left"
+      alignment: "left"
       margin_top: 0.02
       margin_bottom: 0.01
       margin_left: 0.00
       margin_right: 0.01
     lens:
-      position: "outside"
-      alignment: "top-left"
+      placement: outside
+      position: "top-left"
+      alignment: "left"
       margin_top: 0.045
       margin_bottom: 0.01
       margin_left: 0.00
       margin_right: 0.01
     author:
-      position: "outside"
+      placement: outside
+      position: "bottom-left"
       alignment: "left"
       margin_top: 0.01
       margin_bottom: 0.03
@@ -68,19 +72,9 @@ layout:
       relative_position: "below"
       alignment: "left"
       relative_margin: 0.02
-    camera_icon:
-      position: "outside"
-      alignment: "top-left"
-      margin_top: 0.02
-      margin_bottom: 0.01
-      margin_left: 0.02
-      margin_right: 0.01
-background_fill:
-  type: "gaussian_black_35"
-  gaussian_blur_radius: 200
-  gaussian_blur_opacity: 35
 logo:
   enabled: true
+  placement: outside
   position: "top-right"
   alignment: "top-right"
   size_ratio: 0.04
