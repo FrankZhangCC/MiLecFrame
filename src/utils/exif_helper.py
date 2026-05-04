@@ -5,7 +5,7 @@ EXIF信息处理辅助模块
 import piexif
 from PIL import Image
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 from .device_mapper import DeviceMapper
 
 
@@ -16,19 +16,18 @@ class ExifHelper:
         """初始化EXIF助手，创建设备映射器实例"""
         self.device_mapper = DeviceMapper()
     
-    def extract_exif_data(self, image_path: str) -> Optional[Dict[str, str]]:
+    def extract_exif_data(self, image_source: Union[str, bytes]) -> Optional[Dict[str, str]]:
         """
         提取图像的EXIF数据
         
         Args:
-            image_path: 图像文件路径
+            image_source: 图像文件路径(str)或图像二进制数据(bytes)
             
         Returns:
             EXIF数据字典，如果无法提取则返回None
         """
         try:
-            # 打开图像并获取EXIF数据
-            exif_dict = piexif.load(image_path)
+            exif_dict = piexif.load(image_source)
             
             # 提取所需字段
             exif_data = {}
@@ -95,6 +94,22 @@ class ExifHelper:
             print(f"EXIF提取错误: {str(e)}")
             return None
     
+    def extract_raw_exif(self, image_source: Union[str, bytes]) -> Optional[Dict]:
+        """
+        提取完整的原始EXIF字典（piexif格式），不做字段拆解
+        
+        Args:
+            image_source: 图像文件路径(str)或图像二进制数据(bytes)
+            
+        Returns:
+            完整的piexif EXIF字典，如果无法提取则返回None
+        """
+        try:
+            return piexif.load(image_source)
+        except Exception as e:
+            print(f"EXIF原始提取错误: {str(e)}")
+            return None
+
     def _safe_decode(self, byte_string):
         """
         安全解码字节串到字符串，尝试多种编码方式

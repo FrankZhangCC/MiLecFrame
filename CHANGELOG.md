@@ -2,7 +2,21 @@
 
 ## v1.4.0 (2026-05-04)
 
-> 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。
+> 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。**GUI 性能优化**：EXIF 读取零落盘、预览缩略图生成、临时文件生命周期管理。
+
+### EXIF 输出嵌入
+
+- `ImageProcessor._save_image()` 保存时自动将原始 EXIF 嵌入输出图像，通过 `piexif.dump(exif_dict)` 生成二进制数据传入 `image.save(exif=...)`
+- 输出扩展名自动判定保存格式（`.jpg` → JPEG, `.png` → PNG），不再依赖输入格式
+- `ExifHelper.extract_raw_exif()` 新增方法，返回完整 piexif 字典（不做字段拆解）供嵌入阶段使用
+- `ExifHelper.extract_exif_data()` 参数类型扩展为 `Union[str, bytes]`，支持直接传入图片二进制数据
+
+### GUI 性能优化
+
+- **消除 EXIF 临时文件**：上传图片的 EXIF 提取从"写入临时文件 → piexif 读取 → 删除"改为直接从 `uploaded_file.getvalue()` 的 bytes 读取，减少一次磁盘 I/O 及文件清理逻辑
+- **预览缩略图**：处理完成后在内存中将输出图缩放到 1200px 长边再传给 `st.image()`，大幅降低传输带宽（全分辨率 ~15MB → 缩略图 ~200KB）
+- **孤儿临时文件清理**：创建新 `temp_output_path` 前检查并删除旧输出临时文件，避免系统临时目录堆积
+- **悬空引用修复**：删除 `temp_input_path` 后将 `session_state.temp_input_path` 置为 `None`，避免后续代码误用已删除路径
 
 ### 背景填充管理器 (BackgroundFillManager) 🔴 新模块
 

@@ -108,6 +108,8 @@ class ImageProcessor:
                 self.logger.warning(warn_msg)
                 print(warn_msg)
             
+            raw_exif = self.exif_helper.extract_raw_exif(input_path)
+            
             # 获取格式化的EXIF数据用于显示（如果需要传递给renderer或后续处理）
             # 注意：如果renderer仍然需要原始exif_data，我们保留它。
             # 如果renderer更新为使用格式化后的文本，可以在这里准备。
@@ -156,7 +158,7 @@ class ImageProcessor:
             )
             
             # 10. 保存图像
-            self._save_image(rendered_image, output_path, img_format)
+            self._save_image(rendered_image, output_path, img_format, raw_exif)
             
             success_msg = f"成功处理图像: {input_path} -> {output_path}"
             self.logger.info(success_msg)
@@ -256,23 +258,40 @@ class ImageProcessor:
         return image
     
     def _save_image(self, image: Image.Image, output_path: str, 
-                    original_format: str) -> None:
+                    original_format: str, raw_exif: Optional[Dict] = None) -> None:
         """
         保存图像
-        
+
         Args:
             image: 要保存的图像
             output_path: 输出路径
             original_format: 原始图像格式
+            raw_exif: 原始EXIF字典（piexif格式），用于嵌入输出图
         """
         try:
-            # 确保输出目录存在
             output_dir = os.path.dirname(output_path)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            
-            # 保存图像
-            image.save(output_path, format=original_format, quality=95, optimize=True)
+
+            output_ext = os.path.splitext(output_path)[1].lower()
+            if output_ext in ('.jpg', '.jpeg'):
+                save_format = 'JPEG'
+                save_kwargs = {'quality': 95, 'optimize': True}
+            elif output_ext == '.png':
+                save_format = 'PNG'
+                save_kwargs = {'optimize': True}
+            else:
+                save_format = original_format
+                save_kwargs = {'quality': 95, 'optimize': True}
+
+            if raw_exif:
+                try:
+                    exif_bytes = piexif.dump(raw_exif)
+                    save_kwargs['exif'] = exif_bytes
+                except Exception as e:
+                    self.logger.warning(f"嵌入EXIF信息失败: {e}")
+
+            image.save(output_path, format=save_format, **save_kwargs)
         except Exception as e:
             error_msg = f"保存图像时出错: {str(e)}"
             self.logger.error(error_msg)

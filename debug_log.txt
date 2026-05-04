@@ -20623,3 +20623,221 @@
 2026-05-04 02:20:07,233 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
 2026-05-04 02:20:07,233 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 62 8192
 2026-05-04 02:20:08,694 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpnljv0lt4.jpg -> C:\Users\frank\AppData\Local\Temp\tmpdfsj9xv_.jpg
+2026-05-04 09:10:02,482 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:02,483 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:02,484 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:04,855 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:04,856 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:04,857 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:04,857 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:04,857 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:04,857 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:04,857 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:04,858 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:04,858 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:04,858 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:07,444 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:07,444 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:07,445 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:07,449 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:07,449 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:07,449 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:08,739 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:08,740 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:12,531 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:12,531 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:12,531 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,531 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:12,532 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:12,597 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:12,597 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:12,598 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,598 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,598 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:12,598 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:12,599 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:12,600 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:13,871 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:13,872 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:13,873 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:10:13,874 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:10:13,875 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Hasselblad', 'camera_model': 'X2D II 100C', 'lens_model': 'XCD 20-35E@35', 'focal_length': '35.0', 'aperture': '16.0', 'shutter_speed': '25.0', 'iso': '50', 'datetime_original': '2025.06.24 14:11:16'}
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 图像尺寸: (12005, 10257)
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 原始图像尺寸: (11656, 8742)
+2026-05-04 09:10:21,491 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/16.0, 25.0s, ISO50'), ('timestamp_author', '2025.06.24 14:11:16 by Frank Zhang'), ('camera_lens', 'Hasselblad X2D II 100C | XCD 20-35E@35'), ('location', '英国伦敦 ロンドン London UK')]
+2026-05-04 09:10:21,505 - src.core.renderer - DEBUG - [Pos] exif: calc=(233, 9324), bbox=(1709x154), config=bottom-left/left marg={'top': 0, 'bottom': 233, 'left': 0, 'right': 0}
+2026-05-04 09:10:21,505 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(9117, 9324), bbox=(2655x154), config=bottom-right/right marg={'top': 0, 'bottom': 233, 'left': 0, 'right': 0}
+2026-05-04 09:10:21,505 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(233, 9563), bbox=(2224x154), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-05-04 09:10:21,505 - src.core.renderer - DEBUG - [Pos] location: calc=(9957, 9563), bbox=(1815x186), config=?/right marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-05-04 09:10:21,524 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-04 09:10:22,663 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpjtvmrvty.jpg -> C:\Users\frank\AppData\Local\Temp\tmp30d0pga1.jpg
+2026-05-04 09:11:45,361 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:45,361 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:45,362 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:45,363 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:46,946 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:46,946 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:46,946 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:46,947 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:46,947 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:46,947 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:46,947 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:46,948 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:46,948 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:46,948 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:46,949 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:48,259 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:48,260 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:48,260 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:48,260 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:48,261 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:11:48,262 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Hasselblad', 'camera_model': 'X2D II 100C', 'lens_model': 'XCD 20-35E@35', 'focal_length': '35.0', 'aperture': '16.0', 'shutter_speed': '25.0', 'iso': '50', 'datetime_original': '2025.06.24 14:11:16'}
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 图像尺寸: (12005, 10257)
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 原始图像尺寸: (11656, 8742)
+2026-05-04 09:11:55,767 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/16.0, 25.0s, ISO50'), ('timestamp_author', '2025.06.24 14:11:16 by Frank Zhang'), ('camera_lens', 'Hasselblad X2D II 100C | XCD 20-35E@35'), ('location', '英国伦敦 ロンドン London UK')]
+2026-05-04 09:11:55,777 - src.core.renderer - DEBUG - [Pos] exif: calc=(233, 9324), bbox=(1748x154), config=bottom-left/left marg={'top': 0, 'bottom': 233, 'left': 0, 'right': 0}
+2026-05-04 09:11:55,777 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(9079, 9324), bbox=(2693x154), config=bottom-right/right marg={'top': 0, 'bottom': 233, 'left': 0, 'right': 0}
+2026-05-04 09:11:55,777 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(233, 9563), bbox=(2275x154), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-05-04 09:11:55,777 - src.core.renderer - DEBUG - [Pos] location: calc=(9953, 9563), bbox=(1819x186), config=?/right marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-05-04 09:11:55,788 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-04 09:11:56,913 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpji6tbdry.jpg -> C:\Users\frank\AppData\Local\Temp\tmply6e56pq.jpg
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:17:44,015 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:17:44,016 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'
+2026-05-04 09:17:44,016 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 110 - value: b'Hasselblad\x00'
+2026-05-04 09:17:44,016 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 122 - value: b'X2D II 100C\x00'
+2026-05-04 09:17:44,016 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 134 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:17:44,017 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 142 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-05-04 09:17:44,017 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-05-04 09:17:44,017 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 150 - value: <table: 51 bytes>
+2026-05-04 09:17:44,017 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 202 - value: b'2025:08:11 10:11:46\x00'
+2026-05-04 09:17:44,017 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xde\x00\x00\x00'

@@ -205,15 +205,8 @@ def render_image_processing_page():
             st.image(uploaded_file, caption="原始图片", width='stretch')
             
             # 显示文件信息和EXIF
-            # 保存临时文件以读取EXIF
-            temp_exif_path = None
             try:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp:
-                    tmp.write(uploaded_file.getvalue())
-                    temp_exif_path = tmp.name
-                
-                # 提取EXIF数据
-                exif_data = exif_helper.extract_exif_data(temp_exif_path)
+                exif_data = exif_helper.extract_exif_data(uploaded_file.getvalue())
                 
                 # 保存EXIF数据到session state
                 st.session_state.exif_data = exif_data
@@ -292,9 +285,6 @@ def render_image_processing_page():
                     
             except Exception as e:
                 st.warning(f"读取EXIF信息时出错: {str(e)}")
-            finally:
-                if temp_exif_path and os.path.exists(temp_exif_path):
-                    os.unlink(temp_exif_path)
                     
         else:
             st.info("👆 请先上传一张图片")
@@ -362,7 +352,12 @@ div.stButton > button:first-child {{
                             temp_input.write(uploaded_file.getvalue())
                             temp_input_path = temp_input.name
                         
-                        # 创建临时输出文件
+                        # 创建临时输出文件（先清理旧的）
+                        if st.session_state.temp_output_path and os.path.exists(st.session_state.temp_output_path):
+                            try:
+                                os.unlink(st.session_state.temp_output_path)
+                            except OSError:
+                                pass
                         output_ext = ".jpg" if output_format == "JPEG" else ".png"
                         with tempfile.NamedTemporaryFile(delete=False, suffix=output_ext) as temp_output:
                             temp_output_path = temp_output.name
@@ -417,9 +412,10 @@ div.stButton > button:first-child {{
                         st.code(error_details)
                     
                     finally:
-                        # 清理临时输入文件，保留输出文件供后续使用
+                        # 清理临时输入文件
                         if 'temp_input_path' in locals() and os.path.exists(temp_input_path):
                             os.unlink(temp_input_path)
+                            st.session_state.temp_input_path = None
             
             # 已有处理结果时始终显示预览
             if (st.session_state.processing_result and
@@ -440,7 +436,9 @@ div.stButton > button:first-child {{
                 else:
                     st.success("✅ 图片处理成功！")
 
-                st.image(st.session_state.temp_output_path, caption="添加相框后的图片", width='stretch')
+                preview_img = PILImage.open(st.session_state.temp_output_path)
+                preview_img.thumbnail((1200, 1200), PILImage.Resampling.LANCZOS)
+                st.image(preview_img, caption="添加相框后的图片", width='stretch')
             else:
                 if not st.session_state.processing_result:
                     st.info('👆 请配置选项并点击"生成相框"按钮')
