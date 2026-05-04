@@ -252,28 +252,25 @@ class LayoutEngine:
                 return int(longer_side * value)
             return int(value) if value is not None else None
 
-        margin_top = config.get('margin_top', None)
-        margin_bottom = config.get('margin_bottom', None)
-        margin_left = config.get('margin_left', None)
-        margin_right = config.get('margin_right', None)
-
-        if margin_top is None or margin_left is None:
-            margin = config.get('margin', 10)
-            if isinstance(margin, float):
-                margin = int(longer_side * margin)
-            margin_top = margin_left = margin_bottom = margin_right = int(margin)
+        # 统一 margin 作为初始值（向后兼容），未设置时默认为 0
+        unified = config.get('margin', None)
+        if unified is not None:
+            base = to_px(unified)
+            base = base if base is not None else 0
         else:
-            margin_top = to_px(margin_top) if to_px(margin_top) is not None else 0
-            margin_left = to_px(margin_left) if to_px(margin_left) is not None else 0
-            margin_bottom = to_px(margin_bottom) if to_px(margin_bottom) is not None else 0
-            margin_right = to_px(margin_right) if to_px(margin_right) is not None else 0
+            base = 0
 
-        return {
-            'top': margin_top or 0,
-            'bottom': margin_bottom or 0,
-            'left': margin_left or 0,
-            'right': margin_right or 0,
-        }
+        result = {'top': base, 'bottom': base, 'left': base, 'right': base}
+
+        # 逐方向覆盖：显式定义的独立 margin 值覆盖对应方向
+        for key in ('top', 'bottom', 'left', 'right'):
+            val = config.get(f'margin_{key}', None)
+            if val is not None:
+                px = to_px(val)
+                if px is not None:
+                    result[key] = px
+
+        return result
 
     def _shift_dependents(self, name: str, shift_x: int, shift_y: int):
         if name not in self._dependents:

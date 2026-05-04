@@ -93,3 +93,4 @@ assets/fonts/*
 data/camera_map.csv
 data/lens_map.csv
 debug_log.txt
+docs/FLUTTER_MIGRATION_PLAN.md

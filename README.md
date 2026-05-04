@@ -219,35 +219,86 @@ name: "样式名称"         # 必需字段，用于标识样式
 - `expand_canvas`: 扩展画布配置
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
-- `padding`: 叠加元素安全区域配置（v1.2.0 新增，优先级高于 margin）
+- `padding`: 叠加元素安全区域配置（v1.2.0 新增，**推荐优先使用 padding 控制全局边距**）
   - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于原图长边），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
-  - 绝对定位与相对定位元素均受 padding 约束
+  - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`
   - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
-    - **绝对定位**：
-      - `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
-      - `position`: 锚点相对于原图边界的位置（`top-left`, `top-center`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom-center`, `bottom-right`, `top`, `bottom`）
-      - `alignment`: 元素自身对齐到锚点的方式（`left` 左对齐 / `center` 居中 / `right` 右对齐 / `top` / `bottom` / `top-left` / `top-right`）
-      - `margin`: 传统边距（可选，用于向后兼容）
-      - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
-        - **顶部文字**（如 camera, lens）：必须定义 `margin_top`
-        - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
-        - **左对齐文字**（如 author, camera, lens）：必须定义 `margin_left`
-        - **右对齐文字**（如 location）：必须定义 `margin_right`
-        - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
-        - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
-    - **相对定位**（v1.2.0 新增）：
-      - `relative_to`: 参考元素名称（如 `"exif"`, `"author"`），设置后 `position` 和独立 margin 失效
-      - `relative_position`: 相对位置，可选 `after`/`below`（下方）、`before`/`above`（上方）、`right-of`（右侧）、`left-of`（左侧）
-      - `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 0.01
-      - `alignment`: 在相对方向垂直轴上的对齐（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
-      - `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（默认 0）
-  - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
-  - 元素注册顺序由拓扑排序自动解析，无需手动调整
+  - 元素的定位参数见下方 [定位方式](#定位方式)
+
+#### 定位方式
+
+元素的定位方式分为绝对定位和相对定位，二者互斥（`relative_to` 有值时优先采用相对定位）。
+
+##### 绝对定位
+
+以**原始图片边界**为参考坐标系，元素通过锚点绑定到图片边界上，再通过 margin 偏移。
+
+- `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
+  - `inside`：元素绘制在原图矩形内部，margin 从边界向内偏移
+  - `outside`：元素绘制在原图矩形外部，margin 从边界向外偏移
+- `position`: 锚点相对于原图边界的位置，支持 14 种：
+  `top-left` / `tl`, `top-center` / `tc`, `top-right` / `tr`, `top`, `left`, `center`, `right`, `bottom-left` / `bl`, `bottom-center` / `bc`, `bottom-right` / `br`, `bottom`
+  - 注：`center` 锚点以画布中心为基准，不受 `placement` / margin 影响
+- `alignment`: 元素自身对齐到锚点的方式（`left` / `center` / `right` / `top` / `bottom` / `top-left` / `top-right`）
+
+**margin 边距体系**：
+
+margin 是元素相对于原始图片对应边界的偏移距离，每个方向**独立计算、互不影响**。
+
+- `margin`：统一边距，值为浮点数时按原图长边比例计算（如 `0.02` = 长边的 2%），值为整数时表示绝对像素。未设置时默认 `0`
+  - 此为向后兼容选项，设置后覆盖四个方向的初始值
+- `margin_top` / `margin_bottom` / `margin_left` / `margin_right`：独立四周边距，每个方向分别覆盖 `margin` 统一值
+  - 值类型规则与 `margin` 相同：浮点数 → 比例，整数 → 像素，不设默认 `0`
+  - 四个方向**完全独立**，不存在互斥激活条件，可以只定义需要的方向
+  - **推荐使用浮点数比例**（如 `0.03` 表示长边的 3%）以保持响应式设计特性
+- 计算优先级：`margin_*`（逐方向精调）> `margin`（统一兜底）> 默认 `0`
+- 全局约束：padding 对最终坐标有截断权，margin 的计算结果可能被 padding clamp 修正
+
+定位元素在 `info_position` 中的绝对定位声明示例：
+
+```yaml
+camera_lens:
+  placement: outside
+  position: "bottom-left"
+  alignment: "left"
+  margin_top: 0.01
+  margin_bottom: 0.022
+  margin_left: 0.02
+  margin_right: 0.01
+```
+
+##### 相对定位
+
+以**另一已注册元素**为参考坐标系，元素相对于该参考元素排列。
+
+- `relative_to`: 参考元素名称（如 `"exif"`, `"camera_lens"`）。有值时 `position` 和 `margin_*` 系列失效，转而使用相对定位
+- `relative_position`: 相对位置：
+  `after` / `below`（下方）、`before` / `above`（上方）、`right-of`（右侧）、`left-of`（左侧）
+- `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 `0.01`，**推荐使用浮点数比例**
+- `alignment`: 在相对方向垂直轴上的对齐方式（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
+- `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（相对于原图长边，默认 `0`）
+
+定位元素在 `info_position` 中的相对定位声明示例：
+
+```yaml
+timestamp_author:
+  relative_to: "camera_lens"
+  relative_position: "below"
+  alignment: "left"
+  relative_margin: 0.010
+```
+
+##### 定位系统行为规范
+
+- 元素注册顺序由拓扑排序（Kahn 算法）自动解析，基于 `relative_to` 依赖关系决定处理顺序，无需手动调整
+- 缺失参考元素保护（v1.4.0）：当 `relative_to` 指向的元素因无文本被跳过时，以其绝对定位参数预注册 0×0 锚点，避免依赖元素降级偏移
+- 组合盒溢出保护（v1.2.0）：相对定位元素与参考元素（及其全部从属）合并为组合盒，超出 padding 边界时整体平移，保持对齐关系不变
+- 所有定位坐标均以原图长边比例为基准，确保响应式自适应
 
 ### 渲染上下文 (RenderContext)
 
