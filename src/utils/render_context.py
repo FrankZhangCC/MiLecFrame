@@ -29,7 +29,7 @@ class RenderContext:
         """根据 key 返回对应的显示文本，无数据时返回 None
 
         支持的 key:
-            exif, timestamp, timestamp_author, camera_lens, camera, lens, author, location
+            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps
         """
         if key == 'exif':
             return self._display_data.get('exif_formatted') or None
@@ -49,12 +49,17 @@ class RenderContext:
                 return combined
         elif key == 'camera':
             return self._display_data.get('camera_combined') or None
+        elif key == 'camera_make':
+            return self._display_data.get('camera_make') or None
         elif key == 'lens':
             return self._display_data.get('lens_model') or None
         elif key == 'author':
             return self.author or None
         elif key == 'location':
             return self.location or None
+        elif key == 'gps':
+            if self.exif_data and 'gps' in self.exif_data:
+                return self.exif_data['gps']
         return None
 
     @property

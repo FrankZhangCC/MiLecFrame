@@ -89,7 +89,22 @@ def render_image_processing_page():
             config_manager.save_user_author(author)
         
         # 拍摄地点输入
-        location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
+        # 检查当前图片是否包含 GPS 信息
+        has_gps = False
+        gps_string = ""
+        if 'exif_data' in st.session_state and st.session_state.exif_data:
+            gps_string = st.session_state.exif_data.get('gps', '')
+            has_gps = bool(gps_string)
+        
+        # GPS 替换选项：仅当图片包含 GPS 数据时可勾选
+        use_gps = st.checkbox("使用 GPS 坐标替换拍摄地点", disabled=not has_gps,
+                              key='use_gps_location')
+        
+        if use_gps and has_gps:
+            st.info(f"GPS 坐标: {gps_string}")
+            location = gps_string
+        else:
+            location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
         
         # 边框配置
         enable_border = st.checkbox("添加边框", key='enable_border')

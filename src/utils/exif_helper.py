@@ -86,6 +86,17 @@ class ExifHelper:
                     formatted_date = ExifHelper._format_datetime(date_str)
                     exif_data['datetime_original'] = formatted_date
             
+            # GPS 信息提取
+            # piexif 将 GPS 数据存储在 "GPS" IFD 中，经纬度以 Rational 元组存储：
+            #   GPSLatitude: ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+            #   GPSLongitude: 同上
+            #   GPSLatitudeRef: b'N' 或 b'S'
+            #   GPSLongitudeRef: b'E' 或 b'W'
+            gps_str, gps_raw = ExifHelper._extract_gps(exif_dict)
+            if gps_str:
+                exif_data['gps'] = gps_str
+                exif_data['gps_raw'] = gps_raw
+            
             # 将设备信息记录到CSV文件中
             self._record_device_info(exif_data)
             
@@ -272,7 +283,7 @@ class ExifHelper:
             formatted_data['lens_model'] = mapped_lens
         
         # 其他非设备信息保持不变
-        for key in ['focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original']:
+        for key in ['focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
             if key in exif_data:
                 formatted_data[key] = exif_data[key]
         
@@ -296,11 +307,15 @@ class ExifHelper:
         
         display_data = {}
         
-        # 组合相机型号（品牌+型号）
+        # 组合相机型号（品牌+型号），同时保留映射后的品牌供 render_context 暴露
         if 'camera_make' in formatted_exif and 'camera_model' in formatted_exif:
             camera_make = formatted_exif['camera_make']
             camera_model = formatted_exif['camera_model']
+            display_data['camera_make'] = camera_make
             display_data['camera_combined'] = f"{camera_make} {camera_model}"
+        elif 'camera_make' in formatted_exif:
+            display_data['camera_make'] = formatted_exif['camera_make']
+            display_data['camera_combined'] = formatted_exif['camera_make']
         elif 'camera_model' in formatted_exif:
             display_data['camera_combined'] = formatted_exif['camera_model']
         
@@ -322,7 +337,7 @@ class ExifHelper:
         display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)
         
         # 添加原始数据用于GUI展示
-        for key in ['camera_make', 'camera_model', 'focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original']:
+        for key in ['camera_make', 'camera_model', 'focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
             if key in exif_data:
                 display_data[f'raw_{key}'] = exif_data[key]
         
@@ -366,6 +381,82 @@ class ExifHelper:
         except ValueError:
             # 如果解析失败，返回原始字符串
             return datetime_str
+    
+    @staticmethod
+    def _extract_gps(exif_dict: dict) -> Tuple[Optional[str], Optional[dict]]:
+        """
+        从 EXIF 字典中提取 GPS 信息并格式化为度分秒 (DMS) 字符串
+        
+        piexif 将 GPS 坐标存储为 Rational 元组：
+          GPSLatitude:  ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+          GPSLongitude: 同上
+          GPSLatitudeRef:  b'N' 或 b'S'（bytes 类型）
+          GPSLongitudeRef: b'E' 或 b'W'（bytes 类型）
+        
+        Args:
+            exif_dict: piexif.load() 返回的完整 EXIF 字典
+            
+        Returns:
+            (gps_dms_string, raw_gps_dict) 或 (None, None)
+        """
+        if 'GPS' not in exif_dict:
+            return None, None
+        
+        gps = exif_dict['GPS']
+        
+        # 提取经纬度坐标和方向标识
+        lat = gps.get(piexif.GPSIFD.GPSLatitude)
+        lat_ref = gps.get(piexif.GPSIFD.GPSLatitudeRef)
+        lon = gps.get(piexif.GPSIFD.GPSLongitude)
+        lon_ref = gps.get(piexif.GPSIFD.GPSLongitudeRef)
+        
+        # 四个字段缺一不可
+        if not all([lat, lat_ref, lon, lon_ref]):
+            return None, None
+        
+        # 确保坐标是三个 Rational 元组的格式
+        if not (isinstance(lat, tuple) and len(lat) == 3):
+            return None, None
+        if not (isinstance(lon, tuple) and len(lon) == 3):
+            return None, None
+        
+        # 分别格式化为 DMS 字符串
+        lat_str = ExifHelper._format_dms(lat, lat_ref)
+        lon_str = ExifHelper._format_dms(lon, lon_ref)
+        
+        gps_str = f"{lat_str} {lon_str}"
+        
+        # 收集原始 GPS 数据（含海拔）
+        raw = {
+            'latitude': lat,
+            'latitude_ref': lat_ref,
+            'longitude': lon,
+            'longitude_ref': lon_ref,
+        }
+        
+        return gps_str, raw
+    
+    @staticmethod
+    def _format_dms(coords: tuple, ref) -> str:
+        """
+        将 piexif Rational 坐标元组格式化为度分秒 (DMS) 字符串
+        
+        Args:
+            coords: ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+            ref: 方向标识 (b'N'/b'S'/b'E'/b'W' 或字符串)
+            
+        Returns:
+            格式化后的 DMS 字符串，如 "40°26'46.1\"N"
+        """
+        # 将 Rational 元组转为浮点数：值 = 分子 / 分母
+        deg = float(coords[0][0]) / float(coords[0][1])
+        min_val = float(coords[1][0]) / float(coords[1][1])
+        sec = float(coords[2][0]) / float(coords[2][1])
+        
+        # 方向标识可能是 bytes，需解码
+        ref_str = ref.decode('ascii') if isinstance(ref, bytes) else str(ref)
+        
+        return f"{int(deg)}°{int(min_val)}'{sec:.1f}\"{ref_str}"
     
     @staticmethod
     def format_exif_for_display(exif_data: Dict[str, str]) -> str:

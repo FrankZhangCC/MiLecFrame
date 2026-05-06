@@ -1,5 +1,75 @@
 # 更新历史
 
+## v1.4.1 (2026-05-06)
+
+> 本版本修复布局引擎 margin 积弊、扩展 alignment 组合格式支持、新增 GPS 坐标提取与 GUI 替换选项。
+
+### 布局引擎 margin 逻辑修复
+
+- **移除布尔闸门**：`_resolve_margins()` 旧逻辑使用 `if margin_top is None or margin_left is None` 作为二选一互斥开关，导致仅定义部分方向时全部独立 margin 值被静默丢弃、回退到统一 `margin`
+- 新逻辑改为**逐方向独立回退**：统一 `margin` 作为初始值（未设默认 0），`margin_top` / `margin_bottom` / `margin_left` / `margin_right` 各自覆盖对应方向，不存在互斥激活条件
+- 向后兼容：所有现有 YAML 配置均定义了完整四个 margin 方向，计算结果不变
+- 影响：新配置可以只定义需要的方向（如仅 `margin_bottom: 0.03`），其余默认 0
+
+### alignment 组合格式扩展
+
+- `_align_x()` 新增 `bottom-left`（→ 左对齐）、`top-right` / `bottom-right`（→ 右对齐）
+- `_align_y()` 新增带 `-left`/`-right` 后缀的组合格式（`top-left` / `top-right` → 顶对齐，`bottom-left` / `bottom-right` → 底对齐）
+- 组合格式在各轴向上独立解析方向语义，互不干扰
+
+### 相对定位 alignment 文档修正
+
+- README 中相对定位 `alignment` 描述从模糊的"垂直轴对齐"改为按 `relative_position` 方向明确说明：
+  - `after`/`below`/`before`/`above` → 控制**水平**方向，以参考元素宽度为基准
+  - `right-of`/`left-of` → 控制**垂直**方向，以参考元素高度为基准
+- 补充说明相对定位 alignment 以参考元素边界计算，与绝对定位 margin_* 无关
+
+### 定位方式文档结构重构
+
+- README 样式配置规范中新增 `#### 定位方式` (H4) 独立标题
+- 下设 `##### 绝对定位` 和 `##### 相对定位` (H5) 子章节，从原 `info_position` 三级列表项中提升
+- 定位系统行为规范（拓扑排序、缺失参考保护、组合盒溢出）独立为 `##### 定位系统行为规范`
+- margin 体系从"必需"措辞改为逐方向独立描述，补充 float=比例 / int=像素 的详细计算规则和推荐优先级
+
+### GPS 坐标提取 (EXIF GPS IFD) 🟢 新功能
+
+- `ExifHelper._extract_gps()` 新增静态方法，从 piexif `"GPS"` IFD 中提取经纬度 Rational 元组
+- `ExifHelper._format_dms()` 新增静态方法，将 `((deg_num,deg_den), (min_num,min_den), (sec_num,sec_den))` 格式化为度分秒字符串（如 `40°26'46.1"N 79°56'56.1"W`）
+- `extract_exif_data()` 在 Exif 信息提取完成后自动调用 GPS 提取，写入 `exif_data['gps']` 和 `exif_data['gps_raw']`
+- `get_formatted_exif_for_display()` 和 `get_display_data()` 透传 `gps` 字段
+- 方向标识（`b'N'`/`b'S'`/`b'E'`/`b'W'`）自动 bytes 解码
+
+### GPS 渲染与 GUI 集成
+
+- `RenderContext.get_text('gps')` 新增 key，从 `exif_data['gps']` 返回 DMS 格式化坐标字符串
+- 样式 YAML 中声明 `gps` 即可渲染 GPS 坐标（与 GUI checkbox 独立）
+- 样式配置规范中 `info_position` 支持的元素类型、fonts.sizes、color 覆盖列表均新增 `gps`
+- GUI 拍摄地点输入上方新增 "使用 GPS 坐标替换拍摄地点" checkbox
+  - 图片含 GPS 数据时可选，无 GPS 时灰显 (`disabled=True`)
+  - 勾选后显示 GPS 坐标信息，`location` 自动填充为 GPS DMS 字符串
+  - 未勾选时保持手动 `st.text_input` 输入
+
+### camera_make 独立暴露与 Logo 匹配统一
+
+- `get_display_data()` 新增 `display_data['camera_make']`，存储 device_mapper 映射后的相机品牌（如 "Leica"、"Nikon"），不再仅用于拼接 `camera_combined` 后丢弃
+- `RenderContext.get_text('camera_make')` 新增 key，返回映射后品牌字符串
+- 样式 YAML 中声明 `camera_make` 即可独立显示品牌（与 `camera` 返回"品牌 型号"区分）
+- Logo 自动匹配链路重构：renderer 不再通过 `ExifHelper.get_camera_brand(exif_data)` 直接读取原始 EXIF，改为 `context.get_text('camera_make')` 经 RenderContext 统一获取
+- 匹配时对返回值 `.lower()` 处理，与 LogoSelector 子串匹配逻辑保持一致
+- 样式配置规范中 `info_position` 支持的元素类型、fonts.sizes、color 覆盖列表均新增 `camera_make`
+
+### Logo 文档修正
+
+- README 中"装饰元素不通过样式配置 YAML 定义"的描述修正为区分三种装饰元素的配置来源：border/watermark 完全由外部参数控制，Logo 采用混合模式（YAML 定义布局/尺寸/定位，GUI/CLI 决定文件选择）
+- 新增 Logo 配置文档小节，列出 `logo:` 节所有支持字段及默认值
+
+### Logo 长边限制收紧
+
+- `renderer._add_logo()` 中长边上限从 `3 × size_ratio × 原图长边` 收紧为 `2.5 × size_ratio × 原图长边`，降低细长 Logo 的视觉失控风险
+- `assets/logos/README.md` 中形状建议同步从 `≤ 3:1` 改为 `≤ 2.5:1`
+
+---
+
 ## v1.4.0 (2026-05-04)
 
 > 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。**GUI 性能优化**：EXIF 读取零落盘、预览缩略图生成、临时文件生命周期管理。

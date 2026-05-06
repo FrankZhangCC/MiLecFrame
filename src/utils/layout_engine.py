@@ -226,9 +226,9 @@ class LayoutEngine:
         ox: int, ow: int, ew: int,
         m: Dict[str, int]
     ) -> int:
-        if alignment in ('left', 'top-left'):
+        if alignment in ('left', 'top-left', 'bottom-left'):
             return ox + m['left']
-        if alignment == 'right':
+        if alignment in ('right', 'top-right', 'bottom-right'):
             return ox + ow - ew - m['right']
         return ox + (ow - ew) // 2
 
@@ -238,9 +238,9 @@ class LayoutEngine:
         oy: int, oh: int, eh: int,
         m: Dict[str, int]
     ) -> int:
-        if alignment == 'top':
+        if alignment in ('top', 'top-left', 'top-right'):
             return oy + m['top']
-        if alignment == 'bottom':
+        if alignment in ('bottom', 'bottom-left', 'bottom-right'):
             return oy + oh - eh - m['bottom']
         return oy + (oh - eh) // 2
 
