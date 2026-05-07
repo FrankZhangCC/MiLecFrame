@@ -52,7 +52,7 @@ logo:
   relative_to: "exif"
   relative_position: "left-of"
   alignment: "center"
-  relative_margin: 0.013
-  size_ratio: 0.045
+  relative_margin: 0.016
+  size_ratio: 0.048
   offset_y_ratio: 0.013
 name: 照片底部信息水印

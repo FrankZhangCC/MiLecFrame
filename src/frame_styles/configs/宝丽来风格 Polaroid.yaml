@@ -9,10 +9,10 @@ fonts:
   weight: medium
   size_ratio: 0.01
   sizes:
-    exif: 0.017
-    timestamp_author: 0.017
-    camera_lens: 0.017
-    location: 0.017
+    exif: 0.018
+    timestamp_author: 0.018
+    camera_lens: 0.018
+    location: 0.018
 layout:
   expand_canvas:
     enabled: true

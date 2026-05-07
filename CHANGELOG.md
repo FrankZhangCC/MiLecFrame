@@ -55,12 +55,12 @@
 - GUI 文件信息区域从内联 PIL/ICC 提取逻辑改为调用 `exif_helper.get_file_info(pil_img)`，与 `get_display_data(exif_data)` 并列组成统一数据出口
 - 遵循项目既有架构规范：所有显示数据均通过 ExifHelper 集中提供，GUI 层只负责渲染
 
-### 响应式参照边切换 🟡 架构变更
+### 边框功能移除 🟡 架构清理
 
-- 全局响应式基准从 `max(width, height)`（原图长边）切换为 `min(width, height)`（原图短边），统一命名为 `reference_side`
-- 影响范围：`LayoutEngine`、`FontManager`、`FrameRenderer`（Logo 尺寸）、`Decorator`（水印边距）——共 4 个文件约 6 处 `max`→`min` 修改
-- 变量命名统一：`original_longer_side` / `longer_side` → `reference_side`
-- 样式配置中的 `size_ratio` / `margin` 等比例参数需手动重新校准（同一比例值在长/短边基准下实际像素不同）
+- `decorator.py` 删除 `add_border()` 方法及 dispatch 分支，边框功能已无调用方
+- `image_processing_page.py` 删除边框 UI 控件（checkbox / slider / selectbox）及关联配置条目
+- `image_processor.py` 删除 docstring 中边框示例
+- Logo 在 README 中从"装饰元素"独立为 `### Logo` 小节，明确其独立渲染管线定位（YAML `logo:` 节 + 文字层之后渲染 + `LogoSelector` 独立工具类）
 
 ### README 更新
 

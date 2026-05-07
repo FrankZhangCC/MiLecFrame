@@ -66,7 +66,6 @@ class ImageProcessor:
             bg_fill_type: 背景填充类型
             decorations: 装饰元素列表。每个元素是一个字典，包含 'type' 和 'params'。
                          例如水印: {'type': 'watermark', 'params': {'text': '...', 'position': '...', 'opacity': 0.5, 'color': '#FFFFFF'}}
-                         例如边框: {'type': 'border', 'params': {'width': 10, 'color': '#000000'}}
             font_weight: 字体字重 (light, regular, medium)
             logo_filename: logo文件名
             

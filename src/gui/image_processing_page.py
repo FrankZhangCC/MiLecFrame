@@ -106,19 +106,6 @@ def render_image_processing_page():
         else:
             location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
         
-        # 边框配置
-        enable_border = st.checkbox("添加边框", key='enable_border')
-        border_width = 0
-        border_color = (255, 255, 255)
-        if enable_border:
-            col_b1, col_b2 = st.columns(2)
-            with col_b1:
-                border_width = st.slider("边框宽度 (px)", 1, 20, 5, key='border_width')
-            with col_b2:
-                border_color_option = st.selectbox("边框颜色", ["白色", "黑色", "灰色"], key='border_color')
-                color_map = {"白色": (255, 255, 255), "黑色": (0, 0, 0), "灰色": (128, 128, 128)}
-                border_color = color_map[border_color_option]
-        
         # 水印配置
         enable_watermark = st.checkbox("添加水印", key='enable_watermark')
         watermark_text = ""
@@ -328,9 +315,6 @@ def render_image_processing_page():
             current_config = {
                 'selected_style': selected_style,
                 'selected_bg_fill': selected_bg_fill,
-                'enable_border': enable_border,
-                'border_width': border_width,
-                'border_color': border_color,
                 'enable_watermark': enable_watermark,
                 'watermark_text': watermark_text,
                 'watermark_position': watermark_position,
@@ -395,14 +379,6 @@ div.stButton > button:first-child {{
                         
                         # 构建装饰元素列表
                         decorations = []
-                        if enable_border:
-                            decorations.append({
-                                'type': 'border',
-                                'params': {
-                                    'width': border_width,
-                                    'color': border_color
-                                }
-                            })
                         if enable_watermark and watermark_text:
                             decorations.append({
                                 'type': 'watermark',

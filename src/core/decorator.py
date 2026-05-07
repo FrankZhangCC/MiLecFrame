@@ -1,6 +1,6 @@
 """
 装饰元素处理模块
-负责处理相框中的装饰元素，如边框、水印、徽标等
+负责处理相框中的装饰元素，如水印等
 """
 from typing import Tuple, Dict, Optional, List
 from PIL import Image, ImageDraw, ImageFont
@@ -16,34 +16,6 @@ class Decorator:
             font_manager: FontManager实例，用于统一字体加载
         """
         self.font_manager = font_manager
-    def add_border(
-        self, 
-        image: Image.Image, 
-        width: int = 5, 
-        color: Tuple[int, int, int] = (255, 255, 255)
-    ) -> Image.Image:
-        """
-        为图像添加边框
-        
-        Args:
-            image: 输入图像
-            width: 边框宽度
-            color: 边框颜色
-            
-        Returns:
-            添加边框后的图像
-        """
-        # 创建新图像，尺寸稍大以容纳边框
-        new_width = image.width + 2 * width
-        new_height = image.height + 2 * width
-        
-        # 创建带边框的背景
-        bordered_img = Image.new('RGB', (new_width, new_height), color=color)
-        
-        # 将原图粘贴到中心位置
-        bordered_img.paste(image, (width, width))
-        
-        return bordered_img
 
     def add_watermark(
         self, 
@@ -218,9 +190,7 @@ class Decorator:
             decor_type = decoration.get('type')
             params = decoration.get('params', {})
             
-            if decor_type == 'border':
-                result_img = self.add_border(result_img, **params)
-            elif decor_type == 'watermark':
+            if decor_type == 'watermark':
                 result_img = self.add_watermark(
                     result_img, 
                     original_image_size=original_image_size, 
