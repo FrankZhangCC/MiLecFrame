@@ -358,6 +358,7 @@ div.stButton > button:first-child {{
             """, unsafe_allow_html=True)
             
             # 生成相框按钮
+            output_ext = ".jpg" if output_format == "JPEG" else ".png"
             if st.button(button_label, key='process_button'):
                 st.session_state.button_clicked = True
                 with st.spinner("正在处理图片..."):
@@ -373,7 +374,6 @@ div.stButton > button:first-child {{
                                 os.unlink(st.session_state.temp_output_path)
                             except OSError:
                                 pass
-                        output_ext = ".jpg" if output_format == "JPEG" else ".png"
                         with tempfile.NamedTemporaryFile(delete=False, suffix=output_ext) as temp_output:
                             temp_output_path = temp_output.name
                         

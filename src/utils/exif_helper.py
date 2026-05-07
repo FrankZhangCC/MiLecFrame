@@ -233,14 +233,14 @@ class ExifHelper:
             if not lens_recorded:
                 header_exists = lens_map_file.exists()
                 with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
-                    fieldnames = ['original_lens', 'mapped_lens']
+                    fieldnames = ['original_lens', 'mapped_lens', 'short_lens']
                     writer = csv.writer(csvfile)
                     
                     if not header_exists:
                         writer.writerow(fieldnames)
                     
                     # 默认情况下，映射值等于原始值
-                    writer.writerow([original_lens, original_lens])
+                    writer.writerow([original_lens, original_lens, original_lens])
     
     def get_formatted_exif_for_display(self, exif_data: Dict[str, str]) -> Dict[str, str]:
         """
@@ -281,7 +281,9 @@ class ExifHelper:
         if 'lens_model' in exif_data:
             original_lens = exif_data['lens_model']
             mapped_lens = self.device_mapper.get_mapped_lens(original_lens)
+            short_lens = self.device_mapper.get_short_lens(original_lens)
             formatted_data['lens_model'] = mapped_lens
+            formatted_data['short_lens'] = short_lens
         
         # 其他非设备信息保持不变
         for key in ['focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
@@ -353,6 +355,8 @@ class ExifHelper:
         # 添加镜头型号
         if 'lens_model' in formatted_exif:
             display_data['lens_model'] = formatted_exif['lens_model']
+        if 'short_lens' in formatted_exif:
+            display_data['short_lens'] = formatted_exif['short_lens']
         
         # 合并相机+镜头为单行输出（用于样式配置中 camera_lens 元素）
         camera_str = display_data.get('camera_combined', '')
@@ -363,6 +367,15 @@ class ExifHelper:
             display_data['camera_lens_combined'] = camera_str
         elif lens_str:
             display_data['camera_lens_combined'] = lens_str
+
+        # 竖幅/方形图片专用：相机 + 短版镜头合并
+        short_lens_str = display_data.get('short_lens', '')
+        if camera_str and short_lens_str:
+            display_data['camera_lens_combined_short'] = f"{camera_str} | {short_lens_str}"
+        elif camera_str:
+            display_data['camera_lens_combined_short'] = camera_str
+        elif short_lens_str:
+            display_data['camera_lens_combined_short'] = short_lens_str
         
         # 添加格式化的曝光参数
         display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)

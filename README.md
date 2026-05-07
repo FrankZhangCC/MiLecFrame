@@ -141,7 +141,7 @@ MiLeica_Frame/
 │   └── fonts/              # 字体文件
 ├── data/                   # 数据文件
 │   ├── camera_map.csv      # 相机品牌型号映射
-│   └── lens_map.csv        # 镜头映射
+│   └── lens_map.csv        # 镜头映射（原始 → 映射 → 短版）
 ├── tests/                  # 测试文件
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
@@ -229,7 +229,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
-  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
+  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"（横幅）或 "品牌 型号 | 短镜头"（竖幅）；`camera` + `lens` 则分开两行；`lens` 在竖幅时自动使用短版名称
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
 
@@ -330,22 +330,26 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化        |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间      |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并    |
-| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头, 竖幅=相机+短镜头 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号      |
 | `camera_make`      | `"Leica"`                                      | 映射后相机品牌     |
-| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号           |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称 |
 | `author`           | `"Frank"`                                      | 用户输入           |
 | `location`         | `"Shanghai"`                                   | 用户输入           |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）    |
 
-#### 竖向/方形图片自动适配（v1.5.0暂时取消该功能）
+#### 竖向/方形图片自动适配
 
-当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
+当检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，`lens` 和 `camera_lens` 自动使用短版镜头名称，避免竖幅窄图空间不足时文字过长的问题。
 
-此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+此逻辑内聚在 `RenderContext` 中：
 
-- 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
-- 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
+| key            | 横向图片                                 | 竖向/方形图片                              |
+| -------------- | ---------------------------------------- | ------------------------------------------ |
+| `camera_lens`  | `"品牌 型号 \| 镜头"`（完整合并格式）    | `"品牌 型号 \| 短镜头"`（相机 + 短版镜头） |
+| `lens`         | `"镜头"`（完整镜头名）                   | `"短镜头"`（短版镜头名）                   |
+
+短版镜头名在 `lens_map.csv` 的 `short_lens` 列中配置，未配置时自动回退到 `mapped_lens`。
 
 #### 新增显示字段指南
 
@@ -465,23 +469,24 @@ text = context.get_text('camera_lens')  # 一行调用获取最终显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化曝光参数                          |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间                                |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并（作者为空时仅显示时间）      |
-| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 相机+镜头合并，竖向/方形图片自动替换为仅相机 |
+| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头，竖幅=相机+短镜头 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号                                |
 | `camera_make`      | `"Leica"`                                      | 映射后相机品牌（v1.4.1）                     |
-| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号                                     |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称                   |
 | `author`           | `"Frank"`                                      | 用户输入                                     |
 | `location`         | `"Shanghai"`                                   | 用户输入                                     |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS 度分秒格式化坐标（v1.4.1）          |
 
-**相机信息的三级字段**（`get_display_data()` 内部构造，按粒度递增）：
+**相机信息的四级字段**（`get_display_data()` 内部构造，按粒度递增）：
 
-| 内部字段                 | 对外 key        | 输出示例                       | 说明               |
-| ------------------------ | --------------- | ------------------------------ | ------------------ |
-| `camera_make`          | `camera_make` | `"Leica"`                    | 映射后品牌名       |
-| `camera_combined`      | `camera`      | `"Leica Q3"`                 | 品牌 + 型号        |
-| `camera_lens_combined` | `camera_lens` | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 镜头 |
+| 内部字段                 | 对外 key        | 输出示例                       | 说明                             |
+| ------------------------ | --------------- | ------------------------------ | -------------------------------- |
+| `camera_make`          | `camera_make` | `"Leica"`                    | 映射后品牌名                     |
+| `camera_combined`      | `camera`      | `"Leica Q3"`                 | 品牌 + 型号                      |
+| `camera_lens_combined` | `camera_lens` | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 镜头（横幅默认）   |
+| `short_lens`           | `lens` (竖幅) | `"Summilux 28mm"`            | 短版镜头名（竖幅时 `lens` 使用） |
 
-**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`camera_lens` 自动替换为 `camera`（仅显示相机型号），避免竖幅窄图空间不足。
+**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`lens` 自动替换为短版镜头名（`short_lens`），`camera_lens` 自动替换为 `"相机 | 短镜头"`。短版名称在 `lens_map.csv` 的 `short_lens` 列中配置。
 
 **新增显示字段**：只需在 `RenderContext.get_text()` 添加 `elif key == 'xxx':` 分支 + 在 YAML 的 `info_position` 中声明配置，渲染器零改动。
 

@@ -62,6 +62,15 @@
 - `image_processor.py` 删除 docstring 中边框示例
 - Logo 在 README 中从"装饰元素"独立为 `### Logo` 小节，明确其独立渲染管线定位（YAML `logo:` 节 + 文字层之后渲染 + `LogoSelector` 独立工具类）
 
+### 短版镜头名称映射 + 竖幅自适应恢复 🟢 新功能
+
+- `lens_map.csv` 新增 `short_lens` 第三列，为每个镜头配置短版名称（如 `"Summilux 28mm"`），未配置时自动回退到 `mapped_lens`
+- `DeviceMapper` 新增 `short_lens_map` 字典和 `get_short_lens()` 方法，`add_lens_mapping()` 同步支持 `short_lens` 参数
+- `ExifHelper.get_formatted_exif_for_display()` / `get_display_data()` 输出 `short_lens` 字段
+- `RenderContext` 恢复并改造竖幅/方形图片自动适配：`lens` 竖幅时使用短版名称，`camera_lens` 竖幅时使用 `"相机 | 短镜头"` 格式
+- `lens_map.csv` 旧格式（无 `short_lens` 列）自动兼容，回退使用 `mapped_lens` 作为短版名
+- 镜头映射管理页面新增"短版名称"列显示和编辑
+
 ### README 更新
 
 - 版本号 1.4.1 → 1.5.0

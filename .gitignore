@@ -90,8 +90,7 @@ config.ini
 # Assets that are tracked elsewhere
 assets/fonts/*
 !assets/fonts/.gitkeep
-data/camera_map.csv
-data/lens_map.csv
 debug_log.txt
 docs/FLUTTER_MIGRATION_PLAN.md
 docs/LayoutInstruction_排版定位系统参数图解.ai
+test_images
