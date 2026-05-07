@@ -335,7 +335,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `location`         | `"Shanghai"`                                   | 用户输入           |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）    |
 
-#### 竖向/方形图片自动适配
+#### 竖向/方形图片自动适配（v1.5.0暂时取消该功能）
 
 当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
 
@@ -494,11 +494,11 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 #### 支持的格式
 
-| 类别     | 格式                                         | 处理方式                            |
-| -------- | -------------------------------------------- | ----------------------------------- |
-| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                        |
-| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR     |
-| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB、Display P3 等 | 自动 ICC 数学转换至 sRGB |
+| 类别     | 格式                                         | 处理方式                        |
+| -------- | -------------------------------------------- | ------------------------------- |
+| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                    |
+| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR |
+| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB、Display P3 等   | 自动 ICC 数学转换至 sRGB        |
 
 #### 尺寸限制
 

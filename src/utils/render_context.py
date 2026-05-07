@@ -43,10 +43,10 @@ class RenderContext:
                 return f"{ts} by {auth}" if auth else ts
         elif key == 'camera_lens':
             combined = self._display_data.get('camera_lens_combined')
-            if combined:
-                if self.is_vertical_or_square and self._display_data.get('camera_combined'):
-                    return self._display_data['camera_combined']
-                return combined
+            # if combined:
+            #     if self.is_vertical_or_square and self._display_data.get('camera_combined'):
+            #         return self._display_data['camera_combined']
+            return combined
         elif key == 'camera':
             return self._display_data.get('camera_combined') or None
         elif key == 'camera_make':
