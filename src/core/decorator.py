@@ -188,8 +188,10 @@ class Decorator:
         
         # 合并图层
         watermarked_img = Image.alpha_composite(base_img, txt_layer)
-        
-        return watermarked_img.convert('RGB')
+
+        background = Image.new('RGB', watermarked_img.size, (255, 255, 255))
+        background.paste(watermarked_img, mask=watermarked_img.split()[-1])
+        return background
 
     def apply_decorations(
         self, 

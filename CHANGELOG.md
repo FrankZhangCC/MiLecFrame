@@ -1,5 +1,70 @@
 # 更新历史
 
+## v1.5.0 (2026-05-07)
+
+> 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。
+
+### 色彩空间转换管线重构 🔴 关键修复
+
+- **ICC 转换前置**：`_convert_colorspace()` 将 ICC profile 转换从"模式转换之后"改为"模式转换之前"，避免 16-bit TIFF 的 `.convert('RGB')` 截断后再转换导致的精度损失
+- **渲染意图显式指定**：`profileToProfile()` 新增 `renderingIntent=ImageCms.Intent.PERCEPTUAL`，解决默认意图可能导致的 ProPhoto RGB 高饱和区域色域裁剪伪影
+- **日志可视化**：新增 `ImageCms.getProfileDescription()` 日志输出，可在调试日志中明确看到检测到的 ICC 色彩空间名称和转换成功/失败状态
+- 覆盖所有嵌入式 ICC 色彩空间（Adobe RGB、ProPhoto RGB、Display P3、DCI-P3、Apple Image P3 等），通过 ICC profile 精确数学转换至 sRGB
+
+### TIFF 保存路径修复 🔴 致命缺陷
+
+- `_save_image` else 分支原先将 `quality=95, optimize=True` 硬编码传入所有非 JPEG/PNG 格式的 `image.save()`，TIFF 写入器不接受这两个参数，直接抛 `TypeError` 导致处理中断
+- else 分支 `save_kwargs` 改为空字典 `{}`，消除 TIFF 输出硬性崩溃
+
+### 输出嵌入 sRGB ICC Profile 🟡
+
+- `process()` 在 `_convert_colorspace` 完成后捕获转换产生的 sRGB ICC 字节（`image.info['icc_profile']`），渲染后传入 `_save_image` 的 `icc_profile` 参数显式写入输出文件
+- 确保输出文件始终携带正确的色彩空间标记，下游专业软件不再误判
+
+### Pillow 12.2.0 API 兼容性修复 🔴 关键修复
+
+- Pillow 12.2.0 的 `ImageCms.ImageCmsProfile` 不接受 raw bytes，必须用 `io.BytesIO()` 包装为类文件对象传递
+- `_convert_colorspace` 和 GUI 原始预览的 ICC profile 处理统一使用 `io.BytesIO(icc_profile)` 替代直接传 bytes
+- `ImageCms.Intent.PERCEPTUAL` 的 API 路径为 `ImageCms.Intent` 枚举（非 PIL 旧版的 `ImageCms.INTENT_PERCEPTUAL` 顶层常量）
+- 修复前上述两处 API 不兼容均在 `except Exception` 中被静默捕获，回退到原始像素值（ProPhoto RGB 未转换），导致色彩空间转换看似生效实则完全失败
+
+### GUI 原始预览色彩校正 🔴 用户体验
+
+- 原始图片预览（`st.image()`）新增 ICC 检测与转换：先获取 `uploaded_file.getvalue()`，PIL 打开 → 检测 ICC → `profileToProfile` 转 sRGB → 再交给 Streamlit 渲染
+- 解决 ProPhoto RGB TIFF / Display P3 JPEG 上传后预览颜色偏灰的问题
+
+### 下载文件名匹配 🔴 用户体验
+
+- 下载文件名从 `framed_{原始文件名}`（保留 `.tiff` 等原始后缀）改为 `framed_{stem}{输出扩展名}`
+- 例如上传 `photo.tiff` 选择 JPEG 输出 → 下载文件名为 `framed_photo.jpg`，文件名与内容格式一致
+
+### 水印展平安全化
+
+- `decorator.add_watermark()` 中 `watermarked_img.convert('RGB')` 使用默认黑色背景展平 RGBA → 替换为显式白色背景 `Image.new('RGB', ..., (255,255,255))` + `paste(mask=alpha)`
+- 消除透明像素被混合到黑色上的潜在暗边问题
+
+### GUI 文件信息区域 🟢 新功能
+
+- 原始图片预览下方新增 `📋 文件信息` 区域，3 列展示：编码格式（JPEG/PNG/TIFF 等）、色彩空间（ProPhoto RGB / sRGB / Adobe RGB 等）、像素尺寸（宽×高 px）
+- 色彩空间通过 `ImageCms.getProfileDescription()` 读取嵌入式 ICC profile 描述，无 ICC 标记时显示 `sRGB（默认）`
+- PIL Image 对象一次性打开，供文件信息 + 预览 ICC 转换复用，消除重复读取
+
+### 文件元数据统一出口
+
+- `ExifHelper` 新增 `get_file_info(image)` 静态方法，返回 `{format, color_space, width, height}` 字典
+- GUI 文件信息区域从内联 PIL/ICC 提取逻辑改为调用 `exif_helper.get_file_info(pil_img)`，与 `get_display_data(exif_data)` 并列组成统一数据出口
+- 遵循项目既有架构规范：所有显示数据均通过 ExifHelper 集中提供，GUI 层只负责渲染
+
+### README 更新
+
+- 版本号 1.4.1 → 1.5.0
+- 处理管线第 5 步"色彩空间检测 → 非 sRGB 转换"修正为"色彩空间检测 → 非 sRGB ICC 数学转换"
+- 输出嵌入 sRGB ICC profile 在保存步骤中体现
+- GUI 界面上传描述新增"文件信息（编码格式 / 色彩空间 / 像素尺寸）"
+- EXIF 架构文档新增 `get_file_info(image)` 静态方法描述，与 `get_display_data()` 并列组成统一数据出口
+
+---
+
 ## v1.4.1 (2026-05-06)
 
 > 本版本修复布局引擎 margin 积弊、扩展 alignment 组合格式支持、新增 GPS 坐标提取与 GUI 替换选项。

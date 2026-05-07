@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.4.1-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.5.0-blue)
 
 ## 快速开始
 
@@ -60,7 +60,7 @@ streamlit run src/gui/app.py
 
 - **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间、GPS 坐标（度分秒格式化）
 - **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF 等 HDR 格式
-- **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB 自动识别并转换至 sRGB
+- **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB / Display P3 等嵌入式 ICC 色彩空间自动数学转换至 sRGB
 
 ### 相框与布局
 
@@ -442,6 +442,8 @@ EXIF Helper（解析原始二进制 → 纯净字段，_safe_decode 多编码容
 
 统一数据出口 `exif_helper.get_display_data()`，同时提供 `raw_*`（原始值，GUI 设备信息区展示）和映射后字段（相机/镜头组合、格式化曝光参数），确保 GUI 预览与最终渲染数据一致。
 
+`exif_helper.get_file_info(image)` 提供文件级元数据（编码格式 / 色彩空间 / 像素尺寸），与 `get_display_data()` 并列组成统一数据出口，GUI 文件信息区域仅消费此方法的返回值。
+
 #### 渲染上下文（RenderContext）
 
 `src/utils/render_context.py` 是渲染文本数据的**统一入口**，将数据准备逻辑从渲染器中完全解耦：
@@ -496,7 +498,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 | -------- | -------------------------------------------- | ----------------------------------- |
 | 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                        |
 | HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR     |
-| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB                  | 自动识别，非 sRGB 警告并转换至 sRGB |
+| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB、Display P3 等 | 自动 ICC 数学转换至 sRGB |
 
 #### 尺寸限制
 
@@ -512,10 +514,10 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 2. HDR 检测 → HDRHandler 预处理（Gainmap/UltraHDR/HEIF/AVIF）
 3. EXIF 提取（piexif + 多编码解码）→ 设备映射 → 记录到 camera_map.csv / lens_map.csv
 4. 尺寸验证 → 超限等比缩小
-5. 色彩空间检测 → 非 sRGB 转换
+5. 色彩空间检测 → 非 sRGB ICC 数学转换
 6. 加载样式配置（StyleManager，含变体上下文匹配）
 7. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
-8. 保存输出（JPEG/PNG，quality=95，optimize=True，自动嵌入原始 EXIF）
+8. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
 ```
 
 ---
@@ -609,7 +611,7 @@ BackgroundFillManager.register(
 
 基于 Streamlit 的 Web 界面（`src/gui/app.py`），提供以下功能区域：
 
-- **图片上传与预览**：支持拖拽上传，实时显示原图及 EXIF 信息（设备信息 + 拍摄参数 + 相框显示预览）；上传阶段 EXIF 直接从内存读取，无需落盘临时文件
+- **图片上传与预览**：支持拖拽上传，实时显示原图及文件信息（编码格式 / 色彩空间 / 像素尺寸）和 EXIF 信息（设备信息 + 拍摄参数 + 相框显示预览）；上传阶段 EXIF 直接从内存读取，无需落盘临时文件
 - **缩略图预览**：处理完成后自动生成 1200px 长边缩略图用于页面预览，大幅降低传输带宽；下载按钮提供全分辨率原始输出
 - **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
 - **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；边框（宽度/颜色）、水印（内容/位置/透明度/颜色）独立控制

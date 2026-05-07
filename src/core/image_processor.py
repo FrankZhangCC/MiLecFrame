@@ -3,11 +3,12 @@
 负责图像的基本处理、色彩空间转换、尺寸调整等
 """
 import os
+import io
 import logging
 from pathlib import Path
 from typing import Tuple, Optional, Dict, List
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageCms, ImageDraw, ImageFont
 # 设置PIL最大图像像素限制，解决解压炸弹警告
 Image.MAX_IMAGE_PIXELS = 200000000  # 2亿像素，可根据需要调整
 
@@ -126,6 +127,7 @@ class ImageProcessor:
             
             # 6. 处理色彩空间
             image = self._convert_colorspace(image)
+            sRGB_icc_bytes = image.info.get('icc_profile')
             
             # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
@@ -158,7 +160,7 @@ class ImageProcessor:
             )
             
             # 10. 保存图像
-            self._save_image(rendered_image, output_path, img_format, raw_exif)
+            self._save_image(rendered_image, output_path, img_format, raw_exif, sRGB_icc_bytes)
             
             success_msg = f"成功处理图像: {input_path} -> {output_path}"
             self.logger.info(success_msg)
@@ -233,18 +235,40 @@ class ImageProcessor:
     def _convert_colorspace(self, image: Image.Image) -> Image.Image:
         """
         转换图像色彩空间到sRGB
-        
+
+        处理流程：
+        1. ICC 色彩配置文件转换（Adobe RGB / ProPhoto RGB / Display P3 等 → sRGB）
+        2. 像素模式转换（P/RGBA/LA/非RGB → RGB）
+
         Args:
             image: 原始图像
-            
+
         Returns:
-            转换后的图像
+            转换后的 sRGB 图像
         """
+        icc_profile = image.info.get('icc_profile')
+
+        # 步骤1: ICC色彩空间转换（前置，在模式转换之前保留原始位深）
+        if icc_profile:
+            try:
+                icc_stream = io.BytesIO(icc_profile)
+                profile_desc = ImageCms.getProfileDescription(icc_stream)
+                self.logger.info(f"检测到ICC色彩空间: {profile_desc}，转换为sRGB")
+                icc_stream.seek(0)
+                srgb_profile = ImageCms.createProfile('sRGB')
+                image = ImageCms.profileToProfile(
+                    image, icc_stream, srgb_profile,
+                    outputMode='RGB',
+                    renderingIntent=ImageCms.Intent.PERCEPTUAL
+                )
+                self.logger.info("ICC色彩空间转换成功")
+            except Exception as e:
+                self.logger.warning(f"ICC色彩空间转换失败，使用像素模式转换: {e}")
+
+        # 步骤2: 像素模式转换（此时已在sRGB空间内）
         if image.mode in ('RGBA', 'LA', 'P'):
-            # 保留透明通道的图像需要特殊处理
             if image.mode == 'P':
                 image = image.convert('RGBA')
-            # 对于有透明通道的图像，我们先转为RGB
             if image.mode in ('RGBA', 'LA'):
                 background = Image.new('RGB', image.size, (255, 255, 255))
                 if image.mode == 'RGBA':
@@ -254,11 +278,12 @@ class ImageProcessor:
                 image = background
         elif image.mode != 'RGB':
             image = image.convert('RGB')
-        
+
         return image
     
     def _save_image(self, image: Image.Image, output_path: str, 
-                    original_format: str, raw_exif: Optional[Dict] = None) -> None:
+                    original_format: str, raw_exif: Optional[Dict] = None,
+                    icc_profile_bytes: Optional[bytes] = None) -> None:
         """
         保存图像
 
@@ -267,6 +292,7 @@ class ImageProcessor:
             output_path: 输出路径
             original_format: 原始图像格式
             raw_exif: 原始EXIF字典（piexif格式），用于嵌入输出图
+            icc_profile_bytes: sRGB ICC profile字节，用于嵌入输出图
         """
         try:
             output_dir = os.path.dirname(output_path)
@@ -282,7 +308,11 @@ class ImageProcessor:
                 save_kwargs = {'optimize': True}
             else:
                 save_format = original_format
-                save_kwargs = {'quality': 95, 'optimize': True}
+                save_kwargs = {}
+
+            # 嵌入 sRGB ICC profile
+            if icc_profile_bytes:
+                save_kwargs['icc_profile'] = icc_profile_bytes
 
             if raw_exif:
                 try:

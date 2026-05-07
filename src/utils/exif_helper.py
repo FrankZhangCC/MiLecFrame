@@ -2,8 +2,9 @@
 EXIF信息处理辅助模块
 负责提取、解析和格式化照片的EXIF信息
 """
+import io
 import piexif
-from PIL import Image
+from PIL import Image, ImageCms
 from datetime import datetime
 from typing import Dict, Optional, Tuple, Union
 from .device_mapper import DeviceMapper
@@ -288,7 +289,37 @@ class ExifHelper:
                 formatted_data[key] = exif_data[key]
         
         return formatted_data
-    
+
+    @staticmethod
+    def get_file_info(image: Image.Image) -> Dict[str, str]:
+        """
+        提取图像文件级元数据（格式、色彩空间、像素尺寸）
+
+        Args:
+            image: PIL Image 对象
+
+        Returns:
+            包含 format, color_space, width, height 的字典
+        """
+        img_format = image.format or "未知"
+        img_width, img_height = image.size
+
+        icc = image.info.get('icc_profile')
+        if icc:
+            try:
+                color_space = ImageCms.getProfileDescription(io.BytesIO(icc))
+            except Exception:
+                color_space = "未知色彩空间"
+        else:
+            color_space = "sRGB（默认）"
+
+        return {
+            'format': img_format,
+            'color_space': color_space,
+            'width': img_width,
+            'height': img_height,
+        }
+
     def get_display_data(self, exif_data: Dict[str, str]) -> Dict[str, str]:
         """
         获取用于显示的数据，包括相机型号（品牌+型号）和镜头型号的组合
