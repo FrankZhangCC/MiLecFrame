@@ -2,7 +2,7 @@
 
 ## v1.5.0 (2026-05-07)
 
-> 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。
+> 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
 
 ### 色彩空间转换管线重构 🔴 关键修复
 
@@ -54,6 +54,13 @@
 - `ExifHelper` 新增 `get_file_info(image)` 静态方法，返回 `{format, color_space, width, height}` 字典
 - GUI 文件信息区域从内联 PIL/ICC 提取逻辑改为调用 `exif_helper.get_file_info(pil_img)`，与 `get_display_data(exif_data)` 并列组成统一数据出口
 - 遵循项目既有架构规范：所有显示数据均通过 ExifHelper 集中提供，GUI 层只负责渲染
+
+### 响应式参照边切换 🟡 架构变更
+
+- 全局响应式基准从 `max(width, height)`（原图长边）切换为 `min(width, height)`（原图短边），统一命名为 `reference_side`
+- 影响范围：`LayoutEngine`、`FontManager`、`FrameRenderer`（Logo 尺寸）、`Decorator`（水印边距）——共 4 个文件约 6 处 `max`→`min` 修改
+- 变量命名统一：`original_longer_side` / `longer_side` → `reference_side`
+- 样式配置中的 `size_ratio` / `margin` 等比例参数需手动重新校准（同一比例值在长/短边基准下实际像素不同）
 
 ### README 更新
 

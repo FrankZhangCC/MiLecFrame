@@ -396,17 +396,17 @@ class FrameRenderer:
             return image
         
         original_image_size = layout_engine.original_image_size
-        longer_side = max(original_image_size)
+        reference_side = min(original_image_size)
 
         size_ratio = logo_config.get('size_ratio', 0.05)
 
         logo_width, logo_height = logo.size
         logo_short_side = min(logo_width, logo_height)
-        target_short_side = int(longer_side * size_ratio)
+        target_short_side = int(reference_side * size_ratio)
         scale = target_short_side / logo_short_side
 
-        # 长边上限：防止细长条Logo失控，上限为原图长边的 2.5*size_ratio
-        max_long_side = int(longer_side * 2.5 * size_ratio)
+        # Logo 长边上限保护：防止细长条 Logo 失控
+        max_long_side = int(reference_side * 2.5 * size_ratio)
         logo_long_side = max(logo_width, logo_height)
         if logo_long_side * scale > max_long_side:
             scale = max_long_side / logo_long_side

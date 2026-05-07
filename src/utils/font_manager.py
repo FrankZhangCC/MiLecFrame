@@ -72,7 +72,7 @@ class FontManager:
         force_chinese: bool = None
     ) -> ImageFont.FreeTypeFont:
         """
-        加载响应式字体，使用原始图像的长边作为计算基准
+         加载响应式字体，使用原始图像的参照边（短边）作为计算基准
 
         Args:
             fonts_config: 字体配置
@@ -92,8 +92,8 @@ class FontManager:
 
         size_ratio = specific_size_ratio if specific_size_ratio is not None else fonts_config.get('size_ratio', 0.015)
 
-        longer_side = max(original_image_size)
-        font_size = max(12, int(longer_side * size_ratio))
+        reference_side = min(original_image_size)
+        font_size = max(12, int(reference_side * size_ratio))
 
         if force_chinese is not None:
             contains_chinese = force_chinese

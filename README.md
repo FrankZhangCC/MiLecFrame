@@ -66,7 +66,7 @@ streamlit run src/gui/app.py
 
 - **多种相框样式**：JSON / YAML / TOML 配置文件，支持单文件或文件夹变体组织
 - **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
-- **响应式布局**：画布扩展、文字大小、边距、间距均以原图长边比例为基准自适应
+- **响应式布局**：画布扩展、文字大小、边距、间距均以原图参照边（短边）比例为基准自适应
 - **绝对与相对定位**：元素可固定位置或相对于其他元素排列（after / below / left-of 等），拓扑排序自动解析依赖
 - **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
 
@@ -220,7 +220,7 @@ name: "样式名称"         # 必需字段，用于标识样式
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
 - `padding`: 叠加元素安全区域配置（v1.2.0 新增，**推荐优先使用 padding 控制全局边距**）
-  - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于原图长边），默认值为 0（= 画布边界）
+  - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
 - `info_position`: 信息位置配置
@@ -253,12 +253,12 @@ name: "样式名称"         # 必需字段，用于标识样式
 
 margin 是元素相对于原始图片对应边界的偏移距离，每个方向**独立计算、互不影响**。
 
-- `margin`：统一边距，值为浮点数时按原图长边比例计算（如 `0.02` = 长边的 2%），值为整数时表示绝对像素。未设置时默认 `0`
+- `margin`：统一边距，值为浮点数时按参照边（短边）比例计算（如 `0.02` = 参照边的 2%），值为整数时表示绝对像素。未设置时默认 `0`
   - 此为向后兼容选项，设置后覆盖四个方向的初始值
 - `margin_top` / `margin_bottom` / `margin_left` / `margin_right`：独立四周边距，每个方向分别覆盖 `margin` 统一值
   - 值类型规则与 `margin` 相同：浮点数 → 比例，整数 → 像素，不设默认 `0`
   - 四个方向**完全独立**，不存在互斥激活条件，可以只定义需要的方向
-  - **推荐使用浮点数比例**（如 `0.03` 表示长边的 3%）以保持响应式设计特性
+  - **推荐使用浮点数比例**（如 `0.03` 表示参照边（短边）的 3%）以保持响应式设计特性
 - 计算优先级：`margin_*`（逐方向精调）> `margin`（统一兜底）> 默认 `0`
 - 全局约束：padding 对最终坐标有截断权，margin 的计算结果可能被 padding clamp 修正
 
@@ -282,12 +282,12 @@ camera_lens:
 - `relative_to`: 参考元素名称（如 `"exif"`, `"camera_lens"`）。有值时 `position` 和 `margin_*` 系列失效，转而使用相对定位
 - `relative_position`: 相对位置：
   `after` / `below`（下方）、`before` / `above`（上方）、`right-of`（右侧）、`left-of`（左侧）
-- `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 `0.01`，**推荐使用浮点数比例**
+- `relative_margin`: 与参考元素的间距比例（相对于参照边（短边）），默认 `0.01`，**推荐使用浮点数比例**
 - `alignment`: 元素在参考元素范围内的对齐方式，默认 `center`
   - `relative_position` 为 `after` / `below` / `before` / `above` 时，控制**水平方向**：`left`（左对齐）、`right`（右对齐）、其他值居中，以参考元素宽度为基准
   - `relative_position` 为 `right-of` / `left-of` 时，控制**垂直方向**：`top`（顶对齐）、`bottom`（底对齐）、其他值居中，以参考元素高度为基准
   - 注：相对定位中的 `alignment` 以参考元素边界计算，与绝对定位的 `margin_*` 无关
-- `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（相对于原图长边，默认 `0`）
+- `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（相对于参照边（短边），默认 `0`）
 
 定位元素在 `info_position` 中的相对定位声明示例：
 
@@ -304,7 +304,7 @@ timestamp_author:
 - 元素注册顺序由拓扑排序（Kahn 算法）自动解析，基于 `relative_to` 依赖关系决定处理顺序，无需手动调整
 - 缺失参考元素保护（v1.4.0）：当 `relative_to` 指向的元素因无文本被跳过时，以其绝对定位参数预注册 0×0 锚点，避免依赖元素降级偏移
 - 组合盒溢出保护（v1.2.0）：相对定位元素与参考元素（及其全部从属）合并为组合盒，超出 padding 边界时整体平移，保持对齐关系不变
-- 所有定位坐标均以原图长边比例为基准，确保响应式自适应
+- 所有定位坐标均以参照边（短边）比例为基准，确保响应式自适应
 
 ### 渲染上下文 (RenderContext)
 
@@ -372,8 +372,8 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 - `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
 - `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
   - 可通过命令行 `--font-weight` 参数运行时覆盖
-- `size_ratio`: 默认字体大小比例（相对于原图长边像素数）
-- `sizes`: 各类信息的独立字体大小比例（相对于原图长边）
+- `size_ratio`: 默认字体大小比例（相对于参照边（短边）像素数）
+- `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
   - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 未设置的字段默认使用 `size_ratio`
 
@@ -394,7 +394,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 ```yaml
 logo:
   enabled: true                 # 是否启用
-  size_ratio: 0.05              # 短边占原图长边比例
+  size_ratio: 0.05              # 短边占参照边（短边）比例
   placement: outside            # inside / outside
   position: "bottom-right"      # 14 种锚点位置
   alignment: "center"           # 对齐方式
@@ -410,7 +410,7 @@ logo:
   offset_y_ratio: 0
 ```
 
-- Logo 短边 = `size_ratio × 原图长边`，长边自动限制 ≤ `2.5 × size_ratio × 原图长边`（防止细长 Logo 失控），默认 `size_ratio = 0.05`
+- Logo 短边 = `size_ratio × 参照边（短边）`，长边自动限制 ≤ `2.5 × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`
 - 支持绝对定位和相对定位，可引用文字元素（如 `relative_to: "camera_lens"`）
 - Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
 - Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件
@@ -528,7 +528,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 `src/utils/layout_engine.py` 负责画布计算与元素定位：
 
-- **画布扩展**：以原图长边比例扩展四边（`expand_canvas`），上下左右独立设置
+- **画布扩展**：以参照边（短边）比例扩展四边（`expand_canvas`），上下左右独立设置
 - **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
 - **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
 - **相对定位**（v1.2.0）：`relative_to` + `relative_position`（`below` / `above` / `right-of` / `left-of`），`relative_margin` 间距 + `offset` 微调
@@ -550,7 +550,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
 - **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
-- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 原图长边`），长边自动限制 ≤ `2.5 * size_ratio * 原图长边`。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
+- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 参照边（短边）`），长边自动限制 ≤ `2.5 * size_ratio * 参照边（短边）`。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
 - **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名
 
 #### 背景填充管理器 (BackgroundFillManager) (v1.4.0)

@@ -11,7 +11,7 @@ class LayoutEngine:
     def __init__(self, original_image_size: Tuple[int, int], layout_config: Dict):
         self.original_image_size = original_image_size
         self.original_width, self.original_height = original_image_size
-        self.original_longer_side = max(self.original_width, self.original_height)
+        self.reference_side = min(self.original_width, self.original_height)
 
         self.layout_config = layout_config
         self.canvas_size = self._calculate_canvas_size()
@@ -32,8 +32,8 @@ class LayoutEngine:
         left_exp = expand_config.get('left', 0)
         right_exp = expand_config.get('right', 0)
 
-        new_width = self.original_width + int(self.original_longer_side * (left_exp + right_exp))
-        new_height = self.original_height + int(self.original_longer_side * (top_exp + bottom_exp))
+        new_width = self.original_width + int(self.reference_side * (left_exp + right_exp))
+        new_height = self.original_height + int(self.reference_side * (top_exp + bottom_exp))
 
         return new_width, new_height
 
@@ -45,8 +45,8 @@ class LayoutEngine:
         else:
             top_exp = expand_config.get('top', 0)
             left_exp = expand_config.get('left', 0)
-            x = int(self.original_longer_side * left_exp)
-            y = int(self.original_longer_side * top_exp)
+            x = int(self.reference_side * left_exp)
+            y = int(self.reference_side * top_exp)
 
         return x, y, self.original_width, self.original_height
 
@@ -54,7 +54,7 @@ class LayoutEngine:
         """
         计算叠加元素的安全区域（padding），从画布四边向内收缩。
         返回 (left_bound, top_bound, right_bound, bottom_bound)
-        padding 值以 original_longer_side 比例为基准，默认为 0（即画布边界）
+        padding 值以 reference_side 比例为基准，默认为 0（即画布边界）
         """
         padding_config = self.layout_config.get('padding', {})
         if not padding_config:
@@ -62,7 +62,7 @@ class LayoutEngine:
 
         def to_px(value):
             if isinstance(value, (int, float)):
-                return int(self.original_longer_side * float(value))
+                return int(self.reference_side * float(value))
             return 0
 
         pad_left = to_px(padding_config.get('left', 0))
@@ -245,11 +245,11 @@ class LayoutEngine:
         return oy + (oh - eh) // 2
 
     def _resolve_margins(self, config: Dict) -> Dict[str, int]:
-        longer_side = self.original_longer_side
+        reference_side = self.reference_side
 
         def to_px(value):
             if isinstance(value, float):
-                return int(longer_side * value)
+                return int(reference_side * value)
             return int(value) if value is not None else None
 
         # 统一 margin 作为初始值（向后兼容），未设置时默认为 0
@@ -294,7 +294,7 @@ class LayoutEngine:
         offset_y_ratio = config.get('offset_y_ratio', 0.0)
         alignment = config.get('alignment', 'center')
 
-        relative_margin_px = int(self.original_longer_side * relative_margin)
+        relative_margin_px = int(self.reference_side * relative_margin)
 
         target_coords = self.get_element_bounds(relative_to)
         if target_coords is None:
@@ -317,8 +317,8 @@ class LayoutEngine:
         else:
             return self._calculate_absolute(element_width, element_height, config)
 
-        offset_x = int(self.original_longer_side * offset_x_ratio)
-        offset_y = int(self.original_longer_side * offset_y_ratio)
+        offset_x = int(self.reference_side * offset_x_ratio)
+        offset_y = int(self.reference_side * offset_y_ratio)
         x += offset_x
         y += offset_y
 

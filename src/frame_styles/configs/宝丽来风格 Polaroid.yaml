@@ -9,22 +9,22 @@ fonts:
   weight: medium
   size_ratio: 0.01
   sizes:
-    exif: 0.011
-    timestamp_author: 0.011
-    camera_lens: 0.011
-    location: 0.011
+    exif: 0.017
+    timestamp_author: 0.017
+    camera_lens: 0.017
+    location: 0.017
 layout:
   expand_canvas:
     enabled: true
-    top: 0.03
-    bottom: 0.1
-    left: 0.015
-    right: 0.015
+    top: 0.05
+    bottom: 0.13
+    left: 0.025
+    right: 0.025
   padding:
-    top: 0.02
-    bottom: 0.02
-    left: 0.02
-    right: 0.02
+    top: 0.025
+    bottom: 0.025
+    left: 0.025
+    right: 0.025
   info_position:
     exif:
       position: "bottom-left"

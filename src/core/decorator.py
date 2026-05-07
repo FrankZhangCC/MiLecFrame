@@ -80,13 +80,13 @@ class Decorator:
         txt_layer = Image.new('RGBA', base_img.size, (255, 255, 255, 0))
         draw = ImageDraw.Draw(txt_layer)
         
-        # 使用原始图像的长边作为计算基准
+        # 使用原始图像的参照边作为计算基准
         if original_image_size:
-            longer_side = max(original_image_size)
+            reference_side = min(original_image_size)
         else:
-            longer_side = max(image.size)
+            reference_side = min(image.size)
         
-        # 使用FontManager统一加载字体（水印文字高度为原图长边的2%）
+        # 使用FontManager统一加载字体（水印文字高度为参照边的2%）
         img_size_for_font = original_image_size if original_image_size else image.size
         if self.font_manager:
             font = self.font_manager.load_font(
@@ -102,9 +102,9 @@ class Decorator:
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # 根据位置参数计算实际位置，使用原始图像长边的2%作为边距
-        margin = int(longer_side * 0.02)  # 使用原始图像长边的2%作为边距
-        
+        # 根据位置参数计算实际位置，使用参照边的2%作为边距
+        margin = int(reference_side * 0.02)
+
         img_width, img_height = image.size
         
         # 获取当前图像与原始图像的尺寸差，用于调整边距计算
@@ -117,13 +117,13 @@ class Decorator:
                 top_exp = expand_config.get('top', 0)
                 left_exp = expand_config.get('left', 0)
                 
-                # 使用长边作为计算基准，以保持一致的扩展效果
+                # 使用参照边作为计算基准，以保持一致的扩展效果
                 orig_width, orig_height = original_image_size
-                longer_side_orig = max(orig_width, orig_height)
+                reference_side_orig = min(orig_width, orig_height)
                 
                 # 根据扩展比例计算位置
-                top_offset = int(longer_side_orig * top_exp)
-                left_offset = int(longer_side_orig * left_exp)
+                top_offset = int(reference_side_orig * top_exp)
+                left_offset = int(reference_side_orig * left_exp)
                 
                 offset_x = left_offset
                 offset_y = top_offset
