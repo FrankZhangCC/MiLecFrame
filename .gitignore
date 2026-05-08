@@ -45,7 +45,6 @@ Thumbs.db
 # Output images - these are large files that don't need version control
 *.jpg
 *.jpeg
-*.png
 *.bmp
 *.tiff
 *.gif
