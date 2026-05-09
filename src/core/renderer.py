@@ -53,7 +53,8 @@ class FrameRenderer:
         decorations: Optional[List[Dict]] = None,
         logo_filename: Optional[str] = None,
         lens_display_mode: str = 'combined',
-        use_short_lens: bool = False
+        use_short_lens: bool = False,
+        saturation_override: Optional[float] = None,
     ) -> Image.Image:
         """
         渲染带相框的图像
@@ -67,6 +68,9 @@ class FrameRenderer:
             bg_fill_type: 背景填充类型
             decorations: 装饰元素列表
             logo_filename: logo文件名
+            lens_display_mode: 镜头显示模式
+            use_short_lens: 是否使用短版镜头名
+            saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值）
             
         Returns:
             渲染后的图像
@@ -83,7 +87,8 @@ class FrameRenderer:
         context = RenderContext(image.size, exif_data, author, location, lens_display_mode, use_short_lens)
 
         background = BackgroundFillManager.render(
-            image, canvas_width, canvas_height, bg_fill_type
+            image, canvas_width, canvas_height, bg_fill_type,
+            saturation=saturation_override
         )
 
         orig_x, orig_y, orig_w, orig_h = layout_engine.original_bounds

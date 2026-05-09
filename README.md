@@ -68,7 +68,7 @@ streamlit run src/gui/app.py
 - **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
 - **响应式布局**：画布扩展、文字大小、边距、间距均以原图参照边（短边）比例为基准自适应
 - **绝对与相对定位**：元素可固定位置或相对于其他元素排列（after / below / left-of 等），拓扑排序自动解析依赖
-- **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
+- **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色；高斯模糊背景支持饱和度增强以补偿覆盖层颜色淡化。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
 
 ### 装饰元素
 
@@ -563,7 +563,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **背景填充**：
   - 由 `BackgroundFillManager` 统一管理（`src/utils/background_fill.py`），所有填充类型在 `FILL_TYPES` 注册表中集中定义
   - 纯色：`pure_black` / `pure_white`，覆盖含扩展区域的全画布
-  - 高斯模糊叠加：3-pass Box Blur 近似（O(n)），全分辨率等效半径 200px，大图自动降采样至 1200px 计算；float32 混合 + PIL 内置 Floyd-Steinberg 量化消除色彩断层
+  - 高斯模糊叠加：3-pass Box Blur 近似（O(n)），全分辨率等效半径 200px，大图自动降采样至 1200px 计算；float32 混合 + PIL 内置 Floyd-Steinberg 量化消除色彩断层；混合前可选饱和度增强（PIL `ImageEnhance.Color`）补偿覆盖层颜色淡化
   - 每种填充类型同时声明 `text_scheme`（`dark`/`light`），渲染器通过 `BackgroundFillManager.is_dark_bg()` 自动适配文字颜色
   - 支持运行时覆盖 `color`、`opacity`、`blur_radius` 参数，预留自定义背景注册接口 `register()`
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
@@ -581,6 +581,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **类型注册**：所有可用背景类型在 `FILL_TYPES` 类属性中统一定义，包括纯色和高斯模糊两种方法
 - **GUI/CLI 统一**：`get_choices()` 返回 `{label: key}` 供 GUI 下拉框使用，`get_keys()` 返回 key 列表供 CLI argparse 使用
 - **深色/浅色判断**：`is_dark_bg(key)` 根据注册的 `text_scheme` 判断，供渲染器自动适配文字颜色
+- **饱和度增强**：高斯模糊类型注册 `saturation` 系数（≥1.0），在覆盖层混合前增强模糊图像色彩，补偿白色/黑色覆盖导致的颜色淡化；GUI 提供"背景增强"复选框开关
 - **背景渲染**：`render(image, w, h, fill_type)` 根据注册表配置创建背景图像
 - **预留扩展**：`register()` 方法支持运行时动态添加新填充类型
 
@@ -595,7 +596,7 @@ FILL_TYPES = {
     'gaussian_black_65': {
         'label': '模糊背景 (深色 65%)', 'method': 'gaussian',
         'overlay_color': 'black', 'opacity': 65, 'blur_radius': 200,
-        'text_scheme': 'dark'
+        'saturation': 1.8, 'text_scheme': 'dark'
     },
     # ...
 }
@@ -645,7 +646,7 @@ BackgroundFillManager.register(
 - **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
 - **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；水印（内容/位置/透明度/颜色）独立控制
 - **Logo 设置**：自动匹配（根据相机品牌）/ 手动选择 / 无，三选一；自动匹配无结果时不显示
-- **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）
+- **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）；高斯模糊支持"背景增强"复选框（默认开启），增强色彩饱和度以补偿覆盖层淡化
 - **输出格式**：JPEG / PNG 可选
 - **结果下载**：处理后图片预览 + 一键下载
 - **设备映射管理**：独立的相机/镜头映射表界面，支持品牌筛选、表格内编辑实时保存

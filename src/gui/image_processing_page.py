@@ -226,7 +226,11 @@ div.stButton > button:first-child {{
                             font_weight=_fw_key,
                             logo_filename=_logo,
                             lens_display_mode=_lens_key,
-                            use_short_lens=st.session_state.get('use_short_lens', False)
+                            use_short_lens=st.session_state.get('use_short_lens', False),
+                            saturation_override=(
+                                None if st.session_state.get('enable_saturation', True)
+                                else 1.0
+                            ),
                         )
 
                         if _success:
@@ -303,6 +307,17 @@ div.stButton > button:first-child {{
             "字重", list(font_weight_options.keys()), index=1, key='font_weight_select'
         )
         selected_font_weight = font_weight_options[selected_font_weight_label]
+
+        # 背景增强开关（仅在选中的是高斯模糊类型时有效）
+        _selected_bg_cfg = BackgroundFillManager.FILL_TYPES.get(selected_bg_fill, {})
+        _is_gaussian = _selected_bg_cfg.get('method') == 'gaussian'
+        _enhance_help = "增强模糊背景的色彩饱和度，补偿白色/黑色覆盖层的颜色淡化"
+        if not _is_gaussian:
+            _enhance_help += "（仅高斯模糊背景有效，当前选择为纯色填充）"
+        enable_saturation = st.checkbox(
+            "背景增强", value=True, key='enable_saturation',
+            disabled=not _is_gaussian, help=_enhance_help
+        )
 
         st.markdown("---")
 
