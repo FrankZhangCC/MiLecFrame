@@ -270,10 +270,11 @@ def render_image_processing_page():
             raw_bytes = uploaded_file.getvalue()
             pil_img = PILImage.open(io.BytesIO(raw_bytes))
 
+            w, h = pil_img.size
+
             # 新图片上传时按方向设置短版镜头名勾选
             if st.session_state.get('last_file_id') != uploaded_file.file_id:
                 st.session_state.last_file_id = uploaded_file.file_id
-                w, h = pil_img.size
                 st.session_state._pending_use_short_lens = (h >= w)
 
             # 文件信息
@@ -289,11 +290,8 @@ def render_image_processing_page():
             except Exception:
                 pass
 
-            # ---- 双栏预览 ----
-            preview_left, preview_right = st.columns(2)
-
-            with preview_left:
-                # 原始图片预览（含ICC色彩空间转换）
+            # ---- 响应式预览 ----
+            def _render_original():
                 try:
                     preview_img = pil_img
                     icc = pil_img.info.get('icc_profile')
@@ -307,8 +305,7 @@ def render_image_processing_page():
                 except Exception:
                     st.image(uploaded_file, caption="原始图片", width='stretch')
 
-            with preview_right:
-                # 效果预览（处理后显示）
+            def _render_effect():
                 if (st.session_state.processing_result and
                     st.session_state.temp_output_path and
                     os.path.exists(st.session_state.temp_output_path)):
@@ -317,6 +314,22 @@ def render_image_processing_page():
                     st.image(result_img, caption="效果预览", width='stretch')
                 else:
                     st.info("👆 请配置选项并点击\"生成相框\"按钮")
+
+            is_wide = w > h
+
+            if is_wide:
+                # 横向构图：上下排列，缩至 75% 宽度居中
+                col_l, col_img, col_r = st.columns([1, 6, 1])
+                with col_img:
+                    _render_original()
+                    _render_effect()
+            else:
+                # 竖向/方形：左右排列
+                preview_left, preview_right = st.columns(2)
+                with preview_left:
+                    _render_original()
+                with preview_right:
+                    _render_effect()
 
             # ---- 按钮 + 状态 ----
             current_config = {
