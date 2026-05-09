@@ -115,7 +115,10 @@ class FrameRenderer:
                 camera_brand = context.get_text('camera_make')
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()
-                    logo_filename = logo_selector_instance.auto_match_logo(camera_brand.lower())
+                    is_dark_bg = BackgroundFillManager.is_dark_bg(bg_fill_type)
+                    logo_filename = logo_selector_instance.auto_match_logo(
+                        camera_brand.lower(), is_dark_bg=is_dark_bg
+                    )
             
             if logo_filename:
                 image_with_text = self._add_logo(image_with_text, logo_filename, logo_config, layout_engine)

@@ -180,7 +180,10 @@ div.stButton > button:first-child {{
                         else:
                             _brand = ExifHelper.get_camera_brand(_exif_data) if _exif_data else None
                             if _brand:
-                                _logo = logo_selector.auto_match_logo(_brand)
+                                _logo = logo_selector.auto_match_logo(
+                                    _brand,
+                                    is_dark_bg=BackgroundFillManager.is_dark_bg(_bg_key)
+                                )
                         _decorations = []
                         if st.session_state.get('enable_watermark', False):
                             _wm_t = st.session_state.get('watermark_text', '')
@@ -372,7 +375,13 @@ div.stButton > button:first-child {{
                 selected_logo = selected_logo_option
             else:
                 if camera_brand:
-                    matched_logo = logo_selector.auto_match_logo(camera_brand)
+                    bg_fill_label = st.session_state.get('bg_fill_select', '')
+                    bg_options = BackgroundFillManager.get_choices()
+                    bg_fill_key = bg_options.get(bg_fill_label, BackgroundFillManager.DEFAULT_FILL)
+                    matched_logo = logo_selector.auto_match_logo(
+                        camera_brand,
+                        is_dark_bg=BackgroundFillManager.is_dark_bg(bg_fill_key)
+                    )
                     if matched_logo:
                         selected_logo = matched_logo
         else:

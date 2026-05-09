@@ -77,6 +77,7 @@ streamlit run src/gui/app.py
 ### Logo
 
 - 支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
+- 自动匹配时根据背景明暗自动选择 Logo 颜色变体：暗色背景优先 `_white` 后缀，亮色背景优先非 `_white` 后缀
 - 布局、尺寸、定位由样式 YAML 的 `logo:` 节独立定义，渲染顺序在文字层之后（可引用文字元素坐标做相对定位）
 
 ### 使用方式
@@ -426,7 +427,7 @@ logo:
 - Logo 短边 = `size_ratio × 参照边（短边）`，对角线自动限制 ≤ `2 × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`
 - 支持绝对定位和相对定位，可引用文字元素（如 `relative_to: "camera_lens"`）
 - Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
-- Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件
+- Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件，并根据当前背景类型的 `text_scheme`（暗色/亮色）自动选择 `_white` / 非 `_white` 颜色变体
 
 ## 核心功能规格
 
@@ -569,7 +570,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
 - **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 参照边（短边）`），对角线自动限制 ≤ `2 * size_ratio * 参照边（短边）`。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
-- **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名
+- **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名；根据背景 `text_scheme`（通过 `BackgroundFillManager.is_dark_bg()` 获取）自动选择 Logo 颜色变体——暗色背景优先 `_white` 后缀，亮色背景优先非 `_white` 后缀
 
 #### 背景填充管理器 (BackgroundFillManager) (v1.4.0)
 
