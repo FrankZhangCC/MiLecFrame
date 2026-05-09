@@ -230,7 +230,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
-  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"（横幅）或 "品牌 型号 | 短镜头"（竖幅）；`camera` + `lens` 则分开两行；`lens` 在竖幅时自动使用短版名称
+  - `camera_lens` 输出格式由 GUI 中"镜头显示"选项控制（相机+镜头 / 只显示相机 / 只显示镜头），搭配"使用短版镜头名"开关可全局切换为短版镜头名；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
 
@@ -331,26 +331,31 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化        |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间      |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并    |
-| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头, 竖幅=相机+短镜头 |
+| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 由镜头显示模式 + 短版开关控制 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号      |
 | `camera_make`      | `"Leica"`                                      | 映射后相机品牌     |
-| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称 |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，受短版开关控制 |
 | `author`           | `"Frank"`                                      | 用户输入           |
 | `location`         | `"Shanghai"`                                   | 用户输入           |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）    |
 
-#### 竖向/方形图片自动适配
+#### 镜头显示模式 & 短版镜头名
 
-当检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，`lens` 和 `camera_lens` 自动使用短版镜头名称，避免竖幅窄图空间不足时文字过长的问题。
+GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输出行为：
 
-此逻辑内聚在 `RenderContext` 中：
+- **镜头显示**（radio）：`相机+镜头` / `只显示相机` / `只显示镜头`
+  - 选择后 `camera_lens` key 自动映射为对应格式
+- **使用短版镜头名**（checkbox）：勾选后 `camera_lens` 和 `lens` 均使用 `lens_map.csv` 中的 `short_lens` 列值
+  - 上传竖幅/方形图片时默认勾选，横幅默认不勾选
+  - 未配置 `short_lens` 时自动回退到 `mapped_lens`
 
-| key            | 横向图片                                 | 竖向/方形图片                              |
-| -------------- | ---------------------------------------- | ------------------------------------------ |
-| `camera_lens`  | `"品牌 型号 \| 镜头"`（完整合并格式）    | `"品牌 型号 \| 短镜头"`（相机 + 短版镜头） |
-| `lens`         | `"镜头"`（完整镜头名）                   | `"短镜头"`（短版镜头名）                   |
-
-短版镜头名在 `lens_map.csv` 的 `short_lens` 列中配置，未配置时自动回退到 `mapped_lens`。
+| 镜头显示 | 短版开关 | `camera_lens` 输出 | `lens` 输出 |
+|---------|---------|-------------------|------------|
+| 相机+镜头 | 开 | `"Leica Q3 \| 28mm"` | `"28mm"` |
+| 相机+镜头 | 关 | `"Leica Q3 \| Summilux 28mm f/1.7"` | `"Summilux 28mm f/1.7"` |
+| 只显示相机 | 任意 | `"Leica Q3"` | 同 `lens` 列 |
+| 只显示镜头 | 开 | `"28mm"` | `"28mm"` |
+| 只显示镜头 | 关 | `"Summilux 28mm f/1.7"` | `"Summilux 28mm f/1.7"` |
 
 #### 新增显示字段指南
 
@@ -470,24 +475,25 @@ text = context.get_text('camera_lens')  # 一行调用获取最终显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化曝光参数                          |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间                                |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并（作者为空时仅显示时间）      |
-| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头，竖幅=相机+短镜头 |
+| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 由镜头显示模式 + 短版开关控制 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号                                |
 | `camera_make`      | `"Leica"`                                      | 映射后相机品牌（v1.4.1）                     |
-| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称                   |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，受短版开关控制                     |
 | `author`           | `"Frank"`                                      | 用户输入                                     |
 | `location`         | `"Shanghai"`                                   | 用户输入                                     |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS 度分秒格式化坐标（v1.4.1）          |
 
 **相机信息的四级字段**（`get_display_data()` 内部构造，按粒度递增）：
 
-| 内部字段                 | 对外 key        | 输出示例                       | 说明                             |
-| ------------------------ | --------------- | ------------------------------ | -------------------------------- |
-| `camera_make`          | `camera_make` | `"Leica"`                    | 映射后品牌名                     |
-| `camera_combined`      | `camera`      | `"Leica Q3"`                 | 品牌 + 型号                      |
-| `camera_lens_combined` | `camera_lens` | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 镜头（横幅默认）   |
-| `short_lens`           | `lens` (竖幅) | `"Summilux 28mm"`            | 短版镜头名（竖幅时 `lens` 使用） |
+| 内部字段                       | 对外 key          | 输出示例                       | 说明                                  |
+| ------------------------------ | ----------------- | ------------------------------ | ------------------------------------- |
+| `camera_make`                | `camera_make`   | `"Leica"`                    | 映射后品牌名                          |
+| `camera_combined`            | `camera`        | `"Leica Q3"`                 | 品牌 + 型号                           |
+| `camera_lens_combined`       | `camera_lens`   | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 镜头（短版关闭时默认）  |
+| `camera_lens_combined_short` | `camera_lens`   | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 短镜头（短版开启时使用）|
+| `short_lens`                 | `lens`          | `"Summilux 28mm"`            | 短版镜头名（短版开启时 `lens` 使用）  |
 
-**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`lens` 自动替换为短版镜头名（`short_lens`），`camera_lens` 自动替换为 `"相机 | 短镜头"`。短版名称在 `lens_map.csv` 的 `short_lens` 列中配置。
+**镜头显示控制**：GUI 装饰元素板块提供"镜头显示" radio（相机+镜头 / 只显示相机 / 只显示镜头）和"使用短版镜头名" checkbox，控制 `camera_lens` 和 `lens` 的最终输出格式。详见 [镜头显示模式 & 短版镜头名](#镜头显示模式--短版镜头名)。
 
 **新增显示字段**：只需在 `RenderContext.get_text()` 添加 `elif key == 'xxx':` 分支 + 在 YAML 的 `info_position` 中声明配置，渲染器零改动。
 

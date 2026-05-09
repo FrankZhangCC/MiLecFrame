@@ -144,6 +144,21 @@ def render_image_processing_page():
                 }
                 watermark_color = color_map[watermark_color_option]
 
+        # 镜头显示模式
+        lens_display_option = st.selectbox(
+            "镜头显示", ["相机+镜头", "只显示相机", "只显示镜头"],
+            index=0, key='lens_display_option'
+        )
+        mode_map = {"相机+镜头": "combined", "只显示相机": "camera_only", "只显示镜头": "lens_only"}
+        lens_display_mode = mode_map[lens_display_option]
+
+        # 短版镜头名（图片上传时按方向重置默认值）
+        if 'use_short_lens' not in st.session_state:
+            st.session_state.use_short_lens = False
+        if '_pending_use_short_lens' in st.session_state:
+            st.session_state.use_short_lens = st.session_state.pop('_pending_use_short_lens')
+        use_short_lens = st.checkbox("使用短版镜头名（竖幅默认勾选）", key='use_short_lens')
+
     with col_logo:
         st.subheader("🏷️ Logo设置")
         
@@ -206,6 +221,12 @@ def render_image_processing_page():
             # 一次性读取并打开图像（预览+文件信息复用）
             raw_bytes = uploaded_file.getvalue()
             pil_img = PILImage.open(io.BytesIO(raw_bytes))
+
+            # 新图片上传时按方向设置短版镜头名勾选（下一次 rerun 生效）
+            if st.session_state.get('last_file_id') != uploaded_file.file_id:
+                st.session_state.last_file_id = uploaded_file.file_id
+                w, h = pil_img.size
+                st.session_state._pending_use_short_lens = (h >= w)
 
             # 文件信息区域（统一走 ExifHelper 数据出口）
             file_info = exif_helper.get_file_info(pil_img)
@@ -323,7 +344,9 @@ def render_image_processing_page():
                 'author': author,
                 'location': location,
                 'font_weight': selected_font_weight,
-                'output_format': output_format
+                'output_format': output_format,
+                'lens_display_mode': lens_display_mode,
+                'use_short_lens': use_short_lens
             }
             
             # 检查配置是否发生变化
@@ -402,7 +425,9 @@ div.stButton > button:first-child {{
                             bg_fill_type=selected_bg_fill,
                             decorations=decorations if decorations else None,
                             font_weight=selected_font_weight,
-                            logo_filename=selected_logo  # 传递logo参数
+                            logo_filename=selected_logo,
+                            lens_display_mode=lens_display_mode,
+                            use_short_lens=use_short_lens
                         )
                         
                         if success:

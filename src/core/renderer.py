@@ -51,7 +51,9 @@ class FrameRenderer:
         style_config: Dict,
         bg_fill_type: str = "white",
         decorations: Optional[List[Dict]] = None,
-        logo_filename: Optional[str] = None
+        logo_filename: Optional[str] = None,
+        lens_display_mode: str = 'combined',
+        use_short_lens: bool = False
     ) -> Image.Image:
         """
         渲染带相框的图像
@@ -78,7 +80,7 @@ class FrameRenderer:
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
-        context = RenderContext(image.size, exif_data, author, location)
+        context = RenderContext(image.size, exif_data, author, location, lens_display_mode, use_short_lens)
 
         background = BackgroundFillManager.render(
             image, canvas_width, canvas_height, bg_fill_type
