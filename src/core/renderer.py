@@ -3,6 +3,7 @@
 负责相框的图层合成、背景填充、高斯模糊等功能
 """
 import sys
+import math
 import logging
 from pathlib import Path
 
@@ -405,11 +406,11 @@ class FrameRenderer:
         target_short_side = int(reference_side * size_ratio)
         scale = target_short_side / logo_short_side
 
-        # Logo 长边上限保护：防止细长条 Logo 失控
-        max_long_side = int(reference_side * 2.5 * size_ratio)
-        logo_long_side = max(logo_width, logo_height)
-        if logo_long_side * scale > max_long_side:
-            scale = max_long_side / logo_long_side
+        # Logo 对角线上限保护：防止细长条 Logo 失控
+        max_diagonal = int(reference_side * 2 * size_ratio)
+        logo_diagonal = math.hypot(logo_width, logo_height)
+        if logo_diagonal * scale > max_diagonal:
+            scale = max_diagonal / logo_diagonal
 
         new_logo_width = int(logo_width * scale)
         new_logo_height = int(logo_height * scale)

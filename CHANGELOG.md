@@ -4,6 +4,10 @@
 
 > 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
 
+### Logo 对角线保护 (2026-05-09)
+
+- **对角线上限替代长边上限**：`renderer._add_logo()` 中 Logo 尺寸上限从长边改为对角线（`math.hypot`），系数从 2.5 调为 2，对正方形 Logo 无影响，对细长 Logo 提供更均匀的双向约束
+
 ### HDR 管线重构 (2026-05-09)
 
 - **移除 OpenCV 依赖**：`hdr_handler.py` 原有的 `cv2.createTonemap(gamma=1.0)` 近似恒等变换被纯 NumPy 实现的 Reinhard 全局色调映射替代，消除对 `opencv-python` 和 `scikit-image` 的依赖
