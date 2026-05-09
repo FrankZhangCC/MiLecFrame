@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.5.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.5.1-blue)
 
 ## 快速开始
 
@@ -129,16 +129,16 @@ MiLeica_Frame/
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件（支持单文件样式和文件夹变体样式）
 │   │   │   ├── _STYLE_TEMPLATE.txt   # 规格化填空模板
-│   │   │   ├── 照片底部信息水印/  # 文件夹变体样式（示例）
-│   │   │   │   ├── default.yaml       # 默认变体（所有字段有数据）
-│   │   │   │   └── no_location.yaml   # location 缺失时的变体
+│   │   │   ├── 底部信息条 Bottom Bars/  # 文件夹变体样式
+│   │   │   │   ├── default.yaml          # 默认变体（所有字段有数据）
+│   │   │   │   └── no_location.yaml      # location 缺失时的变体
 │   │   │   └── ...
 │   │   ├── __init__.py
 │   │   ├── style_manager.py # 样式管理器（含变体匹配引擎）
 │   │   └── ...
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
-│   ├── icons/              # 图标文件
+│   ├── logos/              # Logo图片
 │   └── fonts/              # 字体文件
 ├── data/                   # 数据文件
 │   ├── camera_map.csv      # 相机品牌型号映射
@@ -162,7 +162,7 @@ MiLeica_Frame/
 
 ```
 configs/
-  照片底部信息水印/
+  底部信息条 Bottom Bars/
     default.yaml              # 默认配置（兜底，所有字段有数据时使用）
     no_location.yaml          # location 缺失时的变体
     no_author.yaml            # author 缺失时的变体
@@ -202,14 +202,14 @@ configs/
 ```python
 # 运行时自动选择变体
 style_config = style_manager.get_style_config(
-    '照片底部信息水印',
+    '底部信息条 Bottom Bars',
     context={'location': location, 'author': author}
 )
 # location=None → 自动选取 no_location.yaml
 # location='北京' → 自动选取 default.yaml
 
 # 不带 context 时（如 GUI 预览）返回 default.yaml，确保向后兼容
-style_config = style_manager.get_style_config('照片底部信息水印')
+style_config = style_manager.get_style_config('底部信息条 Bottom Bars')
 ```
 
 ### 基本信息
@@ -392,7 +392,7 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 
 ### 水印配置 (decorations)
 
-水印完全由 GUI/CLI 外部参数控制，不通过样式 YAML 定义。
+水印完全由 GUI 外部参数控制，不通过样式 YAML 定义。
 
 - `watermark`: 水印（可自定义文字、位置、透明度、颜色），完全外部参数
 
@@ -400,7 +400,7 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 
 ### Logo 配置
 
-Logo 采用**独立渲染管线**：布局、尺寸、定位由 YAML 中 `logo:` 节定义，文件选择由 GUI（自动匹配 / 手动选择 / 无）或 CLI 传入，渲染顺序在文字层之后。
+Logo 采用**独立渲染管线**：布局、尺寸、定位由 YAML 中 `logo:` 节定义，文件选择由 GUI（自动匹配 / 手动选择 / 无）传入，渲染顺序在文字层之后。
 
 样式 YAML 中 `logo:` 节定义 Logo 的表现形式：
 
@@ -445,12 +445,14 @@ logo:
 | 拍摄时间 | `yyyy.mm.dd hh:mm:ss`                                                                            | 原始 EXIF 格式 `yyyy:mm:dd HH:MM:SS` |
 | 相机品牌 | 经 `_safe_decode()` 多编码（utf-8 / latin-1 / shift-jis 等）兼容处理后，小写化用于 Logo 逐词匹配 | `get_camera_brand()`                 |
 
-**三层数据处理架构**：
+**四层数据处理架构**：
 
 ```
 EXIF Helper（解析原始二进制 → 纯净字段，_safe_decode 多编码容错）
-  → Device Mapper（品牌/机型/镜头映射、字符串拼接 "品牌 型号"、格式化）
-    → Renderer / GUI（展示层，仅消费最终数据，不感知数据来源）
+  → Device Mapper（品牌/机型/镜头名映射）
+    → ExifHelper.get_display_data()（字段拼接组合：camera_combined / camera_lens_combined / short_lens 等）
+      → RenderContext（条件路由：镜头显示模式、短版开关、时间+作者拼接、竖向检测）
+        → Renderer / GUI（仅消费最终文本，不感知数据来源）
 ```
 
 统一数据出口 `exif_helper.get_display_data()`，同时提供 `raw_*`（原始值，GUI 设备信息区展示）和映射后字段（相机/镜头组合、格式化曝光参数），确保 GUI 预览与最终渲染数据一致。
