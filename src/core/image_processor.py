@@ -33,7 +33,6 @@ class ImageProcessor:
         """
         self.style_config = style_config
         self.supported_formats = ['JPEG', 'PNG', 'TIFF', 'MPO']
-        self.hdr_supported_formats = ['HEIF', 'HEIC', 'AVIF']  # HDR相关格式
         self.max_input_size = (12000, 12000)  # 最大输入尺寸
         self.max_output_size = (8192, 8192)   # 最大输出尺寸
         
@@ -89,16 +88,15 @@ class ImageProcessor:
                 return False
             
             # 3. 根据图像类型读取图像
-            if self.hdr_handler.is_hdr_format(input_path):
-                # 如果是HDR图像，使用HDR处理器
-                image = self.hdr_handler.process_hdr_image(input_path)
+            is_hdr = self.hdr_handler.detect_hdr_format(input_path)
+            if is_hdr:
+                image = self.hdr_handler.load_image(input_path)
                 if image is None:
-                    error_msg = f"错误: 无法处理HDR图像 - {input_path}"
+                    error_msg = f"错误: 无法加载HDR图像 - {input_path}"
                     self.logger.error(error_msg)
                     print(error_msg)
                     return False
             else:
-                # 普通图像直接用PIL打开
                 image = Image.open(input_path)
             
             # 4. 检查EXIF信息
@@ -124,9 +122,13 @@ class ImageProcessor:
                 # 缩放图像
                 image = self._resize_image_proportionally(image)
             
-            # 6. 处理色彩空间
+            # 6. 处理色彩空间（ICC转换在色调映射之前，确保色域已校正至sRGB）
             image = self._convert_colorspace(image)
             sRGB_icc_bytes = image.info.get('icc_profile')
+
+            # 6a. HDR色调映射（色彩空间已统一为sRGB后再压缩动态范围）
+            if is_hdr:
+                image = self.hdr_handler.convert_hdr_to_sdr(image)
             
             # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
@@ -187,8 +189,8 @@ class ImageProcessor:
         """
         try:
             img_format = Image.open(image_path).format
-            if img_format and (img_format in self.supported_formats or 
-                              self.hdr_handler.is_hdr_format(image_path)):
+            if img_format and (img_format in self.supported_formats or
+                              self.hdr_handler.detect_hdr_format(image_path)):
                 return img_format
             return None
         except Exception:

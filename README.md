@@ -59,7 +59,7 @@ streamlit run src/gui/app.py
 ### 图像处理
 
 - **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间、GPS 坐标（度分秒格式化）
-- **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF 等 HDR 格式
+- **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF（高位深 HDR 自动色调映射转 SDR）
 - **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB / Display P3 等嵌入式 ICC 色彩空间自动数学转换至 sRGB
 
 ### 相框与布局
@@ -87,7 +87,8 @@ streamlit run src/gui/app.py
 
 ## 技术栈
 
-- 核心图像处理：Pillow、OpenCV
+- 核心图像处理：Pillow、NumPy
+- HDR 色调映射：Reinhard 全局算子（NumPy 实现）
 - EXIF处理：piexif
 - GUI界面：Streamlit
 
@@ -505,7 +506,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 | 类别     | 格式                                         | 处理方式                        |
 | -------- | -------------------------------------------- | ------------------------------- |
 | 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                    |
-| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR |
+| HDR      | HEIF、HEIC、AVIF                               | `HDRHandler` 加载 ICC profile，色彩空间转换后 Reinhard 色调映射至 SDR |
 | 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB、Display P3 等   | 自动 ICC 数学转换至 sRGB        |
 
 #### 尺寸限制
@@ -519,13 +520,14 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 ```
 1. 验证输入文件存在 + 格式支持
-2. HDR 检测 → HDRHandler 预处理（Gainmap/UltraHDR/HEIF/AVIF）
+2. HDR 检测 → HDRHandler 加载（保留 ICC profile）
 3. EXIF 提取（piexif + 多编码解码）→ 设备映射 → 记录到 camera_map.csv / lens_map.csv
 4. 尺寸验证 → 超限等比缩小
 5. 色彩空间检测 → 非 sRGB ICC 数学转换
-6. 加载样式配置（StyleManager，含变体上下文匹配）
-7. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
-8. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
+6. HDR 色调映射 → Reinhard 全局算子压缩动态范围（仅 HEIF/AVIF）
+7. 加载样式配置（StyleManager，含变体上下文匹配）
+8. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
+9. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
 ```
 
 ---

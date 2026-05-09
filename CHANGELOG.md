@@ -4,6 +4,15 @@
 
 > 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
 
+### HDR 管线重构 (2026-05-09)
+
+- **移除 OpenCV 依赖**：`hdr_handler.py` 原有的 `cv2.createTonemap(gamma=1.0)` 近似恒等变换被纯 NumPy 实现的 Reinhard 全局色调映射替代，消除对 `opencv-python` 和 `scikit-image` 的依赖
+- **修正 HDR 处理顺序**：`image_processor.py` 中 HDR 图像先经 ICC 色彩空间转换（P3/BT.2020 → sRGB），再进行色调映射，避免在原始色域下做错误映射
+- **HDR 加载优化**：`HDRHandler.load_image()` 改用 `to_pillow()` 保留 ICC profile，PIL 直读 HEIF/AVIF 时获取完整色彩元数据
+- **格式检测重构**：`detect_hdr_format()` 替代 `is_hdr_format()`，检测逻辑收敛至 `HDRHandler`，移除 `image_processor` 中的 `hdr_supported_formats` 硬编码列表
+- **移除不实宣称**：README 移除 Gainmap HDR JPEG 和 UltraHDR 的错误支持描述，更新技术栈、格式表和处理管线说明
+- **依赖精简**：`requirements.txt` 移除 `opencv-python>=4.6.0` 和 `scikit-image>=0.19.0`（全项目零引用）
+
 ### 色彩空间转换管线重构 🔴 关键修复
 
 - **ICC 转换前置**：`_convert_colorspace()` 将 ICC profile 转换从"模式转换之后"改为"模式转换之前"，避免 16-bit TIFF 的 `.convert('RGB')` 截断后再转换导致的精度损失
