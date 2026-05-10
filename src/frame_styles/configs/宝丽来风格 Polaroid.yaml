@@ -30,26 +30,26 @@ layout:
       position: "bottom-left"
       alignment: "left"
       margin_top: 0
-      margin_bottom: 0.02
+      margin_bottom: 0.035
       margin_left: 0
       margin_right: 0
     timestamp_author:
       relative_to: "exif"
       relative_position: "below"
       alignment: "left"
-      relative_margin: 0.01
+      relative_margin: 0.015
     camera_lens:
       position: "bottom-right"
       alignment: "right"
       margin_top: 0
-      margin_bottom: 0.02
+      margin_bottom: 0.035
       margin_left: 0
       margin_right: 0
     location:
       relative_to: "camera_lens"
       relative_position: "below"
       alignment: "right"
-      relative_margin: 0.01
+      relative_margin: 0.015
 logo:
   enabled: false
 name: 宝丽来风格 Polaroid

@@ -17,6 +17,16 @@
 - 解决相机 Model 字段已含品牌名时（如 `"Canon EOS 6D"`），Make + Model 拼接导致的品牌重复（如 `"Canon Canon EOS 6D"`）
 - 如果 `camera_map.csv` 中正确配置了 `mapped_model`（如 `"EOS 6D"` 不含品牌前缀），侧边栏将显示 `"Canon EOS 6D"`
 
+### 🟩 性能优化：GUI 缓存
+
+- `src/gui/image_processing_page.py` 新增 8 个缓存工厂函数（`@st.cache_resource` × 4 + `@st.cache_data` × 4），跨 rerun 复用 StyleManager / ConfigManager / ExifHelper / LogoSelector 等工具类实例及样式列表、Logo 目录、背景选项等数据加载结果
+- 工具类实例化从每次 rerun 创建改为首次创建后永久复用，消除文件系统扫描和 YAML 解析重复开销
+
+### 🔴 修复：EXIF 过长导致 JPEG 保存失败
+
+- `src/core/image_processor.py:_save_image()` 在 `piexif.dump()` 前删除 MakerNote 段（厂商私有数据块，可占用数十 KB），避免 EXIF 总大小超出 JPEG 规范 65535 字节限制
+- 增加 dump 后字节数检查（> 65533 时跳过 EXIF 嵌入），兜底其他边缘 case
+
 ---
 
 ## v1.5.1 (2026-05-09)

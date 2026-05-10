@@ -19,14 +19,63 @@ from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
 
 
+@st.cache_resource
+def _get_style_manager():
+    return StyleManager()
+
+
+@st.cache_resource
+def _get_config_manager():
+    return ConfigManager()
+
+
+@st.cache_resource
+def _get_exif_helper():
+    return ExifHelper()
+
+
+@st.cache_resource
+def _get_logo_selector():
+    return LogoSelector()
+
+
+@st.cache_data(ttl=60)
+def _get_available_styles():
+    """获取可用样式列表（缓存 60 秒，空时自动创建样本样式）"""
+    sm = StyleManager()
+    styles = sm.get_available_styles()
+    if not styles:
+        sm.create_sample_styles()
+        styles = sm.get_available_styles()
+    return styles
+
+
+@st.cache_data(ttl=300)
+def _get_bg_fill_choices():
+    """获取背景填充选项字典（缓存 300 秒）"""
+    return BackgroundFillManager.get_choices()
+
+
+@st.cache_data(ttl=60)
+def _get_cached_style_config(style_name: str):
+    """获取样式配置（缓存 60 秒）"""
+    return StyleManager().get_style_config(style_name)
+
+
+@st.cache_data(ttl=60)
+def _scan_logos():
+    """扫描 logos 目录（缓存 60 秒）"""
+    return LogoSelector().scan_logos()
+
+
 def render_image_processing_page():
     """渲染图像处理页面"""
     
-    # 初始化工具类实例
-    style_manager = StyleManager()
-    config_manager = ConfigManager()
-    exif_helper = ExifHelper()
-    logo_selector = LogoSelector()
+    # 初始化工具类实例（通过缓存工厂，避免每次 rerun 重建）
+    style_manager = _get_style_manager()
+    config_manager = _get_config_manager()
+    exif_helper = _get_exif_helper()
+    logo_selector = _get_logo_selector()
     
     # 初始化session state变量
     if 'processing_result' not in st.session_state:
@@ -40,7 +89,7 @@ def render_image_processing_page():
     if 'current_config' not in st.session_state:
         st.session_state.current_config = None
 
-    # ===== 预提取 EXIF（session_state 中的文件在 widget 渲染前就已可用） =====
+    # ===== 预提取 EXIF（利用上一轮 session_state 中的文件，在 widget 渲染前将信息提供给侧边栏） =====
     sess_file = st.session_state.get('file_uploader')
     if sess_file is not None and not st.session_state.get('display_data'):
         try:
@@ -159,7 +208,7 @@ div.stButton > button:first-child {{
                 with st.spinner("正在处理图片..."):
                     try:
                         # 收集当前配置（从 session state 读取，控件在后渲染）
-                        _bg_options = BackgroundFillManager.get_choices()
+                        _bg_options = _get_bg_fill_choices()
                         _bg_key = _bg_options.get(st.session_state.get('bg_fill_select', ''), BackgroundFillManager.DEFAULT_FILL)
                         _fw_map = {"细体 (Light)": "light", "常规 (Regular)": "regular", "中等 (Medium)": "medium"}
                         _fw_key = _fw_map.get(st.session_state.get('font_weight_select', '常规 (Regular)'), 'regular')
@@ -276,10 +325,7 @@ div.stButton > button:first-child {{
         # ---- ⚙️ 配置 ----
         st.markdown("### ⚙️ 配置")
 
-        available_styles = style_manager.get_available_styles()
-        if not available_styles:
-            style_manager.create_sample_styles()
-            available_styles = style_manager.get_available_styles()
+        available_styles = _get_available_styles()
 
         col_c1, col_c2 = st.columns(2)
         with col_c1:
@@ -291,7 +337,7 @@ div.stButton > button:first-child {{
         with col_c2:
             output_format = st.selectbox("输出格式", ["JPEG", "PNG"], index=0, key='output_format')
 
-        bg_fill_options = BackgroundFillManager.get_choices()
+        bg_fill_options = _get_bg_fill_choices()
         default_bg_label = BackgroundFillManager.get_label(BackgroundFillManager.DEFAULT_FILL)
         default_bg_index = list(bg_fill_options.keys()).index(default_bg_label)
         selected_bg_fill_label = st.selectbox(
@@ -373,12 +419,12 @@ div.stButton > button:first-child {{
         # ---- 🏷️ Logo ----
         st.markdown("### 🏷️ Logo")
 
-        current_style_config = style_manager.get_style_config(selected_style)
+        current_style_config = _get_cached_style_config(selected_style)
         is_logo_enabled_by_config = current_style_config.get('logo', {}).get('enabled', False)
 
         selected_logo = None
         if is_logo_enabled_by_config:
-            available_logos = ["自动匹配", "无"] + logo_selector.scan_logos()
+            available_logos = ["自动匹配", "无"] + _scan_logos()
 
             camera_brand = None
             if st.session_state.get('exif_data'):
@@ -393,7 +439,7 @@ div.stButton > button:first-child {{
             else:
                 if camera_brand:
                     bg_fill_label = st.session_state.get('bg_fill_select', '')
-                    bg_options = BackgroundFillManager.get_choices()
+                    bg_options = _get_bg_fill_choices()
                     bg_fill_key = bg_options.get(bg_fill_label, BackgroundFillManager.DEFAULT_FILL)
                     matched_logo = logo_selector.auto_match_logo(
                         camera_brand,
@@ -516,7 +562,7 @@ div.stButton > button:first-child {{
                 with preview_right:
                     _render_effect()
 
-            # 延迟 rerun：确保 st.file_uploader 已在本次 run 渲染完毕
+            # 延迟 rerun：确保 st.file_uploader 已在本次 run 渲染完毕，下一次 run 才显示效果图
             if st.session_state.pop('_pending_rerun', None):
                 st.rerun()
 
