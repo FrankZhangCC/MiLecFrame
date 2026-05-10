@@ -596,7 +596,7 @@ FILL_TYPES = {
     'gaussian_black_65': {
         'label': '模糊背景 (深色 65%)', 'method': 'gaussian',
         'overlay_color': 'black', 'opacity': 65, 'blur_radius': 200,
-        'saturation': 1.8, 'text_scheme': 'dark'
+        'saturation': 2.0, 'text_scheme': 'dark'
     },
     # ...
 }

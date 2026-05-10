@@ -16,15 +16,15 @@ fonts:
 layout:
   expand_canvas:
     enabled: true
-    top: 0.05
-    bottom: 0.13
-    left: 0.025
-    right: 0.025
+    top: 0.08
+    bottom: 0.2
+    left: 0.05
+    right: 0.05
   padding:
     top: 0.025
     bottom: 0.025
-    left: 0.025
-    right: 0.025
+    left: 0.05
+    right: 0.05
   info_position:
     exif:
       position: "bottom-left"

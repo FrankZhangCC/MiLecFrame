@@ -285,7 +285,11 @@ div.stButton > button:first-child {{
 
         col_c1, col_c2 = st.columns(2)
         with col_c1:
-            selected_style = st.selectbox("相框样式", available_styles, key='style_select')
+            default_style = "底部信息条 Bottom Bars"
+            default_style_index = available_styles.index(default_style) if default_style in available_styles else 0
+            selected_style = st.selectbox(
+                "相框样式", available_styles, index=default_style_index, key='style_select'
+            )
         with col_c2:
             output_format = st.selectbox("输出格式", ["JPEG", "PNG"], index=0, key='output_format')
 

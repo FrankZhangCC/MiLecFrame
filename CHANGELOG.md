@@ -49,7 +49,7 @@
 
 - `gaussian_blur.py` 新增 `_enhance_saturation()` 函数，使用 PIL `ImageEnhance.Color` 在模糊图像与覆盖层混合前增强色彩饱和度
 - 4 个高斯模糊填充类型在 `FILL_TYPES` 中新增 `saturation` 字段，按覆盖透明度补偿：
-  - `gaussian_white_80` → 2.0 | `gaussian_white_50` → 1.5 | `gaussian_black_65` → 1.8 | `gaussian_black_35` → 1.3
+  - 统一调整为 `2.0`（`gaussian_white_80` / `gaussian_white_50` / `gaussian_black_65` / `gaussian_black_35`）
 - `BackgroundFillManager.render()` 新增 `saturation` 覆盖参数，`register()` 同步支持
 - `renderer.render_frame()` → `image_processor.process()` 全链路新增 `saturation_override` 可选参数
 - GUI `⚙️ 配置` 区新增「背景增强」复选框（默认勾选；纯色填充时灰显），取消勾选时传 1.0 禁用增强
