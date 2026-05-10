@@ -38,6 +38,14 @@ def main():
                         default='medium', help="字体字重（细体、中等、粗体）")
     parser.add_argument("--batch", action="store_true", help="批量处理模式")
     parser.add_argument("--recursive", action="store_true", help="递归处理子文件夹（仅批量模式）")
+    parser.add_argument("--output-format", choices=["JPEG", "PNG"], default="JPEG", help="输出格式（仅批量模式）")
+    parser.add_argument("--logo", default="auto", help="Logo选择：auto(自动匹配) / none(无) / 文件名")
+    parser.add_argument("--lens-display", choices=['combined', 'camera_only', 'lens_only'],
+                        default='combined', help="镜头显示模式")
+    parser.add_argument("--use-short-lens", action="store_true", help="使用短版镜头名")
+    parser.add_argument("--no-enhance", action="store_true", help="关闭背景增强")
+    parser.add_argument("--skip-existing", action="store_true", default=True,
+                        help="跳过已存在的输出文件（默认启用）")
     
     args = parser.parse_args()
     
@@ -60,13 +68,20 @@ def main():
     elif args.batch and args.input and args.output:
         try:
             batch_process_images(
-                args.input, 
-                args.output, 
-                args.style, 
-                args.author, 
-                args.location, 
-                args.bg_fill, 
-                args.recursive
+                input_folder=args.input,
+                output_folder=args.output,
+                style=args.style,
+                author=args.author,
+                location=args.location,
+                bg_fill=args.bg_fill,
+                font_weight=args.font_weight,
+                recursive=args.recursive,
+                output_format=args.output_format,
+                logo=args.logo,
+                lens_display=args.lens_display,
+                use_short_lens=args.use_short_lens,
+                no_enhance=args.no_enhance,
+                skip_existing=args.skip_existing,
             )
         except ImportError as e:
             print(f"批量处理模块导入失败: {str(e)}")
@@ -132,15 +147,19 @@ def launch_gui():
         return
 
 
-def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill='pure_white', font_weight='medium'):
+def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill=None, font_weight='medium'):
     """处理单张图片"""
     print(f"处理图片: {input_path} -> {output_path}")
     # 实现图片处理逻辑
     from core.image_processor import ImageProcessor
-    
+
+    if bg_fill is None:
+        from utils.background_fill import BackgroundFillManager
+        bg_fill = BackgroundFillManager.DEFAULT_FILL
+
     processor = ImageProcessor(style_config=style)
-    success = processor.process(input_path, output_path, author=author, location=location, 
-                               style_name=style, bg_fill_type=bg_fill, font_weight=font_weight)
+    success = processor.process(input_path, output_path, author=author, location=location,
+                                style_name=style, bg_fill_type=bg_fill, font_weight=font_weight)
     
     if not success:
         print("图片处理失败")
@@ -148,37 +167,81 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
 
 
 def batch_process_images(
-    input_folder, 
-    output_folder, 
-    style=None, 
-    author=None, 
-    location=None, 
-    bg_fill='pure_white',
+    input_folder,
+    output_folder,
+    style=None,
+    author=None,
+    location=None,
+    bg_fill=None,
     font_weight='medium',
-    recursive=False
+    recursive=False,
+    output_format="JPEG",
+    logo="auto",
+    lens_display='combined',
+    use_short_lens=False,
+    no_enhance=False,
+    skip_existing=True,
 ):
     """批量处理图片"""
     print(f"批量处理图片: {input_folder} -> {output_folder}")
-    
+
     from core.batch_processor import BatchProcessor
-    
+
+    # 使用默认背景填充类型
+    if bg_fill is None:
+        from utils.background_fill import BackgroundFillManager
+        bg_fill = BackgroundFillManager.DEFAULT_FILL
+
+    # 发现输入文件
+    input_files = BatchProcessor.discover_files(input_folder, recursive=recursive)
+    if not input_files:
+        print("未找到支持的图像文件")
+        sys.exit(1)
+
+    print(f"找到 {len(input_files)} 个文件待处理")
+    input_paths = [str(f) for f in input_files]
+
+    # 进度回调（CLI 用 print 输出）
+    def cli_progress(done, total, filename, status):
+        print(f"  [{done}/{total}] {filename} - {status}")
+
+    saturation_override = 1.0 if no_enhance else None
+
     processor = BatchProcessor()
-    success = processor.batch_process(
-        input_folder=input_folder,
+    result = processor.batch_process(
+        input_files=input_paths,
         output_folder=output_folder,
         author=author,
         location=location,
         style_name=style,
         bg_fill_type=bg_fill,
+        output_format=output_format,
         font_weight=font_weight,
-        recursive=recursive
+        logo_selection=logo,
+        lens_display_mode=lens_display,
+        use_short_lens=use_short_lens,
+        saturation_override=saturation_override,
+        progress_callback=cli_progress,
+        skip_existing=skip_existing,
     )
-    
-    if not success:
-        print("批量处理失败")
+
+    # 输出结果汇总
+    print(f"\n===== 批量处理完成 =====")
+    print(f"  总计: {result.total} 张")
+    print(f"  成功: {result.success_count} 张")
+    print(f"  失败: {result.fail_count} 张")
+    print(f"  跳过: {result.skip_count} 张")
+
+    if result.failed_files:
+        print(f"\n失败详情:")
+        for file_path, error in result.failed_files:
+            from pathlib import Path
+            print(f"  - {Path(file_path).name}: {error}")
+
+    if result.fail_count > 0:
         sys.exit(1)
     else:
-        print("批量处理完成")
+        print("全部处理完成！")
 
 
 # 为了兼容旧版本，保留向后兼容的接口

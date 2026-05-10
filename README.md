@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.5.2-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.6.0-blue)
 
 ## 快速开始
 
@@ -26,7 +26,7 @@ python src/main.py --input input.jpg --output output.jpg --style modern --author
 ##### 批量处理
 
 ```bash
-python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive
+python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive --output-format PNG --logo auto --lens-display combined --no-enhance
 ```
 
 ##### GUI模式
@@ -39,18 +39,24 @@ streamlit run src/gui/app.py
 
 #### 命令行选项
 
-| 参数              | 简写   | 说明                                           |
-| ----------------- | ------ | ---------------------------------------------- |
-| `--input`       | `-i` | 输入图片路径                                   |
-| `--output`      | `-o` | 输出图片路径                                   |
-| `--style`       | `-s` | 相框样式名称                                   |
-| `--author`      |        | 作者姓名                                       |
-| `--location`    |        | 拍摄地点                                       |
-| `--bg-fill`     |        | 背景填充类型                                   |
-| `--batch`       |        | 启用批量处理模式                               |
-| `--recursive`   |        | 递归处理子文件夹（仅批量模式）                 |
-| `--font-weight` |        | 字体字重：`light` / `regular` / `medium` |
-| `--gui`         |        | 启动 Streamlit GUI 界面                        |
+| 参数                | 简写   | 说明                                           |
+| ------------------- | ------ | ---------------------------------------------- |
+| `--input`         | `-i` | 输入图片路径                                   |
+| `--output`        | `-o` | 输出图片路径                                   |
+| `--style`         | `-s` | 相框样式名称                                   |
+| `--author`        |        | 作者姓名                                       |
+| `--location`      |        | 拍摄地点                                       |
+| `--bg-fill`       |        | 背景填充类型                                   |
+| `--batch`         |        | 启用批量处理模式                               |
+| `--recursive`     |        | 递归处理子文件夹（仅批量模式）                 |
+| `--font-weight`   |        | 字体字重：`light` / `regular` / `medium` |
+| `--output-format` |        | 输出格式：`JPEG` / `PNG`（仅批量模式）       |
+| `--logo`          |        | Logo 选择：`auto` / `none` / 文件名          |
+| `--lens-display`  |        | 镜头显示：`combined` / `camera_only` / `lens_only` |
+| `--use-short-lens` |       | 使用短版镜头名                                   |
+| `--no-enhance`    |        | 关闭背景增强                                     |
+| `--skip-existing` |        | 跳过已存在输出文件（默认启用，仅批量模式）       |
+| `--gui`           |        | 启动 Streamlit GUI 界面                        |
 
 `--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
 
@@ -83,8 +89,8 @@ streamlit run src/gui/app.py
 ### 使用方式
 
 - **CLI 命令行**：单张图片或批量文件夹处理
-- **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载
-- **批量处理**：多线程并发、递归子文件夹、实时进度统计、单文件失败不中断其余任务
+- **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载；批量处理页面支持多文件上传、逐张实时进度和结果汇总
+- **批量处理**：GUI 多文件上传（Ctrl+A 全选文件夹）、完整参数配置、逐张独立 Logo 匹配和 GPS 替换、实时进度条、跳过已存在文件、失败详情回溯；CLI 支持文件夹递归扫描
 
 ## 技术栈
 
@@ -110,6 +116,7 @@ MiLeica_Frame/
 │   │   ├── __init__.py
 │   │   ├── app.py                    # Streamlit GUI主文件
 │   │   ├── image_processing_page.py  # 图像处理页面
+│   │   ├── batch_processing_page.py  # 批量处理页面（v1.6.0）
 │   │   ├── camera_mapping_page.py    # 相机映射管理页面
 │   │   ├── lens_mapping_page.py      # 镜头映射管理页面
 │   │   ├── style_creator_page.py     # 样式编辑器页面
@@ -630,7 +637,7 @@ BackgroundFillManager.register(
 
 基于 Streamlit 的 Web 界面（`src/gui/app.py`），采用三栏式布局：
 
-- **侧边栏**（`st.sidebar`）：导航按钮 + 📋 图片信息区块（上传后自动显示文件编码/色彩空间、相机品牌型号、镜头、焦距/光圈/快门/ISO、拍摄时间，0.9rem 字体行高 2，参数独立逐行列出）+ 底部🛑停止按钮
+- **侧边栏**（`st.sidebar`）：导航按钮（🖼️ 图像处理 / 📦 批量处理 / 📸 相机映射管理 / 🔭 镜头映射管理 / 🎨 样式编辑器）+ 📋 图片信息区块（上传后自动显示文件编码/色彩空间、相机品牌型号、镜头、焦距/光圈/快门/ISO、拍摄时间，0.9rem 字体行高 2，参数独立逐行列出）+ 底部🛑停止按钮
 - **主栏**（`main_col`，`st.columns([7, 3])` 左侧）：上传器位于顶部 → 双栏/响应式预览（左原始图右效果图） → 生成/下载按钮 → 状态提示
 - **配置栏**（`config_col`，右侧）：灰色底色 + 圆角 + 白色输入框
   - `⚙️ 配置`：相框样式、输出格式、背景样式、字重
@@ -651,6 +658,7 @@ BackgroundFillManager.register(
 - **结果下载**：处理后图片预览 + 一键下载
 - **设备映射管理**：独立的相机/镜头映射表界面，支持品牌筛选、表格内编辑实时保存
 - **样式编辑器**：可视化表单页面，支持新建与编辑已有样式配置文件，填参后可一键生成 YAML
+- **批量处理**（v1.6.0）：独立标签页，支持多文件上传（含文件夹 Ctrl+A 全选）、文件列表展示尺寸和大小、与单张处理一致的完整配置栏、tkinter 原生文件夹对话框选择输出路径、逐张实时进度条、成功/失败/跳过统计与失败详情回溯
 
 ## 开发规范
 
