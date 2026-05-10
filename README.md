@@ -20,13 +20,13 @@
 ##### 单张图片处理
 
 ```bash
-python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_80
+python src/main.py -i input.jpg -o output.jpg -s "底部信息条 Bottom Bars" --author "Your Name" --bg-fill gaussian_white_80 --logo auto --lens-display combined --output-format JPEG --watermark-text "© MyBrand"
 ```
 
 ##### 批量处理
 
 ```bash
-python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive --output-format PNG --logo auto --lens-display combined --no-enhance
+python src/main.py --batch -i /path/to/input/folder -o /path/to/output/folder -s "底部信息条 Bottom Bars" --author "Your Name" --bg-fill gaussian_white_80 --recursive --output-format PNG --logo auto --lens-display combined --use-gps-location --watermark-text "© MyBrand" --watermark-opacity 30
 ```
 
 ##### GUI模式
@@ -50,12 +50,17 @@ streamlit run src/gui/app.py
 | `--batch`         |        | 启用批量处理模式                               |
 | `--recursive`     |        | 递归处理子文件夹（仅批量模式）                 |
 | `--font-weight`   |        | 字体字重：`light` / `regular` / `medium` |
-| `--output-format` |        | 输出格式：`JPEG` / `PNG`（仅批量模式）       |
+| `--output-format` |        | 输出格式：`JPEG` / `PNG`                         |
 | `--logo`          |        | Logo 选择：`auto` / `none` / 文件名          |
 | `--lens-display`  |        | 镜头显示：`combined` / `camera_only` / `lens_only` |
 | `--use-short-lens` |       | 使用短版镜头名                                   |
 | `--no-enhance`    |        | 关闭背景增强                                     |
-| `--skip-existing` |        | 跳过已存在输出文件（默认启用，仅批量模式）       |
+| `--skip-existing` |        | 跳过已存在输出文件（默认启用）                   |
+| `--watermark-text` |       | 水印文字内容（为空则不启用水印）                 |
+| `--watermark-position` |   | 水印位置：`top-left` / `top-right` / `bottom-left` / `bottom-right` / `top-center` / `bottom-center` |
+| `--watermark-opacity` |    | 水印不透明度 0-100（默认 50）                    |
+| `--watermark-color` |      | 水印颜色：`white` / `black`（默认 white）      |
+| `--use-gps-location` |     | 使用 GPS 坐标替换拍摄地点（批量逐张处理）        |
 | `--gui`           |        | 启动 Streamlit GUI 界面                        |
 
 `--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
