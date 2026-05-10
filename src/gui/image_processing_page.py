@@ -62,9 +62,7 @@ def render_image_processing_page():
         dd = st.session_state.display_data
         parts = ['<div style="font-size:0.9rem;line-height:2;">']
         parts.append(f"<b>文件</b>: {fi['format']} | {fi.get('color_space','')}<br>")
-        make = dd.get('raw_camera_make', '')
-        model = dd.get('raw_camera_model', '')
-        cam = f"{make} {model}".strip()
+        cam = dd.get('camera_combined', '')
         if cam:
             parts.append(f"<b>相机</b>: {cam}<br>")
         lens = dd.get('lens_model', '')

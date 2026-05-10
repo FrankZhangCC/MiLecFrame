@@ -1,5 +1,24 @@
 # 更新历史
 
+## v1.5.2 (2026-05-10)
+
+> 本版本修复等效35mm焦距错误换算的严重bug：删除不可靠的裁切系数推算逻辑，改为优先读取EXIF直接提供的 `FocalLengthIn35mmFilm` 字段，无该字段时直接使用物理焦距。
+
+### 🔴 关键修复：等效35mm焦距计算
+
+- `extract_exif_data()` 新增读取 `FocalLengthIn35mmFilm`（Tag `0xA405`），存入 `exif_data['focal_length_35mm']`
+- `format_exif_for_display()` 焦距逻辑改为：优先使用 `focal_length_35mm`（相机提供的等效值），否则直接用物理焦距 `focal_length`
+- **删除** `_calculate_equivalent_focal()` 方法（原第544-586行）：裁切系数匹配逻辑存在子串匹配缺陷（`'canon'` 误匹配全画幅机型导致 `32mm → 51mm`），不再使用
+- GUI 侧边栏 `raw_focal_length` 不受影响，仍显示物理焦距
+
+### 🔴 侧边栏相机信息重复显示
+
+- `image_processing_page.py` 侧边栏相机显示从手动拼接 `raw_camera_make + raw_camera_model` 改为直接使用映射后的 `camera_combined` 字段
+- 解决相机 Model 字段已含品牌名时（如 `"Canon EOS 6D"`），Make + Model 拼接导致的品牌重复（如 `"Canon Canon EOS 6D"`）
+- 如果 `camera_map.csv` 中正确配置了 `mapped_model`（如 `"EOS 6D"` 不含品牌前缀），侧边栏将显示 `"Canon EOS 6D"`
+
+---
+
 ## v1.5.1 (2026-05-09)
 
 > 本版本重构 v1.5.0 的短版镜头名与竖幅自适应为 GUI 可选控制：支持镜头显示模式选择（相机+镜头 / 只显示相机 / 只显示镜头），短版镜头名开关改为全局可选（竖幅默认勾选）。
