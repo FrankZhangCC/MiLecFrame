@@ -558,6 +558,8 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 设备映射数据存储于 `data/camera_map.csv`（相机品牌与型号映射）和 `data/lens_map.csv`（镜头与短版镜头名映射），由 `src/utils/device_mapper.py` 中的 `DeviceMapper` 类统一管理。
 
+> **⚠️ 编码注意**：CSV 文件必须使用 **UTF-8 编码**（无 BOM）。请使用支持 UTF-8 的编辑器（如 VS Code / PyCharm）修改，避免使用 Windows 记事本（默认 ANSI/GBK 编码）等工具，否则非 ASCII 字符（如 a→α）会导致读取解码错误。
+
 #### 相机映射命名规范
 
 **品牌名**：建议跟随品牌官方拼写习惯：
@@ -570,7 +572,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 | EXIF 原始型号  | 映射后名称 |
 | -------------- | ---------- |
-| ILCE-7M3       | α7 III    |
+| ILCE-7M3       | a7 III    |
 | X-HF1          | X Half     |
 | Canon EOS R5m2 | EOS R5 II  |
 | GFX100 II      | GFX 100 II |

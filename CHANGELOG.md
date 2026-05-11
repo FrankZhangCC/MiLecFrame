@@ -1,5 +1,21 @@
 # 更新历史
 
+## v1.6.1 (2026-05-11)
+
+> 本版本修复 CSV 编码异常导致设备映射失效的问题，统一日志输出并补充侧边栏图片尺寸显示。
+
+### 🔴 修复：CSV 编码异常导致设备映射失效
+
+- `src/utils/exif_helper.py:_record_device_info()` 消除冗余 CSV 读取，改用 `DeviceMapper` 已加载的 dict 做存在性检查，避免 CSV 编码错误导致 `extract_exif_data()` 返回 None
+- `extract_exif_data()` 将 `_record_device_info()` 移出 try/except 核心块，设备信息记录失败不再影响 EXIF 提取结果
+- `_get_exif_helper()` 移除 `@st.cache_resource`，确保 ExifHelper/DeviceMapper 每次 rerun 重新读取最新 CSV 映射数据
+- `print()` → `logging` 统一：`exif_helper.py`、`device_mapper.py` 全部异常/信息输出纳入日志系统
+- `README.md` 设备映射规范新增 UTF-8 编码警告说明，α7 → a7 示例变更，防止非 UTF-8 保存再次引发解码错误
+
+### 🟢 侧边栏图片信息补充宽×高
+
+- `image_processing_page.py` 侧边栏文件信息行补充 `| {width}×{height} px`，恢复原 GUI 文件信息区域中的像素尺寸显示
+
 ## v1.6.0 (2026-05-10)
 
 > 本版本完全重写批量处理系统，新增 GUI 批处理页面，支持多文件上传、完整参数配置、实时进度条和结果汇总。批处理核心参数与单张处理管线完全对齐。
