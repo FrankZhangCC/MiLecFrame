@@ -39,29 +39,29 @@ streamlit run src/gui/app.py
 
 #### 命令行选项
 
-| 参数                | 简写   | 说明                                           |
-| ------------------- | ------ | ---------------------------------------------- |
-| `--input`         | `-i` | 输入图片路径                                   |
-| `--output`        | `-o` | 输出图片路径                                   |
-| `--style`         | `-s` | 相框样式名称                                   |
-| `--author`        |        | 作者姓名                                       |
-| `--location`      |        | 拍摄地点                                       |
-| `--bg-fill`       |        | 背景填充类型                                   |
-| `--batch`         |        | 启用批量处理模式                               |
-| `--recursive`     |        | 递归处理子文件夹（仅批量模式）                 |
-| `--font-weight`   |        | 字体字重：`light` / `regular` / `medium` |
-| `--output-format` |        | 输出格式：`JPEG` / `PNG`                         |
-| `--logo`          |        | Logo 选择：`auto` / `none` / 文件名          |
-| `--lens-display`  |        | 镜头显示：`combined` / `camera_only` / `lens_only` |
-| `--use-short-lens` |       | 使用短版镜头名                                   |
-| `--no-enhance`    |        | 关闭背景增强                                     |
-| `--skip-existing` |        | 跳过已存在输出文件（默认启用）                   |
-| `--watermark-text` |       | 水印文字内容（为空则不启用水印）                 |
-| `--watermark-position` |   | 水印位置：`top-left` / `top-right` / `bottom-left` / `bottom-right` / `top-center` / `bottom-center` |
-| `--watermark-opacity` |    | 水印不透明度 0-100（默认 50）                    |
-| `--watermark-color` |      | 水印颜色：`white` / `black`（默认 white）      |
-| `--use-gps-location` |     | 使用 GPS 坐标替换拍摄地点（批量逐张处理）        |
-| `--gui`           |        | 启动 Streamlit GUI 界面                        |
+| 参数                     | 简写   | 说明                                                                                                             |
+| ------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| `--input`              | `-i` | 输入图片路径                                                                                                     |
+| `--output`             | `-o` | 输出图片路径                                                                                                     |
+| `--style`              | `-s` | 相框样式名称                                                                                                     |
+| `--author`             |        | 作者姓名                                                                                                         |
+| `--location`           |        | 拍摄地点                                                                                                         |
+| `--bg-fill`            |        | 背景填充类型                                                                                                     |
+| `--batch`              |        | 启用批量处理模式                                                                                                 |
+| `--recursive`          |        | 递归处理子文件夹（仅批量模式）                                                                                   |
+| `--font-weight`        |        | 字体字重：`light` / `regular` / `medium`                                                                   |
+| `--output-format`      |        | 输出格式：`JPEG` / `PNG`                                                                                     |
+| `--logo`               |        | Logo 选择：`auto` / `none` / 文件名                                                                          |
+| `--lens-display`       |        | 镜头显示：`combined` / `camera_only` / `lens_only`                                                         |
+| `--use-short-lens`     |        | 使用短版镜头名                                                                                                   |
+| `--no-enhance`         |        | 关闭背景增强                                                                                                     |
+| `--skip-existing`      |        | 跳过已存在输出文件（默认启用）                                                                                   |
+| `--watermark-text`     |        | 水印文字内容（为空则不启用水印）                                                                                 |
+| `--watermark-position` |        | 水印位置：`top-left` / `top-right` / `bottom-left` / `bottom-right` / `top-center` / `bottom-center` |
+| `--watermark-opacity`  |        | 水印不透明度 0-100（默认 50）                                                                                    |
+| `--watermark-color`    |        | 水印颜色：`white` / `black`（默认 white）                                                                    |
+| `--use-gps-location`   |        | 使用 GPS 坐标替换拍摄地点（批量逐张处理）                                                                        |
+| `--gui`                |        | 启动 Streamlit GUI 界面                                                                                          |
 
 `--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
 
@@ -87,9 +87,10 @@ streamlit run src/gui/app.py
 
 ### Logo
 
-- 支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
-- 自动匹配时根据背景明暗自动选择 Logo 颜色变体：暗色背景优先 `_white` 后缀，亮色背景优先非 `_white` 后缀
-- 布局、尺寸、定位由样式 YAML 的 `logo:` 节独立定义，渲染顺序在文字层之后（可引用文字元素坐标做相对定位）
+- 支持手动选择或根据 EXIF 相机品牌自动匹配
+- 根据背景明暗自动选择 Logo 颜色变体（暗色 → `_white`，亮色 → 非 `_white`）
+- 布局、尺寸、定位由样式 YAML 的 `logo:` 节独立定义
+- 详见 [Logo 配置](#logo-配置)、[Logo 文件制作指南](#logo-文件制作指南) 及 [Logo 渲染子系统](#logo-渲染子系统)
 
 ### 使用方式
 
@@ -441,6 +442,39 @@ logo:
 - Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
 - Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件，并根据当前背景类型的 `text_scheme`（暗色/亮色）自动选择 `_white` / 非 `_white` 颜色变体
 
+### Logo 文件制作指南
+
+#### 文件格式要求
+
+- **格式**：仅支持 PNG 格式（RGBA 透明背景）
+- **图形**：透明底 PNG，图形四周不留空白区域（建议将图形裁剪至边界）
+- **分辨率**：建议横向分辨率 ≥ 2000px，保证任意缩放比例下清晰度不受影响
+
+#### 文件命名规范
+
+推荐格式：**`[Brand]_[Shape]_[Color].png`**
+
+| 命名元素        | 说明                                                                                                                              | 示例                                       |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Brand** | 英文品牌名称；子品牌用下划线分隔                                                                                                  | `sony_alpha`、`nikon_Z`、`canon_EOS` |
+| **Shape** | `logo`（原始商标）、`round`（圆形底框）、`vertical`（垂直排列，适用于含子品牌）、`horizontal`（横向排列，适用于含子品牌） | `logo`、`round`                        |
+| **Color** | `black`、`white`，或色彩具体名称（如 `red`、`orange`、`yellow`、`grey`）                                              | `black`、`white`、`red`              |
+
+示例文件名：
+
+- `sony_logo_black.png` — Sony 原始商标，黑色
+- `canon_eos_round_white.png` — Canon EOS，圆形底框，白色
+- `nikon_Z_round_black.png` — Nikon Z，圆形底框，黑色
+- `fujifilm_gfx_round_white.png` — Fujifilm GFX，圆形底框，白色
+
+#### 颜色变体自动匹配
+
+系统根据背景明暗自动选择 Logo 颜色变体：
+
+- **暗色背景** → 优先匹配 `_white` 后缀的 Logo（白色 Logo 在暗色背景上更醒目）
+- **亮色背景** → 优先匹配非 `_white` 后缀的 Logo（深色 Logo 在亮色背景上更醒目）
+- 若指定颜色变体不存在，自动回退到该品牌的其他可用颜色变体
+
 ## 核心功能规格
 
 ### EXIF 信息处理与渲染上下文
@@ -520,6 +554,51 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 ---
 
+### 设备映射数据规范
+
+设备映射数据存储于 `data/camera_map.csv`（相机品牌与型号映射）和 `data/lens_map.csv`（镜头与短版镜头名映射），由 `src/utils/device_mapper.py` 中的 `DeviceMapper` 类统一管理。
+
+#### 相机映射命名规范
+
+**品牌名**：建议跟随品牌官方拼写习惯：
+
+- 品牌官方全大写的（如 **SONY**），保持全大写
+- 品牌名称过长的（如 **Hasselblad**），建议首字母大写（Title Case）
+- 其他品牌跟随官方标准拼写（如 Canon、Nikon、FUJIFILM、Xiaomi 等）
+
+**型号名**：建议跟随品牌官方市场名称拼写，而非 EXIF 内部编号。示例：
+
+| EXIF 原始型号  | 映射后名称 |
+| -------------- | ---------- |
+| ILCE-7M3       | α7 III    |
+| X-HF1          | X Half     |
+| Canon EOS R5m2 | EOS R5 II  |
+| GFX100 II      | GFX 100 II |
+| NIKON Z 9      | Z9         |
+
+#### 镜头映射命名规范
+
+`lens_map.csv` 包含三列：`original_lens`（EXIF 原始镜头名）、`mapped_lens`（完整映射名）、`short_lens`（短版名）。
+
+**完整映射名**：建议跟随品牌官方市场名称拼写，保持可读性。
+
+**短版映射名**：建议优先保留焦距和光圈信息，格式跟随品牌官方市场名称拼写。具体规则：
+
+| 镜头类型           | 规则                                                                                                   | 示例                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| **原厂镜头** | 保留镜头系列（如 EF、RF、Z、FE、GF、XF、XCD）和定位标识（如 L、S、GM），去掉详细的防抖/马达/镀膜等描述 | `Z 85mm f/1.8 S`、`FE 85mm F1.4 GM`、`GF 120mm F4` |
+| **副厂镜头** | 不保留品牌名称和卡口信息，仅保留焦距和光圈                                                             | `100-400mm F5-6.3`、`28-200mm F2.8-5.6`              |
+
+示例对照：
+
+| 原始镜头名                                    | 完整映射名                                    | 短版名           |
+| --------------------------------------------- | --------------------------------------------- | ---------------- |
+| RF85mm F1.2 L USM                             | RF 85mm F1.2 L USM                            | RF 85mm F1.2 L   |
+| NIKKOR Z 85mm f/1.8 S                         | NIKKOR Z 85mm f/1.8 S                         | Z 85mm f/1.8 S   |
+| 100-400mm F5-6.3 DG OS HSM\| Contemporary 017 | SIGMA 100-400mm F5-6.3 DG OS HSM Contemporary | 100-400mm F5-6.3 |
+
+---
+
 ### 图像支持与处理管线
 
 #### 支持的格式
@@ -581,8 +660,20 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
 - **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
-- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 参照边（短边）`），对角线自动限制 ≤ `2 * size_ratio * 参照边（短边）`。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
-- **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名；根据背景 `text_scheme`（通过 `BackgroundFillManager.is_dark_bg()` 获取）自动选择 Logo 颜色变体——暗色背景优先 `_white` 后缀，亮色背景优先非 `_white` 后缀
+
+##### Logo 渲染子系统
+
+Logo 文件统一存储于 `assets/logos/` 目录。核心模块 `src/utils/logo_selector.py` 中的 `LogoSelector` 类负责：
+
+- **文件扫描**：`scan_logos()` 遍历 `assets/logos/` 目录下所有 PNG 文件
+- **格式校验**：`validate_logo()` 验证文件为 PNG 格式
+- **自动匹配**：`auto_match_logo()` 根据相机品牌自动选择 Logo
+
+**调用链**：渲染器通过 `RenderContext.get_text('camera_make')` 获取映射后的相机品牌名，传给 `LogoSelector.auto_match_logo()` 进行逐词子串匹配，过滤 ≤2 字符的无意义词（如 AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名。匹配后根据背景明暗自动选择颜色变体：暗色背景优先 `_white` 后缀，亮色背景优先非 `_white` 后缀。
+
+**尺寸约束**：Logo 短边 = `logo.size_ratio × 参照边（短边）`，对角线自动限制 ≤ `2 × size_ratio × 参照边（短边）`（默认 `size_ratio = 0.05`），防止细长 Logo 失控。支持绝对定位和相对定位，通过 `relative_to` 可引用文字元素坐标。
+
+**渲染顺序**：Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用。
 
 #### 背景填充管理器 (BackgroundFillManager) (v1.4.0)
 
