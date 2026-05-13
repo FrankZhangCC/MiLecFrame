@@ -54,5 +54,5 @@ logo:
   alignment: "center"
   relative_margin: 0.016
   size_ratio: 0.048
-  offset_y_ratio: 0.013
+  offset_y_ratio: 0.014
 name: 照片底部信息水印
