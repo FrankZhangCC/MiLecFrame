@@ -1,7 +1,7 @@
 """
 高斯模糊工具模块
 """
-from PIL import Image, ImageFilter, ImageEnhance
+from PIL import Image
 import numpy as np
 
 COLOR_OPTIONS = {
@@ -16,10 +16,15 @@ _BLUR_WORK_MIN = 512
 _BOX_BLUR_PASSES = 3
 
 
-def _box_blur(image: Image.Image, radius: float) -> Image.Image:
+def _box_blur_numpy(arr: np.ndarray, radius: float) -> np.ndarray:
+    r = int(radius)
+    if r <= 0:
+        return arr
+    kernel = np.ones(2 * r + 1, dtype=np.float32) / (2 * r + 1)
     for _ in range(_BOX_BLUR_PASSES):
-        image = image.filter(ImageFilter.BoxBlur(radius))
-    return image
+        arr = np.apply_along_axis(lambda x: np.convolve(x, kernel, mode='same'), 1, arr)
+        arr = np.apply_along_axis(lambda x: np.convolve(x, kernel, mode='same'), 0, arr)
+    return arr
 
 
 def _compute_scale_factor(image_long_edge: int) -> float:
@@ -28,20 +33,16 @@ def _compute_scale_factor(image_long_edge: int) -> float:
     return _BLUR_WORK_MAX / image_long_edge
 
 
-def _enhance_saturation(image: Image.Image, factor: float) -> Image.Image:
-    """
-    增强图像饱和度（用于补偿高斯模糊叠加覆盖层后的颜色淡化）
-    
-    Args:
-        image: RGB 模式的图像
-        factor: 饱和度增强系数（1.0 = 不变，>1.0 = 增强）
-        
-    Returns:
-        增强后的图像（factor ≤ 1.0 时原样返回）
-    """
+def _enhance_saturation_numpy(arr: np.ndarray, factor: float) -> np.ndarray:
     if factor <= 1.0:
-        return image
-    return ImageEnhance.Color(image).enhance(factor)
+        return arr
+    L = (0.2126 * arr[:, :, 0] + 0.7152 * arr[:, :, 1] + 0.0722 * arr[:, :, 2])
+    result = np.stack([
+        L + (arr[:, :, 0] - L) * factor,
+        L + (arr[:, :, 1] - L) * factor,
+        L + (arr[:, :, 2] - L) * factor,
+    ], axis=-1)
+    return np.clip(result, 0, 255)
 
 
 def apply_gaussian_blur_overlay_expansion(
@@ -81,11 +82,12 @@ def apply_gaussian_blur_overlay_expansion(
         blur_img = blur_img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
 
     effective_radius = blur_radius * scale_factor
-    blur_img = _box_blur(blur_img, effective_radius)
 
-    # 饱和度增强：在叠加覆盖层之前增强模糊图像的色彩，
-    # 以补偿白色/黑色覆盖层导致的颜色淡化
-    blur_img = _enhance_saturation(blur_img, saturation)
+    # float32 域处理：box blur + 饱和度增强，避免 uint8 量化误差被放大
+    arr = np.array(blur_img, dtype=np.float32)
+    arr = _box_blur_numpy(arr, effective_radius)
+    arr = _enhance_saturation_numpy(arr, saturation)
+    blur_img = Image.fromarray(arr.astype(np.uint8), mode='RGB')
 
     blur_img = blur_img.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
 
