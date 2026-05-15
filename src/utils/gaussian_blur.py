@@ -21,9 +21,13 @@ def _box_blur_numpy(arr: np.ndarray, radius: float) -> np.ndarray:
     if r <= 0:
         return arr
     kernel = np.ones(2 * r + 1, dtype=np.float32) / (2 * r + 1)
+
+    def _blur_1d(x):
+        return np.convolve(np.pad(x, r, mode='edge'), kernel, mode='valid')
+
     for _ in range(_BOX_BLUR_PASSES):
-        arr = np.apply_along_axis(lambda x: np.convolve(x, kernel, mode='same'), 1, arr)
-        arr = np.apply_along_axis(lambda x: np.convolve(x, kernel, mode='same'), 0, arr)
+        arr = np.apply_along_axis(_blur_1d, 1, arr)
+        arr = np.apply_along_axis(_blur_1d, 0, arr)
     return arr
 
 
