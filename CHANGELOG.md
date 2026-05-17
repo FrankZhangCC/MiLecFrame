@@ -1,5 +1,20 @@
 # 更新历史
 
+## v1.6.3 (2026-05-17)
+
+> 本版本修复非标准 EXIF 类型导致写入失败的问题，并为 debug_log 引入行数滚动机制。
+
+### 🔴 修复：非标准 EXIF 标签类型导致写入失败
+
+- `src/core/image_processor.py` 新增 `_try_dump_exif()` 容错式序列化函数：hook `piexif.dump()` 异常并正则解析问题标签，自动丢弃后重试，最大化保留可写入标签，而非整体放弃 EXIF 嵌入
+- 修复 `exif_failed.jpg` 等由相机以非标准数据类型（SHORT 而非 UNDEFINED）写入 SceneType(0xA301) 时，`piexif.dump()` 抛出 `Got wrong type of exif value` 导致整个 EXIF 丢失的问题
+
+### 🟢 debug_log.txt 滚动更新机制
+
+- `src/utils/logging_config.py` 新增 `LineCountRotatingFileHandler`：继承 `logging.FileHandler`，每次写入后追踪行数，超出 1000 行时自动删除最旧记录，文件始终保持最新 1000 行
+- 通过文件行数实时统计校准计数器，支持多行消息（如 traceback）计数偏差的自动修正
+- 异常静默降级：滚动失败时重新统计文件行数确保计数器不漂移
+
 ## v1.6.2 (2026-05-16)
 
 > 本版本修复 float32 模糊管线中 zero-padding 边界导致的画布四周发黑问题。
