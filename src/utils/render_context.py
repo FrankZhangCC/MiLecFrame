@@ -85,7 +85,7 @@ class RenderContext:
             return f"{ss}s" if ss else None
         elif key == 'iso_formatted':
             iso_val = self._display_data.get('raw_iso')
-            return f"ISO{iso_val}" if iso_val else None
+            return iso_val if iso_val else None
         elif key == 'custom_text':
             return self.custom_text or None
         return None

@@ -415,3 +415,216 @@ class LayoutEngine:
         y = max(pad_top, min(y, pad_bottom - element_height))
 
         return x, y
+
+    def _collect_tree_members(self, root_name: str, members: set):
+        """
+        递归收集以 root_name 为根的依赖树中所有元素名称
+        """
+        members.add(root_name)
+        for dep_name in self._dependents.get(root_name, []):
+            self._collect_tree_members(dep_name, members)
+
+    def _resolve_tree_ref(self, position: str, alignment: str):
+        """
+        解析 position + alignment → (h_ref, v_ref)
+        h_ref: 'left' / 'center' / 'right'
+        v_ref: 'top'  / 'center' / 'bottom'
+        与 _get_anchor 的行为完全一致
+        """
+        # ── 上方位置组 ──
+        if position in ('top-left', 'tl') or (
+            position == 'top' and alignment in ('left', 'top-left', 'bottom-left')
+        ):
+            return 'left', 'top'
+        if position in ('top-right', 'tr') or (
+            position == 'top' and alignment in ('right', 'top-right', 'bottom-right')
+        ):
+            return 'right', 'top'
+        if position in ('top-center', 'tc', 'top'):
+            return 'center', 'top'
+
+        # ── 下方位置组 ──
+        if position in ('bottom-left', 'bl') or (
+            position == 'bottom' and alignment in ('left', 'top-left', 'bottom-left')
+        ):
+            return 'left', 'bottom'
+        if position in ('bottom-right', 'br') or (
+            position == 'bottom' and alignment in ('right', 'top-right', 'bottom-right')
+        ):
+            return 'right', 'bottom'
+        if position in ('bottom-center', 'bc', 'bottom'):
+            return 'center', 'bottom'
+
+        # ── 左侧：水平固定，垂直由 alignment 控制 ──
+        if position == 'left':
+            if alignment in ('top', 'top-left', 'top-right'):
+                return 'left', 'top'
+            elif alignment in ('bottom', 'bottom-left', 'bottom-right'):
+                return 'left', 'bottom'
+            return 'left', 'center'
+
+        # ── 右侧：水平固定，垂直由 alignment 控制 ──
+        if position == 'right':
+            if alignment in ('top', 'top-left', 'top-right'):
+                return 'right', 'top'
+            elif alignment in ('bottom', 'bottom-left', 'bottom-right'):
+                return 'right', 'bottom'
+            return 'right', 'center'
+
+        # ── 画布中心 ──
+        if position == 'center':
+            return 'center', 'center'
+
+        # 兜底：下方居中
+        return 'center', 'bottom'
+
+    def _compute_visual_bounds(self, member_names):
+        """
+        根据 positions 注册表计算一组元素的视觉包围盒
+        返回 (left, top, right, bottom) 或 None
+        文字元素的 top/bottom 使用 ascent 校正后的视觉边界
+        """
+        tree_left = float('inf')
+        tree_top = float('inf')
+        tree_right = float('-inf')
+        tree_bottom = float('-inf')
+
+        for member_name in member_names:
+            mpos = self.positions.get(member_name)
+            if not mpos:
+                continue
+            mx, my = mpos['x'], mpos['y']
+            mw, mh = mpos['width'], mpos['height']
+            mascent = mpos.get('ascent')
+
+            if mascent is not None and mascent > 0:
+                # 文字元素：注册 y = 基线，视觉顶部 = 基线 - ascent
+                visual_top = my - mascent
+                visual_bottom = my + (mh - mascent)
+            else:
+                visual_top = my
+                visual_bottom = my + mh
+
+            tree_left = min(tree_left, mx)
+            tree_top = min(tree_top, visual_top)
+            tree_right = max(tree_right, mx + mw)
+            tree_bottom = max(tree_bottom, visual_bottom)
+
+        if tree_left == float('inf'):
+            return None
+        return tree_left, tree_top, tree_right, tree_bottom
+
+    def apply_tree_positioning(self, all_positions: dict):
+        """
+        依赖树组合定位
+
+        将每棵依赖树（根 + 其 relative_to 子孙）视作整体，
+        按根节点的 position / alignment / margin_* 参数对整个树的
+        视觉包围盒做一次绝对定位。
+
+        调用时机：Phase 2 所有元素完成独立注册之后，Phase 3 绘制之前。
+        """
+        processed = set()
+
+        for name in list(self.positions.keys()):
+            cfg = all_positions.get(name, {})
+            if cfg.get('relative_to'):
+                continue
+            if name in processed:
+                continue
+            # 仅处理显式声明 tree_align 的根元素，未声明的链不受影响
+            if not cfg.get('tree_align'):
+                continue
+
+            # 1. 收集整棵树的所有成员
+            tree_members = set()
+            self._collect_tree_members(name, tree_members)
+            processed.update(tree_members)
+
+            if len(tree_members) <= 1:
+                # 单元素已在 Phase 2 完成绝对定位，无需额外处理
+                continue
+
+            # 2. 计算树的视觉包围盒
+            bounds = self._compute_visual_bounds(tree_members)
+            if bounds is None:
+                continue
+
+            tree_left, tree_top, tree_right, tree_bottom = bounds
+            tree_w = tree_right - tree_left
+            tree_h = tree_bottom - tree_top
+
+            position = cfg.get('position', 'bottom')
+            alignment = cfg.get('alignment', 'center')
+
+            # 3. 用根节点的绝对定位参数计算树应有的目标左上角坐标
+            target_x, target_y = self._calculate_absolute(tree_w, tree_h, cfg)
+
+            # 4. 解析水平 / 垂直参考方向
+            h_ref, v_ref = self._resolve_tree_ref(position, alignment)
+
+            # 5. 计算目标参考坐标
+            if h_ref == 'left':
+                target_ref_x = target_x
+            elif h_ref == 'right':
+                target_ref_x = target_x + tree_w
+            else:
+                target_ref_x = target_x + tree_w // 2
+
+            if v_ref == 'top':
+                target_ref_y = target_y - tree_h
+            elif v_ref == 'bottom':
+                target_ref_y = target_y
+            else:
+                target_ref_y = target_y - tree_h // 2
+
+            # 6. 计算当前参考坐标
+            if h_ref == 'left':
+                cur_ref_x = tree_left
+            elif h_ref == 'right':
+                cur_ref_x = tree_right
+            else:
+                cur_ref_x = (tree_left + tree_right) // 2
+
+            if v_ref == 'top':
+                cur_ref_y = tree_top
+            elif v_ref == 'bottom':
+                cur_ref_y = tree_bottom
+            else:
+                cur_ref_y = (tree_top + tree_bottom) // 2
+
+            # 7. 平移整棵树
+            shift_x = target_ref_x - cur_ref_x
+            shift_y = target_ref_y - cur_ref_y
+
+            if shift_x != 0 or shift_y != 0:
+                self._shift_dependents(name, shift_x, shift_y)
+                root_pos = self.positions[name]
+                root_pos['x'] += shift_x
+                root_pos['y'] += shift_y
+
+            # 8. padding 约束：若移动后溢出安全区域，整体平移回来
+            pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
+
+            new_bounds = self._compute_visual_bounds(tree_members)
+            if new_bounds is None:
+                continue
+
+            nl, nt, nr, nb = new_bounds
+
+            clip_x = 0
+            clip_y = 0
+            if nl < pad_left:
+                clip_x = pad_left - nl
+            elif nr > pad_right:
+                clip_x = pad_right - nr
+            if nt < pad_top:
+                clip_y = pad_top - nt
+            elif nb > pad_bottom:
+                clip_y = pad_bottom - nb
+
+            if clip_x != 0 or clip_y != 0:
+                self._shift_dependents(name, clip_x, clip_y)
+                root_pos2 = self.positions[name]
+                root_pos2['x'] += clip_x
+                root_pos2['y'] += clip_y

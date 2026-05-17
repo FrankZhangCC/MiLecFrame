@@ -1,18 +1,21 @@
 # ============================================================
-# 扩展宝丽来风格 Polaroid Motto
-# 基于"宝丽来风格 Polaroid"扩展，新增预定义文本和自定义文本功能
+# 扩展宝丽来风格 Polaroid Motto (v1.7.0)
+# 基于"宝丽来风格 Polaroid"扩展，包含：
+#   - 独立格式化 EXIF 字段（焦距/光圈/快门/ISO）
+#   - 预定义文本标签（FL/Aperture/Shutter/ISO）
+#   - 依赖树组合定位（整链居中）
+#   - 自定义文本
 # ============================================================
 
 name: 扩展宝丽来风格 Polaroid Motto
 
-# ---- 颜色配置 ----
 colors:
   text: '#000000'
   custom_timestamp_author_light_color: [51, 51, 51]
   custom_timestamp_author_dark_color: [204, 204, 204]
   custom_location_light_color: [51, 51, 51]
   custom_location_dark_color: [204, 204, 204]
-  # defined_texts 元素的颜色（浅色背景深灰，深色背景浅灰）
+  # defined_texts 元素颜色
   custom_defined_text_01_light_color: [51, 51, 51]
   custom_defined_text_01_dark_color: [204, 204, 204]
   custom_defined_text_02_light_color: [51, 51, 51]
@@ -21,27 +24,23 @@ colors:
   custom_defined_text_03_dark_color: [204, 204, 204]
   custom_defined_text_04_light_color: [51, 51, 51]
   custom_defined_text_04_dark_color: [204, 204, 204]
-  custom_custom_text_light_color: [51, 51, 51]
-  custom_custom_text_dark_color: [204, 204, 204]
 
-# ---- 字体配置 ----
 fonts:
   family: Gotham
   weight: medium
   size_ratio: 0.01
-  line_spacing_ratio: 0.008     # 多行文本默认行间距（相对于原图短边）
+  line_spacing_ratio: 0.008
   sizes:
-    exif: 0.018
-    timestamp_author: 0.018
-    camera_lens: 0.018
-    location: 0.018
-    defined_text_01: 0.018
-    defined_text_02: 0.018
-    defined_text_03: 0.018
-    defined_text_04: 0.018
+    defined_text_01: 0.022
+    defined_text_02: 0.022
+    defined_text_03: 0.022
+    defined_text_04: 0.022
+    focal_length_formatted: 0.022
+    aperture_formatted: 0.022
+    shutter_speed_formatted: 0.022
+    iso_formatted: 0.022
     custom_text: 0.015
 
-# ---- 布局配置 ----
 layout:
   expand_canvas:
     enabled: true
@@ -55,68 +54,63 @@ layout:
     left: 0.05
     right: 0.05
 
-  # --- 相机信息文本（与原宝丽来风格一致）---
+  # ── 独立格式化 EXIF 字段（组件，不独立出现）──
   info_position:
-    exif:
-      position: "bottom-left"
+    focal_length_formatted:
+      relative_to: "defined_text_01"
+      relative_position: "right-of"
       alignment: "left"
-      margin_top: 0
-      margin_bottom: 0.035
-      margin_left: 0
-      margin_right: 0
-    timestamp_author:
-      relative_to: "exif"
-      relative_position: "below"
+      relative_margin: 0.005
+    aperture_formatted:
+      relative_to: "defined_text_02"
+      relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.015
-    camera_lens:
-      position: "bottom-right"
-      alignment: "right"
-      margin_top: 0
-      margin_bottom: 0.035
-      margin_left: 0
-      margin_right: 0
-    location:
-      relative_to: "camera_lens"
-      relative_position: "below"
-      alignment: "right"
-      relative_margin: 0.015
+      relative_margin: 0.005
+    shutter_speed_formatted:
+      relative_to: "defined_text_03"
+      relative_position: "right-of"
+      alignment: "left"
+      relative_margin: 0.005
+    iso_formatted:
+      relative_to: "defined_text_04"
+      relative_position: "right-of"
+      alignment: "left"
+      relative_margin: 0.005
 
-  # --- 预定义文本：四段固定内容，编码编号命名避免 key 冲突 ---
+  # ── 预定义文本标签（构成链的骨架）──
   defined_texts:
     defined_text_01:
       content: "FL"
-      position: "bottom-left"
-      alignment: "bottom"
-      margin_bottom: 0.080
+      position: "bottom"
+      alignment: "center"
+      tree_align: true
+      margin_bottom: 0.07
     defined_text_02:
-      content: "shutter"
-      relative_to: "defined_text_01"
+      content: "Aperture"
+      relative_to: "focal_length_formatted"
       relative_position: "right-of"
-      alignment: "bottom"
-      relative_margin: 0.008
-      offset_y_ratio: 0.0
+      alignment: "left"
+      relative_margin: 0.02
     defined_text_03:
-      content: "aperture"
-      relative_to: "defined_text_02"
+      content: "Shutter"
+      relative_to: "aperture_formatted"
       relative_position: "right-of"
-      alignment: "bottom"
-      relative_margin: 0.008
+      alignment: "left"
+      relative_margin: 0.02
     defined_text_04:
       content: "ISO"
-      relative_to: "defined_text_03"
+      relative_to: "shutter_speed_formatted"
       relative_position: "right-of"
-      alignment: "bottom"
-      relative_margin: 0.008
+      alignment: "left"
+      relative_margin: 0.02
 
-  # --- 自定义文本：用户在 GUI 中输入内容 ---
+  # ── 自定义文本 ──
   custom_text:
     enabled: true
     position: "bottom-center"
     alignment: "center"
-    line_spacing_ratio: 0.008      # 覆盖全局行间距
+    line_spacing_ratio: 0.003
     margin_bottom: 0.125
 
-# ---- Logo ----
 logo:
   enabled: false

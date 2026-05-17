@@ -254,7 +254,8 @@ name: "样式名称"         # 必需字段，用于标识样式
   - 内容在配置文件中写死，采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 以此类推
   - 此命名惯例确保 key 不与 `info_position` 的保留名（如 `exif`、`author` 等）冲突，且补零保证字典自然排序
   - 每个条目包含 `content`（文本内容）和标准布局参数，与 `info_position` 共用定位系统
-  - 示例：`defined_text_01: { content: "FL", position: "bottom-left", ... }`
+  - `tree_align: true`（可选，用于根元素）：将整棵依赖树按根元素的 position/alignment/margin 做整体绝对定位，适合水平链式排版居中。未声明时不影响已有垂直链
+  - 示例：`defined_text_01: { content: "FL", position: "bottom", alignment: "center", tree_align: true, margin_bottom: 0.07 }`
 - `custom_text`: 自定义文本配置 (v1.7.0)
   - `enabled`: 布尔值，设为 `true` 时 GUI 显示多行文本输入框，CLI 通过 `--custom-text` 参数传入
   - 布局参数与 `info_position` 相同，`relative_to` 可跨区域引用（包括 `defined_texts` 和 `info_position` 中的元素）
@@ -667,6 +668,8 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 `src/utils/layout_engine.py` 负责画布计算与元素定位：
 
+> **算法详情**：布局引擎的完整定位系统（绝对定位 / 相对定位 / 基线校正 / 组合盒约束 / 树级组合定位 / 拓扑排序等）以及渲染器的三阶段管线，请参见独立的 **[布局引擎与渲染器算法文档](src/docs/layout_engine.md)**。
+
 - **画布扩展**：以参照边（短边）比例扩展四边（`expand_canvas`），上下左右独立设置
 - **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
 - **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
@@ -776,7 +779,11 @@ BackgroundFillManager.register(
 - **EXIF 预提取**：利用 `session_state` widget 预置机制，上传后侧边栏信息即时刷新，无需额外交互
 - **缩略图预览**：处理完成后自动生成 1200px 长边缩略图用于页面预览，大幅降低传输带宽；下载按钮提供全分辨率原始输出
 - **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
-- **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；水印（内容/位置/透明度/颜色）独立控制
+- **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；
+  - v1.7.0 新增 ✏️ **自定义文本**：样式启用时显示多行文本输入框，支持换行
+  - v1.7.0 新增 **独立格式化 EXIF**：`focal_length_formatted` / `aperture_formatted` / `shutter_speed_formatted` / `iso_formatted` 四个独立 key 可在样式中直接引用
+  - v1.7.0 新增 **预定义文本**：`defined_texts` 配置节支持写死固定内容文本块
+- **水印**（内容/位置/透明度/颜色）独立控制
 - **Logo 设置**：自动匹配（根据相机品牌）/ 手动选择 / 无，三选一；自动匹配无结果时不显示
 - **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）；高斯模糊支持"背景增强"复选框（默认开启），增强色彩饱和度以补偿覆盖层淡化
 - **输出格式**：JPEG / PNG 可选
