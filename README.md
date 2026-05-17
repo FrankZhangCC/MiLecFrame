@@ -250,6 +250,19 @@ name: "样式名称"         # 必需字段，用于标识样式
   - `camera_lens` 输出格式由 GUI 中"镜头显示"选项控制（相机+镜头 / 只显示相机 / 只显示镜头），搭配"使用短版镜头名"开关可全局切换为短版镜头名；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
+- `defined_texts`: 预定义文本配置 (v1.7.0)
+  - 内容在配置文件中写死，采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 以此类推
+  - 此命名惯例确保 key 不与 `info_position` 的保留名（如 `exif`、`author` 等）冲突，且补零保证字典自然排序
+  - 每个条目包含 `content`（文本内容）和标准布局参数，与 `info_position` 共用定位系统
+  - 示例：`defined_text_01: { content: "FL", position: "bottom-left", ... }`
+- `custom_text`: 自定义文本配置 (v1.7.0)
+  - `enabled`: 布尔值，设为 `true` 时 GUI 显示多行文本输入框，CLI 通过 `--custom-text` 参数传入
+  - 布局参数与 `info_position` 相同，`relative_to` 可跨区域引用（包括 `defined_texts` 和 `info_position` 中的元素）
+  - 默认输入内容：`"Always believe that something wonderful\nis about to happen."`
+- 多行文本行间距 (v1.7.0)
+  - `fonts.line_spacing_ratio`：全局行间距系数（相对于参照边，默认 `0.005`），仅多行文本生效
+  - 可在 `defined_texts` 或 `custom_text` 条目中通过 `line_spacing_ratio` 覆盖全局值
+  - 行间距 = `reference_side * line_spacing_ratio` 像素
 
 #### 定位方式
 
@@ -355,6 +368,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `author`           | `"Frank"`                                      | 用户输入                      |
 | `location`         | `"Shanghai"`                                   | 用户输入                      |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）               |
+| `custom_text`      | 用户在 GUI 中输入的文本内容                    | 用户输入（v1.7.0）             |
 
 #### 镜头显示模式 & 短版镜头名
 
@@ -382,6 +396,15 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 2. **样式 YAML** — 在 `info_position` 中声明字段及其位置/字体配置
 3. **`fonts.sizes`** — 按需为新字段添加独立字体大小（可选，回退到 `size_ratio`）
 
+#### 预定义文本 (defined_texts) 与自定义文本 (custom_text)
+
+v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染管线（测量 → 拓扑排序 → 定位绘制）：
+
+- **`defined_texts`**：内容在样式 YAML 中写死，适合固定标签文本（如 "FL"、"ISO" 等）
+- **`custom_text`**：内容由用户在 GUI 文本框输入或 CLI `--custom-text` 传入，适合个性化的寄语文本
+
+两类文本的元素定位参数与 `info_position` 完全相同（支持绝对/相对定位），`relative_to` 可跨区域引用。defined_texts 的 key 采用补零编号命名（如 `defined_text_01`、`defined_text_02`），避免与 info_position 的保留 key 冲突。
+
 渲染器 (`renderer.py`) 无需任何修改——它只遍历 `info_position` 的 key 并通过 `context.get_text()` 取值。
 
 ### 颜色配置 (colors)
@@ -406,6 +429,7 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 - `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
   - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 未设置的字段默认使用 `size_ratio`
+- `line_spacing_ratio`: 行间距系数（v1.7.0，默认 `0.005`），相对于参照边，仅多行文本生效。可在 `fonts` 级别设全局值，也可在 `defined_texts` 或 `custom_text` 条目中覆盖
 
 ### 水印配置 (decorations)
 

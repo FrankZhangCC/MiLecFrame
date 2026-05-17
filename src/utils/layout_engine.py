@@ -77,8 +77,8 @@ class LayoutEngine:
             self.canvas_height - pad_bottom
         )
 
-    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None):
-        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
+    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None, ascent: int = None):
+        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height, 'ascent': ascent}
         if relative_to:
             if relative_to not in self._dependents:
                 self._dependents[relative_to] = []
@@ -302,18 +302,54 @@ class LayoutEngine:
 
         tx, ty, tw, th = target_coords
 
+        # 获取参考元素的 ascent，用于校正基线偏移
+        # 文字元素注册时做了 y -= descent，因此 registry 中的 ty = 基线 y
+        # 而 ty + th = 基线 + (ascent + descent) ≠ 视觉底部
+        # 视觉底部 = ty + (th - ascent) = ty + descent
+        # 视觉顶部 = ty - ascent
+        ref_data = self.positions.get(relative_to, {})
+        ref_ascent = ref_data.get('ascent')
+
+        if ref_ascent is not None and ref_ascent > 0:
+            # 文字元素：注册的 ty 是基线 y
+            ref_visual_top = ty - ref_ascent
+            ref_visual_bottom = ty + (th - ref_ascent)
+        else:
+            # 非文字元素（Logo 等）：注册的 ty 是包围盒左上角
+            ref_visual_top = ty
+            ref_visual_bottom = ty + th
+
         if relative_position in ('after', 'below'):
-            y = ty + th + relative_margin_px
+            # 元素位于参考元素下方
+            # 元素包围盒顶部 y_calc 位于 ref_visual_bottom + element_height + margin 处
+            # 这样渲染器做 descent 偏移后，元素的视觉顶部恰好位于参考元素视觉底部 + margin
+            y = ref_visual_bottom + element_height + relative_margin_px
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position in ('before', 'above'):
-            y = ty - element_height - relative_margin_px
+            # 元素位于参考元素上方
+            # 元素包围盒顶部 y_calc 位于 ref_visual_top - margin 处
+            # 渲染器做 descent 偏移后，元素视觉底部恰好位于参考元素视觉顶部 - margin
+            y = ref_visual_top - element_height - relative_margin_px
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position == 'right-of':
             x = tx + tw + relative_margin_px
-            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
+            if alignment in ('bottom', 'bottom-left', 'bottom-right'):
+                # 元素视觉底部对齐参考元素视觉底部
+                y = ref_visual_bottom
+            elif alignment in ('top', 'top-left', 'top-right'):
+                # 元素视觉顶部对齐参考元素视觉顶部
+                y = ref_visual_top + element_height
+            else:
+                # 垂直居中
+                y = (ref_visual_top + ref_visual_bottom + element_height) // 2
         elif relative_position == 'left-of':
             x = tx - element_width - relative_margin_px
-            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
+            if alignment in ('bottom', 'bottom-left', 'bottom-right'):
+                y = ref_visual_bottom
+            elif alignment in ('top', 'top-left', 'top-right'):
+                y = ref_visual_top + element_height
+            else:
+                y = (ref_visual_top + ref_visual_bottom + element_height) // 2
         else:
             return self._calculate_absolute(element_width, element_height, config)
 
@@ -325,22 +361,30 @@ class LayoutEngine:
         # 组合盒约束：将参考元素、当前元素、以及所有已注册的从属元素当作整体，
         # 整体平移确保不超出 padding 安全区域
         # padding 优先级高于 margin：margin 参与位置计算，但最终结果受 padding 截断
+        # 使用视觉边界参与组合盒计算，与对齐计算保持一致
         pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
 
         group_left = min(tx, x)
-        group_top = min(ty, y)
+        group_top = min(ref_visual_top, y)
         group_right = max(tx + tw, x + element_width)
-        group_bottom = max(ty + th, y + element_height)
+        group_bottom = max(ref_visual_bottom, y + element_height)
 
         # 扩展组合盒以包含所有已注册的从属元素（支持多个元素 relative_to 同一参考元素）
         for dep_name in self._dependents.get(relative_to, []):
             dep_bounds = self.get_element_bounds(dep_name)
             if dep_bounds:
                 dx, dy, dw, dh = dep_bounds
+                dep_ascent = self.positions.get(dep_name, {}).get('ascent')
+                if dep_ascent is not None and dep_ascent > 0:
+                    dep_visual_top = dy - dep_ascent
+                    dep_visual_bottom = dy + (dh - dep_ascent)
+                else:
+                    dep_visual_top = dy
+                    dep_visual_bottom = dy + dh
                 group_left = min(group_left, dx)
-                group_top = min(group_top, dy)
+                group_top = min(group_top, dep_visual_top)
                 group_right = max(group_right, dx + dw)
-                group_bottom = max(group_bottom, dy + dh)
+                group_bottom = max(group_bottom, dep_visual_bottom)
 
         shift_x = 0
         shift_y = 0

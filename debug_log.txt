@@ -1,224 +1,1000 @@
-2026-05-17 21:27:35,744 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:35,744 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:35,745 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:35,745 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:35,745 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:35,745 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:35,752 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:35,752 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:35,752 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:35,752 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:35,752 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:35,753 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:35,771 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:35,772 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:38,544 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:38,545 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:38,546 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:38,547 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+2026-05-17 23:27:58,483 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
 ，转换为sRGB
-2026-05-17 21:27:38,927 - src.core.image_processor - INFO - ICC色彩空间转换成功
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 开始添加文字图层...
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 作者: Frank Zhang
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 地点: None
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 图像尺寸: (4096, 3379)
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
-2026-05-17 21:27:41,299 - src.core.renderer - DEBUG - 待渲染的文本元素: [('camera_lens', 'Xiaomi 15 Pro'), ('timestamp_author', '2026.05.17 19:23:04 by Frank Zhang'), ('exif', '23mm, f/1.4, 1/50s, ISO400')]
-2026-05-17 21:27:41,300 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(122, 3194), bbox=(388x70), config=bottom-left/left marg={'top': 30, 'bottom': 122, 'left': 61, 'right': 30}
-2026-05-17 21:27:41,301 - src.core.renderer - DEBUG - [Pos] exif: calc=(3196, 3158), bbox=(778x70), config=bottom-right/right marg={'top': 30, 'bottom': 86, 'left': 30, 'right': 61}
-2026-05-17 21:27:41,301 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(3149, 3244), bbox=(825x57), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
-2026-05-17 21:27:41,303 - src.core.renderer - DEBUG - 文字图层添加完成
-2026-05-17 21:27:41,308 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
-2026-05-17 21:27:41,468 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpyzx58fl1.jpg -> C:\Users\frank\AppData\Local\Temp\tmpw81cj2ez.jpg
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:41,503 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:41,504 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:41,505 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:42,166 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
-2026-05-17 21:27:42,167 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:42,458 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:42,459 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:42,460 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:42,460 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:42,460 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:43,122 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:43,123 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:43,123 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:43,123 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:43,123 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
-2026-05-17 21:27:43,123 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:45,735 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
-2026-05-17 21:27:45,736 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
-2026-05-17 21:27:45,737 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
-2026-05-17 21:27:45,737 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:45,737 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
-2026-05-17 21:27:45,737 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
-2026-05-17 21:27:46,360 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
-2026-05-17 21:27:46,361 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:27:58,816 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 自定义文本: None
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 图像尺寸: (4096, 3379)
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:28:01,028 - src.core.renderer - DEBUG - 待渲染的文本元素: ['camera_lens', 'timestamp_author', 'exif']
+2026-05-17 23:28:01,029 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(122, 3194), bbox=(388x70), config=bottom-left/left marg={'top': 30, 'bottom': 122, 'left': 61, 'right': 30}
+2026-05-17 23:28:01,029 - src.core.renderer - DEBUG - [Pos] exif: calc=(3196, 3158), bbox=(778x70), config=bottom-right/right marg={'top': 30, 'bottom': 86, 'left': 30, 'right': 61}
+2026-05-17 23:28:01,030 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(3149, 3244), bbox=(825x57), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:01,032 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:28:01,037 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:28:01,171 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmppsi9a2kx.jpg -> C:\Users\frank\AppData\Local\Temp\tmp8xibsioh.jpg
+2026-05-17 23:28:01,201 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:01,202 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:01,203 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:01,203 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:01,203 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:01,203 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:01,812 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:01,813 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:02,095 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:02,096 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:02,727 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:02,728 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,591 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,601 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,603 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:06,605 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:06,608 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,611 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:06,613 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:06,615 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:06,616 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,617 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:06,619 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:06,621 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:06,622 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:06,624 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:06,625 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,628 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:06,630 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,631 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,633 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:06,634 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,636 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,637 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,638 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:06,640 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:06,641 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,643 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:06,644 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:06,646 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:06,647 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,649 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:06,650 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:06,652 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:06,654 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:06,655 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:06,657 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,658 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:06,660 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,662 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,663 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:06,665 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,666 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:06,668 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:06,669 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:06,670 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:06,672 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:06,673 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:06,674 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:06,676 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:06,677 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:06,679 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:06,680 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:06,682 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+，转换为sRGB
+2026-05-17 23:28:07,003 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:28:09,178 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:28:09,180 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:28:09,189 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:28:09,190 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:28:09,191 - src.core.renderer - DEBUG - 自定义文本: None
+2026-05-17 23:28:09,193 - src.core.renderer - DEBUG - 图像尺寸: (4096, 3379)
+2026-05-17 23:28:09,194 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:28:09,196 - src.core.renderer - DEBUG - 待渲染的文本元素: ['camera_lens', 'timestamp_author', 'exif']
+2026-05-17 23:28:09,198 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(122, 3194), bbox=(388x70), config=bottom-left/left marg={'top': 30, 'bottom': 122, 'left': 61, 'right': 30}
+2026-05-17 23:28:09,199 - src.core.renderer - DEBUG - [Pos] exif: calc=(3196, 3158), bbox=(778x70), config=bottom-right/right marg={'top': 30, 'bottom': 86, 'left': 30, 'right': 61}
+2026-05-17 23:28:09,200 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(3149, 3244), bbox=(825x57), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:09,206 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:28:09,219 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:28:09,344 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpoissjnsf.jpg -> C:\Users\frank\AppData\Local\Temp\tmpu65fqmf0.jpg
+2026-05-17 23:28:09,378 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:09,381 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:09,390 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:09,391 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:09,393 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:09,394 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:09,396 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:09,397 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:09,399 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:09,400 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:09,401 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:09,403 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:09,404 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:09,406 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:09,408 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:09,409 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:09,410 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:09,412 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:09,413 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:09,414 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:10,049 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:10,051 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:10,052 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:10,061 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:10,062 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:10,064 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:10,065 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:10,067 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:10,068 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:10,070 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:10,071 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:10,073 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:10,074 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:10,076 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:10,077 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:10,078 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:10,359 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:10,361 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:10,371 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:10,373 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:10,375 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:10,377 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:10,379 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:10,381 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:10,382 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:10,383 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:10,385 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:10,386 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:10,388 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:10,389 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:10,390 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:10,392 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:10,394 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:10,395 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:10,396 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:10,398 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:11,008 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:11,010 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:11,011 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:11,012 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:11,021 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:11,022 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:11,024 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:11,025 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:11,027 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:11,028 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:11,029 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:11,030 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:11,032 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:11,033 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:11,034 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:11,036 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:15,101 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:15,104 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:15,107 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:15,108 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:15,109 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:15,110 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:15,112 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:15,113 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:15,114 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:15,116 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:15,117 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:15,118 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:15,121 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:15,122 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:15,124 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:15,125 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:15,127 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:15,128 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:15,130 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:15,131 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:15,795 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:15,796 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:15,798 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:15,799 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:15,801 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:15,802 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:15,804 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:15,805 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:15,807 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:15,808 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:15,809 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:15,811 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:15,812 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:15,814 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:15,815 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:15,817 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:16,200 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:16,202 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:16,203 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:16,204 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,206 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:16,207 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,209 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,210 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:16,213 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,214 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,215 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,217 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:16,218 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:16,219 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,220 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:16,222 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:16,223 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:16,224 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,226 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:16,227 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:16,237 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:16,239 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:16,240 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:16,241 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,243 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:16,244 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,245 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,247 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:16,248 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,249 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,252 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,253 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:16,254 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:16,255 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,257 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:16,258 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:16,260 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:16,261 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,262 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:16,263 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:16,266 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:16,267 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:16,268 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:16,270 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,271 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:16,273 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,274 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,275 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:16,277 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,278 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:16,280 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:16,281 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:16,283 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:16,284 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:16,285 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:16,287 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:16,288 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:16,290 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:16,291 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:16,292 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:16,295 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+，转换为sRGB
+2026-05-17 23:28:16,639 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:28:19,037 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:28:19,039 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:28:19,040 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:28:19,042 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:28:19,043 - src.core.renderer - DEBUG - 自定义文本: Always believe that something wonderful
+is about to happen.
+2026-05-17 23:28:19,045 - src.core.renderer - DEBUG - 图像尺寸: (4403, 3932)
+2026-05-17 23:28:19,046 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:28:19,047 - src.core.renderer - DEBUG - 待渲染的文本元素: ['exif', 'timestamp_author', 'camera_lens', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+2026-05-17 23:28:19,050 - src.core.renderer - DEBUG - [Pos] exif: calc=(153, 3424), bbox=(740x67), config=bottom-left/left marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,051 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(3878, 3424), bbox=(371x67), config=bottom-right/right marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,053 - src.core.renderer - DEBUG - [Pos] defined_text_01: calc=(153, 3562), bbox=(70x67), config=bottom-left/bottom marg={'top': 0, 'bottom': 245, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,054 - src.core.renderer - DEBUG - [Pos] custom_text: calc=(1725, 3701), bbox=(951x138), config=bottom-center/center marg={'top': 0, 'bottom': 384, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,055 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(153, 3523), bbox=(988x67), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,056 - src.core.renderer - DEBUG - [Pos] defined_text_02: calc=(247, 3548), bbox=(194x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,058 - src.core.renderer - DEBUG - [Pos] defined_text_03: calc=(465, 3534), bbox=(235x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,059 - src.core.renderer - DEBUG - [Pos] defined_text_04: calc=(724, 3520), bbox=(98x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:28:19,065 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:28:19,072 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:28:19,220 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmptzg2g6m5.jpg -> C:\Users\frank\AppData\Local\Temp\tmph0ctuxm0.jpg
+2026-05-17 23:28:19,252 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:19,255 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:19,256 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:19,258 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:19,260 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:19,262 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:19,264 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:19,266 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:19,268 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:19,269 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:19,270 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:19,272 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:19,273 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:19,274 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:19,276 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:19,279 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:19,282 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:19,285 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:19,289 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:19,292 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:19,959 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:19,961 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:19,962 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:19,964 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:19,965 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:19,967 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:19,968 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:19,970 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:19,971 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:19,973 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:19,974 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:19,975 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:19,976 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:19,978 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:19,979 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:19,981 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:28:20,287 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:28:20,289 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:28:20,291 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:20,293 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:20,295 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:28:20,296 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:20,298 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:20,299 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:20,300 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:20,301 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:20,303 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:20,304 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:20,305 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:20,308 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:20,310 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:28:20,311 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:28:20,312 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:28:20,313 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:20,315 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:28:20,316 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:28:20,934 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:28:20,936 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:28:20,937 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:28:20,939 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:20,940 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:28:20,941 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:28:20,943 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:20,944 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:28:20,945 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:20,947 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:28:20,948 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:28:20,949 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:28:20,959 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:28:20,960 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:28:20,961 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:28:20,963 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:36:25,458 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:25,461 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:25,463 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:25,464 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:25,465 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:25,466 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:25,468 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:25,469 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:25,471 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:25,472 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:25,474 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:25,475 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:25,477 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:25,478 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:25,481 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:25,483 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:25,485 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:25,486 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:25,487 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:25,489 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:26,098 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:36:26,100 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:36:26,101 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:26,103 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:26,104 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:36:26,105 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:26,107 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:26,108 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:26,109 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:26,111 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:26,112 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:26,114 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:26,115 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:26,116 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:26,117 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:36:26,119 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:36:29,029 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:29,033 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:29,034 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:29,035 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,037 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:29,039 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,041 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,042 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:29,044 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,045 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,047 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,048 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:29,049 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:29,051 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,052 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:29,053 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:29,055 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:29,056 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,057 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:29,059 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:29,060 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:29,062 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:29,063 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:29,065 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,066 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:29,067 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,069 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,070 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:29,072 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,073 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,074 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,075 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:29,077 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:29,078 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,079 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:29,081 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:29,082 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:29,083 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,085 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:29,087 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:29,088 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:29,090 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:29,091 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:29,092 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,093 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:29,094 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,096 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,097 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:29,098 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,099 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:29,101 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:29,102 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:29,103 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:29,104 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:29,105 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:29,107 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:29,108 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:29,110 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:29,112 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:29,113 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:29,116 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+，转换为sRGB
+2026-05-17 23:36:29,499 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:36:31,985 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:36:31,987 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:36:31,988 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:36:31,990 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:36:31,991 - src.core.renderer - DEBUG - 自定义文本: Always believe that something wonderful
+is about to happen.
+2026-05-17 23:36:31,992 - src.core.renderer - DEBUG - 图像尺寸: (4403, 3932)
+2026-05-17 23:36:31,994 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:36:31,995 - src.core.renderer - DEBUG - 待渲染的文本元素: ['exif', 'timestamp_author', 'camera_lens', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+2026-05-17 23:36:31,998 - src.core.renderer - DEBUG - [Pos] exif: calc=(153, 3424), bbox=(740x67), config=bottom-left/left marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:36:31,999 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(3878, 3424), bbox=(371x67), config=bottom-right/right marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,001 - src.core.renderer - DEBUG - [Pos] defined_text_01: calc=(153, 3562), bbox=(70x67), config=bottom-left/bottom marg={'top': 0, 'bottom': 245, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,002 - src.core.renderer - DEBUG - [Pos] custom_text: calc=(1725, 3701), bbox=(951x138), config=bottom-center/center marg={'top': 0, 'bottom': 384, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,004 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(153, 3523), bbox=(988x67), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,005 - src.core.renderer - DEBUG - [Pos] defined_text_02: calc=(247, 3548), bbox=(194x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,006 - src.core.renderer - DEBUG - [Pos] defined_text_03: calc=(465, 3534), bbox=(235x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,008 - src.core.renderer - DEBUG - [Pos] defined_text_04: calc=(724, 3520), bbox=(98x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:36:32,014 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:36:32,021 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:36:32,182 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpv6801oq0.jpg -> C:\Users\frank\AppData\Local\Temp\tmpglwnlagf.jpg
+2026-05-17 23:36:32,214 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:32,216 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:32,218 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:32,220 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:32,223 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:32,225 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:32,226 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:32,227 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:32,229 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:32,230 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:32,231 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:32,233 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:32,234 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:32,235 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:32,236 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:32,238 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:32,239 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:32,241 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:32,242 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:32,243 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:32,850 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:36:32,852 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:36:32,853 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:32,855 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:32,856 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:36:32,859 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:32,860 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:32,861 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:32,862 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:32,864 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:32,865 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:32,867 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:32,869 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:32,872 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:32,875 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:36:32,877 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:36:33,205 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:33,207 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:33,210 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:33,213 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:33,215 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:33,216 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:33,218 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:33,218 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:33,219 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:33,221 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:33,222 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:33,224 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:33,225 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:33,227 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:33,228 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:33,230 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:33,231 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:33,233 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:33,234 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:33,235 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:33,858 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:36:33,859 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:36:33,861 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:33,862 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:33,863 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:36:33,865 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:33,866 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:33,868 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:33,869 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:33,871 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:33,879 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:33,881 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:33,882 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:33,884 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:33,885 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:36:33,886 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:36:50,353 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:50,355 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:50,356 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:50,357 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:50,359 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:50,360 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:50,361 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:50,363 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:50,364 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:50,365 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:50,366 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:50,368 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:50,369 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:50,370 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:50,372 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:50,373 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:50,374 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:50,375 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:50,377 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:50,378 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:50,396 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:50,398 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:50,399 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:50,401 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:50,405 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:50,408 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:50,410 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:50,413 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:50,416 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:50,417 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:50,418 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:50,419 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:50,421 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:50,422 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:50,424 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:50,425 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:50,426 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:50,428 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:50,428 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:50,430 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:52,468 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:52,472 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:52,473 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:52,474 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,477 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:52,479 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,481 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,483 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:52,484 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,486 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,487 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,489 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:52,490 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:52,492 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,493 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:52,494 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:52,496 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:52,497 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,498 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:52,500 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:52,501 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:52,503 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:52,504 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:52,505 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,506 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:52,508 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,509 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,510 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:52,512 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,513 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,514 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,515 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:52,516 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:52,518 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,519 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:52,520 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:52,521 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:52,523 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,524 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:52,525 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:52,527 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:52,528 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:52,529 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:52,531 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,532 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:52,534 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,537 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,538 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:52,540 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,542 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:52,543 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:52,544 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:52,546 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:52,548 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:52,549 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:52,551 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:52,552 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:52,553 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:52,555 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:52,556 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:52,559 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+，转换为sRGB
+2026-05-17 23:36:52,890 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:36:55,195 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:36:55,197 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:36:55,198 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:36:55,199 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:36:55,201 - src.core.renderer - DEBUG - 自定义文本: None
+2026-05-17 23:36:55,202 - src.core.renderer - DEBUG - 图像尺寸: (4096, 3379)
+2026-05-17 23:36:55,204 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:36:55,205 - src.core.renderer - DEBUG - 待渲染的文本元素: ['camera_lens', 'timestamp_author', 'exif']
+2026-05-17 23:36:55,208 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(122, 3194), bbox=(388x70), config=bottom-left/left marg={'top': 30, 'bottom': 122, 'left': 61, 'right': 30}
+2026-05-17 23:36:55,209 - src.core.renderer - DEBUG - [Pos] exif: calc=(3196, 3158), bbox=(778x70), config=bottom-right/right marg={'top': 30, 'bottom': 86, 'left': 30, 'right': 61}
+2026-05-17 23:36:55,210 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(3149, 3245), bbox=(825x57), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:36:55,214 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:36:55,221 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:36:55,368 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpksrkkz62.jpg -> C:\Users\frank\AppData\Local\Temp\tmphsa2u4pj.jpg
+2026-05-17 23:36:55,399 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:55,401 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:55,402 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:55,404 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:55,405 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:55,406 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:55,408 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:55,409 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:55,410 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:55,412 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:55,413 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:55,414 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:55,416 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:55,417 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:55,419 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:55,422 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:55,423 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:55,424 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:55,426 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:55,427 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:56,090 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:36:56,091 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:36:56,093 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:56,094 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:56,095 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:36:56,097 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:56,098 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:56,099 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:56,101 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:56,103 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:56,104 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:56,105 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:56,107 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:56,108 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:56,109 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:36:56,111 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:36:56,397 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:36:56,399 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:36:56,402 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:56,403 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:56,404 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:36:56,406 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:56,407 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:56,409 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:56,410 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:56,412 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:56,413 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:56,414 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:56,416 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:56,417 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:56,418 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:36:56,420 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:36:56,421 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:36:56,422 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:56,424 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:36:56,425 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:36:57,048 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:36:57,050 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:36:57,052 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:36:57,053 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:57,054 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:36:57,056 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:36:57,064 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:57,066 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:36:57,067 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:57,069 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:36:57,070 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:36:57,071 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:36:57,073 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:36:57,074 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:36:57,076 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:36:57,077 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:37:01,455 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:01,458 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:01,461 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:01,462 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:01,464 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:01,465 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:01,466 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:01,468 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:01,469 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:01,471 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:01,472 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:01,473 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:01,475 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:01,476 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:01,478 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:01,479 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:01,481 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:01,482 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:01,485 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:01,486 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:02,148 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:37:02,149 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:37:02,151 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:02,152 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,154 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:37:02,155 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,156 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,158 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:02,159 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,160 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,161 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,163 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:02,164 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:02,165 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,167 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:37:02,168 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:37:02,804 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:02,805 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:02,808 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:02,810 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,812 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:02,813 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,814 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,815 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:02,817 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,818 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,819 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,821 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:02,822 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:02,823 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,825 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:02,826 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:02,827 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:02,828 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,830 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:02,831 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:02,833 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:02,834 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:02,835 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:02,837 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,838 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:02,840 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,841 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,842 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:02,844 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,845 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,846 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,848 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:02,849 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:02,851 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,852 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:02,853 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:02,855 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:02,856 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,857 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:02,859 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:02,860 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:02,861 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:02,863 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:02,864 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,865 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:02,866 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,867 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,869 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:02,870 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,871 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:02,873 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:02,874 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:02,875 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:02,876 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:02,878 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:02,879 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:02,880 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:02,882 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:02,883 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:02,884 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:02,887 - src.core.image_processor - INFO - 检测到ICC色彩空间: sRGB EOTF with DCI-P3 Color Gamut
+，转换为sRGB
+2026-05-17 23:37:03,252 - src.core.image_processor - INFO - ICC色彩空间转换成功
+2026-05-17 23:37:05,678 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-05-17 23:37:05,680 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'Xiaomi', 'camera_model': 'Xiaomi 15 Pro', 'focal_length': '6.7', 'focal_length_35mm': '23', 'aperture': '1.4', 'shutter_speed': '1/50', 'iso': '400', 'datetime_original': '2026.05.17 19:23:04', 'gps': '20°3\'36.4"N 110°9\'5.8"E', 'gps_raw': {'latitude': ((20, 1), (3, 1), (363528000, 10000000)), 'latitude_ref': b'N', 'longitude': ((110, 1), (9, 1), (57564000, 10000000)), 'longitude_ref': b'E'}}
+2026-05-17 23:37:05,681 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-05-17 23:37:05,682 - src.core.renderer - DEBUG - 地点: None
+2026-05-17 23:37:05,684 - src.core.renderer - DEBUG - 自定义文本: Always believe that something wonderful
+is about to happen.
+2026-05-17 23:37:05,685 - src.core.renderer - DEBUG - 图像尺寸: (4403, 3932)
+2026-05-17 23:37:05,686 - src.core.renderer - DEBUG - 原始图像尺寸: (4096, 3072)
+2026-05-17 23:37:05,688 - src.core.renderer - DEBUG - 待渲染的文本元素: ['exif', 'timestamp_author', 'camera_lens', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+2026-05-17 23:37:05,690 - src.core.renderer - DEBUG - [Pos] exif: calc=(153, 3424), bbox=(740x67), config=bottom-left/left marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,692 - src.core.renderer - DEBUG - [Pos] camera_lens: calc=(3878, 3424), bbox=(371x67), config=bottom-right/right marg={'top': 0, 'bottom': 107, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,693 - src.core.renderer - DEBUG - [Pos] defined_text_01: calc=(153, 3562), bbox=(70x67), config=bottom-left/bottom marg={'top': 0, 'bottom': 245, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,694 - src.core.renderer - DEBUG - [Pos] custom_text: calc=(1725, 3701), bbox=(951x138), config=bottom-center/center marg={'top': 0, 'bottom': 384, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,695 - src.core.renderer - DEBUG - [Pos] timestamp_author: calc=(153, 3537), bbox=(988x67), config=?/left marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,697 - src.core.renderer - DEBUG - [Pos] defined_text_02: calc=(247, 3562), bbox=(194x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,698 - src.core.renderer - DEBUG - [Pos] defined_text_03: calc=(465, 3562), bbox=(235x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,699 - src.core.renderer - DEBUG - [Pos] defined_text_04: calc=(724, 3562), bbox=(98x67), config=?/bottom marg={'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+2026-05-17 23:37:05,705 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-05-17 23:37:05,712 - src.core.image_processor - INFO - 已移除 1 个不兼容的EXIF标签: ['Exif.41729']
+2026-05-17 23:37:05,873 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpy0n90sba.jpg -> C:\Users\frank\AppData\Local\Temp\tmp4ikow_z5.jpg
+2026-05-17 23:37:05,906 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:05,910 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:05,911 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:05,912 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:05,914 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:05,916 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:05,918 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:05,920 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:05,921 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:05,922 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:05,924 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:05,925 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:05,926 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:05,928 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:05,929 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:05,932 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:05,933 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:05,935 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:05,936 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:05,937 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:06,553 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:37:06,555 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:37:06,556 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:06,557 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:06,559 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:37:06,560 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:06,561 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:06,563 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:06,564 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:06,566 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:06,567 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:06,568 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:06,570 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:06,571 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:06,572 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:37:06,574 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'
+2026-05-17 23:37:06,873 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: short (3) - value: b'\x10\x00'
+2026-05-17 23:37:06,876 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: short (3) - value: b'\x0c\x00'
+2026-05-17 23:37:06,879 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 254 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:06,881 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:06,882 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 260 - value: b'Xiaomi\x00'
+2026-05-17 23:37:06,884 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 267 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:06,885 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:06,886 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:06,888 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 281 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:06,889 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 289 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:06,890 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:06,892 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 297 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:06,893 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 329 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:06,895 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:06,896 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34970) - type: byte (1) - value: b'\x00'
+2026-05-17 23:37:06,898 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34973) - type: string (2) Tag Location: 202 - Data Location: 349 - value: b'Madrid\x00'
+2026-05-17 23:37:06,899 - PIL.TiffImagePlugin - DEBUG - tag: unknown (34979) - type: string (2) - value: b'{}\x00'
+2026-05-17 23:37:06,900 - PIL.TiffImagePlugin - DEBUG - tag: unknown (39424) - type: string (2) Tag Location: 226 - Data Location: 356 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:06,901 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01t'
+2026-05-17 23:37:06,903 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x04x'
+2026-05-17 23:37:07,539 - PIL.TiffImagePlugin - DEBUG - tag: ImageWidth (256) - type: long (4) - value: b'\x00\x00\x10\x00'
+2026-05-17 23:37:07,541 - PIL.TiffImagePlugin - DEBUG - tag: ImageLength (257) - type: long (4) - value: b'\x00\x00\x0c\x00'
+2026-05-17 23:37:07,543 - PIL.TiffImagePlugin - DEBUG - tag: BitsPerSample (258) - type: short (3) Tag Location: 46 - Data Location: 206 - value: b'\x00\x08\x00\x08\x00\x08'
+2026-05-17 23:37:07,545 - PIL.TiffImagePlugin - DEBUG - tag: PhotometricInterpretation (262) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:07,547 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 70 - Data Location: 212 - value: b'Xiaomi\x00'
+2026-05-17 23:37:07,549 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 82 - Data Location: 219 - value: b'Xiaomi 15 Pro\x00'
+2026-05-17 23:37:07,551 - PIL.TiffImagePlugin - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:07,552 - PIL.TiffImagePlugin - DEBUG - tag: SamplesPerPixel (277) - type: short (3) - value: b'\x00\x03'
+2026-05-17 23:37:07,554 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 118 - Data Location: 233 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:07,555 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 130 - Data Location: 241 - value: b"\x00\n\xfc\x80\x00\x00'\x10"
+2026-05-17 23:37:07,556 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x00\x02'
+2026-05-17 23:37:07,557 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 154 - Data Location: 249 - value: b'Adobe Photoshop 26.11 (Windows)\x00'
+2026-05-17 23:37:07,559 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 166 - Data Location: 281 - value: b'2026:05:17 21:01:12\x00'
+2026-05-17 23:37:07,561 - PIL.TiffImagePlugin - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x00\x01'
+2026-05-17 23:37:07,562 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x01-'
+2026-05-17 23:37:07,564 - PIL.TiffImagePlugin - DEBUG - tag: GPSInfoIFD (34853) - type: long (4) - value: b'\x00\x00\x031'

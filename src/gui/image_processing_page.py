@@ -278,6 +278,7 @@ div.stButton > button:first-child {{
                                 None if st.session_state.get('enable_saturation', True)
                                 else 1.0
                             ),
+                            custom_text=st.session_state.get('custom_text_input', '') or None,
                         )
 
                         if _success:
@@ -416,10 +417,30 @@ div.stButton > button:first-child {{
 
         st.markdown("---")
 
+        # ---- ✏️ 自定义文本 ----
+        current_style_config = _get_cached_style_config(selected_style)
+        custom_text_cfg = current_style_config.get('layout', {}).get('custom_text', {})
+        is_custom_text_enabled = isinstance(custom_text_cfg, dict) and custom_text_cfg.get('enabled', False)
+
+        custom_text = None
+        if is_custom_text_enabled:
+            st.markdown("### ✏️ 自定义文本")
+            default_custom = "Always believe that something wonderful\nis about to happen."
+            custom_text = st.text_area(
+                "输入自定义文本（支持多行）",
+                value=default_custom,
+                placeholder="输入要显示的自定义文本...",
+                key='custom_text_input',
+                height=100
+            )
+            st.markdown("---")
+        else:
+            # 样式不支持时，确保 session_state 中不留残留值
+            st.session_state.pop('custom_text_input', None)
+
         # ---- 🏷️ Logo ----
         st.markdown("### 🏷️ Logo")
 
-        current_style_config = _get_cached_style_config(selected_style)
         is_logo_enabled_by_config = current_style_config.get('logo', {}).get('enabled', False)
 
         selected_logo = None
