@@ -51,6 +51,12 @@ defined_texts:
 - 从属元素的视觉边界同样使用 `dep_ascent` 校正
 - 组合盒的整体平移决策使用视觉边界，避免 padding 约束中因 `ty + th` 偏高 `ascent` 导致的偏移错误
 
+### 🔴 修复：`before` / `above` 相对定位间距多减 element_height
+
+**根因**：在 ascent 基线校正重构中，`_calculate_relative` 的 `before`/`above` 分支公式被错误地写为 `y = ref_visual_top - element_height - margin_px`。由于 descent 偏移后视觉底部 = y，预期间距应为 `ref_visual_top - y = margin_px`，实际却是 `ref_visual_top - y = eh + margin_px`，额外多了一个 `element_height`。
+
+**修复**：将 `src/utils/layout_engine.py:332` 的公式修正为 `y = ref_visual_top - relative_margin_px`，与 `after`/`below` 分支的 `y = ref_visual_bottom + element_height + relative_margin_px` 对称。
+
 ### 🟢 预定义文本 (defined_texts) 与自定义文本 (custom_text)
 
 **`defined_texts`**（`src/core/renderer.py`）：

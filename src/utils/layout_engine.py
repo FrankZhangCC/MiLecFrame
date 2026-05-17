@@ -327,9 +327,10 @@ class LayoutEngine:
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position in ('before', 'above'):
             # 元素位于参考元素上方
-            # 元素包围盒顶部 y_calc 位于 ref_visual_top - margin 处
-            # 渲染器做 descent 偏移后，元素视觉底部恰好位于参考元素视觉顶部 - margin
-            y = ref_visual_top - element_height - relative_margin_px
+            # 渲染器 descent 偏移后，当前视觉底部 = y
+            # 需要：参考视觉顶部 - 当前视觉底部 = margin
+            # 即 ref_visual_top - y = margin_px → y = ref_visual_top - margin_px
+            y = ref_visual_top - relative_margin_px
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position == 'right-of':
             x = tx + tw + relative_margin_px

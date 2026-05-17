@@ -6,262 +6,756 @@
 
 ---
 
+## 目次
+
+1. [架构总览](#1-架构总览)
+2. [LayoutEngine 核心数据结构](#2-layoutengine-核心数据结构)
+3. [文字基线系统——理解坐标约定的关键](#3-文字基线系统理解坐标约定的关键)
+4. [绝对定位系统](#4-绝对定位系统)
+5. [相对定位系统](#5-相对定位系统)
+6. [组合盒约束与级联平移](#6-组合盒约束与级联平移)
+7. [拓扑排序（Phase 2 顺序控制）](#7-拓扑排序phase-2-顺序控制)
+8. [树级组合定位（Phase 2.5）](#8-树级组合定位phase-25)
+9. [三阶段渲染管线详解](#9-三阶段渲染管线详解)
+10. [字体引擎与混排渲染](#10-字体引擎与混排渲染)
+11. [多行文本处理](#11-多行文本处理)
+12. [RenderContext 渲染上下文](#12-rendercontext-渲染上下文)
+13. [Logo 渲染](#13-logo-渲染)
+14. [关键参数速查](#14-关键参数速查)
+15. [常见问题](#15-常见问题)
+
+---
+
 ## 1. 架构总览
 
+整个渲染管线按照数据流顺序分为四个阶段。每个阶段都有明确的输入和输出，阶段之间通过 `draw_items` 字典和 `positions` 注册表传递数据。
+
 ```
-Phase 1 ── 测量所有元素的字体/尺寸/颜色
-  │
-  ├── info_position 的元素 → context.get_text(key)        （EXIF/相机信息）
-  ├── defined_texts  的元素 → entry['content']             （预定义文本）
-  └── custom_text    元素   → context.get_text('custom_text') （自定义文本）
+Phase 1  ── 测量 ──────────────────────────────────────────────────
+输入: layouts(info_position/defined_texts/custom_text),
+      context(RenderContext),
+      colors, fonts, bg_fill_type
+输出: draw_items（key → {text, font, color, width, height, ascent, descent, mixed?}）
+
+行为：
+  遍历所有三种文本来源的每个元素，分别进行：
+  ├─ 获取文本内容：
+  │   ├─ info_position 的 key  →  context.get_text(key)
+  │   ├─ defined_texts 的 key  →  配置中的 content 字段
+  │   └─ custom_text           →  context.get_text('custom_text')
+  ├─ 确定字体：根据混排检测结果加载拉丁/Gotham 或 CJK/GlowSansSC 字体
+  ├─ 测量尺寸：font.getbbox(text) 获取宽度；font.getmetrics() 获取 ascent + descent
+  ├─ 确定颜色：按「元素专属 custom_{key}_{dark/light}_color > 通用兜底 custom_text_{dark/light}_color > 黑白默认」三级优先级
+  └─ 存入 draw_items（此时不触碰 layout_engine）
   │
   ▼
-Phase 2 ── 按拓扑排序计算位置 + 注册到 register
-  │
-  ├── _resolve_element_order()    ← Kahn 算法拓扑排序
-  ├── calculate_position()        ← 绝对/相对定位
-  └── register_element()          ← 存入 positions 注册表
+Phase 2  ── 定位 + 注册 ───────────────────────────────────────────
+输入: draw_items, all_positions（每个元素的定位配置）,
+      text_elements（按三种来源合并的元素列表）
+输出: layout_engine.positions（元素坐标注册表）
+      layout_engine._dependents（依赖关系图）
+
+行为：
+  ├─ 拓扑排序：_resolve_element_order() → 确定处理顺序（根先于子孙）
+  ├─ 预注册缺失锚点：当 relative_to 指向的元素被跳过时，用 0x0 注册其绝对位置
+  ├─ 逐个定位：
+  │   ├─ 有 relative_to  →  _calculate_relative()
+  │   └─ 无 relative_to  →  _calculate_absolute()
+  ├─ 基线偏移：y -= descent（将布局引擎的"包围盒顶"转为"基线"）
+  └─ register_element(name, x, y, w, h, relative_to, ascent)
   │
   ▼
-Phase 2.5 ── 依赖树组合定位（v1.7.0 新增）
-  │
-  └── apply_tree_positioning()    ← 整棵树按根配置重新定位
+Phase 2.5  ── 树级组合定位（v1.7.0，仅在根元素设 tree_align: true 时执行）──
+输入: all_positions, layout_engine.positions
+输出: 对选定树的平移（直接修改 positions 中的坐标）
+
+行为：
+  └─ apply_tree_positioning(all_positions)
+      ├─ 遍历所有根元素，仅处理 tree_align: true 的
+      ├─ 收集 tree_members → 计算视觉包围盒
+      ├─ 用 _calculate_absolute 计算目标位置
+      ├─ 计算平移量并级联平移
+      └─ padding 约束
   │
   ▼
-Phase 3 ── 从注册表读取最终坐标 + 绘制
-  │
-  ├── 单字体行：draw.text(x, y, text)
-  ├── 混排：逐片段 + 基线对齐
-  └── 多行：逐行 + 行间距
+Phase 3  ── 绘制 ──────────────────────────────────────────────────
+输入: positions, draw_items
+输出: 最终图像
+
+行为：
+  └─ 按拓扑序从 positions 读取最终坐标：
+      ├─ 单字体行  →  draw.text(x, y, text, font=font)
+      ├─ 混排文本  →  逐片段绘制，拉丁基线对齐
+      └─ 多行文本  →  逐行绘制 + 行间距
 ```
 
 ---
 
-## 2. LayoutEngine 类
+## 2. LayoutEngine 核心数据结构
 
 ### 2.1 坐标系与参照系
 
-- **参照边（reference_side）**：`min(original_width, original_height)` — 所有比例系数（size_ratio、margin、padding 等）的基准值
-- **画布（canvas）**：经过 `expand_canvas` 扩展后的完整绘图区域
-- **原图边界（original_bounds）**：`(ox, oy, ow, oh)` — 原始图像在画布中的位置
-- **安全区域（padding_bounds）**：`(left, top, right, bottom)` — 所有叠加元素的最终活动范围，画布四边向内收缩
+| 概念 | 命名 | 定义 | 用途 |
+|------|------|------|------|
+| 原图尺寸 | `image.size` | 输入图像的 `(width, height)` | 所有计算的起点 |
+| 参照边 | `reference_side = min(w, h)` | 原图的短边长度（像素） | 所有浮点比例系数的基准除数。`size_ratio=0.02` 意味着字号 = `int(reference_side * 0.02)` |
+| 画布 | `canvas_size = (w, h)` | 经 `expand_canvas` 扩展后的总绘图区域 | 所有元素的最终边界 |
+| 原图边界 | `original_bounds = (ox, oy, ow, oh)` | 原始图像在画布中的位置 | 绝对定位的参考矩形 |
+| 安全区域 | `padding_bounds = (left, top, right, bottom)` | 从画布四边向内收缩后得到的矩形边界 | 叠加元素的活动范围，高于一切 margin |
+
+expand_canvas 的计算：
+```python
+new_width  = original_width  + reference_side * (left_exp + right_exp)
+new_height = original_height + reference_side * (top_exp + bottom_exp)
+ox = int(reference_side * left_exp)           # 原图左边缘在画布中的 x
+oy = int(reference_side * top_exp)            # 原图顶边缘在画布中的 y
+```
+
+padding 的计算：
+```python
+pad_left   = int(reference_side * padding_left)
+pad_top    = int(reference_side * padding_top)
+pad_right  = canvas_width  - int(reference_side * padding_right)
+pad_bottom = canvas_height - int(reference_side * padding_bottom)
+```
 
 ### 2.2 位置注册表（positions）
 
-```
+```python
 self.positions: Dict[str, dict] = {
-  ex: {'x': 100, 'y': 200, 'width': 300, 'height': 40, 'ascent': 32}
+    'exif': {
+        'x': 150,            # 文字元素：基线 x；Logo：包围盒左上角 x
+        'y': 3337,           # ❗ 文字元素：基线 y（不是包围盒顶 y）！
+        'width': 250,        # 元素宽度
+        'height': 40,        # 文字：ascent + descent；Logo：视觉高度
+        'ascent': 32         # v1.7.0 新增：ascents 值，用于视觉边界校正
+    },
+    'logo': {
+        'x': 4000,
+        'y': 3150,           # Logo 的包围盒左上角 y（ascent = None/0）
+        'width': 120,
+        'height': 60,
+        'ascent': 0
+    },
 }
 ```
 
-所有已定位元素的坐标、尺寸和基线 ascent 值。**关键约定**：
+`ascent` 字段的不同取值对应不同的元素类型：
 
-- 对于文字元素，`y` 是 **基线（baseline）y 坐标**（不是包围盒顶部）
-- 对于非文字元素（Logo、占位锚点），`y` 是包围盒顶部 y 坐标
-- `height` = `ascent + descent`（文字元素）或视觉高度（非文字元素）
-- `ascent`：文字元素用 `font.getmetrics()[0]`；混排用 `ref_ascent`；非文字用 0/None
-
-基线偏移约定的成因：
-```
-register_element 前做了 y -= descent → y 从"包围盒顶"变成"基线"
-draw.text(x, y, text) 的语义就是"在 y 处放基线"
-视觉底部 = y_registered + descent = y_calc（布局引擎返回的包围盒顶）
-视觉顶部 = y_registered - ascent = y_calc - (ascent + descent)
-```
+| 元素类型 | ascent 值来源 | 注册 y 含义 | 注册 height 含义 | 注册 ascent |
+|---------|-------------|------------|-----------------|------------|
+| 单字体文字 | `font.getmetrics()[0]` | 基线 | `ascent + descent` | ascent |
+| 混排文字 | `ref_ascent`（拉丁字体） | 基线 | `max_ascent + max_descent` | ref_ascent |
+| 多行文字 | 第一行的 ascent / ref_ascent | 基线 | 块总视觉高度 | 第一行的 ascent |
+| Logo | 未传递（默认 0） | 包围盒左上角 | Logo 像素高度 | 0 |
+| 占位锚点 | 显式传入 0 | 包围盒左上角 | 0 | 0 |
 
 ### 2.3 依赖图（_dependents）
 
-```
-self._dependents: Dict[str, list] = {
-  'exif': ['timestamp_author', 'location'],  # exif 的子节点
-  'camera_lens': ['location'],                # camera_lens 的子节点
+`self._dependents` 维护一张有向无环图（DAG），自动由 `register_element(name, ..., relative_to='parent')` 构建：
+
+```python
+self._dependents = {
+    'exif':        ['timestamp_author', 'location'],   # exif 有两个子节点
+    'camera_lens': ['location'],                        # camera_lens 有一个子节点
 }
 ```
 
-由 `register_element(name, ..., relative_to='parent')` 自动维护。用于：
-- 拓扑排序时确定处理顺序
-- 组合盒约束时收集从属元素
-- 树定位时递归遍历整棵依赖树
-- `_shift_dependents()` 级联平移
+**四个用途**：
+
+| 用途 | 调用方 | 动作 |
+|------|--------|------|
+| 拓扑排序 | `_resolve_element_order()` | 从 `relative_to` 构建入度，确定处理顺序 |
+| 组合盒扩展 | `_calculate_relative()` | 在计算组盒时加入所有已注册从属 |
+| 级联平移 | `_shift_dependents()` | 沿依赖树递归传播 shift_x, shift_y |
+| 树成员收集 | `_collect_tree_members()` | BFS 遍历获取整棵树的所有元素 |
+
+### 2.4 方法索引（完整列表）
+
+| 方法 | 类别 | 作用 |
+|------|------|------|
+| `__init__(size, layout_config)` | 构造 | 计算 canvas_size、original_bounds、padding_bounds |
+| `register_element(name, x, y, w, h, relative_to, ascent)` | 注册 | 存入 positions + 维护 _dependents |
+| `get_element_bounds(name)` | 查询 | 从 positions 读取（支持模糊匹配） |
+| `calculate_position(w, h, config)` | 分发 | 根据有无 relative_to 分支到绝对/相对 |
+| `_calculate_absolute(w, h, config)` | 绝对定位 | 按 position/alignment/placement/margin 计算 |
+| `_get_anchor(...)` | 绝对定位 | 14 种 position 的具体数学公式实现 |
+| `_align_x(alignment, ox, ow, ew, m)` | 对齐辅助 | 水平对齐函数 |
+| `_align_y(alignment, oy, oh, eh, m)` | 对齐辅助 | 垂直对齐函数 |
+| `_resolve_margins(config)` | 绝对定位 | 统一 margin + 方向覆盖的解析 |
+| `_calculate_relative(w, h, config)` | 相对定位 | 按 relative_to + relative_position 计算 |
+| `_shift_dependents(name, sx, sy)` | 级联 | 递归平移所有子孙元素 |
+| `_resolve_element_order(elements, configs)` | 排序 | Kahn 算法拓扑排序 |
+| `_collect_tree_members(root, members)` | 树定位 | BFS 遍历收集依赖树所有成员 |
+| `_resolve_tree_ref(position, alignment)` | 树定位 | position+alignment → (h_ref, v_ref) |
+| `_compute_visual_bounds(members)` | 树定位 | 计算一组元素的视觉包围盒 |
+| `apply_tree_positioning(all_positions)` | 树定位 | 树级组合定位入口 |
 
 ---
 
-## 3. 绝对定位系统
+## 3. 文字基线系统——理解坐标约定的关键
 
-### 3.1 `calculate_position(w, h, config)`
+### 3.1 字体的五大度量值
 
-分发逻辑：
-- 有 `relative_to` → 调用 `_calculate_relative()`
-- 无 `relative_to` → 调用 `_calculate_absolute()`
+每个 Pillow `FreeTypeFont` 对象包含几组固定的属性值，它们决定了文字渲染时的精确位置：
 
-### 3.2 `_calculate_absolute(w, h, config)`
+| 属性 | 获取方式 | 含义 | 示例值（Gotham Medium 40px） |
+|------|---------|------|------|
+| `ascent` | `font.getmetrics()[0]` | 从基线到最高字形顶部的距离（正值，单位 px） | 32 |
+| `descent` | `font.getmetrics()[1]` | 从基线到最低字形底部的距离（正值，单位 px） | 8 |
+| `height` | `ascent + descent` | 字体总高度 | 40 |
+| `bbox` | `font.getbbox(text)` | `(x0, y0, x1, y1)` 四元组。y0 通常在基线之上（负值），y1 在基线之下（正值） | 因文本而异 |
 
-参数：
-- `placement`: `'inside' | 'outside'`（默认 `'outside'`）
-- `position`: 14 种锚点，见下方
-- `alignment`: `'left' | 'center' | 'right'`
-- `margin` / `margin_top` / `margin_bottom` / `margin_left` / `margin_right`
+字体的视觉范围示意（以基线为参考线）：
 
-锚点锚定到**原图边界**（非画布边界），带 padding 约束。
-
-**拆分为 placement + position + alignment 三个正交参数**（v1.4.0 重构）：
-
-| position 值 | 水平参考 | 垂直参考 | 说明 |
-|------------|---------|---------|------|
-| `top-left` / `tl` | 左边缘 | 顶部 | 固定组合 |
-| `top-right` / `tr` | 右边缘 | 顶部 | 固定组合 |
-| `top-center` / `tc` | 水平居中 | 顶部 | 固定组合 |
-| `top` | 由 alignment 决定 | 顶部 | alignment 控制水平 |
-| `bottom-left` / `bl` | 左边缘 | 底部 | 固定组合 |
-| `bottom-right` / `br` | 右边缘 | 底部 | 固定组合 |
-| `bottom-center` / `bc` | 水平居中 | 底部 | 固定组合 |
-| `bottom` | 由 alignment 决定 | 底部 | alignment 控制水平 |
-| `left` | 左边缘 | 由 alignment 决定 | alignment 控制垂直 |
-| `right` | 右边缘 | 由 alignment 决定 | alignment 控制垂直 |
-| `center` | 画布居中 | 画布居中 | 不受 placement/margin 影响 |
-
-**placement 语义**：
-- `inside`：元素在原图矩形内部，margin 从边界向内偏移
-- `outside`：元素在原图矩形外部，margin 从边界向外偏移
-
-**margin 层级**（`_resolve_margins`）：
 ```
-1. 统一 margin → 四边初始值（未设 = 0）
-2. margin_top / margin_bottom / margin_left / margin_right → 各自覆盖对应方向
-3. float = reference_side * ratio, int = 绝对像素
+                ───── top_of_glyphs = baseline - ascent
+               │
+               │   ┌───┬───┬───┐
+               │   │   │   │   │
+  baseline  ═══╪═══╪═══╧═══╪═══╪═══════════════════
+              │    │       │   │
+              │    └───────┴───┘
+              │──── bottom_of_glyphs = baseline + descent
 ```
 
-**padding 约束**（最后应用）：
-```
-x = max(pad_left, min(x, pad_right - w))
-y = max(pad_top, min(y, pad_bottom - h))
-```
-padding 优先级高于 margin。
+### 3.2 `draw.text()` 的基线语义
 
-### 3.3 `_get_anchor(placement, position, alignment, ox, oy, ow, oh, ew, eh, m)`
-
-绝对定位的核心算法，根据 placement + position + alignment 三参数计算 `(x, y)`。
-
-**对齐函数**：
-
-`_align_x(alignment, ox, ow, ew, m)`：
-- `'left' / 'top-left' / 'bottom-left'` → `ox + m['left']`
-- `'right' / 'top-right' / 'bottom-right'` → `ox + ow - ew - m['right']`
-- 其他 → `ox + (ow - ew) // 2`（居中）
-
-`_align_y(alignment, oy, oh, eh, m)`：
-- `'top' / 'top-left' / 'top-right'` → `oy + m['top']`
-- `'bottom' / 'bottom-left' / 'bottom-right'` → `oy + oh - eh - m['bottom']`
-- 其他 → `oy + (oh - eh) // 2`（居中）
-
----
-
-## 4. 相对定位系统
-
-### 4.1 `_calculate_relative(w, h, config)`
-
-参数：
-- `relative_to`: 参考元素名称
-- `relative_position`: `'after' / 'below' / 'before' / 'above' / 'right-of' / 'left-of'`
-- `relative_margin`: 间距比（默认 0.01）
-- `alignment`: 相对于参考元素的对齐方式
-- `offset_x_ratio / offset_y_ratio`: 微调偏移（默认 0）
-
-### 4.2 基线偏移校正（v1.7.0 修复）
-
-问题：参考元素注册时的 `y` 已做 `-= descent` 偏移（从包围盒顶变为基线），但 `_calculate_relative` 将 `(tx, ty, tw, th)` 中的 `ty` 当作包围盒顶部处理，导致所有 y 轴对齐计算出错。
-
-修复：每个 `positions` 条目新增 `ascent`，计算时校正视觉边界：
+Pillow 的 `ImageDraw.text(x, y, text, font=font)` 将 `(x, y)` 解释为**基线的左上角起点**
 
 ```python
-# 给定位移前的视觉校正：
+draw = ImageDraw.Draw(image)
+draw.text((100, 200), "Hello", font=font_40px)
+# 基线在 (100, 200)，文字向右上方和右下方伸展
+```
+
+这意味着：
+- 文字的视觉顶部在 `y - ascent = 200 - 32 = 168`
+- 文字的视觉底部在 `y + descent = 200 + 8 = 208`
+- 文字向右延伸到 x=100 加每个字形的宽度之和
+
+### 3.3 布局引擎返回的 y 是什么？
+
+布局引擎的 `_calculate_absolute()` 在计算位置时，使用参数 `eh = ascent + descent`（即文字的总高度）。所有公式中出现的 `eh` 都是一个矩形方框的高度。返回的 `y` 就是这个矩形方框的**顶部边缘**坐标。
+
+```
+  y  = ( 单元素时布局引擎返回的值）
+       │
+       │  ┌──────────────────┐  ← 包围盒顶部（y_calc）
+       │  │                  │
+       │  │  (ascent = 32)   │
+       │  │                  │
+  ═════╪══╪══════════════════╪════  ← 基线（应放置 draw.text 的位置）
+       │  │                  │
+       │  │  (descent = 8)   │
+       │  │                  │
+       │  └──────────────────┘  ← 包围盒底部（y_calc + eh）
+       │
+       └─────────────────────── y + eh
+```
+
+**问题**：`draw.text()` 要的是基线 y，而布局引擎返回的是包围盒顶部 y。两者之间差一个 `descent`。
+
+### 3.4 descent 偏移——渲染器如何在两步之间转换
+
+渲染器 Phase 2 中的转换代码：
+
+```python
+x, y = layout_engine.calculate_position(item['width'], item['height'], cfg)
+# 此时 y = 布局引擎返回的包围盒顶部 = y_calc
+
+y -= item['descent']   # y = y_calc - descent = 基线 y
+
+layout_engine.register_element(name, x, y, item['width'], item['height'], ascent=ascent)
+# 注册到 positions 的 y = 基线 y
+```
+
+之后 Phase 3 绘制时：
+
+```python
+x, y, w, h = layout_engine.get_element_bounds(name)
+# bounds 中的 y = 基线 y（因为注册时用的就是基线 y）
+draw.text((x, y), text, fill=color, font=font)
+# draw.text 的基线在 y 处——符合预期
+```
+
+### 3.5 坐标系统一的数学恒等式
+
+经过 descent 偏移后，以下关系在所有定位计算中成立：
+
+```
+注册 y（baseline） = y_calc - descent
+视觉顶部（visual top）   = baseline - ascent = y_calc - descent - ascent = y_calc - eh
+视觉底部（visual bottom）= baseline + descent = y_calc - descent + descent = y_calc
+```
+
+**最重要的结论**：`视觉底部 = y_calc`。也就是说，文字元素经过 descent 偏移后，它的视觉底部恰好等于布局引擎返回的包围盒顶部 `y_calc`。这个结论是所有相对定位公式推导的基础。
+
+### 3.6 基线偏移导致的相对定位 Bug（v1.7.0 修复）
+
+由于 positions 中的 `y` 是基线而非包围盒顶，当一个后续元素通过 `relative_to` 读取参考元素的坐标时：
+
+```python
+tx, ty, tw, th = self.get_element_bounds(relative_to)
+# ty = 参考元素的基线 y
+# th = 参考元素注册的 height = ascent + descent
+```
+
+在处理 `right-of` + 对齐类型时，原本直接用 `_align_y()` 计算：
+
+```python
+y = _align_y("bottom", ty, th, eh, m)   # 返回 ty + th - eh
+```
+
+但 `ty` 是基线而不是包围盒顶，`ty + th = 基线 + ascent + descent` 并不等于视觉底部。实际视觉底部应为 `ty + descent = ty + (th - ascent)`。直接使用 `ty + th` 导致所有基于参考元素 y 的公式多出了 `ascent` 的误差。
+
+**修复方法**：每个 `positions` 条目存储 `ascent` 值，在需要参考元素视觉边界时做校正：
+
+```python
 ref_ascent = self.positions[relative_to].get('ascent')
+
 if ref_ascent is not None and ref_ascent > 0:
-    ref_visual_top = ty - ref_ascent
-    ref_visual_bottom = ty + (th - ref_ascent)  # = ty + descent
+    # 文字元素：注册 y 是基线
+    ref_visual_top    = ty - ref_ascent           # 视觉顶部 = 基线 - ascent
+    ref_visual_bottom = ty + (th - ref_ascent)    # 视觉底部 = 基线 + descent
 else:
-    ref_visual_top = ty
+    # 非文字元素（Logo、占位锚点）：注册 y 就是包围盒顶
+    ref_visual_top    = ty
     ref_visual_bottom = ty + th
 ```
 
-### 4.3 相对位置定位公式
+`_calculate_relative` 中所有涉及参考元素 y 的计算（包括 `right-of`/`left-of` 的 alignment、`after`/`below`/`before`/`above` 的间距、组合盒边界）全部改用 `ref_visual_top` 和 `ref_visual_bottom`。
 
-参考元素的视觉包围盒 `(ref_visual_top, ref_visual_bottom)` 确定后：
+---
 
-**水平参考方向**（`right-of` / `left-of`）：
+## 4. 绝对定位系统
 
-| alignment | `right-of` | `left-of` |
-|-----------|-----------|-----------|
-| `bottom` (含组合) | `y = ref_visual_bottom` | `y = ref_visual_bottom` |
-| `top` (含组合) | `y = ref_visual_top + element_height` | `y = ref_visual_top + element_height` |
-| `center` / 其他 | `y = (ref_visual_top + ref_visual_bottom + element_height) // 2` | 同上 |
-
-其中 `element_height = ascent + descent`（或 `max_ascent + max_descent`）。
-
-**垂直参考方向**（`after` / `below` / `before` / `above`）：
-
-| relative_position | y 公式 | 说明 |
-|-------------------|--------|------|
-| `after` / `below` | `y = ref_visual_bottom + element_height + margin_px` | 元素位于参考下方，descent 调整后视觉顶距参考视觉底恰为 margin |
-| `before` / `above` | `y = ref_visual_top - element_height - margin_px` | 元素位于参考上方 |
-
-所有位置的 `x` 或 `y` 推导均遵循同一个原则：**`y`（布局引擎返回值）是包围盒顶部，descent 调整后视觉底部 = `y`**。
-
-### 4.4 组合盒约束与级联平移
-
-当相对定位元素放置时，它与参考元素（及所有已注册从属）构成**组合盒**。如果组合盒超出 padding 安全区域，整个组合盒整体平移：
+### 4.1 `_calculate_absolute(w, h, config)` 完整流程
 
 ```python
-group_left   = min(tx, x)
-group_top    = min(ref_visual_top, y)
-group_right  = max(tx + tw, x + element_width)
-group_bottom = max(ref_visual_bottom, y + element_height)
+def _calculate_absolute(self, ew, eh, config):
+    margins  = self._resolve_margins(config)        # 步骤 1：解析 margin
+    placement = config.get('placement', 'outside')  # 步骤 2：三参数
+    position  = config.get('position', 'bottom')
+    alignment = config.get('alignment', 'center')
 
-if group_left < pad_left:
-    shift_x = pad_left - group_left
-elif group_right > pad_right:
-    shift_x = pad_right - group_right
+    x, y = self._get_anchor(placement, position, alignment,   # 步骤 3：锚点
+                            ox, oy, ow, oh, ew, eh, margins)
+
+    x = max(pad_left, min(x, pad_right - ew))       # 步骤 4：padding 约束
+    y = max(pad_top,  min(y, pad_bottom - eh))
+
+    return x, y
 ```
 
-平移通过 `_shift_dependents()` 沿依赖树级联传播：
+### 4.2 三个正交参数
+
+| 参数 | 可选值 | 默认值 | 作用轴 |
+|------|--------|--------|--------|
+| `placement` | `inside` / `outside` | `outside` | 元素在原图矩形内侧还是外侧 |
+| `position` | 14 种锚点 | `bottom` | 绑定到原图的哪条边或哪个角 |
+| `alignment` | `left` / `center` / `right` | `center` | 元素自身相对于锚点的对齐方式 |
+
+### 4.3 14 种 position 的完整行为矩阵
+
+下表显示了每种 position 值从原图边界的何处计算元素的位置。`alignment` 列说明该 position 下 alignment 控制哪根轴（`-` 表示不控制，固定组合）。
+
+| position | 水平参考 | 垂直参考 | alignment 控制的轴 |
+|----------|---------|---------|-------------------|
+| `top-left` / `tl` | 左边缘 | 顶部 | —（固定） |
+| `top-right` / `tr` | 右边缘 | 顶部 | —（固定） |
+| `top-center` / `tc` | 水平居中 | 顶部 | —（固定） |
+| `top` | 取决于 alignment | 顶部 | 水平轴 |
+| `bottom-left` / `bl` | 左边缘 | 底部 | —（固定） |
+| `bottom-right` / `br` | 右边缘 | 底部 | —（固定） |
+| `bottom-center` / `bc` | 水平居中 | 底部 | —（固定） |
+| `bottom` | 取决于 alignment | 底部 | 水平轴 |
+| `left` | 左边缘 | 取决于 alignment | 垂直轴 |
+| `right` | 右边缘 | 取决于 alignment | 垂直轴 |
+| `center` | 画布居中 | 画布居中 | —（固定，不受 placement 和 margins 影响） |
+
+### 4.4 `_get_anchor` 的逐公式展开
+
+#### `_align_x`——水平对齐函数
+
+```python
+def _align_x(alignment, ox, ow, ew, m):
+    # alignment 包含 'left' 语义：元素左边缘在原图左边缘 + margin_left
+    if alignment in ('left', 'top-left', 'bottom-left'):
+        return ox + m['left']
+    
+    # alignment 包含 'right' 语义：元素右边缘在原图右边缘 - margin_right
+    if alignment in ('right', 'top-right', 'bottom-right'):
+        return ox + ow - ew - m['right']
+    
+    # 其他（包括 'center'、默认）：元素水平居中于原图
+    return ox + (ow - ew) // 2
+```
+
+#### `_align_y`——垂直对齐函数
+
+```python
+def _align_y(alignment, oy, oh, eh, m):
+    # alignment 包含 'top' 语义：元素顶边 = 原图顶边 + margin_top
+    if alignment in ('top', 'top-left', 'top-right'):
+        return oy + m['top']
+    
+    # alignment 包含 'bottom' 语义：元素底边 = 原图底边 - margin_bottom
+    if alignment in ('bottom', 'bottom-left', 'bottom-right'):
+        return oy + oh - eh - m['bottom']
+    
+    # 其他（包括 'center'、默认）：元素垂直居中于原图
+    return oy + (oh - eh) // 2
+```
+
+#### 所有 14 种 position 的数学公式
+
+下表中 `oy + oh` 是原图底边，`ox + ow` 是原图右边。
+
+**垂直位置（placement='outside'，默认）：**
+
+| position | y 公式 | 说明 |
+|----------|--------|------|
+| `top-*`（全部） | `y = oy - eh - m['top']` | 元素包围盒在图片外部上方 |
+| `bottom-*`（全部） | `y = oy + oh + m['bottom']` | 元素包围盒在图片外部下方 |
+| `left` | `y = _align_y(alignment, ...)` | 由 alignment 决定垂直位置 |
+| `right` | `y = _align_y(alignment, ...)` | 由 alignment 决定垂直位置 |
+| `center` | `y = (canvas_h - eh) // 2` | 画布居中，不受 margins 影响 |
+
+**垂直位置（placement='inside'）：**
+
+| position | y 公式 | 说明 |
+|----------|--------|------|
+| `top-*`（全部） | `y = oy + m['top']` | 元素包围盒在图片内部顶部，margin 向内 |
+| `bottom-*`（全部） | `y = oy + oh - eh - m['bottom']` | 元素包围盒在图片内部底部 |
+| `left` / `right` | `y = _align_y(alignment, ...)` | 同 outside |
+| `center` | `y = (canvas_h - eh) // 2` | 同 outside |
+
+**水平位置（所有 position）：**
+
+| position | x 公式 | 说明 |
+|----------|--------|------|
+| `*-left` / `left` | `inside:  ox + m['left']`；`outside left:  ox - ew - m['right']` | 元素左边缘对齐原图左边缘 |
+| `*-right` / `right` | `inside: ox + ow - ew - m['right']`；`outside right: ox + ow + m['left']` | 元素右边缘对齐原图右边缘 |
+| `*-center` | `ox + (ow - ew) // 2` | 元素水平居中于原图 |
+| `top` / `bottom` | `_align_x(alignment, ...)` | 由 alignment 决定 |
+| `center` | `(canvas_w - ew) // 2` | 画布居中 |
+
+### 4.5 margin 解析层级
+
+`_resolve_margins(config)` 的解析分两步，优先级清晰：
+
+```
+第一步：统一值。config['margin'] → 四边初始值（未设 → 0）。
+        值类型：float → int(reference_side * ratio)；int → 直接使用。
+
+第二步：方向覆盖。config['margin_top'] → 覆盖 top（如有）
+         config['margin_bottom'] → 覆盖 bottom（如有）
+         config['margin_left'] → 覆盖 left（如有）
+         config['margin_right'] → 覆盖 right（如有）
+         每个方向各自独立，设了几个覆盖几个，不存在互斥激活条件。
+
+最终结果：{'top': px, 'bottom': px, 'left': px, 'right': px}
+```
+
+举例：`margin_bottom: 0.035` + `reference_side = 3000` → `m['bottom'] = int(3000 * 0.035) = 105` 像素。
+
+### 4.6 padding 约束
+
+padding 是所有定位计算的最后一道约束，优先级高于所有 margin：
+
+```python
+x = max(pad_left, min(x, pad_right - element_width))
+y = max(pad_top,  min(y, pad_bottom - element_height))
+```
+
+- 元素超出 padding 左边界 → 推到 pad_left
+- 元素超出 padding 右边界 → 拉到 `pad_right - element_width`
+- 元素超出 padding 上边界 → 推到 pad_top
+- 元素超出 padding 下边界 → 拉到 `pad_bottom - element_height`
+- 当 element_width 大于 `pad_right - pad_left` 时：左对齐到 pad_left，右侧必然溢出（仅单方向约束）
+
+---
+
+## 5. 相对定位系统
+
+### 5.1 `_calculate_relative(w, h, config)` 参数表
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `relative_to` | `str` | 必填 | 参考元素的名称 |
+| `relative_position` | `str` | `'after'` | 6 种方向 |
+| `relative_margin` | `float` | `0.01` | 间距比例，像素 = `int(reference_side * ratio)` |
+| `alignment` | `str` | `'center'` | 在参考元素范围内的对齐方式 |
+| `offset_x_ratio` | `float` | `0.0` | x 轴微调比例 |
+| `offset_y_ratio` | `float` | `0.0` | y 轴微调比例 |
+
+### 5.2 六种方向和 alignment 语义
+
+| relative_position | 元素放置方向 | alignment 控制哪根轴 | 对齐基准物 |
+|------------------|-------------|---------------------|-----------|
+| `after` / `below` | 参考元素的下方 | 水平轴（left/center/right） | 参考元素的宽度 |
+| `before` / `above` | 参考元素的上方 | 水平轴（left/center/right） | 参考元素的宽度 |
+| `right-of` | 参考元素的右侧 | 垂直轴（top/center/bottom） | 参考元素的高度 |
+| `left-of` | 参考元素的左侧 | 垂直轴（top/center/bottom） | 参考元素的高度 |
+
+### 5.3 完整定位公式（含推导）
+
+以下公式中使用的符号：
+
+| 符号 | 含义 |
+|------|------|
+| `tx, ty` | 参考元素的注册坐标（ty = 基线 y） |
+| `tw, th` | 参考元素的注册尺寸（th = ascent + descent） |
+| `ref_ascent` | 参考元素注册的 ascent |
+| `ref_visual_top = ty - ref_ascent` | 参考元素的视觉顶部 y |
+| `ref_visual_bottom = ty + (th - ref_ascent)` | 参考元素的视觉底部 y（= 基线 + descent） |
+| `eh = ascent + descent` | 当前元素的包围盒高度 |
+| `margin_px = int(reference_side * relative_margin)` | 间距像素 |
+
+#### `after` / `below`——当前元素在参考元素下方
+
+```
+y = ref_visual_bottom + eh + margin_px
+x = _align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+```
+
+**推导**：
+1. 目标：当前元素的视觉顶部在参考元素视觉底部下方 margin_px 处。
+2. 当前元素的视觉顶部 = `y - eh`（因为经过 descent 偏移后，视觉顶部 = y - eh）。
+3. 参考元素的视觉底部 = `ref_visual_bottom`。
+4. 所以：`y - eh = ref_visual_bottom + margin_px`。
+5. 解得：`y = ref_visual_bottom + eh + margin_px`。
+
+**验证**：间距 = 当前视觉顶部 - 参考视觉底部 = `(y - eh) - ref_visual_bottom = margin_px` ✓
+
+#### `before` / `above`——当前元素在参考元素上方
+
+```
+y = ref_visual_top - margin_px
+x = _align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+```
+
+**推导**：
+1. 目标：当前元素的视觉底部在参考元素视觉顶部上方 margin_px 处。
+2. 当前元素的视觉底部 = `y`（经过 descent 偏移后，视觉底部 = y）。
+3. 参考元素的视觉顶部 = `ref_visual_top`。
+4. 所以：`ref_visual_top - y = margin_px`。
+5. 解得：`y = ref_visual_top - margin_px`。
+
+**验证**：间距 = 参考视觉顶部 - 当前视觉底部 = `ref_visual_top - y = margin_px` ✓
+
+> 🐛 **v1.7.0 bug note**：此公式在 v1.7.0 ascent 修复初期因逻辑不对称错误地被写为 `y = ref_visual_top - eh - margin_px`，额外多减了一个 `element_height`，导致间距变为 `eh + margin_px`。该 bug 已在本文档最终定稿时修正。
+
+#### `right-of`——当前元素在参考元素右侧
+
+```
+x = tx + tw + margin_px
+
+y 取决于 alignment:
+
+  alignment = 'bottom' / 'bottom-left' / 'bottom-right':
+    y = ref_visual_bottom
+    → 当前视觉底部对齐参考视觉底部
+    → 验证：当前视觉底部(y) = 参考视觉底部(ref_visual_bottom) ✓
+
+  alignment = 'top' / 'top-left' / 'top-right':
+    y = ref_visual_top + eh
+    → 当前视觉顶部对齐参考视觉顶部
+    → 验证：当前视觉顶部(y - eh) = 参考视觉顶部(ref_visual_top) ✓
+
+  alignment = 'center' / 其他:
+    y = (ref_visual_top + ref_visual_bottom + eh) // 2
+    → 当前视觉中心对齐参考视觉中心
+    → 验证：当前视觉中心(y - eh//2) = 参考视觉中心((ref_visual_top + ref_visual_bottom)//2) ✓
+```
+
+#### `left-of`——当前元素在参考元素左侧
+
+```
+x = tx - element_width - margin_px
+
+y 的公式：与 right-of 完全一致（三个 alignment 分支）
+```
+
+### 5.4 微调偏移
+
+所有六种方向计算完毕后，额外叠加 offset 微调：
+
+```python
+offset_x = int(reference_side * offset_x_ratio)
+offset_y = int(reference_side * offset_y_ratio)
+x += offset_x
+y += offset_y
+```
+
+这两个 offset 在组合盒约束之前应用，因此仍然受 padding 约束保护。
+
+---
+
+## 6. 组合盒约束与级联平移
+
+### 6.1 组合盒的计算
+
+当相对定位放置一个元素时，系统将它和参考元素（以及所有已注册的从属元素）视为一个整体——称为**组合盒**。如果这个组合盒超出 padding 安全区域，系统通过整体平移来保持组内相对位置不变。
+
+```python
+# 组合盒的视觉边界
+group_left   = min(tx, x)                              # 参考左边缘 vs 当前左边缘
+group_top    = min(ref_visual_top, y)                  # 参考视觉顶部 vs 当前顶部
+group_right  = max(tx + tw, x + element_width)         # 参考右边缘 vs 当前右边缘
+group_bottom = max(ref_visual_bottom, y + element_height)  # 参考视觉底部 vs 当前底部
+
+# 扩展组合盒以包含所有已注册的从属元素
+for dep_name in self._dependents.get(relative_to, []):
+    dep_bounds = self.get_element_bounds(dep_name)
+    if dep_bounds:
+        dx, dy, dw, dh = dep_bounds
+        # 同样使用视觉边界（校正 ascent 偏移）
+        dep_ascent = self.positions.get(dep_name, {}).get('ascent')
+        if dep_ascent is not None and dep_ascent > 0:
+            dep_visual_top    = dy - dep_ascent
+            dep_visual_bottom = dy + (dh - dep_ascent)
+        else:
+            dep_visual_top    = dy
+            dep_visual_bottom = dy + dh
+        group_left   = min(group_left, dx)
+        group_top    = min(group_top, dep_visual_top)
+        group_right  = max(group_right, dx + dw)
+        group_bottom = max(group_bottom, dep_visual_bottom)
+```
+
+### 6.2 平移量的计算
+
+```python
+shift_x = 0
+shift_y = 0
+
+# 检查四个方向的溢出
+if group_left < pad_left:
+    shift_x = pad_left - group_left          # 左溢出：向右推
+elif group_right > pad_right:
+    shift_x = pad_right - group_right        # 右溢出：向左拉
+
+if group_top < pad_top:
+    shift_y = pad_top - group_top            # 上溢出：向下推
+elif group_bottom > pad_bottom:
+    shift_y = pad_bottom - group_bottom      # 下溢出：向上拉
+```
+
+### 6.3 平移的应用——`_shift_dependents()`
 
 ```python
 def _shift_dependents(self, name, shift_x, shift_y):
+    # 沿依赖树向下传播
     for dep_name in self._dependents.get(name, []):
-        self.positions[dep_name]['x'] += shift_x
-        self.positions[dep_name]['y'] += shift_y
-        self._shift_dependents(dep_name, shift_x, shift_y)
+        if dep_name in self.positions:
+            self.positions[dep_name]['x'] += shift_x
+            self.positions[dep_name]['y'] += shift_y
+            self._shift_dependents(dep_name, shift_x, shift_y)
 ```
 
----
-
-## 5. 拓扑排序（Phase 2 顺序控制）
+调用方式（在 `_calculate_relative` 中）：
 
 ```python
-_resolve_element_order(text_elements, all_positions) → List[str]
+if shift_x != 0 or shift_y != 0:
+    ref_key = relative_to
+    # 先平移参考元素本身
+    self.positions[ref_key]['x'] += shift_x
+    self.positions[ref_key]['y'] += shift_y
+    # 再级联平移所有子孙
+    self._shift_dependents(ref_key, shift_x, shift_y)
+    # 当前元素的位置也同步更新（因为当前元素尚未注册）
+    x += shift_x
+    y += shift_y
 ```
 
-使用 Kahn 算法（BFS 入度计数）：
-1. 建立依赖图：对有 `relative_to` 的元素添加边
-2. 入度为 0 的元素（无依赖）入队
-3. 每次出队 → 加入有序列表 → 依赖者入度 -1 → 入度 0 时入队
-4. 兜底：未被覆盖的元素（循环依赖等）按原序追加
+### 6.4 最终 padding 夹持
 
-保证绝对定位元素（根）先于相对定位元素（子孙）处理。
+无论是平移前还是平移后，当前元素的位置最终都会受 padding 保护：
 
-**缺失参考元素保护**：当 `relative_to` 指向的元素因无文本被跳过但仍存在于配置中时，以 0×0 尺寸预先注册其绝对位置锚点，避免依赖元素降级为默认绝对定位导致位置偏移。
+```python
+x = max(pad_left, min(x, pad_right - element_width))
+y = max(pad_top,  min(y, pad_bottom - element_height))
+```
 
 ---
 
-## 6. 树级组合定位（Phase 2.5）
+## 7. 拓扑排序（Phase 2 顺序控制）
 
-### 6.1 动机
+### 7.1 Kahn 算法实现
 
-现有相对定位只能实现「A 在 B 右侧」这种单一元素级别的控制。当多个元素通过 `relative_to` 链组成「A → B → C → D」时，只有根 A 有绝对定位控制权，整条链必然偏向 A 所在的一侧。用户需要将**整条链**当作一个整体，按 `position / alignment / margin` 做一次**整体绝对定位**。
+`_resolve_element_order(text_elements, all_positions)` 对元素列表按依赖关系拓扑排序：
 
-### 6.2 启用方式
+```python
+def _resolve_element_order(self, text_elements, all_positions):
+    # 构建依赖图（有向，从参考元素指向依赖者）
+    names_in_list = [t[0] for t in text_elements]
+    names_set = set(names_in_list)
 
-在根元素的 positioning config 中添加 `tree_align: true` 显式开启：
+    in_degree = {name: 0 for name in names_in_list}
+    dependents = {name: [] for name in names_in_list}
+
+    for name in names_in_list:
+        cfg = all_positions.get(name, {})
+        ref = cfg.get('relative_to')
+        if ref and ref in names_set:
+            dependents[ref].append(name)   # ref → name 的有向边
+            in_degree[name] += 1           # name 的入度 +1
+
+    # 入度为 0 的元素（无依赖，即绝对定位的根）
+    queue = [name for name in names_in_list if in_degree[name] == 0]
+    ordered = []
+
+    # BFS 拓扑展开
+    while queue:
+        name = queue.pop(0)
+        ordered.append(name)
+        for dep in dependents[name]:
+            in_degree[dep] -= 1
+            if in_degree[dep] == 0:
+                queue.append(dep)
+
+    # 兜底：未被覆盖的元素（循环依赖等）按原序追加
+    for name in names_in_list:
+        if name not in ordered:
+            ordered.append(name)
+
+    return ordered
+```
+
+**保证**：绝对定位的根元素始终先于相对定位的子元素处理。
+
+### 7.2 缺失参考元素保护
+
+当配置中有 `relative_to` 指向某个元素，但该元素因为无文本数据被 `draw_items` 跳过时，系统会检查这个"缺失的参考元素"是否仍在 `all_positions` 中配置了定位参数，如果是，则以 0×0 尺寸预注册其绝对位置锚点：
+
+```python
+for name in draw_items:
+    cfg = all_positions.get(name, {})
+    ref = cfg.get('relative_to')
+    if ref and ref not in draw_items and ref in all_positions:
+        ref_cfg = all_positions[ref]
+        if not ref_cfg.get('relative_to'):
+            rx, ry = layout_engine.calculate_position(0, 0, ref_cfg)
+            layout_engine.register_element(ref, rx, ry, 0, 0, ascent=0)
+```
+
+确保依赖元素不会因为参考元素被跳过而降级为默认绝对定位导致位置偏移。
+
+---
+
+## 8. 树级组合定位（Phase 2.5）
+
+### 8.1 动机
+
+现有相对定位只能实现「A 在 B 右侧」这种单一元素级别的控制。当多个元素通过 `relative_to` 链组成 `A → B → C → D` 时，只有根 A 使用绝对定位，整条链必然从 A 的位置开始向右延伸，无法实现整条链的居中/右对齐等整体定位效果。
+
+树级组合定位要解决的问题：将整条依赖树**当作一个整体**，用根元素的 `position / alignment / margin_*` 参数对整棵树做一次完整的绝对定位。
+
+### 8.2 启用方式
+
+`tree_align: true` 声明在根元素（即没有 `relative_to` 的元素）的定位配置中：
 
 ```yaml
 defined_texts:
@@ -269,195 +763,515 @@ defined_texts:
     content: "FL"
     position: "bottom"
     alignment: "center"
-    tree_align: true       # ← 开启树级组合定位
+    tree_align: true       # ← 启用树级组合定位
     margin_bottom: 0.07
 ```
 
-未声明 `tree_align` 的依赖树（原版所有样式配置）不受影响，行为与 v1.7.0 之前完全一致。
+未声明 `tree_align: true` 的依赖树（包括现有的所有样式配置）不受影响，行为与 v1.7.0 之前完全一致。
 
-### 6.2 算法（`apply_tree_positioning`）
+### 8.3 算法步骤
+
+`apply_tree_positioning(all_positions)` 遍历 `positions` 中所有元素：
 
 ```
-for each root in positions (元素无 relative_to):
-    1. _collect_tree_members(root, members)
-       → 递归 _dependents, 得 {root, child1, child2, ...}
+第一步：识别根元素
+  只有同时满足以下条件的元素才会进入树定位流程：
+  ├─ 无 relative_to（不是其他元素的子元素）
+  ├─ 尚未被其他树处理过
+  └─ 配置中有 tree_align: true
 
-    2. _compute_visual_bounds(members)
-       → (tree_left, tree_top, tree_right, tree_bottom)
+第二步：收集树成员
+  _collect_tree_members(root, members)
+  使用 BFS 遍历 _dependents，收集根节点及其所有子孙。
 
-    3. target_x, target_y = _calculate_absolute(tree_w, tree_h, root_cfg)
-       → 树应有的包围盒左上角
+  如果 len(tree_members) == 1（即根节点没有子元素）→ 跳过。
 
-    4. _resolve_tree_ref(position, alignment) → (h_ref, v_ref)
+第三步：计算树的视觉包围盒
+  _compute_visual_bounds(members)
 
-    5. target_ref = (target_x [± w/2 ± w], target_y [± h ∓ h/2])
-       cur_ref     = (tree_xxx, tree_yyy)
-       shift = target_ref - cur_ref
+  遍历每个成员，用注册的 ascent 校正视觉边界：
+    文字元素：visual_top = y - ascent, visual_bottom = y + (height - ascent)
+    非文字：  visual_top = y,            visual_bottom = y + height
 
-    6. _shift_dependents(root, shift_x, shift_y)
-       平移根节点自身
+  合并所有成员的视觉范围：
+    tree_left   = min(全部成员的视觉左边缘) = min(x)
+    tree_top    = min(全部成员的视觉顶部)    = min(visual_top)
+    tree_right  = max(全部成员的视觉右边缘)   = max(x + width)
+    tree_bottom = max(全部成员的视觉底部)    = max(visual_bottom)
 
-    7. padding 约束：重新计算包围盒，若溢出则再次整体平移
+  tree_w = tree_right - tree_left
+  tree_h = tree_bottom - tree_top
+
+第四步：用根配置计算目标位置
+  target_x, target_y = _calculate_absolute(tree_w, tree_h, root_cfg)
+
+  这里完全复用现有的绝对定位方法，把整棵树当作一个宽度 tree_w、高度 tree_h
+  的虚拟元素来计算目标位置。
+
+第五步：解析水平和垂直参考方向
+  (h_ref, v_ref) = _resolve_tree_ref(position, alignment)
+
+  见 8.4 节的完整映射表。
+
+第六步：计算平移量
+  目标参考坐标：
+    if h_ref == 'left':   target_ref_x = target_x
+    if h_ref == 'right':  target_ref_x = target_x + tree_w
+    if h_ref == 'center': target_ref_x = target_x + tree_w // 2
+
+    if v_ref == 'top':    target_ref_y = target_y - tree_h
+    if v_ref == 'bottom': target_ref_y = target_y
+    if v_ref == 'center': target_ref_y = target_y - tree_h // 2
+
+  当前参考坐标（从树当前包围盒获取）：
+    if h_ref == 'left':   cur_ref_x = tree_left
+    if h_ref == 'right':  cur_ref_x = tree_right
+    if h_ref == 'center': cur_ref_x = (tree_left + tree_right) // 2
+
+    if v_ref == 'top':    cur_ref_y = tree_top
+    if v_ref == 'bottom': cur_ref_y = tree_bottom
+    if v_ref == 'center': cur_ref_y = (tree_top + tree_bottom) // 2
+
+  shift_x = target_ref_x - cur_ref_x
+  shift_y = target_ref_y - cur_ref_y
+
+第七步：平移整棵树
+  if shift_x != 0 or shift_y != 0:
+      _shift_dependents(root, shift_x, shift_y)
+      根元素自身 + shift_x, + shift_y
+
+第八步：padding 约束
+  平移后重新计算树的视觉包围盒。
+  如果溢出 padding 边界，计算 clip_x/clip_y 并再次整体平移回来。
 ```
 
-**核心洞察**：`_calculate_absolute(tree_w, tree_h, cfg)` 返回的是**包围盒顶部**坐标。在 descent 调整语义下，视觉底部 = `y_calc`。因此垂直参考点的 target_ref 使用 `y_calc`（底部）或 `y_calc - tree_h`（顶部），而非 `y_calc + tree_h`。
+### 8.4 `_resolve_tree_ref` 的完整映射
 
-### 6.3 `_resolve_tree_ref` 的14种position映射
+`_resolve_tree_ref(position, alignment)` 将根元素的 `position` + `alignment` 参数解析为 `(h_ref, v_ref)`，完全对齐 `_get_anchor` 的 14 种组合：
 
-依赖树定位的水平和/垂直参考方向完全对齐 `_get_anchor` 的 14 种 position 组合：
+| position | alignment | h_ref | v_ref |
+|----------|-----------|-------|-------|
+| `top-left` / `tl` | 任意 | `left` | `top` |
+| `top-right` / `tr` | 任意 | `right` | `top` |
+| `top-center` / `tc` / `top` | 任意 | `center` | `top` |
+| `bottom-left` / `bl` | 任意 | `left` | `bottom` |
+| `bottom-right` / `br` | 任意 | `right` | `bottom` |
+| `bottom-center` / `bc` / `bottom` | 任意 | `center` | `bottom` |
+| `left` | `top` / `top-*` | `left` | `top` |
+| `left` | `bottom` / `bottom-*` | `left` | `bottom` |
+| `left` | 其他 | `left` | `center` |
+| `right` | `top` / `top-*` | `right` | `top` |
+| `right` | `bottom` / `bottom-*` | `right` | `bottom` |
+| `right` | 其他 | `right` | `center` |
+| `center` | 任意 | `center` | `center` |
+
+当 `position` 为 `top` 或 `bottom` 时，它本身不指定水平方向，此时：
+- `alignment` 为 `left` / `top-left` / `bottom-left` → `h_ref = 'left'`
+- `alignment` 为 `right` / `top-right` / `bottom-right` → `h_ref = 'right'`
+- 其他 → `h_ref = 'center'`
+
+当 `position` 为 `left` 或 `right` 时，垂直方向由 `alignment` 决定（见上表）。
+
+### 8.5 目标参考 y 的校正
+
+`_calculate_absolute(tree_w, tree_h, root_cfg)` 返回的 `(target_x, target_y)` 是虚拟元素包围盒的**左上角**。
+
+经过 descent 偏移后的视觉位置关系：
+- 视觉底部 = `target_y`（对于"底部"类型的 position）
+- 视觉顶部 = `target_y - tree_h`（对于"顶部"类型的 position）
+- 视觉中心 = `target_y - tree_h // 2`（对于"居中"类型的 position）
+
+因此目标参考点的计算方法为：
+
+```
+v_ref = 'bottom' → target_ref_y = target_y     （视觉底部在 target_y）
+v_ref = 'top'    → target_ref_y = target_y - tree_h  （视觉顶部在 target_y - tree_h）
+v_ref = 'center' → target_ref_y = target_y - tree_h // 2
+```
+
+这个校正与第 3 章推导的 `visual_bottom = y_calc` 公式一致。
+
+---
+
+## 9. 三阶段渲染管线详解
+
+`_add_text_and_icons_flexible()` 是渲染器中的主方法，控制整条文字渲染管线。以下按阶段逐一展开。
+
+### 9.1 Phase 1：统一文本收集 + 尺寸测量
+
+**收集三种来源的文本：**
 
 ```python
-position='bottom' + alignment='center' → (h='center', v='bottom')
-position='left'   + alignment='bottom' → (h='left',   v='bottom')
-position='center'                      → (h='center', v='center')
-# ...（全部 14 种组合）
+# --- 来源 1: info_position（EXIF / 相机信息）---
+for key in info_positions:
+    text = context.get_text(key)    # get_text 返回格式化文本，无数据返回 None
+    if text:
+        all_positions[key] = cfg
+        text_elements.append((key, text))
+
+# --- 来源 2: defined_texts（预定义文本）---
+for key, entry in defined_texts_cfg.items():
+    content = entry.get('content', '')
+    if content:
+        layout_cfg = {k: v for k, v in entry.items() if k != 'content'}
+        all_positions[key] = layout_cfg
+        text_elements.append((key, content))
+
+# --- 来源 3: custom_text（用户输入）---
+if custom_text_cfg.get('enabled', False):
+    custom_text_content = context.get_text('custom_text')
+    if custom_text_content:
+        all_positions['custom_text'] = layout_cfg
+        text_elements.append(('custom_text', custom_text_content))
 ```
 
-### 6.4 响应式行为
+**逐元素测量尺寸：**
 
-`tree_w / tree_h` 随时间变化（依赖实际的文本内容长度）。平移量自动适应：
-- 文本变长 → tree_w 变大 → 居中时 shift_x 自动调整
-- 字体比例变大 → tree_h 变大 → 底部对齐时 shift_y 自动调整
+对于 `text_elements` 中的每个 `(text_type, text)`：
 
-不需要任何手动协调，因为 shift 是相对量（target - current）。
+```python
+text_config = all_positions[text_type]
+size_ratio = font_size_config.get(text_type, fonts.get('size_ratio', 0.02))
+text_color = _determine_text_color(bg_fill_type, colors, text_type)
+
+segments = FontManager.split_mixed_text(text)
+
+if len(segments) <= 1:
+    # === 单字体路径 ===
+    font = load_font(fonts, original_image_size, size_ratio, text)
+    bbox = font.getbbox(text)
+    ascent, descent = font.getmetrics()
+    draw_items[text_type] = {
+        'text': text, 'font': font, 'color': text_color,
+        'width': bbox[2] - bbox[0],      # 文本宽度
+        'height': ascent + descent,       # 元素高度
+        'descent': descent,
+        'ascent': ascent,
+        'mixed': False
+    }
+else:
+    # === 混排路径（详见 10.2） ===
+    drawn_fonts = {}
+    seg_info = []
+    total_width = 0
+    for seg_text, is_cjk in segments:
+        font = _get_segment_font(is_cjk)
+        bbox = font.getbbox(seg_text)
+        ascent, descent = font.getmetrics()
+        seg_info.append((seg_text, font, bbox[2]-bbox[0], ascent, descent))
+        total_width += bbox[2] - bbox[0]
+
+    ref_font = drawn_fonts.get('latin') or drawn_fonts.get('cjk')
+    ref_ascent, ref_descent = ref_font.getmetrics()
+    max_ascent = max(s[3] for s in seg_info)
+    max_descent = max(s[4] for s in seg_info)
+
+    draw_items[text_type] = {
+        'seg_info': seg_info,
+        'ref_ascent': ref_ascent,
+        'ref_descent': ref_descent,
+        'color': text_color,
+        'width': total_width,
+        'height': max_ascent + max_descent,
+        'ascent': ref_ascent,
+        'mixed': True
+    }
+```
+
+### 9.2 Phase 2：定位 + 注册
+
+```python
+# 预注册缺失参考元素锚点
+for name in draw_items:
+    cfg = all_positions[name]
+    ref = cfg.get('relative_to')
+    if ref and ref not in draw_items and ref in all_positions:
+        ref_cfg = all_positions[ref]
+        if not ref_cfg.get('relative_to'):
+            rx, ry = layout_engine.calculate_position(0, 0, ref_cfg)
+            layout_engine.register_element(ref, rx, ry, 0, 0, ascent=0)
+
+# 拓扑排序
+ordered_names = _resolve_element_order(text_elements, all_positions)
+
+# 逐个定位 → 注册
+for name in ordered_names:
+    item = draw_items[name]
+    cfg = all_positions[name]
+
+    x, y = layout_engine.calculate_position(item['width'], item['height'], cfg)
+
+    # descent 偏移：从包围盒顶转基线
+    if item.get('type') == 'multiline':
+        first_line = item['lines'][0]
+        y -= first_line.get('ref_descent', first_line.get('descent', 0))
+    elif item['mixed']:
+        y -= item['ref_descent']
+    else:
+        y -= item['descent']
+
+    # 确定 ascent 值用于注册
+    if item.get('type') == 'multiline':
+        first_line = item['lines'][0]
+        element_ascent = (first_line.get('ref_ascent', 0)
+                         if first_line.get('mixed')
+                         else first_line.get('ascent', 0))
+    else:
+        element_ascent = item.get('ascent', 0)
+
+    layout_engine.register_element(
+        name, x, y,
+        item['width'], item['height'],
+        cfg.get('relative_to'),
+        ascent=element_ascent
+    )
+```
+
+### 9.3 Phase 2.5：树级组合定位
+
+```python
+layout_engine.apply_tree_positioning(all_positions)
+```
+
+参见第 8 章。
+
+### 9.4 Phase 3：绘制
+
+```python
+for name in ordered_names:
+    bounds = layout_engine.get_element_bounds(name)
+    if bounds is None:
+        continue
+    x, y, w, h = bounds
+    item = draw_items[name]
+    cfg = all_positions[name]
+
+    if item.get('type') == 'multiline':
+        # === 多行文本绘制（详见第 11 章）===
+        draw_multiline(x, y, w, item, cfg, draw)
+
+    elif not item['mixed']:
+        # === 单字体绘制 ===
+        draw.text((x, y), item['text'], fill=item['color'], font=item['font'])
+
+    else:
+        # === 混排绘制（详见 10.2）===
+        baseline_y = y + item['ref_ascent']
+        current_x = x
+        for seg_text, font, seg_width, ascent, descent in item['seg_info']:
+            seg_y = baseline_y - ascent
+            draw.text((current_x, seg_y), seg_text, fill=item['color'], font=font)
+            current_x += seg_width
+```
 
 ---
 
-## 7. RenderContext（渲染上下文）
+## 10. 字体引擎与混排渲染
 
-所有显示文本的统一入口。`get_text(key)` 返回对应 key 的格式化文本，无数据时返回 `None`：
+### 10.1 FontManager
 
-| Key | 格式 | 数据来源 |
-|-----|------|---------|
-| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | `display_data['exif_formatted']` |
-| `timestamp` | `"2025.01.15 14:30:00"` | `exif_data['datetime_original']` |
-| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | datetime + author |
-| `camera_lens` | `"Leica Q3 \| Summilux 28mm"` | 由 lens_display_mode + use_short_lens 控制 |
-| `camera` | `"Leica Q3"` | `camera_combined` |
-| `camera_make` | `"Leica"` | 映射后品牌 |
-| `lens` | `"Summilux 28mm"` | 受 short_lens 开关控制 |
-| `author` | `"Frank"` | 用户输入 |
-| `location` | `"Shanghai"` | 用户输入 |
-| `gps` | `"40°26'N 79°56'W"` | EXIF GPS 度分秒 |
-| **`custom_text`** (v1.7.0) | 用户输入文本 | GUI 或 CLI 传入 |
-| **`focal_length_formatted`** (v1.7.0) | `"35mm"` | 优先 35mm 等效 |
-| **`aperture_formatted`** (v1.7.0) | `"f/2.8"` | raw_aperture |
-| **`shutter_speed_formatted`** (v1.7.0) | `"1/125s"` | raw_shutter_speed |
-| **`iso_formatted`** (v1.7.0) | `"ISO200"` | raw_iso |
+| 组件 | 详细说明 |
+|------|---------|
+| 字体对 | 拉丁：`Gotham-{weight}`（Gotham-Light / Gotham-Book / Gotham-Medium）；CJK：`GlowSansSC-Normal-{weight}` |
+| CJK 检测 | 正则 `_CJK_CHAR_RE` 覆盖中日韩码位（U+4E00–U+9FFF、U+3400–U+4DBF、U+F900–U+FAFF、日文仮名 U+3040–U+30FF 等） |
+| `split_mixed_text(text)` | 返回 `[(segment, is_cjk), ...]` 片段列表，例如 `"Leica M10-P 拍摄于东京"` → `[("Leica M10-P ", False), ("拍摄于", True), ("东京", True)]` |
+| 缓存键 | `(font_family, font_weight, font_size, is_cjk)` → `FreeTypeFont` 实例 |
+| 字号 | `max(12, int(reference_side * size_ratio))`，最小 12px |
 
----
+### 10.2 混排渲染的基线对齐
 
-## 8. 字体引擎
+混排渲染的难点在于中文字体（GlowSansSC）和拉丁字体（Gotham）的 ascent 值通常不同。如果简单以各自基线渲染，中文和拉丁文字会在视觉上错位。
 
-### 8.1 FontManager
+**对齐方法**：以拉丁字体的基线为共享参考，所有片段共用同一个基线 y，CJK 片段的 ascent 如果大于拉丁 ascent，字形向上延伸但基线仍在同一水平线上：
 
-- 双字体引擎：Gotham（拉丁）+ GlowSansSC（CJK/日文）
-- 中英文检测：`_CJK_CHAR_RE` 正则覆盖中日韩码位
-- `split_mixed_text(text)` → `[(segment, is_cjk), ...]` 将混排字符串拆分为片段
-- 缓存键：`(font_family, font_weight, font_size, is_cjk)` → 字体实例
-- 字号 = `max(12, reference_side * size_ratio)` 像素
+```python
+ref_font = drawn_fonts.get('latin')  # 以 Gotham 为参考
+ref_ascent, ref_descent = ref_font.getmetrics()
 
-### 8.2 混排渲染
+shared_baseline = y + ref_ascent   # 共享基线在 bound box 中的位置
 
-以拉丁字体的基线为共享参照，CJK 片段上移适配：
+for seg_text, font, seg_width, ascent, descent in seg_info:
+    seg_y = shared_baseline - ascent  # 当前片段的绘制 y（基线对齐）
+    draw.text((current_x, seg_y), seg_text, fill=color, font=font)
+    current_x += seg_width
+```
 
 ```
-ref_ascent_latin = Gotham.getmetrics()[0]
-shared_baseline = y + ref_ascent_latin
-segment_y = shared_baseline - segment_ascent
+               ┌────┐
+               │    │
+ ──────────────╪────╪──────────────  ← 共享基线
+               │    │
+               └────┘
+ ↑              ↑
+ ref_ascent    CJK_ascent（可能更高，字形上伸更多但不影响基线位置）
 ```
 
 ---
 
-## 9. 多行文本（v1.7.0）
+## 11. 多行文本处理
 
-### 9.1 测量
+### 11.1 测量
 
-按 `\n` 拆行，逐行复用单行测量逻辑：
+```python
+lines = text.split('\n')
+line_infos = []
+total_width = 0
+total_height = 0
 
+for line_text in lines:
+    if not line_text:
+        total_height += line_spacing_px    # 空行：只记行间距
+        continue
+    # 对每行运行单行测量（同 Phase 1）
+    line_info = measure_single_line(line_text, fonts, ...)
+    line_infos.append(line_info)
+    total_width = max(total_width, line_info.width)
+    total_height += line_info.height
+
+# 末尾减去多余的 line_spacing（最后一行之后不追加间距）
+total_height -= line_spacing_px
 ```
-block_width  = max(all_line_widths)
-block_height = sum(line_heights) + (num_lines - 1) * line_spacing_px
-line_spacing_px = int(reference_side * line_spacing_ratio)
+
+行间距计算：
+```python
+default_line_spacing_ratio = fonts.get('line_spacing_ratio', 0.005)
+ratio = element_config.get('line_spacing_ratio', default_line_spacing_ratio)
+line_spacing_px = int(reference_side * ratio)
 ```
 
-### 9.2 定位
+### 11.2 绘图
 
-整个文本块当作一个整体元素，`calculate_position(block_w, block_h, cfg)` 正常计算。
+```python
+current_y = y  # 块的第一行基线 y
+for line_info in lines:
+    # 行内缩进：由 alignment 决定
+    if alignment in ('right', 'bottom-right', 'top-right'):
+        line_x = x + (block_width - line_width)
+    elif alignment in ('center', 'bottom-center', 'top-center'):
+        line_x = x + (block_width - line_width) // 2
+    else:
+        line_x = x
 
-### 9.3 绘制
+    if single_font:
+        draw.text((line_x, current_y), text, fill=color, font=font)
+    else:
+        # 混排行：走混排绘制路径
+        baseline_y = current_y + ref_ascent
+        ...
 
-逐行绘制，行内按 alignment 缩进：
-```
-current_y = registered_y
-for each line:
-    if alignment == 'right': line_x = x + (block_w - line_w)
-    elif alignment == 'center': line_x = x + (block_w - line_w) // 2
-    else: line_x = x
-    draw.text(line_x, current_y, line_text, ...)
-    current_y += line_height + line_spacing_px
+    current_y += line_info.height + line_spacing_px
 ```
 
 ---
 
-## 10. Logo 渲染（`_add_logo`）
+## 12. RenderContext 渲染上下文
 
-- 缩放基准：Logo 短边 = `reference_side * size_ratio`
-- 对角线上限保护：`logo_diagonal ≤ 2 * reference_side * size_ratio`
-- 支持绝对定位和相对定位（`relative_to` 可引用文字元素坐标）
-- 背景明暗自适应：暗背景 → `_white` 后缀 Logo，亮背景 → 非 `_white`
-- 渲染顺序：文字层之后，可引用文字注册的坐标
+所有显示文本的统一入口。`get_text(key)` 返回对应 key 的格式化文本，无数据时返回 `None`。
+
+| Key | 输出格式 | 数据来源 | 说明 |
+|-----|---------|---------|------|
+| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | `display_data['exif_formatted']` | 组合字符串 |
+| `timestamp` | `"2025.01.15 14:30:00"` | `exif_data['datetime_original']` | 原始拍摄时间 |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | datetime + author | 作者为空时仅显示时间 |
+| `camera_lens` | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | `camera_combined` / `camera_lens_combined` | 由 lens_display_mode 和 use_short_lens 控制 |
+| `camera` | `"Leica Q3"` | `display_data['camera_combined']` | 品牌 + 型号 |
+| `camera_make` | `"Leica"` | `display_data['camera_make']` | 映射后品牌 |
+| `lens` | `"Summilux 28mm"` / `"28mm"` | `lens_model` / `short_lens` | 受 use_short_lens 控制 |
+| `author` | `"Frank"` | 用户输入 | 用户输入 |
+| `location` | `"Shanghai"` | 用户输入 | 用户输入 |
+| `gps` | `"40°26'N 79°56'W"` | `exif_data['gps']` | GPS 度分秒格式 |
+| **`custom_text`** (v1.7.0) | 用户输入文本 | GUI `st.text_area` 或 CLI `--custom-text` | 多行文本 |
+| **`focal_length_formatted`** (v1.7.0) | `"35mm"` | `raw_focal_length_35mm` → 回退 `raw_focal_length` | 优先 35mm 等效焦距 |
+| **`aperture_formatted`** (v1.7.0) | `"f/2.8"` | `raw_aperture` | — |
+| **`shutter_speed_formatted`** (v1.7.0) | `"1/125s"` | `raw_shutter_speed`（已格式化）+ "s" | 分数/小数自动 |
+| **`iso_formatted`** (v1.7.0) | `"200"`（纯数字） | `raw_iso` | 不含"ISO"前缀 |
 
 ---
 
-## 11. 关键参数速查
+## 13. Logo 渲染
 
-### `layout.` 下字段
+| 处理步骤 | 详细说明 |
+|---------|---------|
+| 加载 | `Image.open(logo_path)` → 转换为 RGBA 模式 |
+| 缩放基准 | Logo 短边 = `int(reference_side * size_ratio)` |
+| 对角线保护 | 若缩放后对角线 > `2 × size_ratio × reference_side`，以对角线为上限等比缩小 |
+| 定位 | `layout_engine.calculate_position(new_w, new_h, logo_config)` —— 支持绝对和相对定位 |
+| 粘贴 | `result.paste(logo, (x, y), logo)` —— 使用 alpha 通道混合 |
+| 注册 | `layout_engine.register_element('logo', x, y, new_w, new_h, ascent=0)` |
+| 颜色自适应 | 暗背景优先 `_white` 后缀 Logo；亮背景优先非 `_white` 后缀 |
+| 渲染顺序 | Phase 3 之后（文字层之后），可 `relative_to` 引用文字元素 |
+
+---
+
+## 14. 关键参数速查
+
+### `layout.` 顶层字段
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `expand_canvas` | dict | `{enabled, top, bottom, left, right}` |
-| `padding` | dict | `{top, bottom, left, right}` 安全区域 |
-| `info_position` | dict | `{key: positioning_config}` EXIF/相机信息 |
-| `defined_texts` | dict | `{key: {content, ...}}` 预定义文本 |
-| `custom_text` | dict | `{enabled, ...}` 自定义文本 |
+| `expand_canvas` | `dict{enabled, top, bottom, left, right}` | 画布扩展比例 |
+| `padding` | `dict{top, bottom, left, right}` | 安全区域比例 |
+| `info_position` | `dict{key: positioning_config}` | EXIF/相机信息的定位配置 |
+| `defined_texts` | `dict{key: {content, positioning_config}}` | 预定义文本，key 采用补零编号 |
+| `custom_text` | `dict{enabled, positioning_config}` | 自定义文本 |
 
-### `positioning_config` 定位参数
+### `positioning_config` 定位配置参数
 
-默认值：placement=`outside`, position=`bottom`, alignment=`center`
+**默认值**：`placement='outside'`, `position='bottom'`, `alignment='center'`
 
-**绝对定位**：placement / position / alignment / margin / margin_*
+**绝对定位参数**（根元素）：
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `placement` | `'inside'` / `'outside'` | 元素在原图内侧还是外侧 |
+| `position` | 14 种锚点 | 绑定到原图的哪条边/角 |
+| `alignment` | `'left'` / `'center'` / `'right'` | 元素自身对齐方式 |
+| `margin` | `float` / `int` | 统一边距 |
+| `margin_top` / `_bottom` / `_left` / `_right` | `float` / `int` | 各方向独立边距 |
+| `tree_align` | `boolean` | v1.7.0：启用树级组合定位 |
 
-**相对定位**：relative_to / relative_position / alignment / relative_margin / offset_x_ratio / offset_y_ratio
+**相对定位参数**（`relative_to` 元素）：
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `relative_to` | `string` | 参考元素名称 |
+| `relative_position` | `'after'` / `'below'` / `'before'` / `'above'` / `'right-of'` / `'left-of'` | 相对位置 |
+| `alignment` | `'left'` / `'center'` / `'right'` | 相对于参考元素的对齐方向 |
+| `relative_margin` | `float` | 间距比例（默认 0.01） |
+| `offset_x_ratio` / `offset_y_ratio` | `float` | 微调偏移（默认 0） |
 
 ### `fonts.` 下字段
 
 | 字段 | 默认值 | 说明 |
 |------|--------|------|
-| `family` | `"Gotham"` | 字体族 |
-| `weight` | `"medium"` | 字重 (light/regular/medium) |
-| `size_ratio` | `0.02` | 默认字号比例 |
+| `family` | `"Gotham"` | 字体族名 |
+| `weight` | `"medium"` | `'light'` / `'regular'` / `'medium'` |
+| `size_ratio` | `0.02` | 默认字号 = `int(reference_side * ratio)` |
 | `line_spacing_ratio` | `0.005` | 多行行间距比（v1.7.0） |
 | `sizes` | `{}` | 各元素独立字号：`{key: ratio}` |
 
 ### `colors.` 下字段
 
-两层优先级：
-1. `custom_{key}_dark_color` / `custom_{key}_light_color`（按元素类型覆盖）
-2. `custom_text_dark_color` / `custom_text_light_color`（通用兜底）
-3. 最终兜底：深色背景 = 白色 `(255,255,255)`，浅色背景 = 黑色 `(0,0,0)`
+三层优先级，从上到下：
+```
+1. custom_{key}_dark_color / custom_{key}_light_color      # 按元素类型覆盖
+2. custom_text_dark_color / custom_text_light_color         # 通用兜底
+3. 深色背景 = (255, 255, 255) / 浅色背景 = (0, 0, 0)        # 最终默认
+```
 
 ---
 
-## 12. 常见问题
+## 15. 常见问题
 
 ### Q: `right-of` + `alignment: "bottom"` 为什么不对齐？
 
-v1.7.0 之前这是已知 bug（基线偏移）。确认 `layout_engine.py` 版本 ≥ 1.7.0，且 `register_element` 调用了 `ascent` 参数。相关 fix 详见 `_calculate_relative` 中的 `ref_visual_top` / `ref_visual_bottom` 计算逻辑。
+v1.7.0 之前这是已知 bug（参考元素注册的 y 是基线而非包围盒顶，导致所有 y 轴对齐计算多出了 ascent 误差）。确认 `layout_engine.py` 中 `_calculate_relative` 使用了 `ref_visual_top` / `ref_visual_bottom` 而非原始的 `ty` / `ty + th`。详见第 3.6 节和 [第 5.3 节](#53-完整定位公式含推导)的 right-of 公式。
 
-### Q: 树定位后元素跑到了 padding 外面？
+### Q: `before` / `above` 的间距似乎偏大？
 
-`apply_tree_positioning` 内部已做 padding 约束——如果树定位后整体溢出，会触发第二次整体平移回到安全区域。如果仍然溢出，检查树的 bounding box 是否已经超出 `padding_bounds` 能容纳的范围。
+v1.7.0 初始版本中，`before`/`above` 的公式 `y = ref_visual_top - element_height - margin_px` 多减了一个 `element_height`，导致间距变为 `eh + margin_px`。已在 v1.7.0 后续修订中修正为 `y = ref_visual_top - margin_px`。如果你使用的是 v1.7.0 初始版本，请升级。
+
+### Q: `apply_tree_positioning` 为什么把我原来的垂直链（如 exif → timestamp_author）推走了？
+
+这是因为早期版本对所有依赖树自动应用了树级定位。v1.7.0 已改为 `tree_align` opt-in 模式：只有根元素声言 `tree_align: true` 的依赖树才会进入树级定位流程。原有的垂直链不受影响。
 
 ### Q: 如何让一整行水平居中？
 
@@ -465,17 +1279,22 @@ v1.7.0 之前这是已知 bug（基线偏移）。确认 `layout_engine.py` 版�
 defined_texts:
   root_item:
     content: "xxx"
-    position: "bottom"       # 控制垂直位置
-    alignment: "center"      # 控制水平居中（作用于整棵树）
+    position: "bottom"        # 控制垂直位置（底部）
+    alignment: "center"       # 水平居中，作用于整棵树
+    tree_align: true           # ← 启用树级定位
     margin_bottom: 0.03
-  child_1:
+  child:
     content: "..."
     relative_to: "xxx"
-    relative_position: "right-of"
+    relative_position: "right-of"  # 水平链
 ```
 
-`root_item` 的 `position: "bottom"` + `alignment: "center"` 会将整棵依赖树居中。
+根元素的 `position: "bottom"` + `alignment: "center"` + `tree_align: true` 会将整棵依赖树居中。
 
-### Q: 树定位对单元素有影响吗？
+### Q: `tree_align: true` 对单元素有影响吗？
 
-无。单元素树（无 `relative_to` 引用的元素，或无子元素的元素）在 `apply_tree_positioning` 中自动跳过。
+没有。单元素树（没有 `relative_to` 子元素的根元素，或本身是其他元素子元素的元素）在 `apply_tree_positioning` 中通过 `len(tree_members) <= 1` 判断后自动跳过。
+
+### Q: 水平链过长，超出画布怎么办？
+
+`apply_tree_positioning` 在最后一步做 padding 约束——如果平移后的整棵树超出安全区域，会触发第二次整体平移回到 padding 边界内。如果树宽超过 `pad_right - pad_left` 则必定溢出，需要减小字号或缩短文本内容。
