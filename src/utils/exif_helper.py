@@ -370,7 +370,7 @@ class ExifHelper:
         display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)
         
         # 添加原始数据用于GUI展示
-        for key in ['camera_make', 'camera_model', 'focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
+        for key in ['camera_make', 'camera_model', 'focal_length', 'focal_length_35mm', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
             if key in exif_data:
                 display_data[f'raw_{key}'] = exif_data[key]
         

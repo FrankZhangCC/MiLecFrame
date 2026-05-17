@@ -34,7 +34,8 @@ class RenderContext:
         """根据 key 返回对应的显示文本，无数据时返回 None
 
         支持的 key:
-            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps, custom_text
+            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps, custom_text,
+            focal_length_formatted, aperture_formatted, shutter_speed_formatted, iso_formatted
         """
         if key == 'exif':
             return self._display_data.get('exif_formatted') or None
@@ -72,6 +73,19 @@ class RenderContext:
         elif key == 'gps':
             if self.exif_data and 'gps' in self.exif_data:
                 return self.exif_data['gps']
+        elif key == 'focal_length_formatted':
+            fl = self._display_data.get('raw_focal_length_35mm') or \
+                 self._display_data.get('raw_focal_length')
+            return f"{fl}mm" if fl else None
+        elif key == 'aperture_formatted':
+            ap = self._display_data.get('raw_aperture')
+            return f"f/{ap}" if ap else None
+        elif key == 'shutter_speed_formatted':
+            ss = self._display_data.get('raw_shutter_speed')
+            return f"{ss}s" if ss else None
+        elif key == 'iso_formatted':
+            iso_val = self._display_data.get('raw_iso')
+            return f"ISO{iso_val}" if iso_val else None
         elif key == 'custom_text':
             return self.custom_text or None
         return None
