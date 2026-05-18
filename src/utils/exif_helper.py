@@ -351,7 +351,7 @@ class ExifHelper:
         camera_str = display_data.get('camera_combined', '')
         lens_str = display_data.get('lens_model', '')
         if camera_str and lens_str:
-            display_data['camera_lens_combined'] = f"{camera_str} | {lens_str}"
+            display_data['camera_lens_combined'] = f"{camera_str}  |  {lens_str}"
         elif camera_str:
             display_data['camera_lens_combined'] = camera_str
         elif lens_str:
@@ -360,7 +360,7 @@ class ExifHelper:
         # 竖幅/方形图片专用：相机 + 短版镜头合并
         short_lens_str = display_data.get('short_lens', '')
         if camera_str and short_lens_str:
-            display_data['camera_lens_combined_short'] = f"{camera_str} | {short_lens_str}"
+            display_data['camera_lens_combined_short'] = f"{camera_str}  |  {short_lens_str}"
         elif camera_str:
             display_data['camera_lens_combined_short'] = camera_str
         elif short_lens_str:

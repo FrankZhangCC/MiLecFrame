@@ -13,7 +13,10 @@ import glob as glob_module
 # ── 常量 ────────────────────────────────────────────────────
 
 ELEMENT_KEYS = ['exif', 'timestamp', 'timestamp_author', 'camera', 'lens',
-                'camera_lens', 'author', 'location']
+                'camera_lens', 'camera_make', 'author', 'location', 'gps',
+                'focal_length_formatted', 'aperture_formatted',
+                'shutter_speed_formatted', 'iso_formatted',
+                'custom_text', 'defined_text']
 
 PLACEMENT_OPTIONS = ['outside', 'inside']
 
@@ -171,16 +174,32 @@ def _init_new_style():
         'sc_logo_relative_margin': 0.01, 'sc_logo_offset_x': 0.0, 'sc_logo_offset_y': 0.0,
         'sc_logo_mode': 'absolute',
         'sc_color_light': '', 'sc_color_dark': '',
+        'sc_font_line_spacing': 0.005,
         'style_elements': [DEFAULT_ELEMENT.copy()],
+        'sc_defined_texts': [],
+        'sc_ct_enabled': False,
+        'sc_ct_placement': 'outside',
+        'sc_ct_position': 'bottom-center',
+        'sc_ct_alignment': 'center',
+        'sc_ct_mt': 0.0, 'sc_ct_mb': 0.0, 'sc_ct_ml': 0.0, 'sc_ct_mr': 0.0,
+        'sc_ct_line_spacing': 0.005,
+        'sc_ct_relative_to': '', 'sc_ct_relative_position': 'below',
+        'sc_ct_relative_margin': 0.01,
+        'sc_ct_offset_x': 0.0, 'sc_ct_offset_y': 0.0,
+        'sc_ct_mode': 'absolute',
         'sc_loaded_style': NEW_STYLE_PLACEHOLDER,
     }
     # per-element font sizes
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera',
-              'lens', 'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         defaults[f'sc_font_{k}'] = ''
     # per-element colors
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera',
-              'lens', 'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         defaults[f'sc_color_{k}_light'] = ''
         defaults[f'sc_color_{k}_dark'] = ''
     for key, val in defaults.items():
@@ -213,8 +232,10 @@ def _load_existing_style(filename: str):
         colors.get('custom_text_light_color', ''))
     st.session_state.sc_color_dark = color_to_text(
         colors.get('custom_text_dark_color', ''))
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera',
-              'lens', 'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         st.session_state[f'sc_color_{k}_light'] = color_to_text(
             colors.get(f'custom_{k}_light_color', ''))
         st.session_state[f'sc_color_{k}_dark'] = color_to_text(
@@ -225,9 +246,12 @@ def _load_existing_style(filename: str):
     st.session_state.sc_font_family = str(fonts.get('family', 'Gotham'))
     st.session_state.sc_font_weight = str(fonts.get('weight', 'medium'))
     st.session_state.sc_font_size = float(fonts.get('size_ratio', 0.015))
+    st.session_state.sc_font_line_spacing = float(fonts.get('line_spacing_ratio', 0.005))
     sizes = fonts.get('sizes', {}) or {}
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera',
-              'lens', 'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         if k in sizes:
             st.session_state[f'sc_font_{k}'] = str(sizes[k])
         else:
@@ -324,6 +348,65 @@ def _load_existing_style(filename: str):
     else:
         st.session_state.sc_logo_enabled = False
 
+    # defined_texts
+    defined_texts_config = layout.get('defined_texts', {})
+    dt_list = []
+    dt_id = 1
+    for dt_key, dt_entry in defined_texts_config.items():
+        if not isinstance(dt_entry, dict):
+            continue
+        content = dt_entry.get('content', '')
+        rooted = 'relative_to' not in dt_entry or not dt_entry.get('relative_to')
+        mode = 'absolute' if rooted else 'relative'
+        dt_item = {
+            'id': dt_id, 'key': dt_key, 'content': content,
+            'mode': mode,
+            'tree_align': bool(dt_entry.get('tree_align', False)),
+            'placement': str(dt_entry.get('placement', 'outside')),
+            'position': str(dt_entry.get('position', 'bottom-left')),
+            'alignment': str(dt_entry.get('alignment', 'left')),
+            'margin_top': float(dt_entry.get('margin_top', 0.0)),
+            'margin_bottom': float(dt_entry.get('margin_bottom', 0.0)),
+            'margin_left': float(dt_entry.get('margin_left', 0.0)),
+            'margin_right': float(dt_entry.get('margin_right', 0.0)),
+            'relative_to': str(dt_entry.get('relative_to', 'exif')),
+            'relative_position': str(dt_entry.get('relative_position', 'right-of')),
+            'relative_margin': float(dt_entry.get('relative_margin', 0.01)),
+            'offset_x': float(dt_entry.get('offset_x_ratio', 0.0)),
+            'offset_y': float(dt_entry.get('offset_y_ratio', 0.0)),
+        }
+        dt_list.append(dt_item)
+        dt_id += 1
+    st.session_state.sc_defined_texts = dt_list
+
+    # custom_text
+    ct_cfg = layout.get('custom_text', {})
+    if isinstance(ct_cfg, dict):
+        st.session_state.sc_ct_enabled = bool(ct_cfg.get('enabled', False))
+        st.session_state.sc_ct_placement = str(ct_cfg.get('placement', 'outside'))
+        st.session_state.sc_ct_position = str(ct_cfg.get('position', 'bottom-center'))
+        st.session_state.sc_ct_alignment = str(ct_cfg.get('alignment', 'center'))
+        st.session_state.sc_ct_mt = float(ct_cfg.get('margin_top', 0.0))
+        st.session_state.sc_ct_mb = float(ct_cfg.get('margin_bottom', 0.0))
+        st.session_state.sc_ct_ml = float(ct_cfg.get('margin_left', 0.0))
+        st.session_state.sc_ct_mr = float(ct_cfg.get('margin_right', 0.0))
+        st.session_state.sc_ct_line_spacing = float(ct_cfg.get('line_spacing_ratio', 0.005))
+        st.session_state.sc_ct_relative_to = str(ct_cfg.get('relative_to', ''))
+        st.session_state.sc_ct_relative_position = str(ct_cfg.get('relative_position', 'below'))
+        st.session_state.sc_ct_relative_margin = float(ct_cfg.get('relative_margin', 0.01))
+        st.session_state.sc_ct_offset_x = float(ct_cfg.get('offset_x_ratio', 0.0))
+        st.session_state.sc_ct_offset_y = float(ct_cfg.get('offset_y_ratio', 0.0))
+        st.session_state.sc_ct_mode = 'relative' if ct_cfg.get('relative_to') else 'absolute'
+    else:
+        st.session_state.sc_ct_enabled = False
+
+    # tree_align on info_position roots
+    for elem in st.session_state.style_elements:
+        k = elem['key']
+        ip_entry = layout.get('info_position', {}).get(k, {})
+        if isinstance(ip_entry, dict):
+            elem['tree_align'] = bool(ip_entry.get('tree_align', False))
+
     st.session_state.sc_loaded_style = filename
 
 
@@ -392,11 +475,17 @@ def _render_fonts():
 
     st.caption('各元素独立尺寸（留空使用默认值）')
     cols = st.columns(4)
-    size_keys = ['exif', 'timestamp', 'timestamp_author', 'camera',
-                 'lens', 'camera_lens', 'author', 'location']
+    size_keys = ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+                 'lens', 'camera_lens', 'author', 'location', 'gps',
+                 'focal_length_formatted', 'aperture_formatted',
+                 'shutter_speed_formatted', 'iso_formatted', 'custom_text']
+
+    # line_spacing_ratio 在最后单独一行，不与字体尺寸共用格子
     for i, k in enumerate(size_keys):
         with cols[i % 4]:
             st.text_input(k, key=f'sc_font_{k}', placeholder='留空=默认')
+    st.number_input('行间距 (line_spacing_ratio)', min_value=0.0, max_value=0.1,
+                    step=0.001, format='%.3f', key='sc_font_line_spacing')
 
 
 def _render_logo():
@@ -520,6 +609,10 @@ def _render_one_element(idx: int, elem: dict):
                                           step=0.005, format='%.3f',
                                           key=f'elem_{field}_{eid}')
                     st.session_state.style_elements[idx][field] = val
+            ta = st.checkbox('tree_align (整链组合定位)', 
+                             value=elem.get('tree_align', False),
+                             key=f'elem_treealign_{eid}')
+            st.session_state.style_elements[idx]['tree_align'] = ta
         else:
             c1, c2 = st.columns(2)
             with c1:
@@ -584,6 +677,162 @@ def _render_elements():
         st.rerun()
 
 
+def _render_one_defined_text(idx: int, item: dict):
+    """渲染单个预定义文本条目"""
+    eid = item['id']
+    with st.expander(f"预定义文本 #{idx + 1}: {item.get('key', '')}", expanded=(idx == 0)):
+        _, del_col = st.columns([10, 1])
+        with del_col:
+            if st.button('✕ 删除', key=f'dtdel_{eid}'):
+                st.session_state.sc_defined_texts.pop(idx)
+                st.rerun()
+
+        c1, c2, c3 = st.columns([2, 2, 1])
+        with c1:
+            new_key = st.text_input('Key 名称', value=item.get('key', ''),
+                                    key=f'dtkey_{eid}')
+            st.session_state.sc_defined_texts[idx]['key'] = new_key
+        with c2:
+            new_content = st.text_input('文本内容 (content)', value=item.get('content', ''),
+                                        key=f'dtcnt_{eid}')
+            st.session_state.sc_defined_texts[idx]['content'] = new_content
+        with c3:
+            ta = st.checkbox('tree_align', value=item.get('tree_align', False),
+                             key=f'dtta_{eid}')
+            st.session_state.sc_defined_texts[idx]['tree_align'] = ta
+
+        mode = st.radio('定位方式', ['absolute', 'relative'],
+                        index=0 if item.get('mode') == 'absolute' else 1,
+                        horizontal=True, key=f'dtmode_{eid}')
+        st.session_state.sc_defined_texts[idx]['mode'] = mode
+
+        if mode == 'absolute':
+            c1, c2 = st.columns(2)
+            with c1:
+                p = st.selectbox('placement', PLACEMENT_OPTIONS, key=f'dtpl_{eid}')
+                st.session_state.sc_defined_texts[idx]['placement'] = p
+            with c2:
+                pos = st.selectbox('position', ANCHOR_POSITION_OPTIONS, key=f'dtpos_{eid}')
+                st.session_state.sc_defined_texts[idx]['position'] = pos
+            c1, c2 = st.columns(2)
+            with c1:
+                al = st.selectbox('alignment', ALIGNMENT_OPTIONS, key=f'dtal_{eid}')
+                st.session_state.sc_defined_texts[idx]['alignment'] = al
+            with c2:
+                st.write('')
+            cols = st.columns(4)
+            for j, (lab, fld) in enumerate([('margin_top','margin_top'),('margin_bottom','margin_bottom'),
+                                            ('margin_left','margin_left'),('margin_right','margin_right')]):
+                with cols[j]:
+                    v = st.number_input(lab, value=item.get(fld, 0.0), min_value=0.0, max_value=1.0,
+                                        step=0.005, format='%.3f', key=f'dt{fld}_{eid}')
+                    st.session_state.sc_defined_texts[idx][fld] = v
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                rt = st.selectbox('relative_to', ELEMENT_KEYS, key=f'dtrt_{eid}')
+                st.session_state.sc_defined_texts[idx]['relative_to'] = rt
+            with c2:
+                rp = st.selectbox('relative_position', RELATIVE_POSITION_OPTIONS, key=f'dtrp_{eid}')
+                st.session_state.sc_defined_texts[idx]['relative_position'] = rp
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                al = st.selectbox('alignment', ALIGNMENT_OPTIONS, key=f'dtral_{eid}')
+                st.session_state.sc_defined_texts[idx]['alignment'] = al
+            with c2:
+                rm = st.number_input('relative_margin', value=item.get('relative_margin', 0.01),
+                                     min_value=0.0, max_value=1.0, step=0.005, format='%.3f',
+                                     key=f'dtrm_{eid}')
+                st.session_state.sc_defined_texts[idx]['relative_margin'] = rm
+            with c3:
+                c3a, c3b = st.columns(2)
+                with c3a:
+                    ox = st.number_input('offset_x', value=item.get('offset_x', 0.0),
+                                         step=0.001, format='%.3f', key=f'dtox_{eid}')
+                    st.session_state.sc_defined_texts[idx]['offset_x'] = ox
+                with c3b:
+                    oy = st.number_input('offset_y', value=item.get('offset_y', 0.0),
+                                         step=0.001, format='%.3f', key=f'dtoy_{eid}')
+                    st.session_state.sc_defined_texts[idx]['offset_y'] = oy
+
+
+def _render_defined_texts_section():
+    """预定义文本 defined_texts 编辑区域"""
+    st.subheader('预定义文本 defined_texts')
+    st.caption('固定内容文本，key 建议使用补零编号，如 defined_text_01')
+
+    if 'sc_defined_texts' not in st.session_state:
+        st.session_state.sc_defined_texts = []
+
+    for i, item in enumerate(st.session_state.sc_defined_texts):
+        _render_one_defined_text(i, item)
+
+    if st.button('+ 添加预定义文本', width='stretch'):
+        max_id = max((e.get('id', 0) for e in st.session_state.sc_defined_texts), default=0)
+        st.session_state.sc_defined_texts.append({
+            'id': max_id + 1, 'key': '', 'content': '',
+            'mode': 'absolute', 'tree_align': False,
+            'placement': 'outside', 'position': 'bottom-left', 'alignment': 'left',
+            'margin_top': 0.0, 'margin_bottom': 0.0, 'margin_left': 0.0, 'margin_right': 0.0,
+            'relative_to': 'exif', 'relative_position': 'right-of',
+            'relative_margin': 0.01, 'offset_x': 0.0, 'offset_y': 0.0,
+        })
+        st.rerun()
+
+
+def _render_custom_text_section():
+    """自定义文本 custom_text 编辑区域"""
+    st.subheader('自定义文本 custom_text')
+    st.checkbox('启用 (enabled)', key='sc_ct_enabled')
+
+    if st.session_state.get('sc_ct_enabled'):
+        mode = st.radio('定位方式', ['absolute', 'relative'],
+                        index=0 if st.session_state.get('sc_ct_mode', 'absolute') == 'absolute' else 1,
+                        horizontal=True, key='sc_ct_mode')
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.number_input('line_spacing_ratio', min_value=0.0, max_value=0.1,
+                            step=0.001, format='%.3f', key='sc_ct_line_spacing')
+        with c2:
+            al = st.selectbox('alignment', ALIGNMENT_OPTIONS, key='sc_ct_alignment')
+
+        if mode == 'absolute':
+            c1, c2 = st.columns(2)
+            with c1:
+                st.selectbox('placement', PLACEMENT_OPTIONS, key='sc_ct_placement')
+            with c2:
+                st.selectbox('position', ANCHOR_POSITION_OPTIONS, key='sc_ct_position')
+            cols = st.columns(4)
+            for j, (lab, fld) in enumerate([('margin_top','sc_ct_mt'),('margin_bottom','sc_ct_mb'),
+                                            ('margin_left','sc_ct_ml'),('margin_right','sc_ct_mr')]):
+                with cols[j]:
+                    st.number_input(lab, min_value=0.0, max_value=1.0,
+                                    step=0.005, format='%.3f', key=fld)
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.selectbox('relative_to', ELEMENT_KEYS, key='sc_ct_relative_to')
+            with c2:
+                st.selectbox('relative_position', RELATIVE_POSITION_OPTIONS,
+                             key='sc_ct_relative_position')
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.selectbox('alignment', ALIGNMENT_OPTIONS,
+                             key='sc_ct_alignment')
+            with c2:
+                st.number_input('relative_margin', min_value=0.0, max_value=1.0,
+                                step=0.005, format='%.3f', key='sc_ct_relative_margin')
+            with c3:
+                c3a, c3b = st.columns(2)
+                with c3a:
+                    st.number_input('offset_x', step=0.001, format='%.3f',
+                                    key='sc_ct_offset_x')
+                with c3b:
+                    st.number_input('offset_y', step=0.001, format='%.3f',
+                                    key='sc_ct_offset_y')
+
+
 def _render_colors():
     """颜色配置"""
     st.subheader('颜色 colors')
@@ -598,8 +847,10 @@ def _render_colors():
                       placeholder='[204,204,204] 或 "#C0C0C0"')
 
     st.markdown('##### 按元素类型独立覆盖（留空跳过）')
-    color_keys = ['exif', 'timestamp', 'timestamp_author', 'camera',
-                  'lens', 'camera_lens', 'author', 'location']
+    color_keys = ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+                  'lens', 'camera_lens', 'author', 'location', 'gps',
+                  'focal_length_formatted', 'aperture_formatted',
+                  'shutter_speed_formatted', 'iso_formatted', 'custom_text']
     cols = st.columns(4)
     for i, k in enumerate(color_keys):
         with cols[i % 4]:
@@ -630,8 +881,10 @@ def _collect_config() -> dict:
     if dk:
         colors['custom_text_dark_color'] = parse_color(dk)
 
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'lens',
-              'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         cl = st.session_state.get(f'sc_color_{k}_light', '').strip()
         cd = st.session_state.get(f'sc_color_{k}_dark', '').strip()
         if cl:
@@ -646,9 +899,14 @@ def _collect_config() -> dict:
         'weight': st.session_state.get('sc_font_weight', 'medium'),
         'size_ratio': st.session_state.get('sc_font_size', 0.015),
     }
+    ls_val = st.session_state.get('sc_font_line_spacing', 0.005)
+    if ls_val:
+        fonts['line_spacing_ratio'] = ls_val
     sizes = {}
-    for k in ['exif', 'timestamp', 'timestamp_author', 'camera',
-              'lens', 'camera_lens', 'author', 'location']:
+    for k in ['exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
+              'lens', 'camera_lens', 'author', 'location', 'gps',
+              'focal_length_formatted', 'aperture_formatted',
+              'shutter_speed_formatted', 'iso_formatted', 'custom_text']:
         v = st.session_state.get(f'sc_font_{k}', '').strip()
         if v:
             fv = parse_float_str(v)
@@ -701,8 +959,69 @@ def _collect_config() -> dict:
                 entry['offset_x_ratio'] = elem['offset_x']
             if elem.get('offset_y', 0.0) != 0.0:
                 entry['offset_y_ratio'] = elem['offset_y']
+        # tree_align on root elements
+        if elem.get('tree_align'):
+            entry['tree_align'] = True
         info_pos[key] = entry
     layout['info_position'] = info_pos
+
+    # defined_texts
+    dt_list_raw = st.session_state.get('sc_defined_texts', [])
+    if dt_list_raw:
+        defined_cfg = {}
+        for dt_item in dt_list_raw:
+            dkey = dt_item.get('key', '').strip()
+            if not dkey:
+                continue
+            dentry = {'content': dt_item.get('content', '')}
+            if dt_item.get('mode') == 'absolute':
+                dentry['placement'] = dt_item.get('placement', 'outside')
+                dentry['position'] = dt_item.get('position', 'bottom-left')
+                dentry['alignment'] = dt_item.get('alignment', 'left')
+                dentry['margin_top'] = dt_item.get('margin_top', 0.0)
+                dentry['margin_bottom'] = dt_item.get('margin_bottom', 0.0)
+                dentry['margin_left'] = dt_item.get('margin_left', 0.0)
+                dentry['margin_right'] = dt_item.get('margin_right', 0.0)
+                if dt_item.get('tree_align'):
+                    dentry['tree_align'] = True
+            else:
+                dentry['relative_to'] = dt_item.get('relative_to', 'exif')
+                dentry['relative_position'] = dt_item.get('relative_position', 'right-of')
+                dentry['alignment'] = dt_item.get('alignment', 'left')
+                dentry['relative_margin'] = dt_item.get('relative_margin', 0.01)
+                if dt_item.get('offset_x', 0.0) != 0.0:
+                    dentry['offset_x_ratio'] = dt_item['offset_x']
+                if dt_item.get('offset_y', 0.0) != 0.0:
+                    dentry['offset_y_ratio'] = dt_item['offset_y']
+            defined_cfg[dkey] = dentry
+        if defined_cfg:
+            layout['defined_texts'] = defined_cfg
+
+    # custom_text
+    if st.session_state.get('sc_ct_enabled', False):
+        ct = {'enabled': True}
+        ct_mode = st.session_state.get('sc_ct_mode', 'absolute')
+        if ct_mode == 'relative' and st.session_state.get('sc_ct_relative_to', '').strip():
+            ct['relative_to'] = st.session_state.get('sc_ct_relative_to', '').strip()
+            ct['relative_position'] = st.session_state.get('sc_ct_relative_position', 'below')
+            ct['alignment'] = st.session_state.get('sc_ct_alignment', 'center')
+            ct['relative_margin'] = st.session_state.get('sc_ct_relative_margin', 0.01)
+            ox = st.session_state.get('sc_ct_offset_x', 0.0)
+            oy = st.session_state.get('sc_ct_offset_y', 0.0)
+            if ox != 0.0: ct['offset_x_ratio'] = ox
+            if oy != 0.0: ct['offset_y_ratio'] = oy
+        else:
+            ct['placement'] = st.session_state.get('sc_ct_placement', 'outside')
+            ct['position'] = st.session_state.get('sc_ct_position', 'bottom-center')
+            ct['alignment'] = st.session_state.get('sc_ct_alignment', 'center')
+            ct['margin_top'] = st.session_state.get('sc_ct_mt', 0.0)
+            ct['margin_bottom'] = st.session_state.get('sc_ct_mb', 0.0)
+            ct['margin_left'] = st.session_state.get('sc_ct_ml', 0.0)
+            ct['margin_right'] = st.session_state.get('sc_ct_mr', 0.0)
+        cls = st.session_state.get('sc_ct_line_spacing', 0.005)
+        if cls:
+            ct['line_spacing_ratio'] = cls
+        layout['custom_text'] = ct
 
     data['layout'] = layout
 
@@ -828,6 +1147,12 @@ def render_style_creator_page():
 
     st.markdown('---')
     _render_colors()
+
+    st.markdown('---')
+    _render_defined_texts_section()
+
+    st.markdown('---')
+    _render_custom_text_section()
 
     st.markdown('---')
     _render_elements()

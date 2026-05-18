@@ -35,17 +35,18 @@ fonts:
     defined_text_02: 0.022
     defined_text_03: 0.022
     defined_text_04: 0.022
+    camera_lens: 0.022
     focal_length_formatted: 0.022
     aperture_formatted: 0.022
     shutter_speed_formatted: 0.022
     iso_formatted: 0.022
-    custom_text: 0.015
+    custom_text: 0.022
 
 layout:
   expand_canvas:
     enabled: true
-    top: 0.08
-    bottom: 0.2
+    top: 0.175
+    bottom: 0.175
     left: 0.05
     right: 0.05
   padding:
@@ -56,26 +57,33 @@ layout:
 
   # ── 独立格式化 EXIF 字段（组件，不独立出现）──
   info_position:
+    camera_lens:
+      position: "bottom-center"
+      alignment: "center"
+      margin_top: 0
+      margin_bottom: 0.055
+      margin_left: 0
+      margin_right: 0
     focal_length_formatted:
       relative_to: "defined_text_01"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.005
+      relative_margin: 0.01
     aperture_formatted:
       relative_to: "defined_text_02"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.005
+      relative_margin: 0.01
     shutter_speed_formatted:
       relative_to: "defined_text_03"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.005
+      relative_margin: 0.01
     iso_formatted:
       relative_to: "defined_text_04"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.005
+      relative_margin: 0.01
 
   # ── 预定义文本标签（构成链的骨架）──
   defined_texts:
@@ -84,33 +92,33 @@ layout:
       position: "bottom"
       alignment: "center"
       tree_align: true
-      margin_bottom: 0.07
+      margin_bottom: 0.095
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.02
+      relative_margin: 0.04
     defined_text_03:
       content: "Shutter"
       relative_to: "aperture_formatted"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.02
+      relative_margin: 0.04
     defined_text_04:
       content: "ISO"
       relative_to: "shutter_speed_formatted"
       relative_position: "right-of"
       alignment: "left"
-      relative_margin: 0.02
+      relative_margin: 0.04
 
   # ── 自定义文本 ──
   custom_text:
     enabled: true
-    position: "bottom-center"
+    position: "top-center"
     alignment: "center"
-    line_spacing_ratio: 0.003
-    margin_bottom: 0.125
+    line_spacing_ratio: 0.006
+    margin_top: 0.05
 
 logo:
   enabled: false
