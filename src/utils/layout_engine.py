@@ -302,55 +302,25 @@ class LayoutEngine:
 
         tx, ty, tw, th = target_coords
 
-        # 获取参考元素的 ascent，用于校正基线偏移
-        # 文字元素注册时做了 y -= descent，因此 registry 中的 ty = 基线 y
-        # 而 ty + th = 基线 + (ascent + descent) ≠ 视觉底部
-        # 视觉底部 = ty + (th - ascent) = ty + descent
-        # 视觉顶部 = ty - ascent
-        ref_data = self.positions.get(relative_to, {})
-        ref_ascent = ref_data.get('ascent')
-
-        if ref_ascent is not None and ref_ascent > 0:
-            # 文字元素：注册的 ty 是基线 y
-            ref_visual_top = ty - ref_ascent
-            ref_visual_bottom = ty + (th - ref_ascent)
-        else:
-            # 非文字元素（Logo 等）：注册的 ty 是包围盒左上角
-            ref_visual_top = ty
-            ref_visual_bottom = ty + th
+        # 注册到 positions 的 y = 包围盒顶（文字和非文字统一）
+        # 因此 ty = 参考包围盒顶，ty + th = 参考包围盒底 = 参考视觉底部
+        # ty = 参考视觉顶部（因为文字视觉顶 = baseline - ascent = (ty+ascent) - ascent = ty）
 
         if relative_position in ('after', 'below'):
-            # 元素位于参考元素下方
-            # 元素包围盒顶部 y_calc 位于 ref_visual_bottom + element_height + margin 处
-            # 这样渲染器做 descent 偏移后，元素的视觉顶部恰好位于参考元素视觉底部 + margin
-            y = ref_visual_bottom + element_height + relative_margin_px
+            # 当前元素在参考下方，间距 relative_margin_px
+            # 当前包围盒顶 y 在参考包围盒底 + margin 处
+            y = ty + th + relative_margin_px
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position in ('before', 'above'):
-            # 元素位于参考元素上方
-            # 渲染器 descent 偏移后，当前视觉底部 = y
-            # 需要：参考视觉顶部 - 当前视觉底部 = margin
-            # 即 ref_visual_top - y = margin_px → y = ref_visual_top - margin_px
-            y = ref_visual_top - relative_margin_px
+            # 当前元素在参考上方，间距 relative_margin_px
+            y = ty - element_height - relative_margin_px
             x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
         elif relative_position == 'right-of':
             x = tx + tw + relative_margin_px
-            if alignment in ('bottom', 'bottom-left', 'bottom-right'):
-                # 元素视觉底部对齐参考元素视觉底部
-                y = ref_visual_bottom
-            elif alignment in ('top', 'top-left', 'top-right'):
-                # 元素视觉顶部对齐参考元素视觉顶部
-                y = ref_visual_top + element_height
-            else:
-                # 垂直居中
-                y = (ref_visual_top + ref_visual_bottom + element_height) // 2
+            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
         elif relative_position == 'left-of':
             x = tx - element_width - relative_margin_px
-            if alignment in ('bottom', 'bottom-left', 'bottom-right'):
-                y = ref_visual_bottom
-            elif alignment in ('top', 'top-left', 'top-right'):
-                y = ref_visual_top + element_height
-            else:
-                y = (ref_visual_top + ref_visual_bottom + element_height) // 2
+            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
         else:
             return self._calculate_absolute(element_width, element_height, config)
 
@@ -361,31 +331,22 @@ class LayoutEngine:
 
         # 组合盒约束：将参考元素、当前元素、以及所有已注册的从属元素当作整体，
         # 整体平移确保不超出 padding 安全区域
-        # padding 优先级高于 margin：margin 参与位置计算，但最终结果受 padding 截断
-        # 使用视觉边界参与组合盒计算，与对齐计算保持一致
         pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
 
         group_left = min(tx, x)
-        group_top = min(ref_visual_top, y)
+        group_top = min(ty, y)
         group_right = max(tx + tw, x + element_width)
-        group_bottom = max(ref_visual_bottom, y + element_height)
+        group_bottom = max(ty + th, y + element_height)
 
-        # 扩展组合盒以包含所有已注册的从属元素（支持多个元素 relative_to 同一参考元素）
+        # 扩展组合盒以包含所有已注册的从属元素
         for dep_name in self._dependents.get(relative_to, []):
             dep_bounds = self.get_element_bounds(dep_name)
             if dep_bounds:
                 dx, dy, dw, dh = dep_bounds
-                dep_ascent = self.positions.get(dep_name, {}).get('ascent')
-                if dep_ascent is not None and dep_ascent > 0:
-                    dep_visual_top = dy - dep_ascent
-                    dep_visual_bottom = dy + (dh - dep_ascent)
-                else:
-                    dep_visual_top = dy
-                    dep_visual_bottom = dy + dh
                 group_left = min(group_left, dx)
-                group_top = min(group_top, dep_visual_top)
+                group_top = min(group_top, dy)
                 group_right = max(group_right, dx + dw)
-                group_bottom = max(group_bottom, dep_visual_bottom)
+                group_bottom = max(group_bottom, dy + dh)
 
         shift_x = 0
         shift_y = 0
@@ -481,9 +442,8 @@ class LayoutEngine:
 
     def _compute_visual_bounds(self, member_names):
         """
-        根据 positions 注册表计算一组元素的视觉包围盒
-        返回 (left, top, right, bottom) 或 None
-        文字元素的 top/bottom 使用 ascent 校正后的视觉边界
+        根据 positions 注册表计算一组元素的包围盒
+        所有元素统一使用 (x, y, width, height) 中的 y=包围盒顶、y+h=包围盒底
         """
         tree_left = float('inf')
         tree_top = float('inf')
@@ -496,20 +456,11 @@ class LayoutEngine:
                 continue
             mx, my = mpos['x'], mpos['y']
             mw, mh = mpos['width'], mpos['height']
-            mascent = mpos.get('ascent')
-
-            if mascent is not None and mascent > 0:
-                # 文字元素：注册 y = 基线，视觉顶部 = 基线 - ascent
-                visual_top = my - mascent
-                visual_bottom = my + (mh - mascent)
-            else:
-                visual_top = my
-                visual_bottom = my + mh
 
             tree_left = min(tree_left, mx)
-            tree_top = min(tree_top, visual_top)
+            tree_top = min(tree_top, my)
             tree_right = max(tree_right, mx + mw)
-            tree_bottom = max(tree_bottom, visual_bottom)
+            tree_bottom = max(tree_bottom, my + mh)
 
         if tree_left == float('inf'):
             return None
@@ -573,11 +524,11 @@ class LayoutEngine:
                 target_ref_x = target_x + tree_w // 2
 
             if v_ref == 'top':
-                target_ref_y = target_y - tree_h
-            elif v_ref == 'bottom':
                 target_ref_y = target_y
+            elif v_ref == 'bottom':
+                target_ref_y = target_y + tree_h
             else:
-                target_ref_y = target_y - tree_h // 2
+                target_ref_y = target_y + tree_h // 2
 
             # 6. 计算当前参考坐标
             if h_ref == 'left':

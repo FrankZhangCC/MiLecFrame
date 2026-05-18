@@ -58,11 +58,7 @@ Phase 2  ── 定位 + 注册 ────────────────
 行为：
   ├─ 拓扑排序：_resolve_element_order() → 确定处理顺序（根先于子孙）
   ├─ 预注册缺失锚点：当 relative_to 指向的元素被跳过时，用 0x0 注册其绝对位置
-  ├─ 逐个定位：
-  │   ├─ 有 relative_to  →  _calculate_relative()
-  │   └─ 无 relative_to  →  _calculate_absolute()
-  ├─ 基线偏移：y -= descent（将布局引擎的"包围盒顶"转为"基线"）
-  └─ register_element(name, x, y, w, h, relative_to, ascent)
+  ├─ 逐个定位：calculate_position(w, h, cfg) → (x, y)，y = 包围盒顶
   │
   ▼
 Phase 2.5  ── 树级组合定位（v1.7.0，仅在根元素设 tree_align: true 时执行）──
@@ -84,9 +80,9 @@ Phase 3  ── 绘制 ───────────────────
 
 行为：
   └─ 按拓扑序从 positions 读取最终坐标：
-      ├─ 单字体行  →  draw.text(x, y, text, font=font)
-      ├─ 混排文本  →  逐片段绘制，拉丁基线对齐
-      └─ 多行文本  →  逐行绘制 + 行间距
+      ├─ 单字体行  →  draw.text(x, y - descent, text)
+      ├─ 混排文本  →  baseline_y = y + ref_ascent - ref_descent，逐片段
+      └─ 多行文本  →  首行 baseline = y - descent，逐行 + 行间距
 ```
 
 ---
@@ -122,33 +118,41 @@ pad_bottom = canvas_height - int(reference_side * padding_bottom)
 ### 2.2 位置注册表（positions）
 
 ```python
-self.positions: Dict[str, dict] = {
+self.positions = {
     'exif': {
-        'x': 150,            # 文字元素：基线 x；Logo：包围盒左上角 x
-        'y': 3337,           # ❗ 文字元素：基线 y（不是包围盒顶 y）！
+        'x': 150,            # 元素包围盒左上角 x
+        'y': 3337,           # 元素包围盒左上角 y（文字和非文字统一）
         'width': 250,        # 元素宽度
-        'height': 40,        # 文字：ascent + descent；Logo：视觉高度
-        'ascent': 32         # v1.7.0 新增：ascents 值，用于视觉边界校正
+        'height': 40,        # 文字：ascent + descent；Logo：像素高度
     },
     'logo': {
         'x': 4000,
-        'y': 3150,           # Logo 的包围盒左上角 y（ascent = None/0）
+        'y': 3150,           # Logo 的包围盒左上角 y
         'width': 120,
         'height': 60,
-        'ascent': 0
     },
 }
 ```
 
-`ascent` 字段的不同取值对应不同的元素类型：
+**y 坐标的语义约定——这是理解整个定位系统的核心**：
 
-| 元素类型 | ascent 值来源 | 注册 y 含义 | 注册 height 含义 | 注册 ascent |
-|---------|-------------|------------|-----------------|------------|
-| 单字体文字 | `font.getmetrics()[0]` | 基线 | `ascent + descent` | ascent |
-| 混排文字 | `ref_ascent`（拉丁字体） | 基线 | `max_ascent + max_descent` | ref_ascent |
-| 多行文字 | 第一行的 ascent / ref_ascent | 基线 | 块总视觉高度 | 第一行的 ascent |
-| Logo | 未传递（默认 0） | 包围盒左上角 | Logo 像素高度 | 0 |
-| 占位锚点 | 显式传入 0 | 包围盒左上角 | 0 | 0 |
+`positions` 中所有元素的 y 统一表示**包围盒顶部（bounding box top）**的 y 坐标。文字元素和非文字元素（Logo、占位锚点）遵循完全相同的规则。过去 v1.7.0 早期版本曾在此处存储基线 y，导致 `_calculate_relative` 需要 ascent 校正才能推测真实视觉边界。此重构已彻底消除这一歧义。
+
+包围盒顶 y 意味着：
+- 元素的视觉顶部 = y（文字视觉顶 = baseline - ascent = (y+ascent) - ascent = y）
+- 元素的视觉底部 = y + height（文字视觉底 = baseline + descent = (y+ascent) + descent = y + height）
+- 包围盒底部 = y + height = 视觉底部（两者相等）
+- `_calculate_relative` 可以放心使用 `ty + th` 作为参考底部、`ty` 作为参考顶部
+
+基线仅在 Phase 3 绘制时通过 `y - descent`（单字体）或 `y + (ref_ascent - ref_descent)`（混排）从包围盒顶转换得到。详见[第 3 章](#3-文字基线系统)。
+
+| 元素类型 | 注册 y 含义 | 注册 height 含义 |
+|---------|------------|-----------------|
+| 单字体文字 | 包围盒顶 | `ascent + descent` |
+| 混排文字 | 包围盒顶 | `max_ascent + max_descent` |
+| 多行文字 | 包围盒顶（块整体） | 块总视觉高度 |
+| Logo | 包围盒顶 | Logo 像素高度 |
+| 占位锚点 | 包围盒顶 | 0 |
 
 ### 2.3 依赖图（_dependents）
 
@@ -175,7 +179,7 @@ self._dependents = {
 | 方法 | 类别 | 作用 |
 |------|------|------|
 | `__init__(size, layout_config)` | 构造 | 计算 canvas_size、original_bounds、padding_bounds |
-| `register_element(name, x, y, w, h, relative_to, ascent)` | 注册 | 存入 positions + 维护 _dependents |
+| `register_element(name, x, y, w, h, relative_to)` | 注册 | 存入 positions + 维护 _dependents |
 | `get_element_bounds(name)` | 查询 | 从 positions 读取（支持模糊匹配） |
 | `calculate_position(w, h, config)` | 分发 | 根据有无 relative_to 分支到绝对/相对 |
 | `_calculate_absolute(w, h, config)` | 绝对定位 | 按 position/alignment/placement/margin 计算 |
@@ -254,77 +258,65 @@ draw.text((100, 200), "Hello", font=font_40px)
        └─────────────────────── y + eh
 ```
 
-**问题**：`draw.text()` 要的是基线 y，而布局引擎返回的是包围盒顶部 y。两者之间差一个 `descent`。
+**核心约束**：`draw.text()` 要的是基线 y，而布局引擎的 `_calculate_absolute()` 返回的是包围盒顶部 y。两者之间差一个 `descent`。
 
-### 3.4 descent 偏移——渲染器如何在两步之间转换
+### 3.4 从"注册时转"到"绘制时转"
 
-渲染器 Phase 2 中的转换代码：
+v1.7.0 最终版采用的设计是：**`positions` 统一存储包围盒顶 y，基线转换仅发生在 Phase 3 绘制时单点完成**。此前尝试过在 Phase 2 注册时做 `y -= descent` 转为基线，但由此导致的坐标歧义需要大量 `ascent` 校正代码来补救。最终回归到最简洁的方式。
 
-```python
-x, y = layout_engine.calculate_position(item['width'], item['height'], cfg)
-# 此时 y = 布局引擎返回的包围盒顶部 = y_calc
-
-y -= item['descent']   # y = y_calc - descent = 基线 y
-
-layout_engine.register_element(name, x, y, item['width'], item['height'], ascent=ascent)
-# 注册到 positions 的 y = 基线 y
-```
-
-之后 Phase 3 绘制时：
+绘制时的转换规则：
 
 ```python
-x, y, w, h = layout_engine.get_element_bounds(name)
-# bounds 中的 y = 基线 y（因为注册时用的就是基线 y）
-draw.text((x, y), text, fill=color, font=font)
-# draw.text 的基线在 y 处——符合预期
+# Phase 3 中，从 positions 读取的 y = 包围盒顶
+
+# 单字体：基线 = 包围盒顶 - descent
+draw_y = y - item['descent']
+draw.text((x, draw_y), item['text'], fill=item['color'], font=item['font'])
+
+# 混排：基线 = 包围盒顶 + ref_ascent - ref_descent
+baseline_y = y + item['ref_ascent'] - item['ref_descent']
+for seg_text, font, seg_width, seg_ascent, seg_descent in item['seg_info']:
+    seg_y = baseline_y - seg_ascent
+    draw.text((seg_current_x, seg_y), seg_text, fill=item['color'], font=font)
+    seg_current_x += seg_width
 ```
 
-### 3.5 坐标系统一的数学恒等式
-
-经过 descent 偏移后，以下关系在所有定位计算中成立：
+为什么减 `descent` 或加 `(ref_ascent - ref_descent)` 能得到正确基线？
 
 ```
-注册 y（baseline） = y_calc - descent
-视觉顶部（visual top）   = baseline - ascent = y_calc - descent - ascent = y_calc - eh
-视觉底部（visual bottom）= baseline + descent = y_calc - descent + descent = y_calc
+单字体：
+  positions y = 包围盒顶
+  我们想让 baseline 在旧版 Phase 2 的 y_reg 处。
+  旧版 y_reg = 包围盒顶 - descent
+  所以 draw_y = y - descent
+
+混排：
+  旧版 y_reg = 包围盒顶 - ref_descent
+  旧版 Phase 3: baseline_y = y_reg + ref_ascent = 包围盒顶 - ref_descent + ref_ascent
+  新版 y = 包围盒顶
+  新版 baseline_y = y + (ref_ascent - ref_descent) = 包围盒顶 + ref_ascent - ref_descent
 ```
 
-**最重要的结论**：`视觉底部 = y_calc`。也就是说，文字元素经过 descent 偏移后，它的视觉底部恰好等于布局引擎返回的包围盒顶部 `y_calc`。这个结论是所有相对定位公式推导的基础。
+两种方式计算出的基线在画布上的绝对位置完全一致。
 
-### 3.6 基线偏移导致的相对定位 Bug（v1.7.0 修复）
+### 3.5 统一坐标的数学优势
 
-由于 positions 中的 `y` 是基线而非包围盒顶，当一个后续元素通过 `relative_to` 读取参考元素的坐标时：
+当 `positions` 存储包围盒顶 y 时，`_calculate_relative` 和所有定位公式中读取的 `(tx, ty, tw, th)` 具有以下天然关系：
 
-```python
-tx, ty, tw, th = self.get_element_bounds(relative_to)
-# ty = 参考元素的基线 y
-# th = 参考元素注册的 height = ascent + descent
+```
+ty          = 参考元素的包围盒顶部    = 参考视觉顶部
+ty + th     = 参考元素的包围盒底部    = 参考视觉底部
 ```
 
-在处理 `right-of` + 对齐类型时，原本直接用 `_align_y()` 计算：
-
-```python
-y = _align_y("bottom", ty, th, eh, m)   # 返回 ty + th - eh
+文字元素的视觉边界与包围盒边界重合，因为：
+```
+文字视觉顶 = baseline - ascent = (ty + ascent) - ascent = ty = 包围盒顶
+文字视觉底 = baseline + descent = (ty + ascent) + descent = ty + (ascent + descent) = ty + th = 包围盒底
 ```
 
-但 `ty` 是基线而不是包围盒顶，`ty + th = 基线 + ascent + descent` 并不等于视觉底部。实际视觉底部应为 `ty + descent = ty + (th - ascent)`。直接使用 `ty + th` 导致所有基于参考元素 y 的公式多出了 `ascent` 的误差。
+因此 `ty + th` 可以直接作为参考底部使用，不需要任何 `ascent`/`descent` 校正。`_align_y("bottom", ty, th, eh)` 的语义是"让当前元素的包围盒底（= 视觉底）与参考元素的包围盒底（= 视觉底）对齐"——完全正确，没有歧义。
 
-**修复方法**：每个 `positions` 条目存储 `ascent` 值，在需要参考元素视觉边界时做校正：
-
-```python
-ref_ascent = self.positions[relative_to].get('ascent')
-
-if ref_ascent is not None and ref_ascent > 0:
-    # 文字元素：注册 y 是基线
-    ref_visual_top    = ty - ref_ascent           # 视觉顶部 = 基线 - ascent
-    ref_visual_bottom = ty + (th - ref_ascent)    # 视觉底部 = 基线 + descent
-else:
-    # 非文字元素（Logo、占位锚点）：注册 y 就是包围盒顶
-    ref_visual_top    = ty
-    ref_visual_bottom = ty + th
-```
-
-`_calculate_relative` 中所有涉及参考元素 y 的计算（包括 `right-of`/`left-of` 的 alignment、`after`/`below`/`before`/`above` 的间距、组合盒边界）全部改用 `ref_visual_top` 和 `ref_visual_bottom`。
+这是本重构的核心收益：**删掉了一整层"基线→包围盒"的转换和反向校正，把问题化简到了它的本质——坐标就是坐标，不因元素类型而改变语义**。
 
 ---
 
@@ -499,82 +491,62 @@ y = max(pad_top,  min(y, pad_bottom - element_height))
 | `right-of` | 参考元素的右侧 | 垂直轴（top/center/bottom） | 参考元素的高度 |
 | `left-of` | 参考元素的左侧 | 垂直轴（top/center/bottom） | 参考元素的高度 |
 
-### 5.3 完整定位公式（含推导）
+### 5.3 完整定位公式
 
-以下公式中使用的符号：
+`positions` 统一存储包围盒顶 y 后，`(tx, ty, tw, th)` 具有直观的语义：
 
 | 符号 | 含义 |
 |------|------|
-| `tx, ty` | 参考元素的注册坐标（ty = 基线 y） |
-| `tw, th` | 参考元素的注册尺寸（th = ascent + descent） |
-| `ref_ascent` | 参考元素注册的 ascent |
-| `ref_visual_top = ty - ref_ascent` | 参考元素的视觉顶部 y |
-| `ref_visual_bottom = ty + (th - ref_ascent)` | 参考元素的视觉底部 y（= 基线 + descent） |
-| `eh = ascent + descent` | 当前元素的包围盒高度 |
-| `margin_px = int(reference_side * relative_margin)` | 间距像素 |
+| `tx, ty` | 参考元素的包围盒左上角 x, y |
+| `tw, th` | 参考元素的宽度和高度（文字：`ascent + descent`） |
+| `ty` | = 参考视觉顶部（文字视觉顶 = baseline - ascent = (ty+ascent) - ascent = ty） |
+| `ty + th` | = 参考视觉底部（文字视觉底 = baseline + descent = (ty+ascent) + descent = ty + th） |
+| `eh` | 当前元素的包围盒高度（`ascent + descent`） |
+| `margin_px` | `int(reference_side * relative_margin)` |
+
+由于视觉边界与包围盒边界重合，所有公式可以直接使用注册的 `(tx, ty, tw, th)`，不需要额外校正。
 
 #### `after` / `below`——当前元素在参考元素下方
 
 ```
-y = ref_visual_bottom + eh + margin_px
-x = _align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+y = ty + th + margin_px
+x = _align_x(alignment, tx, tw, ew, {'left': 0, 'right': 0})
 ```
 
-**推导**：
-1. 目标：当前元素的视觉顶部在参考元素视觉底部下方 margin_px 处。
-2. 当前元素的视觉顶部 = `y - eh`（因为经过 descent 偏移后，视觉顶部 = y - eh）。
-3. 参考元素的视觉底部 = `ref_visual_bottom`。
-4. 所以：`y - eh = ref_visual_bottom + margin_px`。
-5. 解得：`y = ref_visual_bottom + eh + margin_px`。
-
-**验证**：间距 = 当前视觉顶部 - 参考视觉底部 = `(y - eh) - ref_visual_bottom = margin_px` ✓
+**推导**：当前包围盒顶部 y 在参考包围盒底部 + margin 处。当前视觉顶部 = y（包围盒顶 = 视觉顶），参考视觉底部 = ty + th。间距 = y - (ty + th) = margin_px。✓
 
 #### `before` / `above`——当前元素在参考元素上方
 
 ```
-y = ref_visual_top - margin_px
-x = _align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+y = ty - eh - margin_px
+x = _align_x(alignment, tx, tw, ew, {'left': 0, 'right': 0})
 ```
 
-**推导**：
-1. 目标：当前元素的视觉底部在参考元素视觉顶部上方 margin_px 处。
-2. 当前元素的视觉底部 = `y`（经过 descent 偏移后，视觉底部 = y）。
-3. 参考元素的视觉顶部 = `ref_visual_top`。
-4. 所以：`ref_visual_top - y = margin_px`。
-5. 解得：`y = ref_visual_top - margin_px`。
-
-**验证**：间距 = 参考视觉顶部 - 当前视觉底部 = `ref_visual_top - y = margin_px` ✓
-
-> 🐛 **v1.7.0 bug note**：此公式在 v1.7.0 ascent 修复初期因逻辑不对称错误地被写为 `y = ref_visual_top - eh - margin_px`，额外多减了一个 `element_height`，导致间距变为 `eh + margin_px`。该 bug 已在本文档最终定稿时修正。
+**推导**：当前包围盒底部 = y + eh 在参考包围盒顶部 - margin 处。参考视觉顶部 = ty。间距 = ty - (y + eh) = ty - (ty - margin) = margin_px。✓
 
 #### `right-of`——当前元素在参考元素右侧
 
 ```
 x = tx + tw + margin_px
-
-y 取决于 alignment:
+y 使用原始 _align_y 公式：
 
   alignment = 'bottom' / 'bottom-left' / 'bottom-right':
-    y = ref_visual_bottom
-    → 当前视觉底部对齐参考视觉底部
-    → 验证：当前视觉底部(y) = 参考视觉底部(ref_visual_bottom) ✓
+    y = ty + th - eh
+    → 当前包围盒底(y+eh) = ty + th = 参考包围盒底 ✓
 
   alignment = 'top' / 'top-left' / 'top-right':
-    y = ref_visual_top + eh
-    → 当前视觉顶部对齐参考视觉顶部
-    → 验证：当前视觉顶部(y - eh) = 参考视觉顶部(ref_visual_top) ✓
+    y = ty
+    → 当前包围盒顶(y) = ty = 参考包围盒顶 ✓
 
   alignment = 'center' / 其他:
-    y = (ref_visual_top + ref_visual_bottom + eh) // 2
-    → 当前视觉中心对齐参考视觉中心
-    → 验证：当前视觉中心(y - eh//2) = 参考视觉中心((ref_visual_top + ref_visual_bottom)//2) ✓
+    y = ty + (th - eh) // 2
+    → 当前包围盒中心(y + eh//2) = ty + th//2 = 参考包围盒中心 ✓
 ```
 
 #### `left-of`——当前元素在参考元素左侧
 
 ```
 x = tx - element_width - margin_px
-
 y 的公式：与 right-of 完全一致（三个 alignment 分支）
 ```
 
@@ -599,30 +571,24 @@ y += offset_y
 
 当相对定位放置一个元素时，系统将它和参考元素（以及所有已注册的从属元素）视为一个整体——称为**组合盒**。如果这个组合盒超出 padding 安全区域，系统通过整体平移来保持组内相对位置不变。
 
+由于 `positions` 统一使用包围盒顶 y，`ty` = 参考视觉顶部、`ty + th` = 参考视觉底部，因此直接使用注册坐标即可，不需要任何 ascent 校正：
+
 ```python
-# 组合盒的视觉边界
-group_left   = min(tx, x)                              # 参考左边缘 vs 当前左边缘
-group_top    = min(ref_visual_top, y)                  # 参考视觉顶部 vs 当前顶部
-group_right  = max(tx + tw, x + element_width)         # 参考右边缘 vs 当前右边缘
-group_bottom = max(ref_visual_bottom, y + element_height)  # 参考视觉底部 vs 当前底部
+# 组合盒边界（所有元素统一使用注册的 (x, y, w, h)）
+group_left   = min(tx, x)
+group_top    = min(ty, y)
+group_right  = max(tx + tw, x + element_width)
+group_bottom = max(ty + th, y + element_height)
 
 # 扩展组合盒以包含所有已注册的从属元素
 for dep_name in self._dependents.get(relative_to, []):
     dep_bounds = self.get_element_bounds(dep_name)
     if dep_bounds:
         dx, dy, dw, dh = dep_bounds
-        # 同样使用视觉边界（校正 ascent 偏移）
-        dep_ascent = self.positions.get(dep_name, {}).get('ascent')
-        if dep_ascent is not None and dep_ascent > 0:
-            dep_visual_top    = dy - dep_ascent
-            dep_visual_bottom = dy + (dh - dep_ascent)
-        else:
-            dep_visual_top    = dy
-            dep_visual_bottom = dy + dh
         group_left   = min(group_left, dx)
-        group_top    = min(group_top, dep_visual_top)
+        group_top    = min(group_top, dy)
         group_right  = max(group_right, dx + dw)
-        group_bottom = max(group_bottom, dep_visual_bottom)
+        group_bottom = max(group_bottom, dy + dh)
 ```
 
 ### 6.2 平移量的计算
@@ -786,21 +752,23 @@ defined_texts:
 
   如果 len(tree_members) == 1（即根节点没有子元素）→ 跳过。
 
-第三步：计算树的视觉包围盒
+第三步：计算树的包围盒
   _compute_visual_bounds(members)
 
-  遍历每个成员，用注册的 ascent 校正视觉边界：
-    文字元素：visual_top = y - ascent, visual_bottom = y + (height - ascent)
-    非文字：  visual_top = y,            visual_bottom = y + height
+  所有元素统一使用注册的包围盒坐标：
+    visual_top    = y
+    visual_bottom = y + height
 
-  合并所有成员的视觉范围：
-    tree_left   = min(全部成员的视觉左边缘) = min(x)
-    tree_top    = min(全部成员的视觉顶部)    = min(visual_top)
-    tree_right  = max(全部成员的视觉右边缘)   = max(x + width)
-    tree_bottom = max(全部成员的视觉底部)    = max(visual_bottom)
+  合并所有成员的包围盒范围：
+    tree_left   = min(x)
+    tree_top    = min(y)
+    tree_right  = max(x + width)
+    tree_bottom = max(y + height)
 
   tree_w = tree_right - tree_left
   tree_h = tree_bottom - tree_top
+
+  注意：此处不涉及 ascent 校正。因为 positions 统一存储包围盒顶 y，ty = 视觉顶，ty + th = 视觉底。
 
 第四步：用根配置计算目标位置
   target_x, target_y = _calculate_absolute(tree_w, tree_h, root_cfg)
@@ -874,22 +842,18 @@ defined_texts:
 
 ### 8.5 目标参考 y 的校正
 
-`_calculate_absolute(tree_w, tree_h, root_cfg)` 返回的 `(target_x, target_y)` 是虚拟元素包围盒的**左上角**。
-
-经过 descent 偏移后的视觉位置关系：
-- 视觉底部 = `target_y`（对于"底部"类型的 position）
-- 视觉顶部 = `target_y - tree_h`（对于"顶部"类型的 position）
-- 视觉中心 = `target_y - tree_h // 2`（对于"居中"类型的 position）
-
-因此目标参考点的计算方法为：
+`_calculate_absolute(tree_w, tree_h, root_cfg)` 返回的 `(target_x, target_y)` 是虚拟元素包围盒的**左上角**。在 `positions` 统一存储包围盒顶 y 的系统中，视觉底部 = `y + height`，因此目标参考点的计算方法为：
 
 ```
-v_ref = 'bottom' → target_ref_y = target_y     （视觉底部在 target_y）
-v_ref = 'top'    → target_ref_y = target_y - tree_h  （视觉顶部在 target_y - tree_h）
-v_ref = 'center' → target_ref_y = target_y - tree_h // 2
+v_ref = 'bottom' → target_ref_y = target_y + tree_h  （树视觉底部 = 目标包围盒底）
+v_ref = 'top'    → target_ref_y = target_y             （树视觉顶部 = 目标包围盒顶）
+v_ref = 'center' → target_ref_y = target_y + tree_h // 2
 ```
 
-这个校正与第 3 章推导的 `visual_bottom = y_calc` 公式一致。
+```python
+cur_ref_y = tree_bottom（或 tree_top、tree_center）
+shift_y = target_ref_y - cur_ref_y
+```
 
 ---
 
@@ -1263,11 +1227,7 @@ for line_info in lines:
 
 ### Q: `right-of` + `alignment: "bottom"` 为什么不对齐？
 
-v1.7.0 之前这是已知 bug（参考元素注册的 y 是基线而非包围盒顶，导致所有 y 轴对齐计算多出了 ascent 误差）。确认 `layout_engine.py` 中 `_calculate_relative` 使用了 `ref_visual_top` / `ref_visual_bottom` 而非原始的 `ty` / `ty + th`。详见第 3.6 节和 [第 5.3 节](#53-完整定位公式含推导)的 right-of 公式。
-
-### Q: `before` / `above` 的间距似乎偏大？
-
-v1.7.0 初始版本中，`before`/`above` 的公式 `y = ref_visual_top - element_height - margin_px` 多减了一个 `element_height`，导致间距变为 `eh + margin_px`。已在 v1.7.0 后续修订中修正为 `y = ref_visual_top - margin_px`。如果你使用的是 v1.7.0 初始版本，请升级。
+v1.7.0 之前这是已知 bug（旧版在 Phase 2 注册时做了 `y -= descent` 将包围盒顶转为基线，导致 `positions` 存储的 ty 成为基线而非包围盒顶，`_align_y("bottom", ty, th, eh)` 计算出错）。v1.7.0 最终版采用统一坐标注册——`positions` 存储包围盒顶 y —彻底消除了这一歧义，`_align_y` 的原始公式直接工作。
 
 ### Q: `apply_tree_positioning` 为什么把我原来的垂直链（如 exif → timestamp_author）推走了？
 

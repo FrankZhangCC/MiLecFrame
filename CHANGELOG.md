@@ -32,30 +32,23 @@ defined_texts:
 ```
 
 **设计关键**：
-- `_resolve_tree_ref()` 完全对齐 `_get_anchor()` 的 14 种 position + alignment 组合行为，零语义偏差
-- 垂直参考点的 `target_ref_y` 使用 `y_calc`（而非 `y_calc + tree_h`），匹配 descent 调整后 `visual_bottom = y_calc` 的特性
+- `_resolve_tree_ref()` 完全对齐 `_get_anchor()` 的 14 种 position + alignment 组合行为
 - 单元素树自动跳过，不影响现有所有样式配置
 - 支持多条独立依赖树，互不干扰
 
-### 🔴 修复：相对定位基线偏移导致对齐错误
+### 🔴 架构重构：统一坐标注册 + 绘制时基线转换
 
-**根因**：`renderer.py` Phase 2 在注册文字元素位置时做了 `y -= descent` 将 y 从「包围盒顶」转换为「基线」。但 `_calculate_relative` 在读取参考元素坐标 `(tx, ty, tw, th)` 时仍将 `ty` 当作包围盒顶部，且 `ty + th ≠ 视觉底部`，导致 `right-of`/`left-of`/`after`/`before` 所有方向的 y 轴对齐产生 `ascent` 量级的系统偏差。
+此前 `renderer.py` Phase 2 在每个元素定位后做 `y -= descent` 将包围盒顶注册为基线，导致 `positions` 中的 y 坐标语义混乱。`_calculate_relative` 读取时不得不做 `ref_ascent` 校正来推测真实视觉边界；`_compute_visual_bounds` 也需做相同校正。整个系统被"基线偏移"问题长期困扰。
 
-**修复**（`src/utils/layout_engine.py:80-86`）：
-- `register_element()` 新增 `ascent` 参数，存入 `positions[name]['ascent']`
-- 所有 `renderer.py` 中 `register_element` 调用点传入对应 ascent 值
-- `_calculate_relative()` 中 `ref_ascent` 校正：视觉顶部 = `ty - ref_ascent`，视觉底部 = `ty + (th - ref_ascent)`
-- 组合盒约束的 `group_top`/`group_bottom` 同步修正
+**根治**：取消 Phase 2 的 `y -= descent`，`positions` 统一存储包围盒顶（bounding box top）坐标。所有元素——无论文字还是非文字——遵循同一注册规则。基线偏移仅在 Phase 3 绘制时单点应用：
 
-**组合盒约束同步修正**（`_calculate_relative` 第 330-387 行）：
-- 从属元素的视觉边界同样使用 `dep_ascent` 校正
-- 组合盒的整体平移决策使用视觉边界，避免 padding 约束中因 `ty + th` 偏高 `ascent` 导致的偏移错误
+- `_calculate_relative()`：回归 v1.6.3 原始公式，使用最简洁的 `_align_y` + `ty + th`，累计砍掉约 30 行 ascent 校正代码
+- `_compute_visual_bounds()`：回归 `y + height`，砍掉 8 行 ascent 校正
+- `register_element()`：不再需要 `ascent` 参数（保留为可选，但不参与运算）
+- Phase 3 绘制：单字体 `draw.text(x, y - descent)`，混排 `baseline_y = y + ref_ascent - ref_descent`
+- 多行文本：第一行基线 = `y - first_line_descent` 或 `y + (ref_ascent - ref_descent)`
 
-### 🔴 修复：`before` / `above` 相对定位间距多减 element_height
-
-**根因**：在 ascent 基线校正重构中，`_calculate_relative` 的 `before`/`above` 分支公式被错误地写为 `y = ref_visual_top - element_height - margin_px`。由于 descent 偏移后视觉底部 = y，预期间距应为 `ref_visual_top - y = margin_px`，实际却是 `ref_visual_top - y = eh + margin_px`，额外多了一个 `element_height`。
-
-**修复**：将 `src/utils/layout_engine.py:332` 的公式修正为 `y = ref_visual_top - relative_margin_px`，与 `after`/`below` 分支的 `y = ref_visual_bottom + element_height + relative_margin_px` 对称。
+**净效果**：总代码减少约 40 行，positions 语义统一，`_calculate_relative` 可读性回归原始水平，所有已知样式配置视觉输出完全不变。
 
 ### 🟢 预定义文本 (defined_texts) 与自定义文本 (custom_text)
 
@@ -108,10 +101,10 @@ defined_texts:
 | 文件 | 改动内容 |
 |------|---------|
 | `src/utils/render_context.py` | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key |
-| `src/core/renderer.py` | 三源文本收集 + 多行测量绘制 + ascent 透传注册 + Phase 2.5 调用 |
+| `src/core/renderer.py` | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用 |
 | `src/core/image_processor.py` | `process()` 透传 `custom_text` |
 | `src/core/batch_processor.py` | `batch_process()` 透传 `custom_text` |
-| `src/utils/layout_engine.py` | `register_element` 加 `ascent` 参数 + `_resolve_tree_ref` + `_compute_visual_bounds` + `_collect_tree_members` + `apply_tree_positioning` |
+| `src/utils/layout_engine.py` | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
 | `src/utils/exif_helper.py` | raw keys 补充 `focal_length_35mm` |
 | `src/gui/image_processing_page.py` | 条件显示 `custom_text` 输入框 |
 | `src/gui/batch_processing_page.py` | 同上 |

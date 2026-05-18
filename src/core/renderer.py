@@ -477,29 +477,16 @@ class FrameRenderer:
             )
 
             if item.get('type') == 'multiline':
-                # 多行文本：整体作为一个块定位，y 偏移通过第一行的 descent 微调
-                first_line = item['lines'][0] if item['lines'] else {}
-                if first_line.get('mixed'):
-                    y -= first_line.get('ref_descent', 0)
-                else:
-                    y -= first_line.get('descent', 0)
+                pass  # 多行文本不在此处做偏移
             elif item['mixed']:
-                # 应用 refer 字体的 descent 偏移（与单字体路径一致），
-                # 然后以 refer 字体的 ascent 确定共享基线
-                y -= item['ref_descent']
+                pass  # 混排不在此处做偏移
             else:
-                y -= item['descent']
-
-            # 确定元素的 ascent 值，供布局引擎在相对定位时校正基线偏移
-            if item.get('type') == 'multiline':
-                first_line = item['lines'][0] if item['lines'] else {}
-                element_ascent = (first_line.get('ref_ascent', 0) if first_line.get('mixed')
-                                  else first_line.get('ascent', 0))
-            else:
-                element_ascent = item.get('ascent', 0)
+                pass  # 单字体不在此处做偏移
+            # 现在 positions 中统一存储包围盒顶 y，不做基线偏移。
+            # Phase 3 绘制时由 draw.text 加 ascent 转基线。
 
             layout_engine.register_element(name, x, y, item['width'], item['height'],
-                                           cfg.get('relative_to'), ascent=element_ascent)
+                                           cfg.get('relative_to'))
 
         # ================================================================
         # Phase 2.5: 依赖树组合定位
@@ -523,7 +510,12 @@ class FrameRenderer:
             if item.get('type') == 'multiline':
                 # --- 多行文本绘制 ---
                 alignment = cfg.get('alignment', 'left')
-                current_y = y
+                # 第一行基线 = 包围盒顶 - descent（与单字体/混排统一）
+                first_line = item['lines'][0] if item['lines'] else {}
+                if first_line.get('mixed'):
+                    current_y = y + first_line.get('ref_ascent', 0) - first_line.get('ref_descent', 0)
+                else:
+                    current_y = y - first_line.get('descent', 0)
                 for line_info in item['lines']:
                     if 'text' not in line_info and 'seg_info' not in line_info:
                         # 空行占位
@@ -546,22 +538,22 @@ class FrameRenderer:
                     else:
                         baseline_y = current_y + line_info['ref_ascent']
                         seg_current_x = line_x
-                        for seg_text, font, seg_width, ascent, descent in line_info['seg_info']:
-                            seg_y = baseline_y - ascent
+                        for seg_text, font, seg_width, seg_ascent, seg_descent in line_info['seg_info']:
+                            seg_y = baseline_y - seg_ascent
                             draw.text((seg_current_x, seg_y), seg_text,
                                       fill=item['color'], font=font)
                             seg_current_x += seg_width
                         current_y += line_info['height'] + item['line_spacing']
             elif not item['mixed']:
-                draw.text((x, y), item['text'], fill=item['color'], font=item['font'])
+                # 单字体：绘制基线在包围盒顶 - descent 处
+                draw.text((x, y - item['descent']), item['text'],
+                          fill=item['color'], font=item['font'])
             else:
-                # 以 refer 字体的 ascent 确定共享基线
-                baseline_y = y + item['ref_ascent']
+                # 混排：用 ref_ascent - ref_descent 将包围盒顶转换为基线
+                baseline_y = y + item['ref_ascent'] - item['ref_descent']
                 current_x = x
-                # 逐片段绘制，各片段基线对齐到共享基线
-                # CJK 字体 ascent 较大时自动上移，适配拉丁基线
-                for seg_text, font, seg_width, ascent, descent in item['seg_info']:
-                    seg_y = baseline_y - ascent
+                for seg_text, font, seg_width, seg_ascent, seg_descent in item['seg_info']:
+                    seg_y = baseline_y - seg_ascent
                     draw.text((current_x, seg_y), seg_text, fill=item['color'], font=font)
                     current_x += seg_width
         
