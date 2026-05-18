@@ -468,7 +468,25 @@ class FrameRenderer:
             item = draw_items[name]
             cfg = all_positions.get(name, {})
 
-            x, y = layout_engine.calculate_position(item['width'], item['height'], cfg)
+            # 判断当前元素是否属于 tree_align 依赖树。
+            # 是：Phase 2 跳过 padding 约束（包括组合盒平移），允许链暂时伸出画布外，
+            #     Phase 2.5 的 apply_tree_positioning 会在第 8 步统一做最终 padding 约束。
+            # 否：按原逻辑在 Phase 2 内即受 padding 约束，不受影响。
+            defer_pad = False
+            if cfg.get('relative_to'):
+                walk = name
+                while walk:
+                    wc = all_positions.get(walk, {})
+                    wp = wc.get('relative_to')
+                    if wp:
+                        walk = wp
+                    else:
+                        if wc.get('tree_align'):
+                            defer_pad = True
+                        break
+
+            x, y = layout_engine.calculate_position(
+                item['width'], item['height'], cfg, defer_padding=defer_pad)
 
             logger.debug(
                 f"[Pos] {name}: calc=({x}, {y}), bbox=({item['width']}x{item['height']}), "

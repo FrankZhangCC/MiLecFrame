@@ -52,8 +52,8 @@ layout:
   padding:
     top: 0.025
     bottom: 0.025
-    left: 0.05
-    right: 0.05
+    left: 0.0
+    right: 0.0
 
   # ── 独立格式化 EXIF 字段（组件，不独立出现）──
   info_position:

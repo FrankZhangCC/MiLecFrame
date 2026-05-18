@@ -58,7 +58,8 @@ Phase 2  ── 定位 + 注册 ────────────────
 行为：
   ├─ 拓扑排序：_resolve_element_order() → 确定处理顺序（根先于子孙）
   ├─ 预注册缺失锚点：当 relative_to 指向的元素被跳过时，用 0x0 注册其绝对位置
-  ├─ 逐个定位：calculate_position(w, h, cfg) → (x, y)，y = 包围盒顶
+  ├─ 逐个定位：calculate_position(w, h, cfg, defer_padding) → (x, y)，y = 包围盒顶
+  │   tree_align 树内的元素传 defer_padding=True，跳过组合盒平移 + padding 夹持，
   │
   ▼
 Phase 2.5  ── 树级组合定位（v1.7.0，仅在根元素设 tree_align: true 时执行）──
@@ -181,7 +182,7 @@ self._dependents = {
 | `__init__(size, layout_config)` | 构造 | 计算 canvas_size、original_bounds、padding_bounds |
 | `register_element(name, x, y, w, h, relative_to)` | 注册 | 存入 positions + 维护 _dependents |
 | `get_element_bounds(name)` | 查询 | 从 positions 读取（支持模糊匹配） |
-| `calculate_position(w, h, config)` | 分发 | 根据有无 relative_to 分支到绝对/相对 |
+| `calculate_position(w, h, config, defer_padding)` | 分发 | 根据有无 relative_to 分支到绝对/相对。`defer_padding` 控制是否在此阶段跳过 padding 约束，用于 tree_align 链内元素 |
 | `_calculate_absolute(w, h, config)` | 绝对定位 | 按 position/alignment/placement/margin 计算 |
 | `_get_anchor(...)` | 绝对定位 | 14 种 position 的具体数学公式实现 |
 | `_align_x(alignment, ox, ow, ew, m)` | 对齐辅助 | 水平对齐函数 |
@@ -644,6 +645,16 @@ if shift_x != 0 or shift_y != 0:
 x = max(pad_left, min(x, pad_right - element_width))
 y = max(pad_top,  min(y, pad_bottom - element_height))
 ```
+
+### 6.5 tree_align 的 padding 延迟
+
+当元素属于 `tree_align: true` 的依赖树时，组合盒约束和最终 padding 夹持都会通过 `defer_padding=True` 参数跳过。原因是：
+
+1. 链条可能很长，以根元素的初始绝对位置（如原图中心）为起点时右缘可能超出画布
+2. 如果 Phase 2 中逐个裁剪或平移，链条内部的相对关系会被破坏
+3. `apply_tree_positioning` 在第 8 步会统一重新计算树的包围盒并对齐到目标位置，再做最终 padding 约束
+
+非 tree_align 的元素不受影响，始终 `defer_padding=False`。
 
 ---
 

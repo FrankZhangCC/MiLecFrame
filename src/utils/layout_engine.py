@@ -98,7 +98,8 @@ class LayoutEngine:
         self,
         element_width: int,
         element_height: int,
-        config: Dict
+        config: Dict,
+        defer_padding: bool = False,
     ) -> Tuple[int, int]:
         """
         计算元素的绘制坐标（统一处理文字和非文字元素）
@@ -108,13 +109,18 @@ class LayoutEngine:
         - relative_to: 参考元素名（有此键则使用相对定位）
         - relative_position: 'after', 'before', 'below', 'above', 'right-of', 'left-of'
         - relative_margin: 间距比例
-        - offset_x_ratio / offset_y_ratio: 偏移比例
+        - offset_x_ratio / offset_y_ratio: 微调偏移比例
         - position: 锚点位置 (如 'top-left', 'bottom-right', 'top', 'bottom', 'left', 'right', 'center' 等)
         - alignment: 元素对齐方式 (如 'left', 'center', 'right')
         - margin / margin_top / margin_bottom / margin_left / margin_right: 边距
+
+        defer_padding: 是否延迟 padding 约束。为 True 时，跳过 padding 夹持和组合盒溢出平移，
+            允许元素暂时超出画布边界。此参数专门用于 tree_align 依赖树内的元素——它们的
+            最终 padding 约束由 apply_tree_positioning() 在第 8 步统一处理。
+            非 tree_align 的元素（原版所有样式）始终 defer_padding=False，行为不变。
         """
         if config.get('relative_to'):
-            return self._calculate_relative(element_width, element_height, config)
+            return self._calculate_relative(element_width, element_height, config, defer_padding)
         return self._calculate_absolute(element_width, element_height, config)
 
     def _calculate_absolute(
@@ -285,7 +291,8 @@ class LayoutEngine:
         self,
         element_width: int,
         element_height: int,
-        config: Dict
+        config: Dict,
+        defer_padding: bool = False,
     ) -> Tuple[int, int]:
         relative_to = config.get('relative_to')
         relative_position = config.get('relative_position', 'after')
@@ -350,14 +357,15 @@ class LayoutEngine:
 
         shift_x = 0
         shift_y = 0
-        if group_left < pad_left:
-            shift_x = pad_left - group_left
-        elif group_right > pad_right:
-            shift_x = pad_right - group_right
-        if group_top < pad_top:
-            shift_y = pad_top - group_top
-        elif group_bottom > pad_bottom:
-            shift_y = pad_bottom - group_bottom
+        if not defer_padding:
+            if group_left < pad_left:
+                shift_x = pad_left - group_left
+            elif group_right > pad_right:
+                shift_x = pad_right - group_right
+            if group_top < pad_top:
+                shift_y = pad_top - group_top
+            elif group_bottom > pad_bottom:
+                shift_y = pad_bottom - group_bottom
 
         if shift_x != 0 or shift_y != 0:
             ref_key = relative_to
@@ -373,8 +381,9 @@ class LayoutEngine:
             x += shift_x
             y += shift_y
 
-        x = max(pad_left, min(x, pad_right - element_width))
-        y = max(pad_top, min(y, pad_bottom - element_height))
+        if not defer_padding:
+            x = max(pad_left, min(x, pad_right - element_width))
+            y = max(pad_top, min(y, pad_bottom - element_height))
 
         return x, y
 
