@@ -29,6 +29,14 @@ layout:
 - 在 `render_frame()` 中：检测到 `corner_radius.enabled == true` 后，将原图转为 RGBA + `putalpha(mask)`，再使用 RGBA 透明通道粘贴到背景画布
 - 与 `expand_canvas`、`padding` 等现有布局参数完全兼容，四角半径与 `reference_side`（原图短边）成正比，保持响应式设计
 
+### 🟢 修复：多行混排文本基线偏移 (Bug Fix)
+
+修复 `自定义文本 (custom_text)` 中输入中文时整体下移的问题。在多行文本的混排行绘制中，`_add_text_and_icons_flexible()` Phase 3 的基线计算重复加了 `ref_ascent`（`renderer.py:610`），导致实际基线位置比预期偏移了约一个字的高度。
+
+**根因**：多行混排第一行的 `current_y` 已在 line 587 正确计算为基线（`y + ref_ascent - ref_descent`），但 line 610 在绘制时又加了 `line_info['ref_ascent']`，形成 `y + 2*ref_ascent - ref_descent` 的错误基线。单行混排（line 623）和单行单字体（line 619）无此问题。
+
+**修复**：将 `baseline_y = current_y + line_info['ref_ascent']` 改为 `baseline_y = current_y`，对齐单行混排的基线约定。
+
 ### 🟢 文档更新
 
 - README.md 版本号更新至 v1.8.0，新增 `corner_radius` 配置说明
