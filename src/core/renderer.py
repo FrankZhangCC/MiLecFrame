@@ -13,6 +13,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from PIL import Image, ImageDraw
+import numpy as np
 from typing import Tuple, Dict, Optional, List
 from src.utils.exif_helper import ExifHelper
 from src.utils.font_manager import FontManager
@@ -23,6 +24,40 @@ from src.utils.render_context import RenderContext
 from src.core.decorator import Decorator
 
 logger = logging.getLogger(__name__)
+
+
+def _rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br):
+    """
+    创建四角独立圆角的抗锯齿灰度蒙版
+    255 = 保留（不透明），0 = 切除（透明）
+
+    基于 signed distance field（SDF）对弧形边缘做 1px 软过渡，
+    消除纯 PIL rectangle + pieslice 方案产生的像素锯齿。
+    仅在四个 r×r 角区域内做 numpy 运算，不扫描全图。
+    """
+    mask = np.full((h, w), 255, dtype=np.float32)
+
+    if r_tl > 0 and r_tl <= w and r_tl <= h:
+        iy, ix = np.ogrid[:r_tl, :r_tl]
+        dist = np.sqrt((ix - r_tl) ** 2 + (iy - r_tl) ** 2)
+        mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
+
+    if r_tr > 0 and r_tr <= w and r_tr <= h:
+        iy, ix = np.ogrid[:r_tr, :r_tr]
+        dist = np.sqrt(ix ** 2 + (iy - r_tr) ** 2)
+        mask[:r_tr, w - r_tr:] = np.clip(r_tr - dist + 0.5, 0, 1) * 255
+
+    if r_bl > 0 and r_bl <= w and r_bl <= h:
+        iy, ix = np.ogrid[:r_bl, :r_bl]
+        dist = np.sqrt((ix - r_bl) ** 2 + iy ** 2)
+        mask[h - r_bl:, :r_bl] = np.clip(r_bl - dist + 0.5, 0, 1) * 255
+
+    if r_br > 0 and r_br <= w and r_br <= h:
+        iy, ix = np.ogrid[:r_br, :r_br]
+        dist = np.sqrt(ix ** 2 + iy ** 2)
+        mask[h - r_br:, w - r_br:] = np.clip(r_br - dist + 0.5, 0, 1) * 255
+
+    return Image.fromarray(mask.astype(np.uint8))
 
 
 class FrameRenderer:
@@ -95,7 +130,25 @@ class FrameRenderer:
 
         orig_x, orig_y, orig_w, orig_h = layout_engine.original_bounds
         positioned_image = background.copy()
-        if image.mode == 'RGBA':
+
+        # 原图圆角处理（若启用）
+        corner_cfg = layout.get('corner_radius')
+        use_rounded = isinstance(corner_cfg, dict) and corner_cfg.get('enabled', False)
+        if use_rounded:
+            ref = layout_engine.reference_side
+            r_tl = int(ref * corner_cfg.get('top_left', 0))
+            r_tr = int(ref * corner_cfg.get('top_right', 0))
+            r_bl = int(ref * corner_cfg.get('bottom_left', 0))
+            r_br = int(ref * corner_cfg.get('bottom_right', 0))
+
+            if any(r > 0 for r in [r_tl, r_tr, r_bl, r_br]):
+                img_rgba = image.convert('RGBA')
+                mask = _rounded_corner_mask(orig_w, orig_h, r_tl, r_tr, r_bl, r_br)
+                img_rgba.putalpha(mask)
+                positioned_image.paste(img_rgba, (orig_x, orig_y), img_rgba)
+            else:
+                positioned_image.paste(image, (orig_x, orig_y))
+        elif image.mode == 'RGBA':
             positioned_image.paste(image, (orig_x, orig_y), image)
         else:
             positioned_image.paste(image, (orig_x, orig_y))

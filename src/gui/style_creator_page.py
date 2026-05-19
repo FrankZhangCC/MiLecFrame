@@ -281,6 +281,14 @@ def _load_existing_style(filename: str):
         st.session_state.sc_pad_left = 0.0
         st.session_state.sc_pad_right = 0.0
 
+    # corner_radius
+    cr = layout.get('corner_radius', {})
+    st.session_state.sc_cr_enabled = bool(cr.get('enabled', False)) if cr else False
+    st.session_state.sc_cr_tl = float(cr.get('top_left', 0.01)) if cr else 0.01
+    st.session_state.sc_cr_tr = float(cr.get('top_right', 0.01)) if cr else 0.01
+    st.session_state.sc_cr_bl = float(cr.get('bottom_left', 0.01)) if cr else 0.01
+    st.session_state.sc_cr_br = float(cr.get('bottom_right', 0.01)) if cr else 0.01
+
     # info_position → style_elements
     ip = layout.get('info_position', {})
     elements = []
@@ -459,6 +467,26 @@ def _render_padding():
     with cols[3]:
         st.number_input('right', min_value=0.0, max_value=1.0,
                         step=0.005, format='%.3f', key='sc_pad_right')
+
+
+def _render_corner_radius():
+    """原图四角圆角"""
+    st.subheader('原图圆角 corner_radius')
+    st.checkbox('启用圆角', key='sc_cr_enabled')
+    cols = st.columns(4)
+    with cols[0]:
+        st.number_input('top_left', min_value=0.0, max_value=0.5,
+                        step=0.005, format='%.3f', key='sc_cr_tl')
+    with cols[1]:
+        st.number_input('top_right', min_value=0.0, max_value=0.5,
+                        step=0.005, format='%.3f', key='sc_cr_tr')
+    with cols[2]:
+        st.number_input('bottom_left', min_value=0.0, max_value=0.5,
+                        step=0.005, format='%.3f', key='sc_cr_bl')
+    with cols[3]:
+        st.number_input('bottom_right', min_value=0.0, max_value=0.5,
+                        step=0.005, format='%.3f', key='sc_cr_br')
+    st.caption('半径系数 = 实际像素 / 原图短边；0.01 ≈ 短边的 1%')
 
 
 def _render_fonts():
@@ -934,6 +962,15 @@ def _collect_config() -> dict:
         'right': st.session_state.get('sc_pad_right', 0.0),
     }
 
+    if st.session_state.get('sc_cr_enabled', False):
+        layout['corner_radius'] = {
+            'enabled': True,
+            'top_left': st.session_state.get('sc_cr_tl', 0.01),
+            'top_right': st.session_state.get('sc_cr_tr', 0.01),
+            'bottom_left': st.session_state.get('sc_cr_bl', 0.01),
+            'bottom_right': st.session_state.get('sc_cr_br', 0.01),
+        }
+
     info_pos = {}
     elements = st.session_state.get('style_elements', [])
     for elem in elements:
@@ -1138,6 +1175,8 @@ def render_style_creator_page():
         _render_canvas()
     with c2:
         _render_padding()
+
+    _render_corner_radius()
 
     st.markdown('---')
     _render_fonts()

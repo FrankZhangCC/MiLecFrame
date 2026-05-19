@@ -2,7 +2,7 @@
 
 > 对应模块：`src/utils/layout_engine.py`（LayoutEngine）和 `src/core/renderer.py`（FrameRenderer）
 >
-> 版本：v1.7.0，2026-05-18
+> 版本：v1.8.0，2026-05-19
 
 ---
 
@@ -23,6 +23,7 @@
 13. [Logo 渲染](#13-logo-渲染)
 14. [关键参数速查](#14-关键参数速查)
 15. [常见问题](#15-常见问题)
+16. [原图圆角裁切](#16-原图圆角裁切)
 
 ---
 
@@ -1186,6 +1187,7 @@ for line_info in lines:
 |------|------|------|
 | `expand_canvas` | `dict{enabled, top, bottom, left, right}` | 画布扩展比例 |
 | `padding` | `dict{top, bottom, left, right}` | 安全区域比例 |
+| `corner_radius` | `dict{enabled, top_left, top_right, bottom_left, bottom_right}` | 原图四角圆角系数（v1.8.0） |
 | `info_position` | `dict{key: positioning_config}` | EXIF/相机信息的定位配置 |
 | `defined_texts` | `dict{key: {content, positioning_config}}` | 预定义文本，key 采用补零编号 |
 | `custom_text` | `dict{enabled, positioning_config}` | 自定义文本 |
@@ -1269,3 +1271,78 @@ defined_texts:
 ### Q: 水平链过长，超出画布怎么办？
 
 `apply_tree_positioning` 在最后一步做 padding 约束——如果平移后的整棵树超出安全区域，会触发第二次整体平移回到 padding 边界内。如果树宽超过 `pad_right - pad_left` 则必定溢出，需要减小字号或缩短文本内容。
+
+---
+
+## 16. 原图圆角裁切
+
+> v1.8.0 新增
+
+### 16.1 功能概述
+
+在渲染管线的原图粘贴步骤前，允许对原始照片的四角进行独立圆角裁切。通过样式配置中的 `corner_radius` 段控制开关与半径。
+
+### 16.2 配置格式
+
+```yaml
+layout:
+  corner_radius:
+    enabled: true
+    top_left: 0.01        # 半径系数，相对于 reference_side（原图短边）
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+```
+
+- `enabled`: 布尔值，缺省 `false`
+- `top_left` / `top_right` / `bottom_left` / `bottom_right`: 四角独立系数，乘以 `reference_side` 得像素半径。值为 `0` 时该角保持直角
+- 整个 `corner_radius` 字段缺失、`enabled != true`、或所有半径系数同时为 0 时，完全跳过此步骤
+
+### 16.3 实现位置
+
+`src/core/renderer.py` → `_rounded_corner_mask()` + `render_frame()` 第 127-150 行
+
+### 16.4 蒙版生成算法
+
+函数 `_rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br)` 返回灰度蒙版（255=保留，0=切除）。
+
+从几何上看，四角独立圆角的蒙版可以理解为：在每个角的 r×r 方形区域内，方形减去一个 1/4 圆即为需要切除的部分。如果忽略抗锯齿，用 PIL 的 `rectangle + pieslice` 即可实现：
+
+```python
+# 几何示意：在每个角先填黑方形，再画白色 1/4 扇形恢复圆弧内部
+draw.rectangle([0, 0, r_tl, r_tl], fill=0)
+draw.pieslice([0, 0, r_tl * 2, r_tl * 2], start=180, end=270, fill=255)
+```
+
+但实际实现改用 **numpy SDF（signed distance field）** 来获得抗锯齿效果：在四个 r×r 角区域内，用 `np.ogrid` 生成网格坐标，计算每个像素到圆心的欧几里得距离，通过 `np.clip(r - dist + 0.5, 0, 1)` 在圆弧边界处产生 **1px 线性过渡**（内侧 α=1.0，外侧 α=0.0），实现相同的几何切除效果的同时消除像素级硬边产生的锯齿：
+
+```python
+mask = np.full((h, w), 255, dtype=np.float32)
+
+iy, ix = np.ogrid[:r_tl, :r_tl]
+dist = np.sqrt((ix - r_tl) ** 2 + (iy - r_tl) ** 2)
+mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
+```
+
+**性能**：只对四个 r×r 小方块做运算，不扫描全图。例如 r=50 时仅 `4×50×50 = 10000` 像素。
+
+### 16.5 合成流程
+
+1. `render_frame()` 检测 `corner_cfg.get('enabled') == True`
+2. 读取四角系数并乘以 `reference_side` 得像素半径
+3. 若任一方向半径 > 0，创建蒙版
+4. 将原图 `convert('RGBA')` 并用 `putalpha(mask)` 写入 Alpha 通道
+5. 以自身 RGBA 为遮罩粘贴到背景画布上
+
+```python
+img_rgba = image.convert('RGBA')
+mask = _rounded_corner_mask(orig_w, orig_h, r_tl, r_tr, r_bl, r_br)
+img_rgba.putalpha(mask)
+positioned_image.paste(img_rgba, (orig_x, orig_y), img_rgba)
+```
+
+### 16.6 兼容性
+
+- 与 `expand_canvas` 完全兼容：圆角在原图边界内裁切，不影响扩出的画布区域
+- 与 `padding` 完全兼容：文字/Logo 层在圆角之上绘制，不受影响
+- 与高斯模糊背景、装饰层等完全兼容：圆角在原图图层上处理，不影响上层

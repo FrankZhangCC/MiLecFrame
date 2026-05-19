@@ -1,4 +1,4 @@
-# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.6.2-blue)
+# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.8.0-blue)
 
 > ©FrankZCC 2026
 > 使用 DeepSeek V4 系列模型开发。
@@ -244,6 +244,22 @@ name: "样式名称"         # 必需字段，用于标识样式
   - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
+- `corner_radius`: 原图四角圆角配置 (v1.8.0)
+  - `enabled`: 布尔值，设为 `true` 时启用在原始图像上裁切圆角；缺省或值为 `false` 时完全跳过此步骤
+  - `top_left`, `top_right`, `bottom_left`, `bottom_right`: 四角独立半径系数（相对于参照边（短边）的比例），如 `0.01` = 短边的 1%
+  - 所有半径系数为 0 时等同于禁用，不会执行蒙版创建和粘贴操作
+
+  ```yaml
+  corner_radius:
+    enabled: true
+    top_left: 0.01
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+  ```
+
+  **实现原理**：在将原图粘贴到画布前，创建一个灰度蒙版，在每个角用 `rectangle + pieslice` 组合绘制四分圆切除区域，再通过 `putalpha` 写入 RGBA 通道后粘贴。
+
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`

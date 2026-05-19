@@ -1,5 +1,39 @@
 # 更新历史
 
+## v1.8.0 (2026-05-19)
+
+> 本版本新增**原图圆角裁切**功能。在样式配置中通过 `corner_radius` 参数即可为原始照片的四角独立裁切圆角，半径系数基于参照边（短边）响应式计算，支持独立调节每个角的弧度。
+
+### 🟢 原图四角独立圆角 (Corner Radius)
+
+在渲染管线中新增原图圆角裁切步骤（位于背景填充之后、装饰/文字/Logo 层之前），通过在 RGBA 通道写入圆角蒙版实现四角透明切除。
+
+**配置格式**（`src/frame_styles/configs/胶片夹风格 FilmClip.yaml` 已启用测试）：
+
+```yaml
+layout:
+  corner_radius:
+    enabled: true          # 开关，缺省视为关闭
+    top_left: 0.01         # 四角独立半径系数（相对于短边比例）
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+```
+
+- `enabled: false` 或整个字段缺失时完全跳过，零额外开销
+- 所有半径系数同时为 0 时等同于禁用，不会创建蒙版
+
+**实现细节**（`src/core/renderer.py`）：
+
+- 新增模块级函数 `_rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br)`，利用 **numpy SDF（signed distance field）** 在四个 r×r 角区域内计算像素到圆心的距离，通过 `np.clip(r - dist + 0.5, 0, 1)` 在圆弧边界产生 1px 线性过渡，同时间实现几何切除效果与抗锯齿软边过渡
+- 在 `render_frame()` 中：检测到 `corner_radius.enabled == true` 后，将原图转为 RGBA + `putalpha(mask)`，再使用 RGBA 透明通道粘贴到背景画布
+- 与 `expand_canvas`、`padding` 等现有布局参数完全兼容，四角半径与 `reference_side`（原图短边）成正比，保持响应式设计
+
+### 🟢 文档更新
+
+- README.md 版本号更新至 v1.8.0，新增 `corner_radius` 配置说明
+- `layout_engine.md` 更新至 v1.8.0，新增第 16 节「原图圆角裁切」
+
 ## v1.7.0 (2026-05-18)
 
 > 本版本为重大功能更新，引入**预定义文本与自定义文本系统**、**独立格式化 EXIF 字段**、**依赖树组合定位**三大新能力。从根本上解决了"多个文本块组合后整体定位"这一长期需求。同时修复相对定位中基线偏移导致的对齐偏差积弊。
