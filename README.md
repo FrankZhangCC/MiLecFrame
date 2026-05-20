@@ -1,7 +1,13 @@
-# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.9.0--dev-orange)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.9.0--dev-orange)
 
-> ©FrankZCC 2026
-> 使用 DeepSeek V4 系列模型开发。
+> ©FrankZhangCC 2026
+> 使用 Qwen3-Coder（初期）与 DeepSeek V4（中后期）开发。
+
+MiLecFrame 是一款为专业摄影师和摄影爱好者设计的照片相框水印工具，参考小米徕卡专属水印样式及后续各大品牌的水印风格开发。
+
+本程序基于 Python 和 Streamlit 框架，采用 Vibe Coding 方式开发（初期使用 Qwen3-Coder，中后期使用 DeepSeek V4）。
+
+相较其他开源方案或在线水印工具，MiLecFrame 除了基础的 EXIF 信息展示、拍摄地点标记等功能外，还针对使用相机创作的群体加入了相机与镜头型号映射、多样化预设样式和可自定义的样式编辑器等特色功能，满足高质量创作传播需求。
 
 ## 快速开始
 
@@ -100,6 +106,10 @@ streamlit run src/gui/app.py
 - **CLI 命令行**：单张图片或批量文件夹处理
 - **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载；批量处理页面支持多文件上传、逐张实时进度和结果汇总
 - **批量处理**：GUI 多文件上传（Ctrl+A 全选文件夹）、完整参数配置、逐张独立 Logo 匹配和 GPS 替换、实时进度条、跳过已存在文件、失败详情回溯；CLI 支持文件夹递归扫描
+
+---
+
+> 以下内容供专业开发者和贡献者参考。
 
 ## 技术栈
 
