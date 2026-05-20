@@ -138,8 +138,32 @@ def main():
         parser.print_help()
 
 
+def _free_port(port=8501):
+    """释放被旧 Streamlit 实例占用的端口，仅杀命令行含 streamlit 的进程。"""
+    try:
+        out = subprocess.run(
+            f'netstat -ano | findstr ":{port}" | findstr "LISTENING"',
+            capture_output=True, text=True, shell=True
+        )
+        for line in out.stdout.strip().splitlines():
+            parts = line.strip().split()
+            if len(parts) < 5:
+                continue
+            pid = parts[-1]
+            wmic_out = subprocess.run(
+                f'wmic process where "ProcessId={pid}" get CommandLine /format:csv',
+                capture_output=True, text=True, shell=True
+            )
+            if 'streamlit' in wmic_out.stdout.lower():
+                os.kill(int(pid), 9)
+                print(f"已终止旧 Streamlit 进程 (PID {pid})")
+    except Exception:
+        pass
+
+
 def launch_gui():
     """启动图形用户界面"""
+    _free_port()
     print("正在启动GUI界面...")
     print("请在浏览器中打开 http://localhost:8501 查看应用")
     print("按 Ctrl+C 可随时停止服务")
