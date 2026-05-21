@@ -5,8 +5,20 @@ colors:
   custom_location_light_color: [51, 51, 51]
   custom_location_dark_color: [204, 204, 204]
 fonts:
-  family: Gotham
-  weight: medium
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
   size_ratio: 0.02
   sizes:
     camera_lens: 0.019

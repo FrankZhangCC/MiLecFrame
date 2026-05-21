@@ -26,8 +26,20 @@ colors:
   custom_defined_text_04_dark_color: [204, 204, 204]
 
 fonts:
-  family: Gotham
-  weight: medium
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
   size_ratio: 0.01
   line_spacing_ratio: 0.008
   sizes:

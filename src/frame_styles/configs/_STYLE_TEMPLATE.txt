@@ -26,11 +26,33 @@
 
 
 【4. 字体 fonts】
-  - 字体族: [________]  (默认 Gotham)
-  - 字重:   [________]  (light / regular / medium)
-  - 默认尺寸 size_ratio: [____]  (例: 0.015)
-  - 默认行间距 line_spacing_ratio: [____]  (例: 0.005，仅多行文本生效)
-  - 各元素独立尺寸（留空则使用 size_ratio）:
+
+  支持拉丁（Latin）和 CJK（中文/日文）独立配置，留空则使用系统预装字体。
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 拉丁字体 (Latin):                                                  │
+  │   - 自定义文件: latin.family  = [________]  (例: Gotham)          │
+  │   - 当前字重:   latin.weight  = [________]  (light / regular / medium)
+  │   - 三档字重映射: latin.weights =                                   │
+  │       light:   [________]  (例: Light, 对应文件后缀)                │
+  │       regular: [________]  (例: Book, 对应文件后缀)                 │
+  │       medium:  [________]  (例: Medium, 对应文件后缀)               │
+  │   - 或启用系统字体: latin.system = Segoe UI（勾选则忽略 family）    │
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ CJK 字体:                                                          │
+  │   - 自定义文件: cjk.family  = [________]  (例: GlowSansSC-Normal)   │
+  │   - 当前字重:   cjk.weight  = [________]  (light / regular / medium)│
+  │   - 三档字重映射: cjk.weights =                                     │
+  │       light:   [________]  (例: Light)                              │
+  │       regular: [________]  (例: Regular)                            │
+  │       medium:  [________]  (例: Medium)                             │
+  │   - 或启用系统字体: cjk.system = Microsoft JhengHei UI（勾选则忽略）│
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 全局:                                                              │
+  │   - 默认尺寸 size_ratio: [____]  (例: 0.015)                       │
+  │   - 行间距 line_spacing_ratio: [____]  (例: 0.005，仅多行文本生效) │
+  └─────────────────────────────────────────────────────────────────────┘
+  各元素独立尺寸（留空则使用 size_ratio）:
       exif: [________]
       timestamp: [________]
       timestamp_author: [________]

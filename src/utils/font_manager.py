@@ -1,19 +1,38 @@
 """
 字体管理器模块
-负责字体的加载、缓存和智能选择（中西文检测、字重映射）
+负责字体的加载、缓存和智能选择（中西文检测、系统字体回退）
 """
 import os
 import re
+import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 from PIL import ImageFont
+
+logger = logging.getLogger(__name__)
 
 _CJK_CHAR_RE = re.compile(
     r'[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff'
     r'\u3040-\u309f\u30a0-\u30ff\u31f0-\u31ff'  # 日文仮名
     r'\u3000-\u303f\uff00-\uffef]+'
 )
+
+# 系统字体映射（Windows），key = 样式配置中声明的字重值
+_SYSTEM_LATIN_FILES = {
+    'Light': 'segoeuil.ttf',
+    'Book': 'segoeui.ttf',       # 部分系统无 segoebk.ttf，回退到 Regular
+    'Regular': 'segoeui.ttf',
+    'Medium': 'seguisb.ttf',
+    'Semibold': 'seguisb.ttf',
+    'Bold': 'segoeuib.ttf',
+}
+_SYSTEM_CJK_FILES = {
+    'Light': 'msjhl.ttc',
+    'Regular': 'msjh.ttc',
+    'Medium': 'msjhbd.ttc',
+    'Bold': 'msjhbd.ttc',
+}
 
 
 class FontManager:
@@ -27,13 +46,12 @@ class FontManager:
             self.fonts_base_path = os.path.join(project_root, 'assets', 'fonts')
 
         self.font_cache: Dict[tuple, ImageFont.FreeTypeFont] = {}
+        self._windows_font_dir = os.path.join(
+            os.environ.get('SystemRoot', 'C:\\Windows'), 'Fonts'
+        )
 
     @staticmethod
     def split_mixed_text(text: str) -> List[Tuple[str, bool]]:
-        """
-        将混排文本拆分为 CJK / 非 CJK 片段序列
-        返回 [(segment_text, is_cjk), ...]
-        """
         if not text:
             return []
         segments = []
@@ -47,21 +65,16 @@ class FontManager:
             segments.append((text[pos:], False))
         return segments
 
-    def _build_font_weight_mapping(self, font_base_name: str) -> Dict[str, Dict[str, str]]:
-        return {
-            'light': {
-                'regular': f'{font_base_name}-Light',
-                'chinese': 'GlowSansSC-Normal-Light.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Light.otf'
-            },
-            'medium': {
-                'regular': f'{font_base_name}-Medium',
-                'chinese': 'GlowSansSC-Normal-Medium.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Medium.otf'
-            },
-            'regular': {
-                'regular': f'{font_base_name}-Book',
-                'chinese': 'GlowSansSC-Normal-Regular.otf' if font_base_name == 'Gotham' else f'GlowSansSC-{font_base_name}-Regular.otf'
-            }
-        }
+    def _try_load_font(self, path: str, font_size: int) -> Optional[ImageFont.FreeTypeFont]:
+        try:
+            font = ImageFont.truetype(path, size=font_size)
+            if hasattr(font, 'getmetrics'):
+                bbox = font.getbbox("Test")
+                if bbox[3] - bbox[1] >= font_size * 0.3:
+                    return font
+        except (OSError, Exception):
+            pass
+        return None
 
     def load_font(
         self,
@@ -71,76 +84,88 @@ class FontManager:
         text_content: str = "",
         force_chinese: bool = None
     ) -> ImageFont.FreeTypeFont:
+        """加载响应式字体
+
+        fonts_config 支持格式：
+          latin:
+            family: Gotham        # 自定义字体名，从 assets/fonts/ 加载 {family}-{weight}.otf
+            weight: Medium        # 字重字符串，直接拼入文件名
+            # 或用系统字体（二选一）
+            # system: Segoe UI
+          cjk:
+            family: GlowSansSC-Normal
+            weight: Medium
+            # system: Microsoft JhengHei UI
+          size_ratio: 0.015
+          weight: Medium           # CLI 全局覆盖
         """
-         加载响应式字体，使用原始图像的参照边（短边）作为计算基准
+        is_cjk = force_chinese if force_chinese is not None else bool(_CJK_CHAR_RE.search(text_content or ""))
 
-        Args:
-            fonts_config: 字体配置
-            original_image_size: 原始图像尺寸
-            specific_size_ratio: 特定的字体大小比例（可选）
-            text_content: 文本内容，用于判断使用哪种字体
-            force_chinese: 强制使用/不使用中文字体（None 则自动检测）
+        latin_cfg = fonts_config.get('latin', {})
+        cjk_cfg = fonts_config.get('cjk', {})
 
-        Returns:
-            字体对象
-        """
-        font_weight = fonts_config.get('weight', 'medium')
-        font_base_name = fonts_config.get('family', 'Gotham')
-
-        font_weight_mapping = self._build_font_weight_mapping(font_base_name)
-        weight_config = font_weight_mapping.get(font_weight, font_weight_mapping['medium'])
+        # CLI 全局字重覆盖
+        global_weight = fonts_config.get('weight')
 
         size_ratio = specific_size_ratio if specific_size_ratio is not None else fonts_config.get('size_ratio', 0.015)
-
         reference_side = min(original_image_size)
         font_size = max(12, int(reference_side * size_ratio))
 
-        if force_chinese is not None:
-            contains_chinese = force_chinese
-        else:
-            contains_chinese = bool(_CJK_CHAR_RE.search(text_content))
+        # 选择配置
+        cfg = cjk_cfg if is_cjk else latin_cfg
 
-        cache_key = (
-            font_base_name,
-            font_weight,
-            font_size,
-            contains_chinese
-        )
+        # 解析字重：通过 weights 映射表将抽象值转为具体字重字符串
+        raw_weight = global_weight or cfg.get('weight', 'medium')
+        weights_map = cfg.get('weights', {})
+        weight = weights_map.get(raw_weight, raw_weight)  # 映射表中查不到则原样使用
+
+        # 缓存 key
+        family = cfg.get('family', '').strip()
+        use_system = 'system' in cfg or not family
+        if use_system:
+            cache_source = f"sys:{('cjk' if is_cjk else 'latin')}:{weight}"
+        else:
+            cache_source = f"cust:{family}:{weight}"
+        cache_key = (cache_source, font_size)
 
         if cache_key in self.font_cache:
             return self.font_cache[cache_key]
 
-        font_name = weight_config['regular']
-        if contains_chinese:
-            font_candidates = [
-                weight_config['chinese'],
-                font_name + '.otf',
-                font_name + '.ttf',
-            ]
-        else:
-            font_candidates = [
-                font_name + '.otf',
-                font_name + '.ttf',
-            ]
+        font = None
 
-        font_paths = [os.path.join(self.fonts_base_path, font) for font in font_candidates]
+        # 优先级 1：自定义字体 assets/fonts/
+        if family and not use_system:
+            for ext in ('.otf', '.ttf'):
+                filepath = os.path.join(self.fonts_base_path, f"{family}-{weight}{ext}")
+                if os.path.exists(filepath):
+                    font = self._try_load_font(filepath, font_size)
+                    if font:
+                        break
 
-        for font_path in font_paths:
-            if os.path.exists(font_path):
-                try:
-                    font = ImageFont.truetype(font_path, size=font_size)
-                    if hasattr(font, 'getmetrics'):
-                        bbox = font.getbbox("Test")
-                        actual_height = bbox[3] - bbox[1]
-                        if actual_height < font_size * 0.3:
-                            continue
-                        self.font_cache[cache_key] = font
-                        return font
-                    else:
-                        continue
-                except (OSError, Exception):
+        # 优先级 2：系统字体（含降级回退）
+        if font is None:
+            sys_map = _SYSTEM_CJK_FILES if is_cjk else _SYSTEM_LATIN_FILES
+            # 要尝试的备选 weight 列表：当前 weight → Regular → 第一个可用
+            fallback_weights = [weight] + [w for w in ['Regular', 'Medium', 'Light', 'Bold'] if w != weight]
+            for fb_weight in fallback_weights:
+                sys_file = sys_map.get(fb_weight)
+                if not sys_file:
                     continue
+                sys_path = os.path.join(self._windows_font_dir, sys_file)
+                if os.path.exists(sys_path):
+                    font = self._try_load_font(sys_path, font_size)
+                    if font:
+                        logger.debug(f"系统字体加载成功: weight={fb_weight}, 文件={sys_file}")
+                        break
+                    else:
+                        logger.debug(f"系统字体加载失败: weight={fb_weight}, 文件={sys_file}")
 
-        default_font = ImageFont.load_default()
-        self.font_cache[cache_key] = default_font
-        return default_font
+        # 优先级 3：PIL 默认
+        if font is None:
+            font = ImageFont.load_default()
+            logger.warning(f"字体全部回退失败，使用 PIL 默认字体")
+
+        logger.info(f"字体加载完成: 来源={cache_source}, 字号={font_size}")
+
+        self.font_cache[cache_key] = font
+        return font

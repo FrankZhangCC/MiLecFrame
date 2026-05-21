@@ -1,4 +1,4 @@
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.10.0--dev-orange)
 
 > ©FrankZhangCC 2026
 > 使用DeepSeek V4系列模型开发。
@@ -33,6 +33,35 @@ python src/main.py
 3. 激活虚拟环境：
    - Windows: `venv\Scripts\activate`
    - Linux/Mac: `source venv/bin/activate`
+
+#### 字体安装
+
+程序需要字体文件来渲染相框文字。**无自定义字体时自动使用系统预装字体**（Windows Segoe UI / Microsoft JhengHei UI），可直接跳过此步骤。
+
+如需使用自定义字体（如预设样式默认的 Gotham + GlowSansSC），请放入 `assets/fonts/` 目录：
+
+**Gotham（拉丁字体）**
+- 下载：https://www.dfonts.org/fonts/gotham-font-family/
+- 放入文件：`Gotham-Light.otf`、`Gotham-Book.otf`、`Gotham-Medium.otf`
+
+**GlowSansSC 未来荧黑（CJK 字体）**
+- 下载：https://github.com/welai/glow-sans
+- 放入文件：`GlowSansSC-Normal-Light.otf`、`GlowSansSC-Normal-Regular.otf`、`GlowSansSC-Normal-Medium.otf`
+
+放置完成后结构：
+
+```
+assets/fonts/
+├── .gitkeep
+├── Gotham-Light.otf
+├── Gotham-Book.otf
+├── Gotham-Medium.otf
+├── GlowSansSC-Normal-Light.otf
+├── GlowSansSC-Normal-Regular.otf
+└── GlowSansSC-Normal-Medium.otf
+```
+
+> Gotham 为商业字体，请遵守其授权协议。GlowSansSC 基于 SIL Open Font License 发布。
 
 #### 使用方法
 
@@ -465,14 +494,50 @@ v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染�
 
 ### 字体配置 (fonts)
 
-- `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
-- `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
-  - 可通过命令行 `--font-weight` 参数运行时覆盖
-- `size_ratio`: 默认字体大小比例（相对于参照边（短边）像素数）
-- `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
-  - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
-  - 未设置的字段默认使用 `size_ratio`
-- `line_spacing_ratio`: 行间距系数（v1.7.0，默认 `0.005`），相对于参照边，仅多行文本生效。可在 `fonts` 级别设全局值，也可在 `defined_texts` 或 `custom_text` 条目中覆盖
+系统支持拉丁和 CJK（中文/日文）字体独立配置，并自动回退到系统预装字体。
+
+```yaml
+fonts:
+  latin:
+    family: Gotham              # 拉丁字体名，从 assets/fonts/ 加载 {family}-{weight}.otf
+    weight: medium              # 当前使用的字重（对应 weights 中的 key）
+    weights:                    # 三档字重映射表
+      light: Light
+      regular: Book
+      medium: Medium
+    # 或使用系统字体 Segoe UI（与 family 二选一，留空时自动回退）
+    # system: "Segoe UI"
+  cjk:
+    family: GlowSansSC-Normal   # CJK 字体名，从 assets/fonts/ 加载
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+    # 或使用系统字体 Microsoft JhengHei UI（与 family 二选一，留空时自动回退）
+    # system: "Microsoft JhengHei UI"
+  size_ratio: 0.015
+  sizes:
+    camera_lens: 0.022
+  line_spacing_ratio: 0.005
+```
+
+**字重解析：** `weight` 字段使用抽象值（`light`/`regular`/`medium`），通过 `weights` 映射表解析为具体字重字符串。CLI 参数 `--font-weight` 也遵循此映射。若 `weights` 未声明，`weight` 的值直接作为字重字符串使用。
+
+**系统字体参考表：**
+
+| weight 值 | Latin 自定义文件名 | Latin 系统字体 | CJK 系统字体 |
+|-----------|-------------------|---------------|-------------|
+| `Light` | `{family}-Light.otf` | Segoe UI Light | Microsoft JhengHei UI Light |
+| `Book` | `{family}-Book.otf` | Segoe UI Book | —（回退 Regular） |
+| `Regular` | `{family}-Regular.otf` | Segoe UI Regular | Microsoft JhengHei UI |
+| `Medium` | `{family}-Medium.otf` | Segoe UI **Semibold** | Microsoft JhengHei UI **Bold** |
+| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold | —（回退 Bold） |
+| `Bold` | `{family}-Bold.otf` | Segoe UI Bold | Microsoft JhengHei UI Bold |
+
+**Fallback 优先级：** `自定义字体文件 → 系统字体 → PIL 默认字体`。Latin/CJK 任一段落缺失，该类别自动走系统字体。
+
+**CLI `--font-weight` 映射：** `light → Light`、`regular → Book`、`medium → Medium`
 
 ### 水印配置 (decorations)
 
@@ -732,7 +797,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
   - 每种填充类型同时声明 `text_scheme`（`dark`/`light`），渲染器通过 `BackgroundFillManager.is_dark_bg()` 自动适配文字颜色
   - 支持运行时覆盖 `color`、`opacity`、`blur_radius` 参数，预留自定义背景注册接口 `register()`
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
-- **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
+- **字体系统**：拉丁 + CJK 双字体独立引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(来源, 字重, 字号, 是否 CJK)` 键值缓存；无自定义配置时自动回退系统字体（Segoe UI / Microsoft JhengHei UI）
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
 
 ##### Logo 渲染子系统

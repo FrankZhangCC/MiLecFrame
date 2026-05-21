@@ -1,8 +1,50 @@
 # 更新历史
 
-## v0.1.0 (2026-05-19)
+## v1.10.0-dev (2026-05-21)
 
-> 首个公开预览版。本版本新增**原图四角独立圆角**功能并修复多行混排基线偏移 bug。
+> 内部开发版本。重写字体加载系统，支持系统字体回退和多行混排基线统一。
+
+### 🔴 重构：统一多行文本绘制路径
+
+此前多行文本中的非混排行（纯拉丁）和混排行（Latin + CJK 混合）使用两套不同的公式计算 `current_y`：
+
+- 非混排行：`current_y = y - descent`（y 作为 PIL `draw.text()` 的传入值）
+- 混排行：`current_y = y + ref_ascent - ref_descent`（y 作为包围盒顶，绘制前转基线）
+
+两套公式的基线位置不同，导致混排行和非混排行交替时行间视觉间隙不一致（偏大或偏小），表现为混排行"上移"。
+
+**根因**：`draw.text((x, current_y), text)` 中 PIL 对 `current_y` 的解释方式与显式 `baseline_y - seg_ascent` 的计算方式不一致。
+
+**修复**（`src/core/renderer.py`）：
+
+- Phase 1 测量中，非混排行也生成 `seg_info`（单段），标注 `mixed: True`
+- Phase 3 绘制中，删除独立的 `draw.text` 分支，所有行通入统一的 `seg_info` 循环
+- `current_y` 统一使用 `y + ref_ascent - ref_descent` 初始化
+
+### 🟢 字体系统重构
+
+- Latin 和 CJK 字体独立配置，支持样式 YAML 中分别声明 `latin`/`cjk` 子段
+- 无自定义字体时自动回退到系统预装字体（Segoe UI / Microsoft JhengHei UI）
+- 样式 YAML 新增 `weights:` 映射段，显式声明三档字重（light/regular/medium）对应的具体字重字符串，`weight` 字段使用抽象值引用此映射
+- CLI `--font-weight` 与 GUI 字重选择均通过此映射表解析，无需硬编码
+- 系统字体多级降级回退链：`当前weight → Regular → Medium → Light → Bold`
+- 旧格式 `fonts.family` + `fonts.weight` 不再支持（迁移到新格式）
+
+### 🟢 GUI 样式编辑器
+
+- Latin/CJK 各自由文本输入 + 字重下拉 + 系统字体复选框控制
+- GUI 默认字重调整为 `Medium`
+
+### 🐛 修复
+
+- `segoebk.ttf` 不存在时 Latin 回退失败（改指向 `segoeui.ttf`）
+- `_SYSTEM_CJK` 变量名错误（应为 `_SYSTEM_CJK_FILES`）
+- CJK 系统字体后缀 `.ttf` 应为 `.ttc`（TrueType Collection）
+- `style_manager.py` `_validate_config()` 默认补全旧格式导致无 `fonts` 样式的回退失效
+
+## v1.9.0-dev (2026-05-19)
+
+> 本版本新增**原图四角独立圆角**功能并修复多行混排基线偏移 bug。
 
 ### 🔧 工程化调整
 
@@ -104,6 +146,7 @@ layout:
 `LayoutEngine.apply_tree_positioning()` 新增 **Phase 2.5** 定位阶段（Phase 2 独立注册之后，Phase 3 绘制之前），将每棵依赖树视作整体，按根元素的 `position` / `alignment` / `margin_*` 参数对整棵树进行一次绝对定位。
 
 **算法流程**（三步法，`src/utils/layout_engine.py`）：
+
 1. **收集树成员**：从 `positions` 注册表 + `_dependents` 依赖图递归获取根及所有子孙
 2. **计算视觉包围盒**：遍历树成员，使用注册的 `ascent` 校正基线偏移，得到 (tree_left, tree_top, tree_right, tree_bottom)
 3. **平移整棵树**：
@@ -125,6 +168,7 @@ defined_texts:
 ```
 
 **设计关键**：
+
 - `_resolve_tree_ref()` 完全对齐 `_get_anchor()` 的 14 种 position + alignment 组合行为
 - 单元素树自动跳过，不影响现有所有样式配置
 - 支持多条独立依赖树，互不干扰
@@ -146,17 +190,20 @@ defined_texts:
 ### 🟢 预定义文本 (defined_texts) 与自定义文本 (custom_text)
 
 **`defined_texts`**（`src/core/renderer.py`）：
+
 - 样式配置中写死文本内容，适合固定标签（如 "FL"、"Aperture" 等）
 - Key 采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 避免与 `info_position` 的保留 key 冲突
 - 定位参数与 `info_position` 完全相同（绝对/相对定位均可），`relative_to` 可跨区域引用
 
 **`custom_text`**：
+
 - `layout.custom_text.enabled: true` 时，GUI 显示多行文本输入框（`st.text_area`）
 - 默认内容 "Always believe that something wonderful\nis about to happen."
 - 完整透传链：GUI → `ImageProcessor.process()` → `FrameRenderer.render_frame()` → `RenderContext.get_text('custom_text')`
 - CLI 通过 `--custom-text` 参数传入
 
 **三源文本统一管线**（`_add_text_and_icons_flexible`）：
+
 - 三种文本来源使用同一 `all_positions` 注册表和 `text_elements` 列表
 - 共用 Phase 1 测量 → Phase 2 拓扑排序 → Phase 2.5 树定位 → Phase 3 绘制
 - 字体大小复用 `fonts.sizes.{key}`，颜色复用 `colors.custom_{key}_light/dark_color`
@@ -165,12 +212,12 @@ defined_texts:
 
 新增 4 个 `RenderContext.get_text()` key，将原本仅以组合字符串 `exif` 输出的焦距/光圈/快门/ISO 拆分为独立字段：
 
-| Key | 格式 | 数据来源 |
-|-----|------|---------|
-| `focal_length_formatted` | `"35mm"` | `exif_data['focal_length_35mm']` → 回退 `raw_focal_length` |
-| `aperture_formatted` | `"f/2.8"` | `raw_aperture` |
-| `shutter_speed_formatted` | `"1/125s"` | `raw_shutter_speed`（已由 `_format_shutter_speed` 格式化） |
-| `iso_formatted` | `"ISO200"` | `raw_iso` |
+| Key                         | 格式         | 数据来源                                                        |
+| --------------------------- | ------------ | --------------------------------------------------------------- |
+| `focal_length_formatted`  | `"35mm"`   | `exif_data['focal_length_35mm']` → 回退 `raw_focal_length` |
+| `aperture_formatted`      | `"f/2.8"`  | `raw_aperture`                                                |
+| `shutter_speed_formatted` | `"1/125s"` | `raw_shutter_speed`（已由 `_format_shutter_speed` 格式化）  |
+| `iso_formatted`           | `"ISO200"` | `raw_iso`                                                     |
 
 - `exif_helper.py:373` 的 raw keys 循环补充 `'focal_length_35mm'` 字段
 - 焦距优先使用 35mm 等效值，缺失时回退到物理焦距
@@ -185,28 +232,29 @@ defined_texts:
 ### 🔴 演示样式配置
 
 新增 `扩展宝丽来风格 Polaroid Motto.yaml`，是首个展示全部 v1.7.0 新功能的示例样式：
+
 - 用 `defined_text_01-04` + `focal_length_formatted` / `aperture_formatted` / `shutter_speed_formatted` / `iso_formatted` 组成 8 元素水平链
 - 整链通过 `apply_tree_positioning()` 居中，替换原有 4 行独立 EXIF 显示
 - `custom_text` 展示多行自定义文本
 
 ### 已修改文件清单
 
-| 文件 | 改动内容 |
-|------|---------|
-| `src/utils/render_context.py` | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key |
-| `src/core/renderer.py` | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用 |
-| `src/core/image_processor.py` | `process()` 透传 `custom_text` |
-| `src/core/batch_processor.py` | `batch_process()` 透传 `custom_text` |
-| `src/utils/layout_engine.py` | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
-| `src/utils/exif_helper.py` | raw keys 补充 `focal_length_35mm` |
-| `src/gui/image_processing_page.py` | 条件显示 `custom_text` 输入框 |
-| `src/gui/batch_processing_page.py` | 同上 |
-| `src/main.py` | 添加 `--custom-text` CLI 参数 |
-| `src/frame_styles/style_manager.py` | `fonts.line_spacing_ratio` 默认值 |
-| `src/frame_styles/configs/_STYLE_TEMPLATE.txt` | 模板新增 defined_texts / custom_text / line_spacing_ratio |
-| `src/frame_styles/configs/扩展宝丽来风格 Polaroid Motto.yaml` | 新建：v1.7.0 演示样式 |
-| `README.md` | 文档补充 |
-| `CHANGELOG.md` | 更新记录 |
+| 文件                                                            | 改动内容                                                                                                                                                |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/utils/render_context.py`                                 | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key                                                                                                     |
+| `src/core/renderer.py`                                        | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用                                                            |
+| `src/core/image_processor.py`                                 | `process()` 透传 `custom_text`                                                                                                                      |
+| `src/core/batch_processor.py`                                 | `batch_process()` 透传 `custom_text`                                                                                                                |
+| `src/utils/layout_engine.py`                                  | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
+| `src/utils/exif_helper.py`                                    | raw keys 补充 `focal_length_35mm`                                                                                                                     |
+| `src/gui/image_processing_page.py`                            | 条件显示 `custom_text` 输入框                                                                                                                         |
+| `src/gui/batch_processing_page.py`                            | 同上                                                                                                                                                    |
+| `src/main.py`                                                 | 添加 `--custom-text` CLI 参数                                                                                                                         |
+| `src/frame_styles/style_manager.py`                           | `fonts.line_spacing_ratio` 默认值                                                                                                                     |
+| `src/frame_styles/configs/_STYLE_TEMPLATE.txt`                | 模板新增 defined_texts / custom_text / line_spacing_ratio                                                                                               |
+| `src/frame_styles/configs/扩展宝丽来风格 Polaroid Motto.yaml` | 新建：v1.7.0 演示样式                                                                                                                                   |
+| `README.md`                                                   | 文档补充                                                                                                                                                |
+| `CHANGELOG.md`                                                | 更新记录                                                                                                                                                |
 
 ### 样式配置规范更新
 
