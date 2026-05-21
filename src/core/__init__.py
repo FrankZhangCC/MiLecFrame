@@ -10,7 +10,6 @@ from .decorator import Decorator
 from .batch_processor import BatchProcessor
 
 from .._version import __version__
-__author__ = "MiLeica Frame Project"
 __all__ = [
     'ImageProcessor',
     'FrameRenderer',

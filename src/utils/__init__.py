@@ -1,5 +1,5 @@
 """
-MiLeica Frame - 工具模块
+MiLecFrame - 工具模块
 """
 
 from .background_fill import BackgroundFillManager
@@ -14,6 +14,3 @@ from .render_context import RenderContext
 
 __all__ = ['BackgroundFillManager', 'ConfigManager', 'ExifHelper', 'DeviceMapper', 'FontManager', 'LayoutEngine',
            'apply_gaussian_blur_overlay_expansion', 'setup_logging', 'RenderContext']
-
-__version__ = "1.0.0"
-__author__ = "MiLeica Frame Project"

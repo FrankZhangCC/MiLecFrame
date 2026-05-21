@@ -1,13 +1,23 @@
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.9.0--dev-orange)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 
 > ©FrankZhangCC 2026
-> 使用 Qwen3-Coder（初期）与 DeepSeek V4（中后期）开发。
+> 使用DeepSeek V4系列模型开发。
 
 MiLecFrame 是一款为专业摄影师和摄影爱好者设计的照片相框水印工具，参考小米徕卡专属水印样式及后续各大品牌的水印风格开发。
 
 本程序基于 Python 和 Streamlit 框架，采用 Vibe Coding 方式开发（初期使用 Qwen3-Coder，中后期使用 DeepSeek V4）。
 
 相较其他开源方案或在线水印工具，MiLecFrame 除了基础的 EXIF 信息展示、拍摄地点标记等功能外，还针对使用相机创作的群体加入了相机与镜头型号映射、多样化预设样式和可自定义的样式编辑器等特色功能，满足高质量创作传播需求。
+
+### 使用方式
+
+直接运行 `src\main.py` 即可启动程序，默认以 GUI 模式（Streamlit Web 界面）运行：
+
+```bash
+python src/main.py
+```
+
+程序会自动打开浏览器访问 `http://localhost:8501`。也可通过命令行参数进行单张/批量处理（详见下方 [命令行选项](#命令行选项)）。
 
 ## 快速开始
 
@@ -179,9 +189,9 @@ MiLeica_Frame/
 
 ## 样式配置规范
 
-样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
+样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](./src/frame_styles/configs/)目录下。
 
-> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
+> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](./src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
 
 ### 文件夹变体样式 (v1.3.0)
 
@@ -248,13 +258,16 @@ name: "样式名称"         # 必需字段，用于标识样式
 ### 布局配置 (layout)
 
 - `expand_canvas`: 扩展画布配置
+
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
 - `padding`: 叠加元素安全区域配置（v1.2.0 新增，**推荐优先使用 padding 控制全局边距**）
+
   - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
 - `corner_radius`: 原图四角圆角配置 (v1.8.0)
+
   - `enabled`: 布尔值，设为 `true` 时启用在原始图像上裁切圆角；缺省或值为 `false` 时完全跳过此步骤
   - `top_left`, `top_right`, `bottom_left`, `bottom_right`: 四角独立半径系数（相对于参照边（短边）的比例），如 `0.01` = 短边的 1%
   - 所有半径系数为 0 时等同于禁用，不会执行蒙版创建和粘贴操作
@@ -269,24 +282,27 @@ name: "样式名称"         # 必需字段，用于标识样式
   ```
 
   **实现原理**：在将原图粘贴到画布前，创建一个灰度蒙版，在每个角用 `rectangle + pieslice` 组合绘制四分圆切除区域，再通过 `putalpha` 写入 RGBA 通道后粘贴。
-
 - `info_position`: 信息位置配置
+
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
   - `camera_lens` 输出格式由 GUI 中"镜头显示"选项控制（相机+镜头 / 只显示相机 / 只显示镜头），搭配"使用短版镜头名"开关可全局切换为短版镜头名；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
 - `defined_texts`: 预定义文本配置 (v1.7.0)
+
   - 内容在配置文件中写死，采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 以此类推
   - 此命名惯例确保 key 不与 `info_position` 的保留名（如 `exif`、`author` 等）冲突，且补零保证字典自然排序
   - 每个条目包含 `content`（文本内容）和标准布局参数，与 `info_position` 共用定位系统
   - `tree_align: true`（可选，用于根元素）：将整棵依赖树按根元素的 position/alignment/margin 做整体绝对定位，适合水平链式排版居中。未声明时不影响已有垂直链
   - 示例：`defined_text_01: { content: "FL", position: "bottom", alignment: "center", tree_align: true, margin_bottom: 0.07 }`
 - `custom_text`: 自定义文本配置 (v1.7.0)
+
   - `enabled`: 布尔值，设为 `true` 时 GUI 显示多行文本输入框，CLI 通过 `--custom-text` 参数传入
   - 布局参数与 `info_position` 相同，`relative_to` 可跨区域引用（包括 `defined_texts` 和 `info_position` 中的元素）
   - 默认输入内容：`"Always believe that something wonderful\nis about to happen."`
 - 多行文本行间距 (v1.7.0)
+
   - `fonts.line_spacing_ratio`：全局行间距系数（相对于参照边，默认 `0.005`），仅多行文本生效
   - 可在 `defined_texts` 或 `custom_text` 条目中通过 `line_spacing_ratio` 覆盖全局值
   - 行间距 = `reference_side * line_spacing_ratio` 像素
@@ -395,7 +411,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `author`           | `"Frank"`                                      | 用户输入                      |
 | `location`         | `"Shanghai"`                                   | 用户输入                      |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）               |
-| `custom_text`      | 用户在 GUI 中输入的文本内容                    | 用户输入（v1.7.0）             |
+| `custom_text`      | 用户在 GUI 中输入的文本内容                      | 用户输入（v1.7.0）            |
 
 #### 镜头显示模式 & 短版镜头名
 

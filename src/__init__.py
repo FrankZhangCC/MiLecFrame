@@ -5,12 +5,12 @@ MiLecFrame - 照片相框程序包初始化
 ©FrankZhangCC 2026
 使用 DeepSeek V4 系列模型开发。
 """
+from ._version import __version__
 from .core import *
 from .gui import *
 from .utils import *
 from .frame_styles import *
 
-__version__ = "1.6.3"
 __author__ = "FrankZhangCC"
 __all__ = [
     'core',
