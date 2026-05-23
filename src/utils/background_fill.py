@@ -33,7 +33,7 @@ class BackgroundFillManager:
             'overlay_color': 'black',
             'opacity': 65,
             'blur_radius': 200,
-            'saturation': 2.0,
+            'saturation': 4.0,
             'text_scheme': 'dark',
         },
         'gaussian_white_80': {
@@ -42,7 +42,7 @@ class BackgroundFillManager:
             'overlay_color': 'white',
             'opacity': 80,
             'blur_radius': 200,
-            'saturation': 2.0,
+            'saturation': 4.0,
             'text_scheme': 'light',
         },
         'gaussian_black_35': {

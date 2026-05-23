@@ -73,7 +73,7 @@ layout:
       position: "bottom-center"
       alignment: "center"
       margin_top: 0
-      margin_bottom: 0.065
+      margin_bottom: 0.075
       margin_left: 0
       margin_right: 0
     focal_length_formatted:
@@ -103,7 +103,7 @@ layout:
       position: "bottom"
       alignment: "center"
       tree_align: true
-      margin_bottom: 0.11
+      margin_bottom: 0.12
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
@@ -127,5 +127,5 @@ logo:
   enabled: true
   position: "top-center"
   alignment: "center"
-  margin_top: 0.05
-  size_ratio: 0.07
+  margin_top: 0.045
+  size_ratio: 0.075
