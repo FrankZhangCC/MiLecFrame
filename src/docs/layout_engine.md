@@ -2,7 +2,7 @@
 
 > 对应模块：`src/utils/layout_engine.py`（LayoutEngine）和 `src/core/renderer.py`（FrameRenderer）
 >
-> 版本：v1.10.0-dev，2026-05-21
+> 版本：v1.11.0-dev，2026-05-23
 
 ---
 

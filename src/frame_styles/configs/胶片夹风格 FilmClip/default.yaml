@@ -57,8 +57,8 @@ fonts:
 layout:
   expand_canvas:
     enabled: true
-    top: 0.175
-    bottom: 0.225
+    top: 0.155
+    bottom: 0.245
     left: 0.05
     right: 0.05
   padding:
@@ -80,7 +80,7 @@ layout:
       position: "bottom-center"
       alignment: "center"
       margin_top: 0
-      margin_bottom: 0.07
+      margin_bottom: 0.13
       margin_left: 0
       margin_right: 0
     focal_length_formatted:
@@ -111,7 +111,7 @@ layout:
       position: "bottom"
       alignment: "center"
       tree_align: true
-      margin_bottom: 0.11
+      margin_bottom: 0.17
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
@@ -137,7 +137,10 @@ layout:
     position: "top-center"
     alignment: "center"
     line_spacing_ratio: 0.006
-    margin_top: 0.05
+    margin_top: 0.055
 
 logo:
-  enabled: false
+  enabled: true
+  alignment: "bottom"
+  margin_bottom: 0.04
+  size_ratio: 0.055

@@ -1,5 +1,45 @@
 # 更新历史
 
+## v1.11.0-dev (2026-05-23)
+
+> 内部开发版本。架构重构：将文字排版从 FrameRenderer 中拆分为独立的 TextRenderer 模块，LayoutEngine 新增多行行位计算方法。
+
+### 🔴 架构重构：三模块拆分
+
+**LayoutEngine** — 职责收窄为纯几何计算。新增：
+
+- `layout_multiline_lines()` — 计算多行文本块内每行的绘制坐标（纯整数运算，不涉及字体/文本/绘制）
+
+**TextRenderer**（`src/core/text_renderer.py`） — **新建模块**，承担原 `FrameRenderer._add_text_and_icons_flexible()` 的全部职责：
+
+- 三源文本收集、字体加载、文本测量、颜色解析
+- 拓扑排序 + 定位注册 + 绘制
+- 多行绘制改调 `LayoutEngine.layout_multiline_lines()`
+
+**FrameRenderer** — 变薄，仅保留编排层：
+
+- 背景 → 原图圆角 → 装饰 → 文字委托 → Logo
+- `_parse_color_value`、`_resolve_color_from_config`、`_determine_text_color`、`_resolve_element_order`、`_add_text_and_icons_flexible` 全部移入 TextRenderer
+
+### 🟢 文件夹变体样式
+
+`胶片夹风格 FilmClip` 转为文件夹变体样式：
+
+- `default.yaml` — 含自定义文本，Logo 关闭
+- `no_custom_text.yaml` — 无自定义文本，顶部替换为 Logo
+
+变体系统现在支持多词字段名（如 `no_custom_text` → 正确解析为 `{'custom_text'}`）。
+
+### 🧹 清理
+
+- 移除 `custom_text` 的多行文本支持（后端 + GUI 全部改为单行输入）
+- `image_processor.py`、`batch_processor.py` 样式上下文传递 `custom_text` 可用性以支持变体自动选择
+
+### 🟢 文档更新
+
+- README.md 版本徽标更新至 v1.11.0-dev
+- `layout_engine.md` 更新至 v1.11.0-dev
+
 ## v1.10.0-dev (2026-05-21)
 
 > 内部开发版本。重写字体加载系统，支持系统字体回退和多行混排基线统一。
