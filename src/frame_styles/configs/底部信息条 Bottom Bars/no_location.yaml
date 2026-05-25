@@ -43,7 +43,7 @@ layout:
       position: "bottom-left"
       alignment: "left"
       margin_top: 0.01
-      margin_bottom: 0.04
+      margin_bottom: 0.044
       margin_left: 0.02
       margin_right: 0.01
     timestamp_author:
