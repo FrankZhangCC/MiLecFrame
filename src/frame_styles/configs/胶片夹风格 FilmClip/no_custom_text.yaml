@@ -125,7 +125,8 @@ layout:
 
 logo:
   enabled: true
-  position: "top-center"
-  alignment: "center"
-  margin_top: 0.045
+  position: "top"
+  alignment: "both-center"
+  margin_top: 0.083
   size_ratio: 0.075
+  diagonal_limit_ratio: 2.2

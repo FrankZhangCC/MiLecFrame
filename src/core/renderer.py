@@ -220,7 +220,8 @@ class FrameRenderer:
         scale = target_short_side / logo_short_side
 
         # Logo 对角线上限保护：防止细长条 Logo 失控
-        max_diagonal = int(reference_side * 2 * size_ratio)
+        diagonal_limit = logo_config.get('diagonal_limit_ratio', 2.0)
+        max_diagonal = int(reference_side * diagonal_limit * size_ratio)
         logo_diagonal = math.hypot(logo_width, logo_height)
         if logo_diagonal * scale > max_diagonal:
             scale = max_diagonal / logo_diagonal
