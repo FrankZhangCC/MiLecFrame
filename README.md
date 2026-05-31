@@ -1,3 +1,5 @@
+![Features_introduction](docs/Features_introduction.jpg)
+
 # MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.12.0--dev-orange)
 
 > ©FrankZhangCC 2026
