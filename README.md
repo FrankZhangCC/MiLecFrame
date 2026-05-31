@@ -43,10 +43,12 @@ python src/main.py
 如需使用自定义字体（如预设样式默认的 Gotham + GlowSansSC），请放入 `assets/fonts/` 目录：
 
 **Gotham（拉丁字体）**
+
 - 下载：https://www.dfonts.org/fonts/gotham-font-family/
 - 放入文件：`Gotham-Light.otf`、`Gotham-Book.otf`、`Gotham-Medium.otf`
 
 **GlowSansSC 未来荧黑（CJK 字体）**
+
 - 下载：https://github.com/welai/glow-sans
 - 放入文件：`GlowSansSC-Normal-Light.otf`、`GlowSansSC-Normal-Regular.otf`、`GlowSansSC-Normal-Medium.otf`
 
@@ -529,14 +531,14 @@ fonts:
 
 **系统字体参考表：**
 
-| weight 值 | Latin 自定义文件名 | Latin 系统字体 | CJK 系统字体 |
-|-----------|-------------------|---------------|-------------|
-| `Light` | `{family}-Light.otf` | Segoe UI Light | Microsoft JhengHei UI Light |
-| `Book` | `{family}-Book.otf` | Segoe UI Book | —（回退 Regular） |
-| `Regular` | `{family}-Regular.otf` | Segoe UI Regular | Microsoft JhengHei UI |
-| `Medium` | `{family}-Medium.otf` | Segoe UI **Semibold** | Microsoft JhengHei UI **Bold** |
-| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold | —（回退 Bold） |
-| `Bold` | `{family}-Bold.otf` | Segoe UI Bold | Microsoft JhengHei UI Bold |
+| weight 值    | Latin 自定义文件名        | Latin 系统字体             | CJK 系统字体                        |
+| ------------ | ------------------------- | -------------------------- | ----------------------------------- |
+| `Light`    | `{family}-Light.otf`    | Segoe UI Light             | Microsoft JhengHei UI Light         |
+| `Book`     | `{family}-Book.otf`     | Segoe UI Book              | —（回退 Regular）                  |
+| `Regular`  | `{family}-Regular.otf`  | Segoe UI Regular           | Microsoft JhengHei UI               |
+| `Medium`   | `{family}-Medium.otf`   | Segoe UI**Semibold** | Microsoft JhengHei UI**Bold** |
+| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold          | —（回退 Bold）                     |
+| `Bold`     | `{family}-Bold.otf`     | Segoe UI Bold              | Microsoft JhengHei UI Bold          |
 
 **Fallback 优先级：** `自定义字体文件 → 系统字体 → PIL 默认字体`。Latin/CJK 任一段落缺失，该类别自动走系统字体。
 
