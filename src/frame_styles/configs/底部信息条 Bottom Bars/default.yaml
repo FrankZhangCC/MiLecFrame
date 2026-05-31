@@ -1,0 +1,76 @@
+colors:
+  text: '#000000'
+  custom_timestamp_author_light_color: [51, 51, 51]
+  custom_timestamp_author_dark_color: [204, 204, 204]
+  custom_location_light_color: [51, 51, 51]
+  custom_location_dark_color: [204, 204, 204]
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  size_ratio: 0.02
+  sizes:
+    camera_lens: 0.019
+    timestamp_author: 0.015
+    exif: 0.019
+    location: 0.015
+layout:
+  expand_canvas:
+    enabled: true
+    top: 0.0
+    bottom: 0.1
+    left: 0.00
+    right: 0.00
+  padding:
+    left: 0.04
+    right: 0.04
+    top: 0.00
+    bottom: 0.00
+  info_position:
+    camera_lens:
+      placement: outside
+      position: "bottom-left"
+      alignment: "left"
+      margin_top: 0.01
+      margin_bottom: 0.028
+      margin_left: 0.02
+      margin_right: 0.01
+    timestamp_author:
+      relative_to: "camera_lens"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.010
+    exif:
+      placement: outside
+      position: "bottom-right"
+      alignment: "right"
+      margin_top: 0.01
+      margin_bottom: 0.028
+      margin_left: 0.01
+      margin_right: 0.02
+    location:
+      relative_to: "exif"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.010
+logo:
+  enabled: true
+  relative_to: "exif"
+  relative_position: "left-of"
+  alignment: "center"
+  relative_margin: 0.016
+  size_ratio: 0.048
+  offset_y_ratio: 0.011
+  diagonal_limit_ratio: 2.0
+name: 底部信息条 BottomBars
