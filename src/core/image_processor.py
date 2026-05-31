@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 图像处理器模块
 负责图像的基本处理、色彩空间转换、尺寸调整等

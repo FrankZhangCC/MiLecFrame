@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 渲染上下文模块
 负责收集和准备所有显示文本数据，将数据准备逻辑从渲染器中解耦

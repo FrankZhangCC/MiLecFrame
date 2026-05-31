@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 日志配置模块
 提供项目统一的日志初始化，确保各入口（CLI/GUI）获得一致的日志输出

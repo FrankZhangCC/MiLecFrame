@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 Streamlit入口点
 用于启动MiLeica Frame的GUI界面

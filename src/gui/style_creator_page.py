@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 样式编辑器页面模块
 通过可视化表单创建和编辑相框样式 YAML 配置文件

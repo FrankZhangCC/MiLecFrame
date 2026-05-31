@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 布局引擎模块
 负责画布尺寸计算、原图边界定位、元素（文字与非文字）的绝对/相对位置计算

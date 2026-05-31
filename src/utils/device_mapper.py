@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 设备映射数据库模块
 用于管理和维护相机品牌、机型及镜头的映射关系

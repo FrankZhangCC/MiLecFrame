@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 文字排版模块
 负责三源文本（info_position / defined_texts / custom_text）的
