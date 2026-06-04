@@ -142,22 +142,37 @@ def main():
 
 
 def _free_port(port=8501):
-    """释放被旧 Streamlit 实例占用的端口，仅杀命令行含 streamlit 的进程。"""
+    """释放被旧 Streamlit 实例占用的端口，仅杀命令行含 streamlit 的进程（跨平台）。"""
     try:
-        out = subprocess.run(
-            f'netstat -ano | findstr ":{port}" | findstr "LISTENING"',
-            capture_output=True, text=True, shell=True
-        )
-        for line in out.stdout.strip().splitlines():
-            parts = line.strip().split()
-            if len(parts) < 5:
-                continue
-            pid = parts[-1]
-            wmic_out = subprocess.run(
-                f'wmic process where "ProcessId={pid}" get CommandLine /format:csv',
+        is_win = sys.platform == "win32"
+        if is_win:
+            # Windows：netstat 取监听该端口的 PID
+            listing = subprocess.run(
+                f'netstat -ano | findstr ":{port}" | findstr "LISTENING"',
                 capture_output=True, text=True, shell=True
-            )
-            if 'streamlit' in wmic_out.stdout.lower():
+            ).stdout
+            pids = {ln.split()[-1] for ln in listing.strip().splitlines() if len(ln.split()) >= 5}
+        else:
+            # macOS / Linux：lsof 取监听该端口的 PID
+            listing = subprocess.run(
+                ['lsof', '-ti', f'tcp:{port}', '-sTCP:LISTEN'],
+                capture_output=True, text=True
+            ).stdout
+            pids = set(listing.split())
+
+        for pid in pids:
+            # 仅终止命令行包含 streamlit 的进程，避免误杀其他占用端口的程序
+            if is_win:
+                cmdline = subprocess.run(
+                    f'wmic process where "ProcessId={pid}" get CommandLine /format:csv',
+                    capture_output=True, text=True, shell=True
+                ).stdout
+            else:
+                cmdline = subprocess.run(
+                    ['ps', '-p', str(pid), '-o', 'command='],
+                    capture_output=True, text=True
+                ).stdout
+            if 'streamlit' in cmdline.lower():
                 os.kill(int(pid), 9)
                 print(f"已终止旧 Streamlit 进程 (PID {pid})")
     except Exception:

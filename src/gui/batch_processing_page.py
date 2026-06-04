@@ -10,6 +10,8 @@ import os
 import io
 import tempfile
 import shutil
+import sys
+import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
 from PIL import Image as PILImage
@@ -86,23 +88,29 @@ _SUPPORTED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.web
 
 def _open_folder_dialog() -> Optional[str]:
     """
-    打开原生文件夹选择对话框（使用 tkinter）
+    打开原生文件夹选择对话框（在独立子进程中运行 tkinter）
 
-    仅在服务器端有效（Streamlit 本地运行时）。
-    无 tkinter 或显示失败时返回 None。
+    必须用子进程而非直接调用：Streamlit 脚本运行在工作线程，而 macOS 要求
+    GUI 操作必须在主线程，直接在本进程 tk.Tk() 会卡死整个服务。子进程拥有
+    独立主线程，可正常弹窗。仅在本地运行（浏览器与服务同机）时有效；
+    无 tkinter / 用户取消 / 超时均返回 None。
 
     Returns:
         选定的文件夹路径，或 None
     """
+    script = (
+        "import tkinter as tk; from tkinter import filedialog; "
+        "root = tk.Tk(); root.withdraw(); root.attributes('-topmost', True); "
+        "p = filedialog.askdirectory(title='选择输出文件夹', mustexist=False); "
+        "root.destroy(); print(p)"
+    )
     try:
-        import tkinter as tk
-        from tkinter import filedialog
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        folder_path = filedialog.askdirectory(title="选择输出文件夹", mustexist=False)
-        root.destroy()
-        return folder_path if folder_path else None
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True, text=True, timeout=120
+        )
+        path = result.stdout.strip()
+        return path if path else None
     except Exception:
         return None
 
@@ -452,14 +460,14 @@ def render_batch_processing_page():
             output_folder = st.text_input(
                 "输出文件夹路径（不存在则自动创建）",
                 value=st.session_state.batch_output_folder,
-                placeholder="如 D:\\output 或 /home/user/output",
+                placeholder="点击右侧「浏览」选择，或手动输入绝对路径",
                 label_visibility="collapsed"
             )
             # 同步 widget 当前值 → session_state（无 key 时手动管理）
             st.session_state.batch_output_folder = output_folder
         with col_browse:
             if st.button("📂 浏览", key='batch_browse_output_btn', width='stretch',
-                         help="打开系统文件夹选择对话框"):
+                         help="打开系统文件夹选择对话框（仅本地运行时有效）"):
                 selected_path = _open_folder_dialog()
                 if selected_path:
                     st.session_state.batch_output_folder = selected_path
