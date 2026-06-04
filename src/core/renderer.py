@@ -17,7 +17,7 @@ if str(project_root) not in sys.path:
 
 from PIL import Image
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict, List
 from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector
