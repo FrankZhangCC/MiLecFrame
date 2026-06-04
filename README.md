@@ -38,7 +38,7 @@ python src/main.py
 
 #### 字体安装
 
-程序需要字体文件来渲染相框文字。**无自定义字体时自动使用系统预装字体**（Windows Segoe UI / Microsoft JhengHei UI），可直接跳过此步骤。
+程序需要字体文件来渲染相框文字。**无自定义字体时自动使用系统预装字体**（Windows：Segoe UI / Microsoft JhengHei UI；macOS：Helvetica / 苹方 PingFang；Linux：DejaVu Sans / Noto Sans CJK，运行时自动探测系统字体路径），可直接跳过此步骤。
 
 如需使用自定义字体（如预设样式默认的 Gotham + GlowSansSC），请放入 `assets/fonts/` 目录：
 

@@ -7,7 +7,10 @@
 """
 import os
 import re
+import sys
+import glob
 import logging
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -36,6 +39,39 @@ _SYSTEM_CJK_FILES = {
     'Medium': 'msjhbd.ttc',
     'Bold': 'msjhbd.ttc',
 }
+
+# macOS 系统字体候选（按存在性逐个探测，绝对路径）；CJK 另含动态资产 glob
+_MAC_LATIN_CANDIDATES = [
+    '/System/Library/Fonts/Helvetica.ttc',
+    '/System/Library/Fonts/HelveticaNeue.ttc',
+    '/Library/Fonts/Arial.ttf',
+]
+_MAC_CJK_GLOBS = [
+    # 新版 macOS 把苹方放入动态资产目录，hash 不固定，必须 glob 探测
+    '/System/Library/AssetsV2/com_apple_MobileAsset_Font*/*/AssetData/PingFang.ttc',
+    '/System/Library/AssetsV2/com_apple_MobileAsset_Font*/*/AssetData/PingFangSC*.ttf',
+]
+_MAC_CJK_CANDIDATES = [
+    '/System/Library/Fonts/PingFang.ttc',          # 旧版 macOS 固定路径
+    '/System/Library/Fonts/STHeiti Medium.ttc',
+    '/System/Library/Fonts/STHeiti Light.ttc',
+    '/Library/Fonts/Arial Unicode.ttf',
+]
+
+# Linux 系统字体候选（按存在性逐个探测）；另用 fc-match 动态兜底
+_LINUX_LATIN_CANDIDATES = [
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/TTF/DejaVuSans.ttf',
+    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+]
+_LINUX_CJK_CANDIDATES = [
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc',
+    '/usr/share/fonts/wenquanyi/wqy-zenhei/wqy-zenhei.ttc',
+]
 
 
 class FontManager:
@@ -77,6 +113,71 @@ class FontManager:
                     return font
         except (OSError, Exception):
             pass
+        return None
+
+    def _fc_match(self, family: str) -> Optional[str]:
+        """Linux：用 fontconfig 的 fc-match 动态定位字体文件；无 fc-match 或失败返回 None"""
+        try:
+            out = subprocess.run(
+                ['fc-match', '-f', '%{file}', family],
+                capture_output=True, text=True, timeout=5
+            )
+            path = out.stdout.strip()
+            return path if path and os.path.exists(path) else None
+        except Exception:
+            return None
+
+    def _system_font_candidates(self, is_cjk: bool) -> List[str]:
+        """按当前平台返回系统字体候选路径列表（动态探测路径在前，静态兜底在后）"""
+        paths: List[str] = []
+        if sys.platform == 'darwin':
+            if is_cjk:
+                for pattern in _MAC_CJK_GLOBS:
+                    paths.extend(sorted(glob.glob(pattern)))
+                paths.extend(_MAC_CJK_CANDIDATES)
+            else:
+                paths.extend(_MAC_LATIN_CANDIDATES)
+        else:
+            # Linux 及其它 POSIX：静态候选 + fc-match 动态兜底
+            paths.extend(_LINUX_CJK_CANDIDATES if is_cjk else _LINUX_LATIN_CANDIDATES)
+            fc_families = (['Noto Sans CJK SC', 'WenQuanYi Zen Hei'] if is_cjk
+                          else ['DejaVu Sans', 'Liberation Sans'])
+            for fam in fc_families:
+                matched = self._fc_match(fam)
+                if matched:
+                    paths.append(matched)
+        return paths
+
+    def _resolve_system_font(self, weight: str, is_cjk: bool, font_size: int) -> Optional[ImageFont.FreeTypeFont]:
+        """跨平台解析系统字体。
+
+        Windows：用字体目录 + 字重映射（行为与原实现一致）。
+        macOS / Linux：按候选路径逐个探测，命中即用。
+        全部走"探测存在即加载、否则继续、最终 None"流程，调用方在 None 时回退 PIL 默认。
+        """
+        if sys.platform == 'win32':
+            sys_map = _SYSTEM_CJK_FILES if is_cjk else _SYSTEM_LATIN_FILES
+            # 备选 weight：当前 weight → Regular → 其它，逐个降级
+            fallback_weights = [weight] + [w for w in ['Regular', 'Medium', 'Light', 'Bold'] if w != weight]
+            for fb_weight in fallback_weights:
+                sys_file = sys_map.get(fb_weight)
+                if not sys_file:
+                    continue
+                sys_path = os.path.join(self._windows_font_dir, sys_file)
+                if os.path.exists(sys_path):
+                    font = self._try_load_font(sys_path, font_size)
+                    if font:
+                        logger.debug(f"系统字体命中(win): weight={fb_weight}, 文件={sys_file}")
+                        return font
+            return None
+
+        # macOS / Linux：候选路径探测
+        for path in self._system_font_candidates(is_cjk):
+            if os.path.exists(path):
+                font = self._try_load_font(path, font_size)
+                if font:
+                    logger.debug(f"系统字体探测命中: {path}")
+                    return font
         return None
 
     def load_font(
@@ -145,23 +246,9 @@ class FontManager:
                     if font:
                         break
 
-        # 优先级 2：系统字体（含降级回退）
+        # 优先级 2：系统字体（跨平台：Windows 字体目录 / macOS / Linux 候选探测 + fc-match 兜底）
         if font is None:
-            sys_map = _SYSTEM_CJK_FILES if is_cjk else _SYSTEM_LATIN_FILES
-            # 要尝试的备选 weight 列表：当前 weight → Regular → 第一个可用
-            fallback_weights = [weight] + [w for w in ['Regular', 'Medium', 'Light', 'Bold'] if w != weight]
-            for fb_weight in fallback_weights:
-                sys_file = sys_map.get(fb_weight)
-                if not sys_file:
-                    continue
-                sys_path = os.path.join(self._windows_font_dir, sys_file)
-                if os.path.exists(sys_path):
-                    font = self._try_load_font(sys_path, font_size)
-                    if font:
-                        logger.debug(f"系统字体加载成功: weight={fb_weight}, 文件={sys_file}")
-                        break
-                    else:
-                        logger.debug(f"系统字体加载失败: weight={fb_weight}, 文件={sys_file}")
+            font = self._resolve_system_font(weight, is_cjk, font_size)
 
         # 优先级 3：PIL 默认
         if font is None:
