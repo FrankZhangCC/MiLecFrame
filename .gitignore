@@ -104,6 +104,9 @@ assets/fonts/*
 !assets/fonts/.gitkeep
 debug_log.txt
 docs/FLUTTER_MIGRATION_PLAN.md
+docs/docs_legacy/
+docs/intro_legacy/
+*.ai
 docs/LayoutInstruction_排版定位系统参数图解.ai
 test_images
 AGENTS.md

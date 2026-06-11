@@ -1,13 +1,14 @@
-![Features_introduction](docs/Features_introduction.jpg)
+![Features_introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.0.0--dev-orange)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.0.0--release-green)
 
 > ©FrankZhangCC 2026
+> 本程序基于 GPLv3 许可证发布，详见 [LICENSE](./LICENSE) 文件。
 > 使用DeepSeek V4系列模型开发。
 
 MiLecFrame 是一款为专业摄影师和摄影爱好者设计的照片相框水印工具，参考小米徕卡专属水印样式及后续各大品牌的水印风格开发。
 
-本程序基于 Python 和 Streamlit 框架，采用 Vibe Coding 方式开发（初期使用 Qwen3-Coder，中后期使用 DeepSeek V4）。
+本程序基于 Python 和 PySide6 + QFluentWidgets 框架，采用 Vibe Coding 方式开发（初期使用 Qwen3-Coder，中后期使用 DeepSeek V4）。
 
 相较其他开源方案或在线水印工具，MiLecFrame 除了基础的 EXIF 信息展示、拍摄地点标记等功能外，还针对使用相机创作的群体加入了相机与镜头型号映射、多样化预设样式和可自定义的样式编辑器等特色功能，满足高质量创作传播需求。
 
@@ -153,7 +154,7 @@ python src/main.py --batch -i /path/to/input/folder -o /path/to/output/folder -s
 ### 使用方式
 
 - **CLI 命令行**：单张图片或批量文件夹处理
-- **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载；批量处理页面支持多文件上传、逐张实时进度和结果汇总
+- **PySide6 桌面 GUI**：原生桌面界面，支持图片拖拽、胶片栏多图排队、完整参数配置和实时预览；批量处理支持文件夹扫描和逐张进度追踪
 - **批量处理**：GUI 多文件上传（Ctrl+A 全选文件夹）、完整参数配置、逐张独立 Logo 匹配和 GPS 替换、实时进度条、跳过已存在文件、失败详情回溯；CLI 支持文件夹递归扫描
 
 ---
@@ -165,7 +166,7 @@ python src/main.py --batch -i /path/to/input/folder -o /path/to/output/folder -s
 - 核心图像处理：Pillow、NumPy
 - HDR 色调映射：Reinhard 全局算子（NumPy 实现）
 - EXIF处理：piexif
-- GUI界面：Streamlit
+- GUI界面：PySide6 + QFluentWidgets
 
 ## 项目结构
 
