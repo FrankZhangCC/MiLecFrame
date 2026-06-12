@@ -224,11 +224,24 @@ MiLeica_Frame/
 │   ├── camera_map.csv      # 相机品牌型号映射
 │   └── lens_map.csv        # 镜头映射（原始 → 映射 → 短版）
 ├── tests/                  # 测试文件
+├── CHANGELOG.md            # 开发版变更日志（详细记录每次 dev 版本的完整变更）
+├── CHANGELOG_RELEASE.md    # 发行版变更日志（仅收录正式版重点功能新增）
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
 ├── build_pyside.py        # PyInstaller 编译脚本
 └── README.md
 ```
+
+### 变更日志说明
+
+本仓库维护两份变更日志文件，服务于不同受众：
+
+| 文件 | 内容 | 适用读者 |
+|------|------|----------|
+| [`CHANGELOG.md`](./CHANGELOG.md) | **开发版变更日志**，记录每个 dev 版本的全部变更（新增、修复、重构、清理等），格式详实 | 贡献者、开发者 |
+| [`CHANGELOG_RELEASE.md`](./CHANGELOG_RELEASE.md) | **发行版变更日志**，仅收录正式发行版的重点功能新增，概括重大里程碑 | 用户、部署者 |
+
+版本对照关系：`v1.n-dev` 系列对应 `v0.n-release` 发行版，`v2.n-dev` 系列对应 `v1.n-release` 发行版。
 
 ## 样式配置规范
 

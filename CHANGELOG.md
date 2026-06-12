@@ -1,4 +1,6 @@
-# 更新历史
+# 更新历史（开发版）
+
+> 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
 ## v2.1.0-dev (2026-06-12)
 
