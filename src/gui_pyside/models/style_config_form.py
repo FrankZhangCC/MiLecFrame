@@ -234,6 +234,8 @@ class StyleConfigFormData:
     # ── 颜色 ──
     color_light: str = ''
     color_dark: str = ''
+    custom_bg_color: str = ''
+    custom_bg_text_scheme: str = ''
     color_per_element: dict = field(default_factory=dict)
 
     # ── 元素布局 ──
@@ -274,6 +276,12 @@ class StyleConfigFormData:
             colors['custom_text_light_color'] = _parse_color(self.color_light)
         if self.color_dark.strip():
             colors['custom_text_dark_color'] = _parse_color(self.color_dark)
+
+        # 自定义背景填充色
+        if self.custom_bg_color.strip():
+            colors['custom_bg_color'] = _parse_color(self.custom_bg_color)
+        if self.custom_bg_text_scheme.strip():
+            colors['custom_bg_text_scheme'] = self.custom_bg_text_scheme
 
         for k in COLOR_ELEMENT_KEYS:
             pe = self.color_per_element.get(k, {})
@@ -500,6 +508,11 @@ class StyleConfigFormData:
             colors.get('custom_text_light_color', ''))
         form.color_dark = _color_to_text(
             colors.get('custom_text_dark_color', ''))
+
+        form.custom_bg_color = _color_to_text(
+            colors.get('custom_bg_color', ''))
+        form.custom_bg_text_scheme = str(
+            colors.get('custom_bg_text_scheme', ''))
 
         for k in COLOR_ELEMENT_KEYS:
             pe = {}

@@ -29,6 +29,26 @@ from src.core.text_renderer import TextRenderer
 logger = logging.getLogger(__name__)
 
 
+def _parse_hex_or_rgb(value) -> Optional[Tuple[int, int, int]]:
+    """
+    解析颜色值，支持 #RRGGBB 字符串或 [R, G, B] 列表/元组
+    返回 RGB 元组，解析失败返回 None
+    """
+    if isinstance(value, str):
+        s = value.strip()
+        if s.startswith('#'):
+            try:
+                return tuple(int(s[i:i+2], 16) for i in (1, 3, 5))
+            except (ValueError, IndexError):
+                return None
+    if isinstance(value, (list, tuple)) and len(value) == 3:
+        try:
+            return tuple(int(c) for c in value)
+        except (ValueError, TypeError):
+            return None
+    return None
+
+
 def _rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br):
     """
     创建四角独立圆角的抗锯齿灰度蒙版
@@ -121,13 +141,33 @@ class FrameRenderer:
         fonts = style_config.get('fonts', {})
         logo_config = style_config.get('logo', {})
 
+        # ── 自定义背景填充色（样式配置中 colors 区块指定） ────────────
+        custom_bg_color_raw = colors.get('custom_bg_color')
+        if custom_bg_color_raw:
+            parsed = _parse_hex_or_rgb(custom_bg_color_raw)
+            if parsed:
+                # 从配置中获取 text_scheme，未设置时自动根据亮度判定
+                text_scheme = colors.get('custom_bg_text_scheme')
+                if not text_scheme:
+                    r, g, b = parsed
+                    luminance = 0.299 * r + 0.587 * g + 0.114 * b
+                    text_scheme = 'dark' if luminance < 128 else 'light'
+                # 注册到 BackgroundFillManager 并获取有效 key
+                effective_bg_type = BackgroundFillManager.register_custom_solid(
+                    parsed, text_scheme)
+            else:
+                logger.warning("样式自定义背景色解析失败: %s，回退到 GUI 选择", custom_bg_color_raw)
+                effective_bg_type = bg_fill_type
+        else:
+            effective_bg_type = bg_fill_type
+
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
         context = RenderContext(image.size, exif_data, author, location, lens_display_mode, use_short_lens, custom_text=custom_text)
 
         background = BackgroundFillManager.render(
-            image, canvas_width, canvas_height, bg_fill_type,
+            image, canvas_width, canvas_height, effective_bg_type,
             saturation=saturation_override
         )
 
@@ -169,7 +209,7 @@ class FrameRenderer:
         # 文字层（委托给 TextRenderer）
         text_renderer = TextRenderer(self.font_manager, layout_engine)
         image_with_text = text_renderer.render(
-            decorated_image, context, colors, fonts, bg_fill_type,
+            decorated_image, context, colors, fonts, effective_bg_type,
         )
         
         # Logo 后处理（可依赖文字层已注册的坐标）
@@ -178,7 +218,7 @@ class FrameRenderer:
                 camera_brand = context.get_text('camera_make')
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()
-                    is_dark_bg = BackgroundFillManager.is_dark_bg(bg_fill_type)
+                    is_dark_bg = BackgroundFillManager.is_dark_bg(effective_bg_type)
                     logo_filename = logo_selector_instance.auto_match_logo(
                         camera_brand.lower(), is_dark_bg=is_dark_bg
                     )

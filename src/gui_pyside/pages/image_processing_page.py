@@ -544,6 +544,17 @@ class ImageProcessingPage(QWidget):
         # LOGO：始终可见，仅控制启用状态
         logo_enabled = isinstance(logo_cfg, dict) and logo_cfg.get('enabled', False)
 
+        # 自定义背景填充色：若样式指定了背景色，禁用 GUI 的背景样式选择
+        custom_bg_color = config.get('colors', {}).get('custom_bg_color')
+        if custom_bg_color:
+            self.combo_bg_fill.setEnabled(False)
+            self.chk_enhance.setEnabled(False)
+            self.combo_bg_fill.setToolTip(f'背景颜色由样式配置指定: {custom_bg_color}')
+        else:
+            self.combo_bg_fill.setEnabled(True)
+            self.chk_enhance.setEnabled(True)
+            self.combo_bg_fill.setToolTip('')
+
         logger.debug(f"样式变更: {style_name}, 自定义文本: {ct_enabled}, LOGO: {logo_enabled}")
 
     # ════════════════════════════════════════════════════════

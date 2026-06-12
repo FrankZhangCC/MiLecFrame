@@ -1,6 +1,6 @@
 ![Features_introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.0.0--release-green)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.1.0--dev-blue)
 
 > ©FrankZhangCC 2026
 > 本程序基于 GPLv3 许可证发布，详见 [LICENSE](./LICENSE) 文件。
@@ -498,10 +498,16 @@ v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染�
 
 颜色由背景类型自动适配，支持按文本类型分别覆盖：
 
+- **自定义背景填充色（可选，v2.1.0）**：
+  - `custom_bg_color`: 自定义背景填充颜色，支持十六进制（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+  - `custom_bg_text_scheme`: 可选声明背景明暗类型，值为 `"dark"` 或 `"light"`；未声明时自动根据颜色亮度（`luminance = 0.299R + 0.587G + 0.114B`，阈值 128）判定
+  - 指定后渲染器使用纯色填充覆盖扩展画布，GUI 背景样式下拉框自动禁用
+  - 示例：`custom_bg_color: "#28180B"` + `custom_bg_text_scheme: "dark"`
 - **通用自定义颜色（作为所有文本类型的兜底）**：
   - `custom_text_light_color`: 亮色背景下的文字颜色
   - `custom_text_dark_color`: 暗色背景下的文字颜色
   - 支持十六进制格式（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+  - 注：两字段可独立声明其一，无需成对填写（v2.1.0 修复）
 - **按文本类型独立覆盖**：`custom_{text_type}_light_color` / `custom_{text_type}_dark_color`
   - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 示例：`custom_exif_light_color: [51, 51, 51]`、`custom_timestamp_dark_color: "#CCCCCC"`
