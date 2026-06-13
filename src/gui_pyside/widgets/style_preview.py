@@ -13,9 +13,10 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QSizePolicy,
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QPixmap, QColorSpace
 
-from qfluentwidgets import SegmentedWidget, ComboBox
+from qfluentwidgets import SegmentedWidget, ComboBox, setCustomStyleSheet
+from qfluentwidgets.common.style_sheet import addStyleSheet, CustomStyleSheet
 
 from PIL import Image as PILImage
 
@@ -88,15 +89,27 @@ class StylePreview(QWidget):
         self.preview_label.setMinimumSize(200, 200)
         self.preview_label.setSizePolicy(
             QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                color: #888;
-                font-size: 14px;
-                background-color: #fafafa;
-            }
-        """)
+        setCustomStyleSheet(self.preview_label,
+            lightQss=(
+                "QLabel {"
+                " border: 1px solid #e0e0e0;"
+                " border-radius: 8px;"
+                " color: #888;"
+                " font-size: 14px;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QLabel {"
+                " border: 1px solid #404040;"
+                " border-radius: 8px;"
+                " color: #999;"
+                " font-size: 14px;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
+        addStyleSheet(self.preview_label, CustomStyleSheet(self.preview_label))
         layout.addWidget(self.preview_label, stretch=1)
 
     def _on_orientation_changed(self, route_key: str):
@@ -158,6 +171,7 @@ class StylePreview(QWidget):
             data, pil_image.width, pil_image.height,
             3 * pil_image.width, QImage.Format.Format_RGB888,
         )
+        qimage.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
         pixmap = QPixmap.fromImage(qimage)
         if pixmap.isNull():
             self._cached_pixmap = None
@@ -167,7 +181,10 @@ class StylePreview(QWidget):
 
         # 缓存原始 pixmap
         self._cached_pixmap = pixmap
-        self.preview_label.setStyleSheet(
-            "border: none; border-radius: 8px; background-color: #fafafa;")
+        setCustomStyleSheet(self.preview_label,
+            lightQss="QLabel { border: none; border-radius: 8px; background-color: #fafafa; }",
+            darkQss="QLabel { border: none; border-radius: 8px; background-color: #282828; }",
+        )
+        addStyleSheet(self.preview_label, CustomStyleSheet(self.preview_label))
         self.preview_label.setText("")
         self._do_scale_pixmap()

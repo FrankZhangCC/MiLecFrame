@@ -1,6 +1,6 @@
 ![Features_introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.1.0--dev-blue)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.1.1--dev-blue)
 
 > ©FrankZhangCC 2026
 > 本程序基于 GPLv3 许可证发布，详见 [LICENSE](./LICENSE) 文件。
