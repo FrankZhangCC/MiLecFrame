@@ -5,20 +5,19 @@
 MiLec Frame - 照片相框程序
 =============================
 
-此程序为照片添加包含 EXIF 信息的相框，支持命令行和GUI两种运行模式。
+此程序为照片添加包含 EXIF 信息的相框，支持命令行和 PySide6 GUI 两种运行模式。
 
 主要功能：
 - 解析照片的EXIF信息
 - 根据EXIF信息生成相框
 - 支持多种相框样式
-- 提供GUI界面
+- 提供 PySide6 桌面 GUI
 """
 
 import argparse
 import sys
 import os
 from pathlib import Path
-import subprocess
 
 
 def main():
@@ -32,7 +31,6 @@ def main():
     parser.add_argument("-i", "--input", help="输入图片路径")
     parser.add_argument("-o", "--output", help="输出图片路径")
     parser.add_argument("-s", "--style", help="相框样式名称")
-    parser.add_argument("--gui", action="store_true", default=True, help="启动GUI界面（默认）")
     parser.add_argument("--author", help="作者名")
     parser.add_argument("--location", help="拍摄地点")
     parser.add_argument("--bg-fill", choices=BackgroundFillManager.get_keys(), 
@@ -63,23 +61,22 @@ def main():
     
     args = parser.parse_args()
     
-    # 如果没有指定任何参数，则默认启动GUI
+    # 如果没有指定任何参数，则默认启动 PySide6 桌面 GUI
     if not args.input and not args.output and not args.batch and not args.recursive:
-        args.gui = True
-    
-    if args.gui:
         try:
-            launch_gui()
+            launch_pyside_gui()
         except ImportError as e:
-            print(f"GUI启动失败，导入错误: {str(e)}")
+            print(f"PySide6 GUI 启动失败，导入错误: {str(e)}")
+            print("请确保已安装 PySide6-Fluent-Widgets: pip install \"PySide6-Fluent-Widgets[full]\"")
             sys.exit(1)
         except KeyboardInterrupt:
             print("\n程序已被用户中断。")
             sys.exit(0)
         except Exception as e:
-            print(f"GUI启动失败，未知错误: {str(e)}")
+            print(f"PySide6 GUI 启动失败，未知错误: {str(e)}")
             sys.exit(1)
-    elif args.batch and args.input and args.output:
+    
+    if args.batch and args.input and args.output:
         try:
             batch_process_images(
                 input_folder=args.input,
@@ -141,74 +138,13 @@ def main():
         parser.print_help()
 
 
-def _free_port(port=8501):
-    """释放被旧 Streamlit 实例占用的端口，仅杀命令行含 streamlit 的进程。"""
-    try:
-        out = subprocess.run(
-            f'netstat -ano | findstr ":{port}" | findstr "LISTENING"',
-            capture_output=True, text=True, shell=True
-        )
-        for line in out.stdout.strip().splitlines():
-            parts = line.strip().split()
-            if len(parts) < 5:
-                continue
-            pid = parts[-1]
-            wmic_out = subprocess.run(
-                f'wmic process where "ProcessId={pid}" get CommandLine /format:csv',
-                capture_output=True, text=True, shell=True
-            )
-            if 'streamlit' in wmic_out.stdout.lower():
-                os.kill(int(pid), 9)
-                print(f"已终止旧 Streamlit 进程 (PID {pid})")
-    except Exception:
-        pass
+def launch_pyside_gui():
+    """启动 PySide6 原生桌面 GUI"""
+    print("正在启动 PySide6 桌面 GUI...")
+    print("按 Ctrl+C 可随时停止")
 
-
-def launch_gui():
-    """启动图形用户界面"""
-    _free_port()
-    print("正在启动GUI界面...")
-    print("请在浏览器中打开 http://localhost:8501 查看应用")
-    print("按 Ctrl+C 可随时停止服务")
-    
-    # 获取项目根目录下的gui app文件路径
-    gui_app_path = Path(__file__).parent / "gui" / "app.py"
-    
-    # 获取当前Python解释器路径
-    python_executable = sys.executable
-    
-    # 使用subprocess运行streamlit命令
-    try:
-        subprocess.run([python_executable, "-m", "streamlit", "run", str(gui_app_path)], check=True)
-    except subprocess.CalledProcessError as e:
-        if e.returncode in (-2, 1):
-            print("\nGUI服务已被用户停止。")
-            return
-        else:
-            print(f"GUI启动失败: {str(e)}")
-            sys.exit(1)
-    except FileNotFoundError:
-        # 如果Python解释器中没有streamlit，尝试直接使用streamlit命令
-        try:
-            subprocess.run(["streamlit", "run", str(gui_app_path)], check=True)
-        except FileNotFoundError:
-            print("错误: 未找到streamlit命令，请确保已安装Streamlit")
-            print("可通过以下命令安装: pip install streamlit")
-            sys.exit(1)
-        except subprocess.CalledProcessError as e:
-            if e.returncode in (-2, 1):
-                print("\nGUI服务已被用户停止。")
-                return
-            else:
-                print(f"GUI启动失败: {str(e)}")
-                sys.exit(1)
-        except KeyboardInterrupt:
-            print("\nGUI服务已被用户中断。")
-            return
-    except KeyboardInterrupt:
-        print("\nGUI服务已被用户中断。")
-        return
-
+    from gui_pyside.app import run_pyside_app
+    run_pyside_app()
 
 def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill=None,
                   font_weight='medium', logo="auto", lens_display='combined',
@@ -425,8 +361,7 @@ def batch_process_images(
         print("全部处理完成！")
 
 
-# 为了兼容旧版本，保留向后兼容的接口
-__all__ = ['main', 'launch_gui', 'process_image', 'batch_process_images']
+__all__ = ['main', 'launch_pyside_gui', 'process_image', 'batch_process_images']
 
 if __name__ == "__main__":
     main()

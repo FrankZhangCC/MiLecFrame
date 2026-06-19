@@ -355,7 +355,8 @@ def _load_existing_style(filename: str):
         st.session_state.sc_logo_position = str(logo.get('position', 'top-right'))
         st.session_state.sc_logo_alignment = str(logo.get('alignment', 'top-right'))
         st.session_state.sc_logo_size = float(logo.get('size_ratio', 0.04))
-        st.session_state.sc_logo_diagonal_limit = float(logo.get('diagonal_limit_ratio', 2.0))
+        st.session_state.sc_logo_diagonal_limit = float(logo.get('max_dim_limit_ratio',
+                                                         logo.get('diagonal_limit_ratio', 2.5)))
         st.session_state.sc_logo_mt = float(logo.get('margin_top', 0.0))
         st.session_state.sc_logo_mb = float(logo.get('margin_bottom', 0.0))
         st.session_state.sc_logo_ml = float(logo.get('margin_left', 0.0))
@@ -564,7 +565,7 @@ def _render_logo():
             st.number_input('size_ratio', min_value=0.001, max_value=0.2,
                             step=0.001, format='%.3f', key='sc_logo_size')
         with c2:
-            st.number_input('diagonal_limit_ratio', min_value=1.0, max_value=5.0,
+            st.number_input('max_dim_limit_ratio', min_value=1.0, max_value=5.0,
                             step=0.1, format='%.1f', key='sc_logo_diagonal_limit')
         with c3:
             st.selectbox('alignment', ALIGNMENT_OPTIONS, key='sc_logo_alignment')
@@ -1126,7 +1127,7 @@ def _collect_config() -> dict:
             'enabled': True,
             'alignment': st.session_state.get('sc_logo_alignment', 'top-right'),
             'size_ratio': st.session_state.get('sc_logo_size', 0.04),
-            'diagonal_limit_ratio': st.session_state.get('sc_logo_diagonal_limit', 2.0),
+            'max_dim_limit_ratio': st.session_state.get('sc_logo_diagonal_limit', 2.5),
         }
         if logo_mode == 'relative' and st.session_state.get('sc_logo_relative_to'):
             logo['relative_to'] = st.session_state.get('sc_logo_relative_to', '')

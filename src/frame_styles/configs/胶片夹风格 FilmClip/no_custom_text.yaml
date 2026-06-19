@@ -53,20 +53,20 @@ layout:
     enabled: true
     top: 0.175
     bottom: 0.225
-    left: 0.05
-    right: 0.05
+    left: 0.04
+    right: 0.04
   padding:
     top: 0.025
     bottom: 0.025
-    left: 0.05
-    right: 0.05
+    left: 0.04
+    right: 0.04
 
   corner_radius:
     enabled: true
-    top_left: 0.02
-    top_right: 0.02
-    bottom_left: 0.02
-    bottom_right: 0.02
+    top_left: 0.04
+    top_right: 0.04
+    bottom_left: 0.04
+    bottom_right: 0.04
 
   info_position:
     camera_lens:
@@ -129,4 +129,4 @@ logo:
   alignment: "both-center"
   margin_top: 0.083
   size_ratio: 0.075
-  diagonal_limit_ratio: 2.2
+  max_dim_limit_ratio: 2.5

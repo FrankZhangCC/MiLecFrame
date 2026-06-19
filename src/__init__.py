@@ -10,14 +10,13 @@ MiLecFrame - 照片相框程序包初始化
 """
 from ._version import __version__
 from .core import *
-from .gui import *
 from .utils import *
 from .frame_styles import *
 
 __author__ = "FrankZhangCC"
 __all__ = [
     'core',
-    'gui', 
+    'gui_legacy',
     'utils',
     'frame_styles',
     'main'

@@ -5,14 +5,27 @@
 Logo选择器模块
 负责扫描logo目录、验证logo格式和根据相机品牌自动匹配logo
 """
+import logging
 import os
 from pathlib import Path
 from typing import List, Optional
 from PIL import Image
 
+logger = logging.getLogger(__name__)
+
 
 class LogoSelector:
     """Logo选择器类"""
+
+    # 品牌独立缩放系数映射表
+    # keyword: 文件名关键字（不区分大小写），factor: 缩放系数（1.0=不变，<1缩小，>1放大）
+    BRAND_SCALE_FACTORS: dict = {
+        # 示例：细长条 logo 可缩小，紧凑型 logo 可放大
+         'hasselblad_logo': 1.5,
+         'sony_logo': 0.7,
+         'canon_logo': 0.7,
+         'fujifilm_logo': 0.7
+    }
     
     def __init__(self, logos_dir: str = None):
         """
@@ -134,3 +147,15 @@ class LogoSelector:
         
         # 未指定背景类型时，返回第一个匹配（保持向后兼容）
         return matched_logos[0]
+
+    def get_brand_scale_factor(self, logo_filename: str) -> float:
+        """
+        根据logo文件名获取品牌独立缩放系数
+        关键字匹配时不区分大小写
+        """
+        logo_lower = os.path.splitext(logo_filename)[0].lower()
+        for keyword, factor in self.BRAND_SCALE_FACTORS.items():
+            if keyword.lower() in logo_lower:
+                logger.debug(f"品牌缩放系数匹配: '{keyword}' → {factor} (logo: {logo_filename})")
+                return factor
+        return 1.0
