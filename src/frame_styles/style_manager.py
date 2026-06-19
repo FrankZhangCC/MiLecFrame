@@ -59,7 +59,7 @@ class StyleManager:
                 if style_name not in styles:
                     styles.append(style_name)
         
-        return styles
+        return sorted(styles)
     
     def _load_config_file(self, config_path: str) -> Optional[Dict]:
         """加载单个配置文件"""
@@ -269,6 +269,29 @@ class StyleManager:
         
         return True
     
+    def get_style_thumbnail(self, style_name: str) -> Optional[str]:
+        """
+        获取指定样式的缩略图路径
+        
+        在样式配置文件夹中查找 thumbnail.png / thumbnail.jpg / thumbnail.jpeg。
+        
+        Args:
+            style_name: 样式名称
+            
+        Returns:
+            缩略图文件绝对路径，不存在则返回 None
+        """
+        style_dir = os.path.join(self.config_dir, style_name)
+        if not os.path.isdir(style_dir):
+            return None
+        
+        for ext in ('.png', '.jpg', '.jpeg'):
+            thumb_path = os.path.join(style_dir, f'thumbnail{ext}')
+            if os.path.isfile(thumb_path):
+                return thumb_path
+        
+        return None
+
     def get_default_style(self) -> Optional[Dict]:
         """
         获取默认样式配置
