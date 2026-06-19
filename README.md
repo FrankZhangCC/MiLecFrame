@@ -1,6 +1,6 @@
 ![Features_introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.0.0--release-green)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.1.0--release-blue)
 
 > ©FrankZhangCC 2026
 > 本程序基于 GPLv3 许可证发布，详见 [LICENSE](./LICENSE) 文件。
@@ -224,15 +224,30 @@ MiLeica_Frame/
 │   ├── camera_map.csv      # 相机品牌型号映射
 │   └── lens_map.csv        # 镜头映射（原始 → 映射 → 短版）
 ├── tests/                  # 测试文件
+├── CHANGELOG.md            # 开发版变更日志（详细记录每次 dev 版本的完整变更）
+├── CHANGELOG_RELEASE.md    # 发行版变更日志（仅收录正式版重点功能新增）
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
 ├── build_pyside.py        # PyInstaller 编译脚本
 └── README.md
 ```
 
+### 变更日志说明
+
+本仓库维护两份变更日志文件，服务于不同受众：
+
+| 文件 | 内容 | 适用读者 |
+|------|------|----------|
+| [`CHANGELOG.md`](./CHANGELOG.md) | **开发版变更日志**，记录每个 dev 版本的全部变更（新增、修复、重构、清理等），格式详实 | 贡献者、开发者 |
+| [`CHANGELOG_RELEASE.md`](./CHANGELOG_RELEASE.md) | **发行版变更日志**，仅收录正式发行版的重点功能新增，概括重大里程碑 | 用户、部署者 |
+
+版本对照关系：`v1.n-dev` 系列对应 `v0.n-release` 发行版，`v2.n-dev` 系列对应 `v1.n-release` 发行版。
+
 ## 样式配置规范
 
 样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](./src/frame_styles/configs/)目录下。
+
+**每种样式必须存放在独立的文件夹中**（文件夹名 = 样式名），即使只有单变体也不例外。文件夹内除配置文件外还可存放缩略图、补充资源等附属文件。传统单文件样式（`样式名.yaml` 直接放在 `configs/` 根目录）已不再推荐使用。
 
 > **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](./src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
 
@@ -247,8 +262,12 @@ configs/
     no_location.yaml          # location 缺失时的变体
     no_author.yaml            # author 缺失时的变体
     no_location_no_author.yaml # 多字段同时缺失时的变体（越具体越优先）
-  OtherStyle.yaml             # 传统单文件样式（向后兼容）
+  裁剪胶片 FilmCut/
+    default.yaml              # 单变体样式也建议使用文件夹，方便存放缩略图
+    thumbnail.png
 ```
+
+所有样式均建议使用独立文件夹组织（即使只有单变体），以便在文件夹内存放缩略图、补充资源等附属文件。
 
 #### 命名规则
 
@@ -291,6 +310,31 @@ style_config = style_manager.get_style_config(
 # 不带 context 时（如 GUI 预览）返回 default.yaml，确保向后兼容
 style_config = style_manager.get_style_config('底部信息条 Bottom Bars')
 ```
+
+### 样式缩略图
+
+样式选择器在 GUI 中以横向缩略图滚动列表展示，每种样式需要一张预览缩略图。
+
+**文件约定**：
+
+```
+configs/样式名称/
+├── default.yaml              # 样式配置
+├── thumbnail.png             # 缩略图（必需）
+└── no_location.yaml          # 变体配置（可选）
+```
+
+| 规范 | 要求 |
+|------|------|
+| **文件名** | `thumbnail.png`（推荐）或 `thumbnail.jpg` / `thumbnail.jpeg` |
+| **尺寸** | 512 × 512 像素（正方形） |
+| **格式** | PNG（推荐）或 JPEG |
+| **存放位置** | 样式配置文件夹根目录，与 `default.yaml` 同级 |
+| **作用** | 样式选择器中用于直观展示该样式的最终效果 |
+
+**缺失处理**：未放置缩略图时，样式选择器中对应位置以灰色背景 + 样式名称文字占位，不影响程序正常运行。
+
+> 示例：为"底部信息条 Bottom Bars"样式放置缩略图 → `configs/底部信息条 Bottom Bars/thumbnail.png`
 
 ### 基本信息
 
@@ -498,10 +542,16 @@ v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染�
 
 颜色由背景类型自动适配，支持按文本类型分别覆盖：
 
+- **自定义背景填充色（可选，v2.1.0）**：
+  - `custom_bg_color`: 自定义背景填充颜色，支持十六进制（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+  - `custom_bg_text_scheme`: 可选声明背景明暗类型，值为 `"dark"` 或 `"light"`；未声明时自动根据颜色亮度（`luminance = 0.299R + 0.587G + 0.114B`，阈值 128）判定
+  - 指定后渲染器使用纯色填充覆盖扩展画布，GUI 背景样式下拉框自动禁用
+  - 示例：`custom_bg_color: "#28180B"` + `custom_bg_text_scheme: "dark"`
 - **通用自定义颜色（作为所有文本类型的兜底）**：
   - `custom_text_light_color`: 亮色背景下的文字颜色
   - `custom_text_dark_color`: 暗色背景下的文字颜色
   - 支持十六进制格式（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+  - 注：两字段可独立声明其一，无需成对填写（v2.1.0 修复）
 - **按文本类型独立覆盖**：`custom_{text_type}_light_color` / `custom_{text_type}_dark_color`
   - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 示例：`custom_exif_light_color: [51, 51, 51]`、`custom_timestamp_dark_color: "#CCCCCC"`

@@ -1,4 +1,250 @@
-# 更新历史
+# 更新历史（开发版）
+
+> 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
+
+## v2.2.0-dev (2026-06-19)
+
+> 样式选择器从文字下拉列表重构为**横向缩略图滚动选择**。所有样式配置文件迁移至独立文件夹，支持在每个样式目录下放置 `thumbnail.png` 作为预览图。新增 `StyleManager.get_style_thumbnail()`、`layout_debug` 调试工具、`ExpandGroupSettingCard` 开发铁律。
+
+### 🟢 样式选择器重构（文字列表 → 缩略图滚动）
+
+**`src/gui_pyside/widgets/style_selector_card.py`** — 完全重写：
+
+- 移除 `FlowContainer` + `FlowLayout` 实现，改用 `SmoothScrollArea` + `QHBoxLayout` 横向滚动条模式（与底部胶片栏同架构）
+- 新增 `HorizontalWheelFilter`：将垂直滚轮事件转为水平平滑滚动，复用 `SmoothScrollDelegate.hScrollBar.scrollValue()`
+- 固定高度 `SCROLL_AREA_HEIGHT = CARD_HEIGHT + 22`，`_adjustViewSize()` 使用 `maximumHeight()` 而非 `sizeHint().height()` 计算 spaceWidget 高度
+- 图片加载时通过 `QPixmap.scaled(THUMBNAIL_SIZE, THUMBNAIL_SIZE, KeepAspectRatio, SmoothTransformation)` 将 512×512 原图缩放到 120×120
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- 配置面板新增独立 Tab 2「样式选择」`StyleSelectorCard`，原「相框配置」Tab 中的样式 `ComboBox` 已移除
+- 所有 `self.combo_style` 引用替换为 `self.style_selector_card.current_style`
+
+### 🟢 样式缩略图系统
+
+**`src/frame_styles/style_manager.py`**：
+
+- 新增 `get_style_thumbnail(style_name)` 方法：在样式文件夹中查找 `thumbnail.png/jpg/jpeg`，返回绝对路径或 `None`
+- `get_available_styles()` 返回 `sorted(styles)` 字母序排列
+
+**`src/gui_pyside/widgets/style_thumbnail_card.py`**：
+
+- 选中态从 `setCustomStyleSheet`（QSS 渲染）改为 `paintEvent` 中 `QPainter.drawRoundedRect` 直接绘制 2px 主题色圆角边框，解决 `CardWidget` 基类 paintEvent 不执行 QFrame 默认绘制导致 QSS 边框无效的问题
+- 缩略图尺寸调整：`CARD_WIDTH=156`、`CARD_HEIGHT=185`、`THUMBNAIL_SIZE=140` → `CARD_WIDTH=136`、`CARD_HEIGHT=160`、`THUMBNAIL_SIZE=120`
+- 样式名称从 `BodyLabel` 改为 `CaptionLabel`（更小字号适配窄卡）
+- 图片加载后绘制 2px `rgba(0,0,0,38)` 圆角描边
+
+### 🟢 新增文件
+
+- `src/gui_pyside/utils/layout_debug.py`：`dump_expand_card(card)` 调试工具，打印卡片各层尺寸并自动检测收起间隙、滚动范围不足等异常
+
+### 🟢 configs 存储结构重构
+
+所有单文件样式迁移为独立文件夹（文件夹名 = 样式名）：
+
+| 之前 | 之后 |
+|------|------|
+| `configs/裁剪胶片 FilmCut.yaml` | `configs/裁剪胶片 FilmCut/default.yaml` |
+| `configs/简洁信息 SimpleInfo.yaml` | `configs/简洁信息 SimpleInfo/default.yaml` |
+| `configs/宝丽来风格 Polaroid.yaml` | `configs/宝丽来风格 Polaroid/default.yaml` |
+| `configs/底部信息条 Bottom Bars/`（已是文件夹） | 不变，新增 `thumbnail.png` 目录 |
+| `configs/胶片夹风格 FilmClip/`（已是文件夹） | 不变，新增 `thumbnail.png` 目录 |
+
+`StyleManager.get_style_config()` 保留单文件 fallback 逻辑以向后兼容。
+
+### 🟢 文档与工具
+
+- `README.md`：版本徽标更新至 v2.2.0-dev；样式配置规范新增"文件夹组织"要求；新增「样式缩略图」配置说明（512×512 PNG/JPG 预置）
+- `AGENTS.md`：新增「ExpandGroupSettingCard 开发铁律」6 条规则 + layout_debug 调试验证流程
+
+### 🐛 修复
+
+- **StyleSelectorCard 展开后大片灰色区域**：`FlowLayout.sizeHint()` 仅返回 max 子控件尺寸，被 `_adjustViewSize()` 取用后 spaceWidget 高度不足，改为 `smoothScrollArea.maximumHeight() + 3`
+- **StyleSelectorCard 收起时底部间隙**：`QScrollArea.sizeHint()` 不反映 `setFixedHeight()`（始终 ~8px），spaceWidget 仅 ~11px 滚动范围不足，改为 `_adjustViewSize()` 覆盖
+- **缩略图超出卡片右边界**：`CARD_WIDTH` 从 140 增加到 `THUMBNAIL_SIZE + 左/右边距 = 136`，ImageLabel 嵌入卡片内容区内
+- **512×512 缩略图未缩放**：`QPixmap` 加载后未调用 `.scaled()`，直接以原生分辨率设置导致溢出。加载后等比缩放至 `THUMBNAIL_SIZE × THUMBNAIL_SIZE`
+
+### 🟢 拖放支持
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- 页面级 `setAcceptDrops(True)` + `dragEnterEvent` / `dragMoveEvent` / `dragLeaveEvent` / `dropEvent` 完整拖放事件链
+- 图片扩展名白名单 `_ALLOWED_EXT` 过滤（与文件对话框一致），非图片文件自动跳过并 `InfoBar.warning` 提示
+- 拖入文件时显示半透明蒙层覆盖全页面，中央显示"松开左键以添加图片"（`BodyLabel`，32px 浅色文字），`dragLeaveEvent` / `dropEvent` 后自动隐藏
+- `WA_TransparentForMouseEvents` 确保蒙层不拦截拖放事件传递
+- 拖放文件路径直接复现有 `_load_files()` 方法，零改动
+
+### 🟢 Delete 键移除图片
+
+- 新增 `QShortcut(QKeySequence.Delete, self)` 全局快捷键，`_on_delete_key()` 回调
+- 回调中检测焦点控件类型：若焦点在 `QLineEdit` 时跳过（保留文字删除原生行为），否则调用 `_remove_filmstrip_item(self.current_index)`
+
+## v2.1.1-dev (2026-06-13)
+
+> 新增 **GUI 色彩管理（QColorSpace）** 与 **深色模式适配**。修复在广色域显示器（如 Display P3）上 sRGB 图片显示过饱和的问题；所有硬编码的 `setStyleSheet` 浅色背景色替换为 QFluentWidgets 的 `setCustomStyleSheet(lightQss, darkQss)` 双主题方案，自动跟随系统深色/浅色主题切换，无需手动监听信号。
+
+### 🟢 QColorSpace 色彩管理
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- `_create_thumbnail()`：生成缩略图 QImage 后调用 `setColorSpace(QColorSpace.NamedColorSpace.SRgb)`，告知 Qt 渲染管道的色彩空间
+- `_update_preview()`：预览大图两处 QImage 创建（`result_path` 和 `file_bytes` 分支）同样添加 `setColorSpace()`
+
+**`src/gui_pyside/widgets/style_preview.py`**：
+
+- `set_preview_image()`：样式编辑器的预览 QImage 同样标记 SRgb 色彩空间
+
+**原理**：Qt 6 在 `QPainter.drawImage()` 时会自动读取 `QImage.colorSpace()` 进行色域映射。在 sRGB 屏上原样显示，在 Display P3 等广色域屏上做正确的色域转换，消除颜色拉伸导致的过饱和。
+
+### 🟢 深色模式适配（`setCustomStyleSheet`）
+
+**`image_processing_page.py`**（11 处样式 → `setCustomStyleSheet` 双主题）：
+
+| 位置 | 样式对象 | Light | Dark |
+|------|---------|-------|------|
+| 类常量 | `_STYLE_THUMB_NORMAL` | 边框 `#ddd`，背景 `white` | 边框 `#444`，背景 `#282828` |
+| 类常量 | `_STYLE_THUMB_SELECTED` | 边框 `#0078d4`，背景 `white` | 边框 `#4da6ff`，背景 `#282828` |
+| 常量 | `_STYLE_THUMB_PROCESSED` | 边框 `#00a86b`，背景 `white` | 边框 `#6ccb5f`，背景 `#282828` |
+| `_setup_ui()` | 主 QSplitter 手柄 | 背景 `#e0e0e0`，hover `#0078d4` | 背景 `#3D3D3D`，hover `#4da6ff` |
+| `_setup_ui()` | 内容 QSplitter 手柄 | 同上 | 同上 |
+| `_create_preview_panel()` | EXIF 面板 | `#f5f5f5` | `#2B2B2B` |
+| `_create_config_panel()` | ScrollArea 配置面板 | `#f5f5f5` | `#2B2B2B` |
+| `_create_filmstrip()` | 胶片栏背景 | 顶边 `#e0e0e0`，底 `#fafafa` | 顶边 `#3D3D3D`，底 `#282828` |
+| `_update_preview()` | 显示图后预览背景 | `#fafafa` | `#282828` |
+| `_update_filmstrip_thumbnail()` | 已处理缩略图 | 绿色 `#00a86b`，hover 蓝 | 绿 `#6ccb5f`，hover `#4da6ff` |
+
+- 预览占位样式（虚线边框、灰色文字、近白背景）从 3 处硬编码（`_create_preview_panel` / `_on_clear_all` / `_remove_filmstrip_item`）抽取为 `_apply_preview_placeholder_style()` 方法，统一维护
+- `_set_thumb_style()` 从 `setStyleSheet` 字符串切换到 `setCustomStyleSheet` 双主题，引用类常量 dict 中的 `'light'` / `'dark'` 键
+
+**`style_preview.py`**（2 处样式 → `setCustomStyleSheet` 双主题）：
+
+| 位置 | Light | Dark |
+|------|-------|------|
+| `__init__()` 预览占位 | 边框 `#e0e0e0`，字 `#888`，底 `#fafafa` | 边框 `#404040`，字 `#999`，底 `#282828` |
+| `set_preview_image()` 渲染后背景 | `#fafafa` | `#282828` |
+
+**颜色设计依据**：Dark 色值参考 QFluentWidgets 源码标准：
+- `#282828` = Flyout 背景（比主窗口 `#202020` 略亮，适合卡片/预览区域）
+- `#2B2B2B` = Dialog 面板背景（适合功能面板）
+- `#3D3D3D` = Separator 分割线颜色
+- `#4da6ff` = 亮蓝强调色（Fluent Design Blue 在深色背景上的变体）
+- `#6ccb5f` = `FluentSystemColor.SUCCESS_FOREGROUND` 深色值
+
+### 🔴 修复：`setCustomStyleSheet` 未对新建 widget 生效
+
+`setCustomStyleSheet(widget, lightQss, darkQss)` 是 QFluentWidgets 提供的双主题样式接口，但其内部实现**只将 QSS 字符串存储为 widget 的动态属性**（`lightCustomQss` / `darkCustomQss`），并不调用 `widget.setStyleSheet()`。实际样式生效依赖 `CustomStyleSheetWatcher` 事件过滤器监听 `DynamicPropertyChange` 事件后触发 `addStyleSheet()`——而该事件过滤器由 `styleSheetManager.register()` 安装。
+
+**根因**：`_add_filmstrip_item()` 等场景中，thumb_label 是新创建的 QLabel，从未经过 `styleSheetManager.register()`，事件过滤器未被安装。`setCustomStyleSheet` 存储了属性但 `setStyleSheet()` 从未被调用，边框样式不生效。
+
+**修复**（`image_processing_page.py`）：
+- 新增 `_apply_custom_style(widget, lightQss, darkQss)` 辅助方法，在 `setCustomStyleSheet` 之后立即调用 `addStyleSheet(widget, CustomStyleSheet(widget))` 完成注册和应用
+- 所有 10 处 `setCustomStyleSheet` 调用替换为 `self._apply_custom_style`
+
+**`style_preview.py`**：两处 `setCustomStyleSheet` 调用后追加 `addStyleSheet(self.preview_label, CustomStyleSheet(self.preview_label))`
+
+**验证**：测试脚本确认新建 QLabel 调用 `setCustomStyleSheet` 后 `styleSheet()` 为空，`addStyleSheet` 后 `styleSheet()` 正确返回 QSS。
+
+### 🟢 硬编码强调色统一为 QFW 主题色变量
+
+所有缩略图选中/悬停边框色从硬编码 `#0078d4` / `#4da6ff` 替换为 QFluentWidgets 的 `--ThemeColorPrimary` QSS 变量：
+
+| 常量 | 替换项 | 语义 |
+|------|--------|------|
+| `_STYLE_THUMB_NORMAL` | `QLabel:hover { border-color }` | 悬停预览色 |
+| `_STYLE_THUMB_SELECTED` | `QLabel { border }` + `QLabel:hover { border-color }` | 选中强调色 |
+| `_STYLE_THUMB_PROCESSED` | `QLabel:hover { border-color }` | 悬停统一 |
+
+`--ThemeColorPrimary` 由 QFW 的 `renderQss()` 在 `StyleSheetCompose.content()` 拼接后统一替换为当前主题色值（默认 `#009faa`），主题切换和主题色变更时自动跟随，无需额外代码连接信号。绿色已处理边框（`#00a86b` / `#6ccb5f`）保留为语义状态色。
+
+### ⚙️ 架构: `setCustomStyleSheet` 机制
+
+使用 QFluentWidgets 内置 `setCustomStyleSheet(widget, lightQss, darkQss)` 替代 `widget.setStyleSheet(qss)`。该函数自动将 dark/light QSS 分别作为动态属性存储，通过 `CustomStyleSheetWatcher` 监听 `DynamicPropertyChange` 事件，在主题切换时自动刷新。无需手动连接 `qconfig.themeChanged` 信号。
+
+### 📝 文档
+
+- `README.md` 版本徽标更新至 v2.1.1-dev
+- `CHANGELOG.md`：本页更新
+
+## v2.1.0-dev (2026-06-12)
+
+> 新增**样式配置自定义背景填充色**特性。样式可在 `colors` 区块中声明 `custom_bg_color`（支持 `#RRGGBB` 十六进制或 `[R,G,B]` 数组），指定后渲染器自动使用纯色背景覆盖 GUI 的 `bg_fill_type` 选择，同时 GUI 的背景样式下拉框自动禁用。新增 `custom_bg_text_scheme`（`dark`/`light`）可显式声明背景明暗类型以决定文字和 Logo 配色，未声明时自动根据颜色亮度检测。
+
+### 🟢 新增：样式配置自定义背景填充色
+
+**配置方式**（`src/frame_styles/configs/样式名.yaml`）：
+
+```yaml
+colors:
+  custom_bg_color: "#28180B"           # 支持 "#RRGGBB" 或 [R,G,B]
+  custom_bg_text_scheme: "dark"        # 可选：dark / light，留空自动检测
+```
+
+- `colors` 区块下新增两个可选字段，与现有 `custom_text_light_color` / `custom_text_dark_color` 平级
+- `custom_bg_color` 接受两种格式：十六进制字符串（如 `"#FF6B6B"`）或 RGB 数组（如 `[255,107,107]`），与现有颜色配置风格一致
+- `custom_bg_text_scheme` 可选声明 `dark` 或 `light`，未声明时使用相对亮度公式（`luminance = 0.299R + 0.587G + 0.114B`）自动判定
+- 样式指定 `custom_bg_color` 后，`BackgroundFillManager.render()` 使用纯色填充覆盖扩展画布，完全不依赖用户选择的 `bg_fill_type`
+
+### 🟢 渲染器核心支持
+
+**`src/core/renderer.py`**：
+
+- `render_frame()` 在解析 `style_config` 后检测 `colors.custom_bg_color`，若存在则：
+  1. 调用 `_parse_hex_or_rgb()` 解析颜色值
+  2. 读取 `custom_bg_text_scheme`（可选），未设置时自动计算亮度判定
+  3. 调用 `BackgroundFillManager.register_custom_solid()` 动态注册填充类型
+  4. 使用注册返回的 key 作为 `effective_bg_type` 覆盖原有 `bg_fill_type`
+- 后续 `text_renderer.render()` / `logo` 自动匹配 / `is_dark_bg()` 均使用 `effective_bg_type`，零额外适配
+- 颜色解析失败时自动回退到用户选择的 `bg_fill_type`，保证鲁棒性
+
+**`src/utils/background_fill.py`**：
+
+- 新增 `register_custom_solid(color, text_scheme)` 方法：注册自定义纯色填充并返回 key
+- **预留接口**：后续 GUI 自定义颜色功能可通过同一入口调用，保证行为一致
+
+**`src/core/text_renderer.py`** — 关键修复：
+
+- `_resolve_color_from_config()` 此前强制要求 `dark_key` 和 `light_key` **成对存在**（`if dark_key not in colors_config or light_key not in colors_config: return None`），导致仅声明单侧颜色（如仅 `custom_text_dark_color`）时无法生效
+- 改为只检查当前背景明暗对应的 key，允许单侧声明，与设计意图一致
+
+### 🟢 图像处理页面 GUI
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- `_update_style_dependent_controls()` 新增 `custom_bg_color` 检测：
+  - 样式有自定义背景色 → `combo_bg_fill.setEnabled(False)` + `chk_enhance.setEnabled(False)` + tooltip 显示颜色值
+  - 样式无自定义背景色 → 恢复正常可操作状态
+- 背景增强复选框（仅高斯模糊有效）同步禁用，因纯色背景无需增强
+
+### 🟢 样式编辑器支持
+
+**`src/gui_pyside/widgets/style_config_sections/colors_section.py`**：
+
+- 在通用兜底颜色和按元素覆盖之间新增"自定义背景填充" UI 区块：
+  - `custom_bg_color` `LineEdit`：支持 `"#FF6B6B"` 或 `[255,107,107]` 输入
+  - `custom_bg_text_scheme` `ComboBox`：三选项（自动检测 / dark / light）
+- `load_from_model()` / `save_to_model()` 同步读写新字段
+
+**`src/gui_pyside/models/style_config_form.py`**：
+
+- `StyleConfigFormData` 新增 `custom_bg_color: str` 和 `custom_bg_text_scheme: str` 字段
+- `to_yaml_dict()`：在 `colors` 区块中写入 `custom_bg_color` / `custom_bg_text_scheme`
+- `from_yaml_dict()`：从 YAML 读取并恢复字段值
+
+### 🟢 演示样式
+
+**`src/frame_styles/configs/裁剪胶片 FilmCut.yaml`**：
+
+- 作为新特性演示样式，配置深褐暖色调背景：
+  - `custom_bg_color: "#28180B"` — 深棕色背景
+  - `custom_bg_text_scheme: "dark"` — 暗色背景，使用浅色文字
+  - `custom_text_dark_color: "#DFAE81"` — 所有文字显示为暖金色
+- 此样式加载后，GUI 背景样式下拉框自动禁用，背景增强开关同时禁用
+
+### 🟢 文档更新
+
+- `README.md` 版本徽标更新至 v2.1.0-dev
+- `src/frame_styles/configs/_STYLE_TEMPLATE.txt`：颜色配置节新增 `custom_bg_color` 和 `custom_bg_text_scheme` 填写示例
+- `CHANGELOG.md`：本页更新
 
 ## v2.0.0-dev (2026-06-09)
 

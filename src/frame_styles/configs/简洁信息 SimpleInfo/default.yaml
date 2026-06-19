@@ -1,8 +1,8 @@
-name: 裁剪胶片 FilmCut
+﻿name: 简洁信息 SimpleInfo
 colors:
   text: '#000000'
 fonts:
-  size_ratio: 0.017
+  size_ratio: 0.018
   latin:
     family: Gotham
     weights:
@@ -21,10 +21,10 @@ fonts:
 layout:
   expand_canvas:
     enabled: true
-    top: 0.05
-    bottom: 0.05
-    left: 0.02
-    right: 0.02
+    top: 0.07
+    bottom: 0.07
+    left: 0.03
+    right: 0.03
   padding:
     top: 0.01
     bottom: 0.01
@@ -33,22 +33,13 @@ layout:
   info_position:
     camera_lens:
       placement: outside
-      position: top-left
-      alignment: left
-      margin_top: 0.008
-      margin_bottom: 0.0
-      margin_left: 0.0
-      margin_right: 0.0
-      tree_align: true
-    exif:
-      placement: outside
       position: bottom-left
       alignment: left
       margin_top: 0.0
       margin_bottom: 0.017
       margin_left: 0.0
       margin_right: 0.0
-    timestamp_author:
+    exif:
       placement: outside
       position: bottom-right
       alignment: right
@@ -56,6 +47,15 @@ layout:
       margin_bottom: 0.017
       margin_left: 0.0
       margin_right: 0.0
+    timestamp_author:
+      placement: outside
+      position: top-left
+      alignment: left
+      margin_top: 0.008
+      margin_bottom: 0.0
+      margin_left: 0.0
+      margin_right: 0.0
+      tree_align: true
     location:
       placement: outside
       position: top-right

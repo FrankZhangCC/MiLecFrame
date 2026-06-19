@@ -151,6 +151,27 @@ class BackgroundFillManager:
     # ── 管理接口（预留扩展）────────────────────────────
 
     @classmethod
+    def register_custom_solid(
+        cls,
+        color: Tuple[int, int, int],
+        text_scheme: str,
+    ) -> str:
+        """
+        注册自定义纯色填充类型（预留接口：后续 GUI 自定义颜色功能统一调用）
+
+        Args:
+            color: RGB 元组 (R, G, B)
+            text_scheme: 'dark' 或 'light'
+        Returns:
+            填充类型 key，可直接传入 render() / is_dark_bg()
+        """
+        hex_str = f'{color[0]:02X}{color[1]:02X}{color[2]:02X}'
+        key = f'_custom_{hex_str}_{text_scheme}'
+        label = f'自定义颜色 #{hex_str}'
+        cls.register(key, label, 'solid', text_scheme, color=color)
+        return key
+
+    @classmethod
     def register(
         cls,
         key: str,

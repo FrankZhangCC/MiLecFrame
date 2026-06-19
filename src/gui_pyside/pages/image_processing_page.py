@@ -19,10 +19,10 @@ from typing import Optional
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QSplitter,
-    QFileDialog, QApplication, QSizePolicy,
+    QFileDialog, QApplication, QSizePolicy, QLineEdit,
 )
 from PySide6.QtCore import Qt, Signal, QSize, QTimer, QEvent, QObject
-from PySide6.QtGui import QImage, QPixmap, QWheelEvent
+from PySide6.QtGui import QImage, QPixmap, QWheelEvent, QColorSpace, QDragEnterEvent, QDropEvent, QColor, QKeySequence, QShortcut
 
 from qfluentwidgets import (
     PrimaryPushButton, PushButton, TransparentPushButton,
@@ -33,10 +33,15 @@ from qfluentwidgets import (
     SmoothScrollArea, StateToolTip, RoundMenu, Action, ScrollArea,
     ExpandLayout,
 )
+from qfluentwidgets.common.style_sheet import (
+    setCustomStyleSheet as _qfw_setCustomStyleSheet,
+    addStyleSheet, CustomStyleSheet,
+)
 
 from ..models.file_item import FileItem
 from ..models.processing_config import ProcessingConfig
 from ..utils.temp_manager import TempManager
+from ..widgets.style_selector_card import StyleSelectorCard
 from src.utils.exif_helper import ExifHelper
 from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
@@ -47,6 +52,9 @@ from PIL import ImageCms
 import io
 
 logger = logging.getLogger(__name__)
+
+# 图片文件扩展名白名单（与 _on_add_files 文件对话框过滤器一致）
+_ALLOWED_EXT = ('.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.webp')
 
 
 class FilmStripWheelFilter(QObject):
@@ -81,17 +89,44 @@ class ImageProcessingPage(QWidget):
     └─────────────────────────────────────────┘
     """
 
-    # ── 缩略图边框样式 ──
-    _STYLE_THUMB_NORMAL = (
-        "QLabel { border: 2px solid #ddd; border-radius: 4px; padding: 2px;"
-        " background-color: white; }"
-        " QLabel:hover { border-color: #0078d4; }"
-    )
-    _STYLE_THUMB_SELECTED = (
-        "QLabel { border: 2px solid #0078d4; border-radius: 4px; padding: 2px;"
-        " background-color: white; }"
-        " QLabel:hover { border-color: #0078d4; }"
-    )
+    # ── 缩略图边框样式（light / dark 双主题）──
+    _STYLE_THUMB_NORMAL = {
+        'light': (
+            "QLabel { border: 2px solid #ddd; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid #444; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
+    _STYLE_THUMB_SELECTED = {
+        'light': (
+            "QLabel { border: 2px solid --ThemeColorPrimary; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid --ThemeColorPrimary; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
+    # ── 已处理缩略图边框样式（light / dark 双主题）──
+    _STYLE_THUMB_PROCESSED = {
+        'light': (
+            "QLabel { border: 2px solid #00a86b; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid #6ccb5f; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -114,6 +149,28 @@ class ImageProcessingPage(QWidget):
         # 加载已保存的作者名和配置
         self._load_saved_config()
 
+        # ── 拖放支持 ──
+        self.setAcceptDrops(True)
+        self._drag_overlay = QWidget(self)
+        self._drag_overlay.hide()
+        self._drag_overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._apply_custom_style(self._drag_overlay,
+            lightQss="background: rgba(255,255,255,0.7);",
+            darkQss="background: rgba(0,0,0,0.5);")
+        overlay_layout = QVBoxLayout(self._drag_overlay)
+        overlay_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._drag_hint_label = BodyLabel("松开左键以添加图片", self._drag_overlay)
+        self._drag_hint_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = self._drag_hint_label.font()
+        font.setPixelSize(32)
+        self._drag_hint_label.setFont(font)
+        self._drag_hint_label.setTextColor(QColor(120, 120, 120), QColor(180, 180, 180))
+        overlay_layout.addWidget(self._drag_hint_label)
+
+        # ── Delete 键移除图片 ──
+        self._delete_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Delete), self)
+        self._delete_shortcut.activated.connect(self._on_delete_key)
+
         logger.info("图像处理页面初始化完成")
 
     def _setup_ui(self):
@@ -126,27 +183,31 @@ class ImageProcessingPage(QWidget):
         splitter = QSplitter(Qt.Orientation.Vertical)
         splitter.setChildrenCollapsible(False)
         splitter.setHandleWidth(4)
-        splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #e0e0e0;
-            }
-            QSplitter::handle:hover {
-                background-color: #0078d4;
-            }
-        """)
+        self._apply_custom_style(splitter,
+            lightQss="""
+                QSplitter::handle { background-color: #e0e0e0; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+            darkQss="""
+                QSplitter::handle { background-color: #3D3D3D; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+        )
 
         # 上部：主内容区（预览 + 配置），用水平 QSplitter 可调宽度
         content_splitter = QSplitter(Qt.Orientation.Horizontal)
         content_splitter.setChildrenCollapsible(False)
         content_splitter.setHandleWidth(4)
-        content_splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #e0e0e0;
-            }
-            QSplitter::handle:hover {
-                background-color: #0078d4;
-            }
-        """)
+        self._apply_custom_style(content_splitter,
+            lightQss="""
+                QSplitter::handle { background-color: #e0e0e0; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+            darkQss="""
+                QSplitter::handle { background-color: #3D3D3D; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+        )
 
         left_panel = self._create_preview_panel()
         right_panel = self._create_config_panel()
@@ -179,6 +240,50 @@ class ImageProcessingPage(QWidget):
         # 初始化样式依赖控件的显示状态
         self._update_style_dependent_controls()
 
+    # ════════════════════════════════════════════════════════
+    #  文件拖放支持
+    # ════════════════════════════════════════════════════════
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        """拖入文件：显示蒙层，仅接受图片文件"""
+        if event.mimeData().hasUrls():
+            paths = [url.toLocalFile() for url in event.mimeData().urls()]
+            if any(p.lower().endswith(_ALLOWED_EXT) for p in paths if p):
+                self._drag_overlay.setGeometry(self.rect())
+                self._drag_overlay.show()
+                self._drag_overlay.raise_()
+                event.acceptProposedAction()
+                return
+        event.ignore()
+
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+
+    def dragLeaveEvent(self, event):
+        self._drag_overlay.hide()
+
+    def dropEvent(self, event: QDropEvent):
+        self._drag_overlay.hide()
+        file_paths = [url.toLocalFile() for url in event.mimeData().urls()]
+        valid_paths = [p for p in file_paths if p and os.path.isfile(p) and p.lower().endswith(_ALLOWED_EXT)]
+        skipped = len(file_paths) - len(valid_paths)
+        if valid_paths:
+            self._load_files(valid_paths)
+        if skipped > 0:
+            InfoBar.warning(
+                title="部分文件未添加",
+                content=f"已跳过 {skipped} 个不支持的格式",
+                duration=3000,
+                parent=self)
+
+    def _on_delete_key(self):
+        """Delete 键移除当前选中图片（文本输入时保留原生行为）"""
+        focused = QApplication.focusWidget()
+        if isinstance(focused, QLineEdit):
+            return
+        if self.current_index >= 0:
+            self._remove_filmstrip_item(self.current_index)
+
     def _create_preview_panel(self) -> QWidget:
         """创建左侧预览面板（预览窗口 + EXIF 信息 + 操作按钮）"""
         panel = QWidget()
@@ -191,27 +296,28 @@ class ImageProcessingPage(QWidget):
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setMinimumSize(200, 200)
         self.preview_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                border: 2px dashed #ccc;
-                border-radius: 8px;
-                color: #888;
-                font-size: 14px;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_preview_placeholder_style()
         layout.addWidget(self.preview_label, stretch=1)
 
         # ── EXIF 信息面板（固定高度，两行网格布局） ──
         self.exif_panel = QWidget()
         self.exif_panel.setFixedHeight(60)
-        self.exif_panel.setStyleSheet("""
-            QWidget#exifPanel {
-                background-color: #f5f5f5;
-                border-radius: 6px;
-                padding: 4px 12px;
-            }
-        """)
+        self._apply_custom_style(self.exif_panel,
+            lightQss="""
+                QWidget#exifPanel {
+                    background-color: #f5f5f5;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                }
+            """,
+            darkQss="""
+                QWidget#exifPanel {
+                    background-color: #2B2B2B;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                }
+            """,
+        )
         self.exif_panel.setObjectName("exifPanel")
 
         exif_grid = QGridLayout(self.exif_panel)
@@ -279,12 +385,10 @@ class ImageProcessingPage(QWidget):
         """创建右侧配置面板（5 个手风琴折叠 Tab）"""
         panel = ScrollArea()
         panel.setWidgetResizable(True)
-        panel.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: #f5f5f5;
-            }
-        """)
+        self._apply_custom_style(panel,
+            lightQss="QScrollArea { border: none; background-color: #f5f5f5; }",
+            darkQss="QScrollArea { border: none; background-color: #2B2B2B; }",
+        )
 
         config_container = QWidget()
         config_layout = QVBoxLayout(config_container)
@@ -300,7 +404,12 @@ class ImageProcessingPage(QWidget):
         self.output_settings_card.setParent(config_container)
         card_layout.addWidget(self.output_settings_card)
 
-        # ── Tab 2: 相框配置 ──
+        # ── Tab 2: 样式选择（缩略图网格） ──
+        self.style_selector_card = self._create_style_selection_card()
+        self.style_selector_card.setParent(config_container)
+        card_layout.addWidget(self.style_selector_card)
+
+        # ── Tab 3: 相框配置 ──
         self.frame_config_card = self._create_frame_config_card()
         self.frame_config_card.setParent(config_container)
         card_layout.addWidget(self.frame_config_card)
@@ -329,12 +438,20 @@ class ImageProcessingPage(QWidget):
         filmstrip = QWidget()
         filmstrip.setMinimumHeight(100)
         filmstrip.setMaximumHeight(250)
-        filmstrip.setStyleSheet("""
-            QWidget {
-                border-top: 1px solid #e0e0e0;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_custom_style(filmstrip,
+            lightQss=(
+                "QWidget {"
+                " border-top: 1px solid #e0e0e0;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QWidget {"
+                " border-top: 1px solid #3D3D3D;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
 
         layout = QVBoxLayout(filmstrip)
         layout.setContentsMargins(16, 8, 16, 8)
@@ -387,24 +504,24 @@ class ImageProcessingPage(QWidget):
 
         return card
 
-    def _create_frame_config_card(self) -> ExpandSettingCard:
-        """Tab 2: 相框配置"""
-        card = ExpandGroupSettingCard(FluentIcon.PHOTO, "相框配置", "选择相框样式、背景和字体")
-
-        # 相框样式
+    def _create_style_selection_card(self) -> ExpandSettingCard:
+        """Tab 2: 样式选择（缩略图网格）"""
         from frame_styles.style_manager import StyleManager
         self.style_manager = StyleManager()
         available_styles = self.style_manager.get_available_styles()
         if not available_styles:
             self.style_manager.create_sample_styles()
             available_styles = self.style_manager.get_available_styles()
-        self.combo_style = ComboBox()
-        self.combo_style.addItems(available_styles)
-        if "底部信息条 Bottom Bars" in available_styles:
-            self.combo_style.setCurrentText("底部信息条 Bottom Bars")
-        self.combo_style.currentTextChanged.connect(self._on_style_changed)
-        self.combo_style.setMinimumWidth(200)
-        card.addGroup(FluentIcon.CHECKBOX, "相框样式", "选择预设的相框样式", self.combo_style, 2)
+
+        card = StyleSelectorCard()
+        card.refresh_styles(available_styles, self.style_manager)
+        card.style_selected.connect(self._on_style_changed)
+
+        return card
+
+    def _create_frame_config_card(self) -> ExpandSettingCard:
+        """Tab 3: 相框配置（背景、字体等，样式选择已独立为 Tab 2）"""
+        card = ExpandGroupSettingCard(FluentIcon.PHOTO, "相框配置", "背景填充、字体字重等设置")
 
         # 背景填充
         bg_choices = BackgroundFillManager.get_choices()
@@ -525,7 +642,7 @@ class ImageProcessingPage(QWidget):
 
     def _update_style_dependent_controls(self):
         """根据当前选中的样式配置，更新自定义文本和LOGO的启用状态"""
-        style_name = self.combo_style.currentText()
+        style_name = self.style_selector_card.current_style
         if not style_name:
             return
 
@@ -543,6 +660,17 @@ class ImageProcessingPage(QWidget):
 
         # LOGO：始终可见，仅控制启用状态
         logo_enabled = isinstance(logo_cfg, dict) and logo_cfg.get('enabled', False)
+
+        # 自定义背景填充色：若样式指定了背景色，禁用 GUI 的背景样式选择
+        custom_bg_color = config.get('colors', {}).get('custom_bg_color')
+        if custom_bg_color:
+            self.combo_bg_fill.setEnabled(False)
+            self.chk_enhance.setEnabled(False)
+            self.combo_bg_fill.setToolTip(f'背景颜色由样式配置指定: {custom_bg_color}')
+        else:
+            self.combo_bg_fill.setEnabled(True)
+            self.chk_enhance.setEnabled(True)
+            self.combo_bg_fill.setToolTip('')
 
         logger.debug(f"样式变更: {style_name}, 自定义文本: {ct_enabled}, LOGO: {logo_enabled}")
 
@@ -674,6 +802,7 @@ class ImageProcessingPage(QWidget):
             pil_thumb = pil_thumb.convert('RGB')
         data = pil_thumb.tobytes()
         q_img = QImage(data, pil_thumb.width, pil_thumb.height, 3 * pil_thumb.width, QImage.Format.Format_RGB888)
+        q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
         return q_img.copy()  # copy() 确保数据独立
 
     def _add_filmstrip_item(self, item: FileItem):
@@ -762,12 +891,46 @@ class ImageProcessingPage(QWidget):
                                   Qt.TransformationMode.SmoothTransformation)
                 )
 
+    def _apply_custom_style(self, widget, lightQss, darkQss):
+        """设置自定义主题样式并确保新 widget 首次即生效"""
+        _qfw_setCustomStyleSheet(widget, lightQss, darkQss)
+        addStyleSheet(widget, CustomStyleSheet(widget))
+
     def _set_thumb_style(self, label: QLabel, selected: bool):
-        """设置缩略图边框样式：选中=蓝色，未选=灰色"""
+        """设置缩略图边框样式：选中=蓝色，未选=灰色（自动适配 light/dark 主题）"""
         if selected:
-            label.setStyleSheet(self._STYLE_THUMB_SELECTED)
+            self._apply_custom_style(label,
+                lightQss=self._STYLE_THUMB_SELECTED['light'],
+                darkQss=self._STYLE_THUMB_SELECTED['dark'],
+            )
         else:
-            label.setStyleSheet(self._STYLE_THUMB_NORMAL)
+            self._apply_custom_style(label,
+                lightQss=self._STYLE_THUMB_NORMAL['light'],
+                darkQss=self._STYLE_THUMB_NORMAL['dark'],
+            )
+
+    def _apply_preview_placeholder_style(self):
+        """为预览区 QLabel 设置占位样式（自动适配 light/dark 主题）"""
+        self._apply_custom_style(self.preview_label,
+            lightQss=(
+                "QLabel {"
+                " border: 2px dashed #ccc;"
+                " border-radius: 8px;"
+                " color: #888;"
+                " font-size: 14px;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QLabel {"
+                " border: 2px dashed #555;"
+                " border-radius: 8px;"
+                " color: #999;"
+                " font-size: 14px;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
 
     def _select_item(self, index: int):
         """选中胶片栏中的某个项"""
@@ -807,20 +970,20 @@ class ImageProcessingPage(QWidget):
                 if pil_img.mode != 'RGB':
                     pil_img = pil_img.convert('RGB')
                 data = pil_img.tobytes()
-                pixmap = QPixmap.fromImage(
-                    QImage(data, pil_img.width, pil_img.height,
-                           3 * pil_img.width, QImage.Format.Format_RGB888)
-                )
+                q_img = QImage(data, pil_img.width, pil_img.height,
+                               3 * pil_img.width, QImage.Format.Format_RGB888)
+                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
+                pixmap = QPixmap.fromImage(q_img)
             elif item.file_bytes:
                 pil_img = PILImage.open(io.BytesIO(item.file_bytes))
                 pil_img = self._convert_to_srgb(pil_img)
                 if pil_img.mode != 'RGB':
                     pil_img = pil_img.convert('RGB')
                 data = pil_img.tobytes()
-                pixmap = QPixmap.fromImage(
-                    QImage(data, pil_img.width, pil_img.height,
-                           3 * pil_img.width, QImage.Format.Format_RGB888)
-                )
+                q_img = QImage(data, pil_img.width, pil_img.height,
+                               3 * pil_img.width, QImage.Format.Format_RGB888)
+                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
+                pixmap = QPixmap.fromImage(q_img)
             else:
                 return
             item.cached_pixmap = pixmap
@@ -836,7 +999,10 @@ class ImageProcessingPage(QWidget):
                 Qt.TransformationMode.SmoothTransformation,
             )
             self.preview_label.setPixmap(scaled)
-            self.preview_label.setStyleSheet("border: none; background-color: #fafafa;")
+            self._apply_custom_style(self.preview_label,
+                lightQss="QLabel { border: none; background-color: #fafafa; }",
+                darkQss="QLabel { border: none; background-color: #282828; }",
+            )
             self.preview_label.setText("")
 
     def _update_filmstrip_thumbnail(self, item: FileItem):
@@ -862,10 +1028,9 @@ class ImageProcessingPage(QWidget):
                 if is_selected:
                     self._set_thumb_style(label, True)
                 else:
-                    label.setStyleSheet(
-                        "QLabel { border: 2px solid #00a86b; border-radius: 4px; padding: 2px;"
-                        " background-color: white; }"
-                        " QLabel:hover { border-color: #0078d4; }"
+                    self._apply_custom_style(label,
+                        lightQss=self._STYLE_THUMB_PROCESSED['light'],
+                        darkQss=self._STYLE_THUMB_PROCESSED['dark'],
                     )
 
     def _update_exif_info(self, item: FileItem):
@@ -1031,7 +1196,7 @@ class ImageProcessingPage(QWidget):
                 output_path=output_path,
                 author=self.edit_author.text() or None,
                 location=location or None,
-                style_name=self.combo_style.currentText(),
+                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
                 bg_fill_type=bg_key,
                 decorations=decorations or None,
                 font_weight=fw_key,
@@ -1116,15 +1281,7 @@ class ImageProcessingPage(QWidget):
         # 清空预览
         self.preview_label.clear()
         self.preview_label.setText("请从底部胶片栏选择图片，或拖拽图片到此处")
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                border: 2px dashed #ccc;
-                border-radius: 8px;
-                color: #888;
-                font-size: 14px;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_preview_placeholder_style()
 
         # 清空 EXIF
         self.exif_file.setText("文件: <b>—</b>")
@@ -1177,15 +1334,7 @@ class ImageProcessingPage(QWidget):
             self.current_index = -1
             self.preview_label.clear()
             self.preview_label.setText("请从底部胶片栏选择图片，或拖拽图片到此处")
-            self.preview_label.setStyleSheet("""
-                QLabel {
-                    border: 2px dashed #ccc;
-                    border-radius: 8px;
-                    color: #888;
-                    font-size: 14px;
-                    background-color: #fafafa;
-                }
-            """)
+            self._apply_preview_placeholder_style()
         elif self.current_index > index:
             self.current_index -= 1
 
@@ -1207,7 +1356,7 @@ class ImageProcessingPage(QWidget):
             default_config_manager.save_user_author(self.edit_author.text())
         # 最近使用配置
         default_config_manager.save_last_used_settings({
-            'style_name': self.combo_style.currentText(),
+            'style_name': self.style_selector_card.current_style or "底部信息条 Bottom Bars",
             'output_format': self.combo_output_format.currentText(),
             'bg_fill': self.combo_bg_fill.currentText(),
             'enhance_background': self.chk_enhance.isChecked(),
@@ -1227,9 +1376,7 @@ class ImageProcessingPage(QWidget):
             return
         # 先恢复样式（可能触发 _on_style_changed 更新自定义文本/LOGO 启用状态）
         if 'style_name' in saved:
-            items = [self.combo_style.itemText(i) for i in range(self.combo_style.count())]
-            if saved['style_name'] in items:
-                self.combo_style.setCurrentText(saved['style_name'])
+            self.style_selector_card.set_current_style(saved['style_name'])
         if 'output_format' in saved:
             idx = self.combo_output_format.findText(saved['output_format'])
             if idx >= 0:
@@ -1246,17 +1393,9 @@ class ImageProcessingPage(QWidget):
                 self.combo_font_weight.setCurrentIndex(idx)
 
     def refresh_style_list(self):
-        """刷新样式下拉列表（样式编辑器中新建/保存样式后调用）"""
-        current = self.combo_style.currentText()
+        """刷新样式网格（样式编辑器中新建/保存样式后调用）"""
         styles = self.style_manager.get_available_styles()
-        self.combo_style.blockSignals(True)
-        self.combo_style.clear()
-        self.combo_style.addItems(styles)
-        if current in styles:
-            self.combo_style.setCurrentText(current)
-        elif "底部信息条 Bottom Bars" in styles:
-            self.combo_style.setCurrentText("底部信息条 Bottom Bars")
-        self.combo_style.blockSignals(False)
+        self.style_selector_card.refresh_styles(styles, self.style_manager)
 
     def showEvent(self, event):
         """页面显示时刷新样式列表"""
