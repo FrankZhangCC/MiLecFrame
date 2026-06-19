@@ -1,0 +1,20 @@
+# Core image processing
+Pillow>=9.0.0
+piexif>=1.1.3
+numpy>=1.21.0
+
+# HDR support
+pillow-heif>=0.13.0  # HEIF/AVIF loading with ICC profile preservation
+
+# GUI options (install one as needed)
+streamlit>=1.20.0  # Recommended for web GUI
+# gradio>=3.20.0  # Alternative GUI option
+# flask>=2.2.0    # Alternative GUI option
+
+# Data handling
+pandas>=1.4.0
+PyYAML>=6.0
+toml>=0.10.0
+
+# Utility
+requests>=2.28.0
