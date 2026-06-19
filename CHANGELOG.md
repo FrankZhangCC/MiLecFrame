@@ -1,5 +1,173 @@
 # 更新历史
 
+## v2.0.0-dev (2026-06-09)
+
+> **里程碑版本**。GUI 从 Streamlit Web 界面全面迁移至 PySide6 + QFluentWidgets 原生桌面应用，实现 Fluent Design 风格界面。Streamlit 版已封存，批量处理页面因胶片栏功能覆盖而取消。新增 PyInstaller 编译支持，为独立 exe 发布奠定基础。
+
+### 🔴 架构变革：GUI 框架迁移 (Streamlit → PySide6)
+
+**Streamlit Web GUI 已封存**（`src/gui/` → `src/gui_legacy/`），PySide6 原生桌面 GUI 成为唯一默认入口：
+
+- 新建 `src/gui_pyside/` 完整应用目录：
+  - `app.py` — QApplication 初始化 + Fluent 主题设置 + 高 DPI 适配
+  - `main_window.py` — `FluentWindow` 主容器，`NavigationInterface` 导航栏 + `QStackedWidget` 页面路由
+  - `models/` — `FileItem`（图片文件数据模型）、`ProcessingConfig`（处理配置）、`StyleConfigFormData`（样式编辑器表单）
+  - `utils/temp_manager.py` — 临时文件生命周期管理器，窗口关闭时自动清理
+- **移除** `types.ModuleType` hack：`src/gui_pyside/app.py` 不再需要伪造 `src` 模块，因 `src/__init__.py` 不再自动导入 streamlit
+
+**入口简化**（`src/main.py`）：
+
+| 项目 | 之前 | 之后 |
+|---|---|---|
+| 无参数启动 | 弹出 tkinter 对话框选模式 | **默认启动 PySide6** |
+| `--gui` 参数 | 启动 Streamlit | **已删除** |
+| `--mode` 参数 | streamlit/pyside 二选一 | **已删除** |
+| `launch_gui()` | Streamlit subprocess 启动 | **已删除** |
+| `_free_port()` | 释放 Streamlit 端口 | **已删除** |
+
+**取消批量处理页面**：因图像处理页面中的胶片栏已支持多图排队处理，批处理页面不再需要。CLI `--batch` 模式与 `BatchProcessor` 核心模块保留不变。
+
+### 🟢 图像处理页面（`image_processing_page.py`）
+
+完整 PySide6 实现，基于 QFluentWidgets 组件：
+
+**页面布局**：上下垂直分割器（主内容区 80% + 胶片栏 20%），主内容区再水平分割（预览 55% + 配置栏 45%）
+
+**预览窗口**：
+- 单图显示（非分栏），加载时显示原图，处理后自动切换为效果图
+- 使用 PIL 加载大图绕过 Qt 256MB QImageIOHandler 分配上限
+- 压缩到预览标签尺寸，保持宽高比
+- ICC 色彩空间自动转换（`_convert_to_srgb`）
+
+**EXIF 信息面板**：
+- 两行四列网格布局：第一行 = 文件格式/色彩空间/尺寸、相机、镜头；第二行 = 焦距、光圈、快门、ISO
+- 支持 `<b>HTML</b>` 富文本高亮值字段
+- 无数据时显示 `—` 占位符
+
+**胶片栏（FilmStrip，页面底部）**：
+- 横向滚动缩略图列表，等比缩略图（高度自适应 60–120px）
+- 三种状态指示：灰色边框=未处理、蓝色高亮=已选中、绿色边框=已处理
+- 滚轮事件过滤器将垂直滚动转为水平滚动
+- 右键菜单 → 移除此图片
+- 动态重新缩放：窗口/分割器变化时自动调整缩略图尺寸
+- `_rescale_filmstrip_thumbnails()` + `QTimer.singleShot` 防抖
+
+**配置面板（5 个手风琴折叠 Tab，`ExpandGroupSettingCard`）**：
+
+| Tab | 控件 | 条件控制 |
+|---|---|---|
+| 输出设置 | 输出格式 `ComboBox`（JPEG/PNG） | ✅ 始终可用 |
+| 相框配置 | 相框样式、背景填充、背景增强 `SwitchButton`、字重 | ✅ 始终可用 |
+| 个性化配置 | 作者姓名、拍摄地点、GPS 替换、自定义文本 | 🔹 自定义文本仅样式 `custom_text.enabled` 时启用 |
+| 拍摄信息配置 | 镜头显示、短版镜头名、LOGO 选择 | 🔹 LOGO 仅样式 `logo.enabled` 时显示 |
+| 文本水印 | 启用水印 `SwitchButton`、内容、位置、不透明度 `Slider`（0-100）、颜色 | 🔹 水印内容/位置/不透明度/颜色仅启用时可编辑 |
+
+**操作按钮**：
+- `PrimaryPushButton`：导出当前图像、一键导出所有、生成相框
+- `TransparentPushButton`：清空所有
+- 按钮启用状态自动管理：有图片选中→启用生成；处理完成→启用导出
+
+**处理流程**（`_on_generate_frame`）：
+1. 从 GUI 控件收集所有配置参数（背景/字重/镜头/LED 映射等）
+2. GPS 替换逻辑：勾选且 EXIF 含 GPS → 用 GPS 覆盖地点
+3. LOGO 选择：自动匹配（`LogoSelector.auto_match_logo`）/手动指定/无
+4. 水印装饰组装：位置映射 + 颜色映射 + 不透明度
+5. 创建临时文件 → `ImageProcessor.process()` → 清理输入临时文件
+6. 成功：更新 `FileItem.is_processed` / `result_path` → 刷新预览 + 胶片栏缩略图 + 按钮状态
+7. `StateToolTip` 进度通知（处理中 / 完成 / 失败）
+
+**状态管理**：
+- `save_config()` 窗口关闭时保存作者名 + 四项最近配置到 `ConfigManager`
+- `cleanup()` 窗口关闭时清理所有文件项和临时文件
+- `_on_clear_all()` 清空胶片栏 + 预览 + EXIF + 按钮状态
+- 支持多文件加载（`QFileDialog.getOpenFileNames`）+ `_show_progress` 进度提示
+
+### 🟢 相机/镜头映射管理页面
+
+**相机映射管理**（`CameraMappingPage`）：
+- 品牌筛选按钮行（Canon/Nikon/Sony/Fuji/Hasselblad/DJI/OM/Ricoh/Xiaomi/Vivo/Oppo/Huawei + 其他）
+- 可编辑表格（`TableView` + 自定义模型）
+- 保存到 `data/camera_map.csv`
+- 手动刷新按钮 + `showEvent` 自动刷新
+
+**镜头映射管理**（`LensMappingPage`）：
+- 搜索过滤 + 可编辑表格
+- 保存到 `data/lens_map.csv`
+- 同步手动刷新 + 自动刷新
+
+### 🟢 样式编辑器页面（`StyleCreatorPage`）
+
+完成 10 个配置区块 + 实时预览 + Pivot 导航：
+
+**架构**：
+- `QSplitter` 水平分割 → 左侧配置面板 + 右侧实时预览
+- 配置面板：`SmoothScrollArea` 包裹，`Pivot` 快速导航标签（点击自动滚动到对应区块）
+- 10 个 `ExpandGroupSettingCard` 折叠卡片，每区块一个独立文件：
+  - 基本信息、画布扩展、安全区域、原图圆角、字体、Logo、颜色、预定义文本、自定义文本、元素布局
+
+**数据模型**（`StyleConfigFormData` `@dataclass`）：
+- 替代 Streamlit 版 ~100 个 `session_state` 键
+- `to_yaml_dict()` / `from_yaml_dict()` / `save_to_file()` / `clone()` 完整方法
+- `ElementConfig` + `DefinedTextConfig` 子数据类
+- 元素定位编辑器（`element_editor.py`）：绝对/相对定位切换，`tree_align`，margin 四边，offset 偏移
+
+**实时预览系统**：
+- 300ms `QTimer.singleShot` debounce 防抖
+- `FrameRenderer.render_frame()` 直接复用，通过 `saturation_override=1.0` 关闭饱和度增强加速
+- 预置 `PREVIEW_EXIF_DATA`（跳过错综的 ExifHelper 解析链路）
+- `SegmentedWidget` 横图/竖图样本图切换
+- 预置 Logo + 作者 + 地点（跳过 LogoSelector 匹配）
+- 1200px 样本图渲染 < 200ms
+
+**样式加载/保存/导出**：
+- 样式选择器 `ComboBox` 列出已有样式文件
+- 新建清空表单 → 设定 filename → 写入文件
+- YAML 导出预览 `Dialog` + 只读 `TextEdit`
+- `flow_style=True` 保持颜色列表流式格式
+
+**已修复的 Bug（样式编辑器）**：
+- `SegmentedWidget.currentItem()` 返回对象而非字符串
+- 预览不刷新（`_on_config_changed` 未回写 UI → form_data）
+- 加载样式后数据被覆盖（`_save_all_sections` 在加载期间触发）
+- `margin` 统一边距字段未解析
+- ElementEditor 自引用导致渲染无限循环
+- 动态添加元素后卡片高度不更新（`_adjustViewSize` 未调用）
+- 配置滚动面板使用 Qt 原生 `QScrollArea` 而非 `SmoothScrollArea`
+
+### 🟢 Logo 系统增强
+
+- **品牌独立缩放系数**（`LogoSelector.BRAND_SCALE_FACTORS`）：为特定品牌叠加缩放系数，与 `size_ratio` 和长边限制计算相乘。例如 `'hasselblad_logo': 0.6` 使哈苏 logo 缩小 40%
+- **长边限制替代对角线限制**：Logo 尺寸上限从对角线系数 `2.0` 改为 `diagonal_limit_ratio` 可配置字段，默认 `2.0`，样式 YAML 中通过 `logo.diagonal_limit_ratio` 独立控制
+- 样式编辑器 GUI 新增 `diagonal_limit_ratio` 输入框
+
+### 🟢 依赖与构建
+
+- `requirements.txt`：移除 `streamlit`，加入 `PySide6>=6.5.0`、`PySide6-Fluent-Widgets[full]>=1.11.0`、`pyinstaller>=6.0`
+- `setup_env.py`：同步依赖更新
+- `build_pyside.py`：**新建** PyInstaller 编译脚本（`--onedir` + 资源文件打包：CSV 映射表、YAML 样式配置、Logo PNG）
+- `streamlit_app.py`：**已删除**
+- `.gitignore`：添加 `dist/`、`build/`、`*.spec`
+
+### 🧹 清理与废弃
+
+| 项目 | 状态 |
+|---|---|
+| `src/gui/`（Streamlit GUI） | → `src/gui_legacy/`（已封存，原地保留可恢复） |
+| `src/gui_pyside/app.py` `types.ModuleType` hack | 已删除 |
+| `main.py --gui` / `--mode` 参数 | 已删除 |
+| `main.py launch_gui()` / `_free_port()` 函数 | 已删除 |
+| 批量处理 PySide6 页面 | 已取消（交互逻辑由胶片栏覆盖） |
+| `streamlit_app.py` | 已删除 |
+| `project_master_spec.json` 引用（README） | 已删除 |
+| Linux/macOS 启动说明 | 已移除，标注仅 Windows 测试 |
+
+### 📝 文档更新
+
+- `README.md`：运行方式（默认 PySide6）、项目结构更新、GUI 界面章节重写、技术栈更新
+- `AGENTS.md`：架构速览更新、入口命令更新
+- `docs/GUI_REFACTORING_PLAN.md`：版本 v1.3，Streamlit 已封存，批量处理已取消
+- `CHANGELOG.md`：本页更新
+
 ## v1.12.0-dev (2026-05-25)
 
 > 内部开发版本。新增布局引擎 `alignment: "both-center"` 双轴居中模式，支持元素中心点与锚点完全重合。

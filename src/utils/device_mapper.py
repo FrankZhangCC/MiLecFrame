@@ -1,5 +1,5 @@
 # Copyright (c) 2026 FrankZhangCC
-# MIT License - see LICENSE file for details
+# GNU General Public License v3.0 - see LICENSE file for details
 
 """
 设备映射数据库模块
@@ -8,6 +8,7 @@
 import csv
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -56,7 +57,7 @@ class DeviceMapper:
                     if 'camera' in str(file_path):
                         writer.writerow(['original_brand', 'original_model', 'mapped_brand', 'mapped_model', 'timestamp'])  # 写入表头
                     elif 'lens' in str(file_path):
-                        writer.writerow(['original_lens', 'mapped_lens', 'short_lens'])  # 写入表头
+                        writer.writerow(['original_lens', 'mapped_lens', 'short_lens', 'brand', 'mount', 'timestamp'])  # 写入表头
     
     def _load_camera_map(self) -> Dict[Tuple[str, str], Dict[str, str]]:
         """
@@ -256,7 +257,9 @@ class DeviceMapper:
             print(f"添加相机映射时出错: {str(e)}")
             return False
     
-    def add_lens_mapping(self, original_lens: str, mapped_lens: str, short_lens: Optional[str] = None) -> bool:
+    def add_lens_mapping(self, original_lens: str, mapped_lens: str, short_lens: Optional[str] = None,
+                          brand: Optional[str] = None, mount: Optional[str] = None,
+                          timestamp: Optional[str] = None) -> bool:
         """
         添加新的镜头映射
         
@@ -264,6 +267,9 @@ class DeviceMapper:
             original_lens: 原始镜头名
             mapped_lens: 映射后的镜头名
             short_lens: 短版镜头名（可选，默认等于 mapped_lens）
+            brand: 镜头品牌（可选）
+            mount: 镜头卡口（可选，多卡口用逗号分隔）
+            timestamp: 时间戳（可选，默认当前时间）
             
         Returns:
             是否添加成功
@@ -271,6 +277,8 @@ class DeviceMapper:
         try:
             if short_lens is None:
                 short_lens = mapped_lens
+            if timestamp is None:
+                timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
 
             # 检查映射是否已存在
             if original_lens in self.lens_map:
@@ -284,7 +292,7 @@ class DeviceMapper:
             # 追加到CSV文件
             with open(self.lens_db_path, 'a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow([original_lens, mapped_lens, short_lens])
+                writer.writerow([original_lens, mapped_lens, short_lens, brand or '', mount or '', timestamp])
             
             print(f"成功添加镜头映射: {original_lens} -> {mapped_lens} [短版: {short_lens}]")
             return True

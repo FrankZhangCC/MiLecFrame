@@ -143,7 +143,7 @@
       position: [______________]  (bottom-right / top-left / ...)
       alignment: [______________]  (left / center / both-center / right / ...)
       size_ratio: [____]
-      diagonal_limit_ratio: [____]  (可选，默认 2.0；对角线上限 = ratio × size_ratio × reference_side)
+      max_dim_limit_ratio: [____]  (可选，默认 2.5；长边长度上限 = ratio × size_ratio × reference_side)
       margin_top: [____]  margin_bottom: [____]
       margin_left: [____]  margin_right: [____]
       或使用相对定位:

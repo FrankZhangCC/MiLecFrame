@@ -7,15 +7,18 @@
 - 所有代码应当详细注释。
 - 新增代码时，除非必要，不要删除旧有注释。
 - 每次执行任务后都要执行语法检查：`python -m py_compile` 校验所有被修改的 `.py` 文件。
+- 在执行任务后，可以通过写测试代码的方式，检查新增或修改的代码是否真实起作用，特别是在涉及到GUI窗口修改的时候。
+- 在排查问题时，积极使用debug log的方式进行问题定位，必要时让用户执行操作后再读取debug log。
 - 所有命令在虚拟环境中执行：先运行 `.\venv\Scripts\activate`（Windows PowerShell）。
 
 ## 架构速览
 
 ```
 src/
-  main.py              ← CLI 入口（单张 / 批量；默认启动 GUI）
+  main.py              ← CLI 入口（单张 / 批量；默认启动 PySide6 GUI）
   core/                ← ImageProcessor → FrameRenderer / HDRHandler / Decorator / BatchProcessor
-  gui/                 ← Streamlit GUI（app.py 为主入口，分页面渲染）
+  gui_legacy/          ← Streamlit GUI（已封存）
+  gui_pyside/          ← PySide6 + QFluentWidgets 原生桌面 GUI（当前默认）
   utils/               ← 工具层（ExifHelper, DeviceMapper, FontManager, LayoutEngine,
                          BackgroundFillManager, RenderContext, logging_config）
   frame_styles/
@@ -29,8 +32,7 @@ src/
 | ----------- | ------------------------------------------------------------------------------- |
 | 单张处理    | `python src/main.py -i <in> -o <out> -s <style> --author "..." --bg-fill ...` |
 | 批量处理    | `python src/main.py --batch -i <dir> -o <dir> --recursive`                    |
-| GUI（推荐） | `streamlit run src/gui/app.py`                                                |
-| GUI（备选） | `python src/main.py --gui`（subprocess 包装，会调用 streamlit）               |
+| GUI（默认） | `python src/main.py`（启动 PySide6 桌面窗口）                                 |
 | 环境搭建    | `python setup_env.py`（创建 venv + 安装依赖）                                 |
 
 ## 没有测试/检查框架
@@ -73,6 +75,14 @@ src/
 - DEBUG 级别 → `debug_log.txt`（项目根目录）
 - INFO 及以上 → 控制台 stderr
 - 入口点（CLI/GUI）均已调用 `setup_logging()`，带幂等守卫。
+
+### GUI 重构计划
+
+- PySide6 + QFluentWidgets 重构计划详见 **[`docs/GUI_REFACTORING_PLAN.md`](./docs/GUI_REFACTORING_PLAN.md)**。
+- 该文档包含：原 GUI 功能逻辑总结、重构架构设计、QFluentWidgets 组件映射表、数据模型设计、内存管理方案、实施步骤等全部规划内容。
+- 开发 GUI 时必须严格遵循该文档，特别是 **全面使用 QFluentWidgets 组件、禁用 Qt 原生界面组件** 的规则。
+- 阅读 [https://qfluentwidgets.com/zh/pages/componentlist](https://qfluentwidgets.com/zh/pages/componentlist) 了解QFluentWidgets包含的可用组件列表。
+- 阅读官方API文档 [https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/index.html](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/index.html) 了解组件详细说明。
 
 ### 命令执行环境
 

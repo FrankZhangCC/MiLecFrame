@@ -1,5 +1,5 @@
 # Copyright (c) 2026 FrankZhangCC
-# MIT License - see LICENSE file for details
+# GNU General Public License v3.0 - see LICENSE file for details
 
 """
 EXIF信息处理辅助模块
@@ -217,20 +217,20 @@ class ExifHelper:
         # 处理镜头信息
         if 'lens_model' in exif_data:
             original_lens = exif_data['lens_model']
-            
+
             # 通过 DeviceMapper 已加载的 dict 检查是否已存在（避免冗余 CSV 读取）
             if original_lens not in self.device_mapper.lens_map:
                 lens_map_file = Path(lens_map_path)
                 header_exists = lens_map_file.exists()
                 with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
-                    fieldnames = ['original_lens', 'mapped_lens', 'short_lens']
+                    fieldnames = ['original_lens', 'mapped_lens', 'short_lens', 'brand', 'mount', 'timestamp']
                     writer = csv.writer(csvfile)
-                    
+
                     if not header_exists:
                         writer.writerow(fieldnames)
-                    
+
                     # 默认情况下，映射值等于原始值
-                    writer.writerow([original_lens, original_lens, original_lens])
+                    writer.writerow([original_lens, original_lens, original_lens, '', '', timestamp])
     
     def get_formatted_exif_for_display(self, exif_data: Dict[str, str]) -> Dict[str, str]:
         """
