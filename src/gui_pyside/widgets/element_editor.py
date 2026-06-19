@@ -1,5 +1,5 @@
 # Copyright (c) 2026 FrankZhangCC
-# MIT License - see LICENSE file for details
+# GNU General Public License v3.0 - see LICENSE file for details
 
 """
 元素定位编辑器（可复用组件）

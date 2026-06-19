@@ -1,5 +1,5 @@
 # Copyright (c) 2026 FrankZhangCC
-# MIT License - see LICENSE file for details
+# GNU General Public License v3.0 - see LICENSE file for details
 
 """
 MiLec Frame - 照片相框程序
