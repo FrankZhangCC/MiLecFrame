@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 装饰元素处理模块
 负责处理相框中的装饰元素，如水印等

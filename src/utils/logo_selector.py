@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 Logo选择器模块
 负责扫描logo目录、验证logo格式和根据相机品牌自动匹配logo

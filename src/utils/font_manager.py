@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 字体管理器模块
 负责字体的加载、缓存和智能选择（中西文检测、系统字体回退）

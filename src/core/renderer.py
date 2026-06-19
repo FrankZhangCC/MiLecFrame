@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 图像渲染引擎模块
 负责相框的图层合成、背景填充、高斯模糊等功能

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 EXIF信息处理辅助模块
 负责提取、解析和格式化照片的EXIF信息
