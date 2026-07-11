@@ -1068,7 +1068,7 @@ class ImageProcessingPage(QWidget):
         self.exif_lens.setText(f"镜头: <b>{lens}</b>" if lens else "镜头: <b>—</b>")
 
         # 第二行
-        fl = dd.get('raw_focal_length', '')
+        fl = dd.get('raw_focal_length_35mm', '') or dd.get('raw_focal_length', '')
         self.exif_focal.setText(f"焦距: <b>{fl}mm</b>" if fl else "焦距: <b>—</b>")
 
         ap = dd.get('raw_aperture', '')
