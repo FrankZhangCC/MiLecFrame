@@ -114,6 +114,7 @@ class FrameRenderer:
         use_short_lens: bool = False,
         saturation_override: Optional[float] = None,
         custom_text: Optional[str] = None,
+        timestamp_display_mode: str = 'full',
     ) -> Image.Image:
         """
         渲染带相框的图像
@@ -131,6 +132,7 @@ class FrameRenderer:
             use_short_lens: 是否使用短版镜头名
             saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值）
             custom_text: 自定义文本内容（由用户在 GUI 输入，仅当样式配置中 custom_text.enabled=True 时生效）
+            timestamp_display_mode: 拍摄时间显示模式（'full'=日期与时刻, 'date_only'=仅日期, 'hide'=不显示）
             
         Returns:
             渲染后的图像
@@ -164,7 +166,7 @@ class FrameRenderer:
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
-        context = RenderContext(image.size, exif_data, author, location, lens_display_mode, use_short_lens, custom_text=custom_text)
+        context = RenderContext(image.size, exif_data, author, location, lens_display_mode, use_short_lens, custom_text=custom_text, timestamp_display_mode=timestamp_display_mode)
 
         background = BackgroundFillManager.render(
             image, canvas_width, canvas_height, effective_bg_type,

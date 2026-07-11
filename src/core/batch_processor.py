@@ -105,6 +105,7 @@ class BatchProcessor:
         progress_callback: Optional[Callable[[int, int, str, str], None]] = None,
         skip_existing: bool = True,
         custom_text: Optional[str] = None,
+        timestamp_display_mode: str = 'full',
     ) -> BatchResult:
         """
         批量处理图像
@@ -131,6 +132,7 @@ class BatchProcessor:
                 签名: callback(processed_count: int, total_count: int, filename: str, status_msg: str)
             skip_existing: 是否跳过已存在的输出文件
             custom_text: 自定义文本内容（仅当样式配置 custom_text.enabled=True 时生效）
+            timestamp_display_mode: 拍摄时间显示模式（'full'=日期与时刻, 'date_only'=仅日期, 'hide'=不显示）
 
         Returns:
             BatchResult: 包含成功/失败/跳过计数及失败详情的结果对象
@@ -218,6 +220,7 @@ class BatchProcessor:
                     use_short_lens=use_short_lens,
                     saturation_override=saturation_override,
                     custom_text=custom_text,
+                    timestamp_display_mode=timestamp_display_mode,
                 )
 
                 if success:
