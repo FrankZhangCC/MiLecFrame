@@ -62,6 +62,7 @@ error_log.txt
 data/*
 !data/camera_map.csv
 !data/lens_map.csv
+!data/logo_scale.yaml
 
 # User config
 config.json
