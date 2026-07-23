@@ -17,7 +17,7 @@ if str(project_root) not in sys.path:
 
 from PIL import Image
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector
@@ -83,6 +83,48 @@ def _rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br):
     return Image.fromarray(mask.astype(np.uint8))
 
 
+def _draw_single_rectangle(
+    background: Image.Image,
+    rect_w: int,
+    rect_h: int,
+    position: Tuple[int, int],
+    color: Tuple[int, int, int],
+    opacity: float,
+    corner_radius: Optional[Dict] = None,
+    reference_side: float = 1.0,
+) -> Image.Image:
+    """
+    在背景上绘制单个矩形（RGBA 合成，支持透明度和圆角）
+
+    Args:
+        background: 背景图像（RGB 模式）
+        rect_w, rect_h: 矩形像素尺寸
+        position: 左上角坐标 (x, y)
+        color: RGB 颜色元组
+        opacity: 透明度 0.0-1.0
+        corner_radius: 圆角配置 {'top_left': ratio, ...} 或 None（直角）
+        reference_side: 参照边长度，用于将圆角 ratio 转为像素
+    """
+    alpha_val = int(round(255 * opacity))
+    rect_layer = Image.new('RGBA', background.size, (0, 0, 0, 0))
+    rect_img = Image.new('RGBA', (rect_w, rect_h), (*color, alpha_val))
+
+    if corner_radius and isinstance(corner_radius, dict):
+        r_tl = int(reference_side * corner_radius.get('top_left', 0))
+        r_tr = int(reference_side * corner_radius.get('top_right', 0))
+        r_bl = int(reference_side * corner_radius.get('bottom_left', 0))
+        r_br = int(reference_side * corner_radius.get('bottom_right', 0))
+        if any(r > 0 for r in [r_tl, r_tr, r_bl, r_br]):
+            mask = _rounded_corner_mask(rect_w, rect_h, r_tl, r_tr, r_bl, r_br)
+            mask_array = np.array(mask, dtype=np.float32) * opacity
+            rect_img.putalpha(Image.fromarray(mask_array.astype(np.uint8)))
+
+    rect_layer.paste(rect_img, position)
+    result = background.convert('RGBA')
+    result = Image.alpha_composite(result, rect_layer)
+    return result.convert('RGB')
+
+
 class FrameRenderer:
     """相框渲染器"""
     
@@ -93,6 +135,82 @@ class FrameRenderer:
 
         # 初始化装饰器
         self.decorator = Decorator(font_manager=self.font_manager)
+
+    def _draw_rectangles(
+        self,
+        background: Image.Image,
+        style_config: Dict,
+        layout_engine: LayoutEngine,
+        effective_bg_type: str,
+    ) -> Image.Image:
+        """
+        在背景上绘制所有自定义矩形（背景层之上，原图层之下）
+        """
+        layout = style_config.get('layout', {})
+        colors_cfg = style_config.get('colors', {})
+        rectangles = layout.get('rectangles')
+
+        if not rectangles or not isinstance(rectangles, dict):
+            return background
+
+        ref = layout_engine.reference_side
+        is_dark_bg = BackgroundFillManager.is_dark_bg(effective_bg_type)
+
+        result = background.copy()
+
+        for rect_name in sorted(rectangles.keys()):
+            rect_cfg = rectangles[rect_name]
+            if not isinstance(rect_cfg, dict):
+                continue
+
+            # 1. 颜色解析（深/浅背景自适应）
+            dark_key = f'custom_{rect_name}_dark_color'
+            light_key = f'custom_{rect_name}_light_color'
+            color_raw = colors_cfg.get(dark_key if is_dark_bg else light_key)
+            if color_raw is None:
+                color_raw = colors_cfg.get(light_key if is_dark_bg else dark_key)
+            if color_raw is None:
+                logger.warning("矩形 %s 未找到颜色配置，跳过", rect_name)
+                continue
+
+            color = _parse_hex_or_rgb(color_raw)
+            if color is None:
+                logger.warning("矩形 %s 颜色解析失败: %s，跳过", rect_name, color_raw)
+                continue
+
+            # 2. 尺寸解析
+            width_ratio = rect_cfg.get('width_ratio', 0)
+            height_ratio = rect_cfg.get('height_ratio', 0)
+            if width_ratio <= 0 or height_ratio <= 0:
+                logger.warning("矩形 %s 尺寸无效 (width_ratio=%s, height_ratio=%s)，跳过",
+                               rect_name, width_ratio, height_ratio)
+                continue
+            rect_w = int(ref * width_ratio)
+            rect_h = int(ref * height_ratio)
+
+            # 3. 透明度
+            opacity = float(rect_cfg.get('opacity', 1.0))
+            opacity = max(0.0, min(1.0, opacity))
+
+            # 4. 构建定位配置（剔除矩形专用键，保留定位参数）
+            skip_keys = {'width_ratio', 'height_ratio', 'opacity', 'corner_radius', 'name'}
+            position_cfg = {k: v for k, v in rect_cfg.items() if k not in skip_keys}
+
+            # 5. 计算位置（跳过 padding 约束）
+            rect_x, rect_y = layout_engine.calculate_position(
+                rect_w, rect_h, position_cfg, defer_padding=True)
+
+            # 6. 圆角
+            corner_radius = rect_cfg.get('corner_radius')
+
+            # 7. 绘制
+            logger.debug("绘制矩形 %s: %dx%d @ (%d,%d), color=%s, opacity=%.2f",
+                         rect_name, rect_w, rect_h, rect_x, rect_y, color, opacity)
+            result = _draw_single_rectangle(
+                result, rect_w, rect_h, (rect_x, rect_y), color,
+                opacity, corner_radius, ref)
+
+        return result
 
     def _get_logo_selector(self):
         """获取LogoSelector实例"""
@@ -172,6 +290,10 @@ class FrameRenderer:
             image, canvas_width, canvas_height, effective_bg_type,
             saturation=saturation_override
         )
+
+        # ── 自定义矩形（背景层之上，原图层之下） ──────────────────
+        background = self._draw_rectangles(
+            background, style_config, layout_engine, effective_bg_type)
 
         orig_x, orig_y, orig_w, orig_h = layout_engine.original_bounds
         positioned_image = background.copy()

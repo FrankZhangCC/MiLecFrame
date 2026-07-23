@@ -7,6 +7,7 @@
 1. [快速入门](#1-快速入门)
 2. [文件组织规范](#2-文件组织规范)
 3. [布局配置](#3-布局配置)
+   - [3.5 自定义矩形（rectangles）](#35-自定义矩形-rectangles)
 4. [元素定位系统](#4-元素定位系统)
 5. [文本内容配置](#5-文本内容配置)
 6. [颜色配置](#6-颜色配置)
@@ -214,6 +215,70 @@ layout:
 - 四个角的半径独立控制，设为 `0` 表示该角保持直角
 - 与画布扩展和 padding 完全兼容，圆角仅作用于原图，不影响扩出区域
 
+### 3.5 自定义矩形（rectangles）
+
+在背景层之上、原图层之下绘制装饰性矩形色块，可用于添加底部渐变条、背景分隔线等视觉元素。
+
+```yaml
+layout:
+  rectangles:
+    rect_01:
+      width_ratio: 0.85          # 宽度 = 参照边 × 比例
+      height_ratio: 0.04         # 高度 = 参照边 × 比例
+      opacity: 0.8               # 透明度 0.0-1.0
+      position: "top"            # 标准锚点
+      alignment: "both-center"   # 对齐方式
+      margin_top: 0.01           # 边距（可选）
+      corner_radius:             # 圆角（可选）
+        top_left: 0.005
+        top_right: 0.005
+        bottom_left: 0
+        bottom_right: 0
+    rect_02:
+      width_ratio: 1.1
+      height_ratio: 0.15
+      opacity: 0.5
+      position: "bottom"
+      alignment: "both-center"
+      margin_bottom: 0.05
+```
+
+#### 命名规则
+
+- key 采用**补零编号**：`rect_01`、`rect_02`、`rect_03`…… 以此类推
+- 矩形按键名排序绘制（`rect_01` 最先，位于最底层）
+- 颜色在 `colors` 区域中定义（见 [§6 颜色配置](#6-颜色配置)）
+
+#### 矩形专用参数
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `width_ratio` | `float` | **必填** | 宽度比例，相对于原图参照边（短边） |
+| `height_ratio` | `float` | **必填** | 高度比例，相对于原图参照边（短边） |
+| `opacity` | `float` | `1.0` | 透明度 0.0-1.0 |
+| `corner_radius` | `dict` | — | 四角独立圆角（省略则直角，缩放基准 = 参照边） |
+
+#### 定位参数
+
+矩形复用 [§4.2 绝对定位系统](#42-绝对定位) 的全部锚点和对齐规则，支持 `position`、`alignment`、`margin_*` 等所有参数。**与文字元素不同，矩形不受 `padding` 安全区域约束**，可超出安全区域绘制到画布边界。
+
+#### 图层位置
+
+```
+┌────────────────────────┐
+│     背景填充层          │
+│  ┌──────────────────┐  │
+│  │   ★ 矩形层 ★     │  │  ← rectangles 在此
+│  └──────────────────┘  │
+│  ┌──────────────────┐  │
+│  │     原图          │  │
+│  └──────────────────┘  │
+│      文字 / Logo 层    │
+└────────────────────────┘
+```
+
+矩形在背景之上、原图之下，文字和 Logo 仍然覆盖在矩形上方。
+
 ---
 
 ## 4. 元素定位系统
@@ -225,6 +290,7 @@ layout:
 - **`info_position` 中声明的 text_type**：如 `camera_lens`、`exif`、`timestamp_author` 等（文本来源于 EXIF 数据或用户输入）
 - **`defined_texts`**：配置文件中写死的固定文字
 - **`custom_text`**：用户在 GUI 中输入的个性文字
+- **`rectangles`**：装饰性矩形色块（不受 padding 约束）
 - **Logo**：品牌标识图片
 
 所有元素的定位方式分为两种，互斥（`relative_to` 有值时使用相对定位）。
@@ -504,6 +570,22 @@ colors:
 
 - 支持的元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
 
+### 矩形颜色
+
+矩形的颜色遵循同样的明暗自适应规则，命名格式为 `custom_{矩形名}_{dark/light}_color`：
+
+```yaml
+colors:
+  custom_rect_01_dark_color: "#FF6B6B"      # 深色背景时使用
+  custom_rect_01_light_color: "#E05555"     # 浅色背景时使用
+  custom_rect_02_dark_color: [50, 150, 255]
+  custom_rect_02_light_color: [30, 100, 200]
+```
+
+- 每个矩形需分别配置 `dark` 和 `light` 颜色
+- 若仅配了一种，则无论背景明暗都使用该颜色
+- 未配置颜色的矩形会被跳过（warning）
+
 ---
 
 ## 7. 字体配置
@@ -688,6 +770,16 @@ layout:
     bottom_left: 0.01
     bottom_right: 0.01
 
+  # 自定义矩形（可选）
+  rectangles:
+    rect_01:
+      width_ratio: 1.1
+      height_ratio: 0.15
+      opacity: 0.5
+      position: "bottom"
+      alignment: "both-center"
+      margin_bottom: 0.05
+
   # 信息位置：声明哪些文字显示 + 定位方式
   info_position:
     camera_lens:
@@ -738,6 +830,8 @@ logo:
 colors:
   custom_text_light_color: "#333333"
   custom_text_dark_color: "#CCCCCC"
+  custom_rect_01_light_color: [255, 255, 255]
+  custom_rect_01_dark_color: [0, 0, 0]
 
 # 【字体配置】（可选，不配置则使用系统字体）
 fonts:
