@@ -20,7 +20,7 @@ def run_app():
     
     # 设置页面配置
     st.set_page_config(
-        page_title="MiLeica Frame - 照片相框程序",
+        page_title="MiLecFrame - 照片相框程序",
         page_icon="📷",
         layout="wide"
     )
@@ -47,7 +47,13 @@ div.block-container {
         st.session_state.current_page = "🖼️ 图像处理"
     
     # 侧边栏导航
-    st.sidebar.title("MiLeica相框水印 by FrankZ")
+    st.sidebar.markdown("""
+<div style="line-height: 1.3; margin-bottom: 0.5rem;">
+    <h1 style="margin: 0 0 2px 0; padding: 0; font-size: 1.5rem;">MiLecFrame</h1>
+    <p style="font-size: 0.75rem; color: #888; margin: 0; padding: 0;">©Frank Zhang 2025</p>
+    <p style="font-size: 0.75rem; color: #888; margin: 0; padding: 0;">使用 DeepSeek V4 系列模型开发。</p>
+</div>
+""", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     st.sidebar.caption("🧭 导航")
     
@@ -104,7 +110,8 @@ div.block-container {
     # 底部信息
     st.markdown("---")
     st.caption("💡 提示：本程序支持设备映射，自动识别并显示相机型号等信息")
-    st.caption("📋 版权所有 © 2026 MiLeica Frame 项目组")
+    st.caption("📋 ©Frank Zhang 2025")
+    st.caption("📋 使用 DeepSeek V4 系列模型开发。")
 
 
 if __name__ == "__main__":

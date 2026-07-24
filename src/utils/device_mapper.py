@@ -3,9 +3,12 @@
 用于管理和维护相机品牌、机型及镜头的映射关系
 """
 import csv
+import logging
 import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 class DeviceMapper:
@@ -76,9 +79,9 @@ class DeviceMapper:
                         'mapped_model': mapped_model
                     }
         except FileNotFoundError:
-            print(f"警告: 相机映射数据库文件不存在: {self.camera_db_path}")
+            logger.warning("相机映射数据库文件不存在: %s", self.camera_db_path)
         except Exception as e:
-            print(f"加载相机映射数据库时出错: {str(e)}")
+            logger.warning("加载相机映射数据库时出错: %s", e)
         
         return camera_map
     
@@ -100,10 +103,10 @@ class DeviceMapper:
                     if original_lens and mapped_lens:
                         lens_map[original_lens] = mapped_lens
         except FileNotFoundError:
-            print(f"警告: 镜头映射数据库文件不存在: {self.lens_db_path}")
+            logger.warning("镜头映射数据库文件不存在: %s", self.lens_db_path)
         except Exception as e:
-            print(f"加载镜头映射数据库时出错: {str(e)}")
-        
+            logger.warning("加载镜头映射数据库时出错: %s", e)
+
         return lens_map
 
     def _load_short_lens_map(self) -> Dict[str, str]:
@@ -130,9 +133,9 @@ class DeviceMapper:
                     elif row.get('mapped_lens', '').strip():
                         short_lens_map[original_lens] = row['mapped_lens'].strip()
         except FileNotFoundError:
-            print(f"警告: 镜头映射数据库文件不存在: {self.lens_db_path}")
+            logger.warning("镜头映射数据库文件不存在: %s", self.lens_db_path)
         except Exception as e:
-            print(f"加载短版镜头映射时出错: {str(e)}")
+            logger.warning("加载短版镜头映射时出错: %s", e)
         
         return short_lens_map
 
@@ -292,4 +295,4 @@ class DeviceMapper:
         self.camera_map = self._load_camera_map()
         self.lens_map = self._load_lens_map()
         self.short_lens_map = self._load_short_lens_map()
-        print("设备映射数据库已刷新")
+        logger.info("设备映射数据库已刷新")
