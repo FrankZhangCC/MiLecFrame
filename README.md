@@ -1,6 +1,6 @@
 ![Features_introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.1.1--dev-blue)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.2.0--dev-blue)
 
 > ©FrankZhangCC 2026
 > 本程序基于 GPLv3 许可证发布，详见 [LICENSE](./LICENSE) 文件。
@@ -247,6 +247,8 @@ MiLeica_Frame/
 
 样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](./src/frame_styles/configs/)目录下。
 
+**每种样式必须存放在独立的文件夹中**（文件夹名 = 样式名），即使只有单变体也不例外。文件夹内除配置文件外还可存放缩略图、补充资源等附属文件。传统单文件样式（`样式名.yaml` 直接放在 `configs/` 根目录）已不再推荐使用。
+
 > **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](./src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
 
 ### 文件夹变体样式 (v1.3.0)
@@ -260,8 +262,12 @@ configs/
     no_location.yaml          # location 缺失时的变体
     no_author.yaml            # author 缺失时的变体
     no_location_no_author.yaml # 多字段同时缺失时的变体（越具体越优先）
-  OtherStyle.yaml             # 传统单文件样式（向后兼容）
+  裁剪胶片 FilmCut/
+    default.yaml              # 单变体样式也建议使用文件夹，方便存放缩略图
+    thumbnail.png
 ```
+
+所有样式均建议使用独立文件夹组织（即使只有单变体），以便在文件夹内存放缩略图、补充资源等附属文件。
 
 #### 命名规则
 
@@ -304,6 +310,31 @@ style_config = style_manager.get_style_config(
 # 不带 context 时（如 GUI 预览）返回 default.yaml，确保向后兼容
 style_config = style_manager.get_style_config('底部信息条 Bottom Bars')
 ```
+
+### 样式缩略图
+
+样式选择器在 GUI 中以横向缩略图滚动列表展示，每种样式需要一张预览缩略图。
+
+**文件约定**：
+
+```
+configs/样式名称/
+├── default.yaml              # 样式配置
+├── thumbnail.png             # 缩略图（必需）
+└── no_location.yaml          # 变体配置（可选）
+```
+
+| 规范 | 要求 |
+|------|------|
+| **文件名** | `thumbnail.png`（推荐）或 `thumbnail.jpg` / `thumbnail.jpeg` |
+| **尺寸** | 512 × 512 像素（正方形） |
+| **格式** | PNG（推荐）或 JPEG |
+| **存放位置** | 样式配置文件夹根目录，与 `default.yaml` 同级 |
+| **作用** | 样式选择器中用于直观展示该样式的最终效果 |
+
+**缺失处理**：未放置缩略图时，样式选择器中对应位置以灰色背景 + 样式名称文字占位，不影响程序正常运行。
+
+> 示例：为"底部信息条 Bottom Bars"样式放置缩略图 → `configs/底部信息条 Bottom Bars/thumbnail.png`
 
 ### 基本信息
 
