@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 批量处理页面模块
 提供多文件上传、配置设置、一键批处理和实时进度显示

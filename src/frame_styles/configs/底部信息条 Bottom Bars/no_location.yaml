@@ -67,5 +67,5 @@ logo:
   relative_margin: 0.016
   size_ratio: 0.048
   offset_y_ratio: 0.011
-  diagonal_limit_ratio: 2.0
+  max_dim_limit_ratio: 2.5
 name: 底部信息条 BottomBars

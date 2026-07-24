@@ -82,6 +82,11 @@ config.ini
 *.class
 *.o
 
+# Build output
+dist/
+build/
+*.spec
+
 # Large files
 *.bin
 *.dmg
@@ -102,3 +107,12 @@ docs/FLUTTER_MIGRATION_PLAN.md
 docs/LayoutInstruction_排版定位系统参数图解.ai
 test_images
 AGENTS.md
+docs/Features_特性一图介绍.ai
+docs/frame_example 拷贝.png
+docs/frame_example.psd
+docs/project_master_spec.json
+!docs/Features_introduction.jpg
+ScreenShot_2026-06-02_215044_996.png
+session-ses_1779.md
+docs/Features_Vertical_特性一图介绍竖版.ai
+docs/ScreenShot_2026-06-01_212104_518.png

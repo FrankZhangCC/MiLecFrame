@@ -1,4 +1,6 @@
-、# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.12.0--dev-orange)
+![Features_introduction](docs/Features_introduction.jpg)
+
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.0.0--dev-orange)
 
 > ©FrankZhangCC 2026
 > 使用DeepSeek V4系列模型开发。
@@ -11,13 +13,13 @@ MiLecFrame 是一款为专业摄影师和摄影爱好者设计的照片相框水
 
 ### 使用方式
 
-直接运行 `src\main.py` 即可启动程序，默认以 GUI 模式（Streamlit Web 界面）运行：
+直接运行 `src\main.py` 即可启动程序，默认以 PySide6 桌面 GUI 模式运行：
 
 ```bash
 python src/main.py
 ```
 
-程序会自动打开浏览器访问 `http://localhost:8501`。也可通过命令行参数进行单张/批量处理（详见下方 [命令行选项](#命令行选项)）。
+程序会弹出原生桌面窗口。也可通过命令行参数进行单张/批量处理（详见下方 [命令行选项](#命令行选项)）。
 
 ## 快速开始
 
@@ -31,8 +33,9 @@ python src/main.py
    python setup_env.py
    ```
 3. 激活虚拟环境：
-   - Windows: `venv\Scripts\activate`
-   - Linux/Mac: `source venv/bin/activate`
+   `.\venv\Scripts\activate`
+
+> **注意**：本程序仅已在 Windows 环境下测试，未在 Linux / macOS 上验证。如在这些系统上使用，可能需要调整路径格式和字体配置。
 
 #### 字体安装
 
@@ -41,10 +44,12 @@ python src/main.py
 如需使用自定义字体（如预设样式默认的 Gotham + GlowSansSC），请放入 `assets/fonts/` 目录：
 
 **Gotham（拉丁字体）**
+
 - 下载：https://www.dfonts.org/fonts/gotham-font-family/
 - 放入文件：`Gotham-Light.otf`、`Gotham-Book.otf`、`Gotham-Medium.otf`
 
 **GlowSansSC 未来荧黑（CJK 字体）**
+
 - 下载：https://github.com/welai/glow-sans
 - 放入文件：`GlowSansSC-Normal-Light.otf`、`GlowSansSC-Normal-Regular.otf`、`GlowSansSC-Normal-Medium.otf`
 
@@ -65,25 +70,31 @@ assets/fonts/
 
 #### 使用方法
 
-##### 单张图片处理
+##### 桌面 GUI（推荐，默认模式）
+
+```bash
+python src/main.py
+```
+
+程序会弹出原生桌面窗口，支持图片拖拽、胶片栏多图排队、完整的参数配置和预览功能。
+
+> 首次使用请先运行 `python setup_env.py` 安装依赖，详见 [环境搭建](#环境搭建)。
+
+##### 命令行模式（不推荐，仅用于批量脚本化）
+
+> **注意**：命令行模式仅适用于已确认参数的批量自动化场景，日常使用请优先选择桌面 GUI。
+
+**单张图片处理**：
 
 ```bash
 python src/main.py -i input.jpg -o output.jpg -s "底部信息条 Bottom Bars" --author "Your Name" --bg-fill gaussian_white_80 --logo auto --lens-display combined --output-format JPEG --watermark-text "© MyBrand"
 ```
 
-##### 批量处理
+**批量处理**：
 
 ```bash
 python src/main.py --batch -i /path/to/input/folder -o /path/to/output/folder -s "底部信息条 Bottom Bars" --author "Your Name" --bg-fill gaussian_white_80 --recursive --output-format PNG --logo auto --lens-display combined --use-gps-location --watermark-text "© MyBrand" --watermark-opacity 30
 ```
-
-##### GUI模式
-
-```bash
-streamlit run src/gui/app.py
-```
-
-> **注意**: 当使用Streamlit GUI模式时，若要停止程序，请在终端中按下 `Ctrl+C` 来中断服务。关闭浏览器标签页不会自动停止后台服务。
 
 #### 命令行选项
 
@@ -109,7 +120,6 @@ streamlit run src/gui/app.py
 | `--watermark-opacity`  |        | 水印不透明度 0-100（默认 50）                                                                                    |
 | `--watermark-color`    |        | 水印颜色：`white` / `black`（默认 white）                                                                    |
 | `--use-gps-location`   |        | 使用 GPS 坐标替换拍摄地点（批量逐张处理）                                                                        |
-| `--gui`                |        | 启动 Streamlit GUI 界面                                                                                          |
 
 `--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
 
@@ -170,15 +180,18 @@ MiLeica_Frame/
 │   │   ├── decorator.py        # 装饰元素处理
 │   │   ├── batch_processor.py  # 批量处理
 │   │   └── ...
-│   ├── gui/                # GUI界面相关
-│   │   ├── __init__.py
-│   │   ├── app.py                    # Streamlit GUI主文件
-│   │   ├── image_processing_page.py  # 图像处理页面
-│   │   ├── batch_processing_page.py  # 批量处理页面（v1.6.0）
-│   │   ├── camera_mapping_page.py    # 相机映射管理页面
-│   │   ├── lens_mapping_page.py      # 镜头映射管理页面
-│   │   ├── style_creator_page.py     # 样式编辑器页面
-│   │   └── ...
+│   ├── gui_legacy/         # Streamlit Web GUI（已封存）
+│   ├── gui_pyside/         # PySide6 原生桌面 GUI（当前默认）
+│   │   ├── app.py                   # PySide6 应用入口
+│   │   ├── main_window.py           # FluentWindow 主窗口 + 导航
+│   │   ├── pages/                   # 页面容器
+│   │   │   ├── image_processing_page.py  # 图像处理页面
+│   │   │   ├── camera_mapping_page.py    # 相机映射管理页面
+│   │   │   ├── lens_mapping_page.py      # 镜头映射管理页面
+│   │   │   └── style_creator_page.py     # 样式编辑器页面
+│   │   ├── widgets/                 # 可复用 Widget 组件
+│   │   ├── models/                  # 数据模型
+│   │   └── utils/                   # 工具层
 │   ├── utils/              # 工具函数
 │   │   ├── __init__.py
 │   │   ├── exif_helper.py       # EXIF数据处理
@@ -212,7 +225,7 @@ MiLeica_Frame/
 ├── tests/                  # 测试文件
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
-├── streamlit_app.py       # Streamlit应用入口
+├── build_pyside.py        # PyInstaller 编译脚本
 └── README.md
 ```
 
@@ -527,14 +540,14 @@ fonts:
 
 **系统字体参考表：**
 
-| weight 值 | Latin 自定义文件名 | Latin 系统字体 | CJK 系统字体 |
-|-----------|-------------------|---------------|-------------|
-| `Light` | `{family}-Light.otf` | Segoe UI Light | Microsoft JhengHei UI Light |
-| `Book` | `{family}-Book.otf` | Segoe UI Book | —（回退 Regular） |
-| `Regular` | `{family}-Regular.otf` | Segoe UI Regular | Microsoft JhengHei UI |
-| `Medium` | `{family}-Medium.otf` | Segoe UI **Semibold** | Microsoft JhengHei UI **Bold** |
-| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold | —（回退 Bold） |
-| `Bold` | `{family}-Bold.otf` | Segoe UI Bold | Microsoft JhengHei UI Bold |
+| weight 值    | Latin 自定义文件名        | Latin 系统字体             | CJK 系统字体                        |
+| ------------ | ------------------------- | -------------------------- | ----------------------------------- |
+| `Light`    | `{family}-Light.otf`    | Segoe UI Light             | Microsoft JhengHei UI Light         |
+| `Book`     | `{family}-Book.otf`     | Segoe UI Book              | —（回退 Regular）                  |
+| `Regular`  | `{family}-Regular.otf`  | Segoe UI Regular           | Microsoft JhengHei UI               |
+| `Medium`   | `{family}-Medium.otf`   | Segoe UI**Semibold** | Microsoft JhengHei UI**Bold** |
+| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold          | —（回退 Bold）                     |
+| `Bold`     | `{family}-Bold.otf`     | Segoe UI Bold              | Microsoft JhengHei UI Bold          |
 
 **Fallback 优先级：** `自定义字体文件 → 系统字体 → PIL 默认字体`。Latin/CJK 任一段落缺失，该类别自动走系统字体。
 
@@ -558,7 +571,7 @@ Logo 采用**独立渲染管线**：布局、尺寸、定位由 YAML 中 `logo:`
 logo:
   enabled: true                 # 是否启用
   size_ratio: 0.05              # 短边占参照边（短边）比例
-  diagonal_limit_ratio: 2.0     # 对角线上限倍数（相对于 size_ratio），默认 2.0
+  max_dim_limit_ratio: 2.5     # 长边长度上限倍数（相对于 size_ratio），默认 2.5
   placement: outside            # inside / outside
   position: "bottom-right"      # 14 种锚点位置
   alignment: "center"           # 对齐方式（支持 both-center：双轴居中，元素中心与锚点重合）
@@ -574,10 +587,11 @@ logo:
   offset_y_ratio: 0
 ```
 
-- Logo 短边 = `size_ratio × 参照边（短边）`，对角线自动限制 ≤ `diagonal_limit_ratio × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`，`diagonal_limit_ratio = 2.0`
+- Logo 短边 = `size_ratio × 参照边（短边）`，长边自动限制 ≤ `max_dim_limit_ratio × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`，`max_dim_limit_ratio = 2.5`
 - 支持绝对定位和相对定位，可引用文字元素（如 `relative_to: "camera_lens"`）
 - Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
 - Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件，并根据当前背景类型的 `text_scheme`（暗色/亮色）自动选择 `_white` / 非 `_white` 颜色变体
+- **品牌独立缩放系数**（v1.12.0）：可在 `LogoSelector.BRAND_SCALE_FACTORS` 字典中按文件名关键字为特定品牌 logo 叠加缩放系数。系数在 `size_ratio` 和长边限制计算之后相乘，默认 `1.0`（不变）。例如 `'hasselblad_logo': 0.6` 使哈苏 logo 在基础尺寸上再缩小 40%。
 
 ### Logo 文件制作指南
 
@@ -872,15 +886,13 @@ BackgroundFillManager.register(
 
 ### GUI 界面
 
-基于 Streamlit 的 Web 界面（`src/gui/app.py`），采用三栏式布局：
+默认使用 PySide6 原生桌面 GUI（`src/gui_pyside/`），采用 QFluentWidgets Fluent Design 风格：
 
-- **侧边栏**（`st.sidebar`）：导航按钮（🖼️ 图像处理 / 📦 批量处理 / 📸 相机映射管理 / 🔭 镜头映射管理 / 🎨 样式编辑器）+ 📋 图片信息区块（上传后自动显示文件编码/色彩空间、相机品牌型号、镜头、焦距/光圈/快门/ISO、拍摄时间，0.9rem 字体行高 2，参数独立逐行列出）+ 底部🛑停止按钮
-- **主栏**（`main_col`，`st.columns([7, 3])` 左侧）：上传器位于顶部 → 双栏/响应式预览（左原始图右效果图） → 生成/下载按钮 → 状态提示
-- **配置栏**（`config_col`，右侧）：灰色底色 + 圆角 + 白色输入框
-  - `⚙️ 配置`：相框样式、输出格式、背景样式、字重
-  - `🎨 装饰`：作者姓名、GPS替换+拍摄地点、镜头显示+短版镜头名
-  - `🏷️ Logo`：自动匹配/手动/无
-  - `💧 水印`：可折叠（默认收起），内容/位置/透明度/颜色
+- **主窗口**：`FluentWindow` 框架，左侧 `NavigationInterface` 导航栏
+- **页面**：图像处理（含胶片栏多图排队）、相机映射管理、镜头映射管理、样式编辑器
+- **图像处理页面**：顶部预览 + 右侧配置栏（5 个手风琴折叠 Tab）+ 底部胶片栏
+
+旧版 Streamlit Web GUI 已封存于 `src/gui_legacy/`。
 
 功能概览：
 
@@ -920,10 +932,6 @@ BackgroundFillManager.register(
 - 在PowerShell环境中调试
 - 使用绝对路径执行Python脚本
 - 避免使用 `&&`作为命令连接符
-
-### 技术规范参考
-
-- 项目技术规范详细内容请参见 [project_master_spec.json](./project_master_spec.json)，后续开发必须严格遵循此规范
 
 ## 贡献
 
