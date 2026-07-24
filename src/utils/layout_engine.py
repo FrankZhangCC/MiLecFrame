@@ -20,6 +20,7 @@ class LayoutEngine:
         self.padding_bounds = self._calculate_padding_bounds()
 
         self.positions: Dict[str, dict] = {}
+        self._dependents: Dict[str, list] = {}
 
     def _calculate_canvas_size(self) -> Tuple[int, int]:
         expand_config = self.layout_config.get('expand_canvas', {})
@@ -76,8 +77,13 @@ class LayoutEngine:
             self.canvas_height - pad_bottom
         )
 
-    def register_element(self, name: str, x: int, y: int, width: int, height: int):
+    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None):
         self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
+        if relative_to:
+            if relative_to not in self._dependents:
+                self._dependents[relative_to] = []
+            if name not in self._dependents[relative_to]:
+                self._dependents[relative_to].append(name)
 
     def get_element_bounds(self, name: str) -> Optional[Tuple[int, int, int, int]]:
         if name in self.positions:
@@ -260,6 +266,15 @@ class LayoutEngine:
             'right': margin_right or 0,
         }
 
+    def _shift_dependents(self, name: str, shift_x: int, shift_y: int):
+        if name not in self._dependents:
+            return
+        for dep_name in self._dependents[name]:
+            if dep_name in self.positions:
+                self.positions[dep_name]['x'] += shift_x
+                self.positions[dep_name]['y'] += shift_y
+                self._shift_dependents(dep_name, shift_x, shift_y)
+
     def _calculate_relative(
         self,
         element_width: int,
@@ -301,7 +316,8 @@ class LayoutEngine:
         x += offset_x
         y += offset_y
 
-        # 组合盒约束：将参考元素与当前元素当作整体，整体平移确保不超出 padding 安全区域
+        # 组合盒约束：将参考元素、当前元素、以及所有已注册的从属元素当作整体，
+        # 整体平移确保不超出 padding 安全区域
         # padding 优先级高于 margin：margin 参与位置计算，但最终结果受 padding 截断
         pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
 
@@ -309,6 +325,16 @@ class LayoutEngine:
         group_top = min(ty, y)
         group_right = max(tx + tw, x + element_width)
         group_bottom = max(ty + th, y + element_height)
+
+        # 扩展组合盒以包含所有已注册的从属元素（支持多个元素 relative_to 同一参考元素）
+        for dep_name in self._dependents.get(relative_to, []):
+            dep_bounds = self.get_element_bounds(dep_name)
+            if dep_bounds:
+                dx, dy, dw, dh = dep_bounds
+                group_left = min(group_left, dx)
+                group_top = min(group_top, dy)
+                group_right = max(group_right, dx + dw)
+                group_bottom = max(group_bottom, dy + dh)
 
         shift_x = 0
         shift_y = 0
@@ -331,6 +357,7 @@ class LayoutEngine:
             if ref_key in self.positions:
                 self.positions[ref_key]['x'] += shift_x
                 self.positions[ref_key]['y'] += shift_y
+                self._shift_dependents(ref_key, shift_x, shift_y)
             x += shift_x
             y += shift_y
 

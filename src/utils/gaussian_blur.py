@@ -74,15 +74,4 @@ def apply_gaussian_blur_overlay_expansion(
     blended = blur_arr * (1.0 - alpha) + overlay_arr * alpha
     blended = np.clip(blended, 0, 255).astype(np.uint8)
 
-    result = Image.fromarray(blended, mode='RGB')
-    result = apply_dithering(result)
-
-    return result
-
-
-def apply_dithering(image: Image.Image) -> Image.Image:
-    return image.quantize(
-        colors=256,
-        method=Image.Quantize.MEDIANCUT,
-        dither=Image.Dither.FLOYDSTEINBERG
-    ).convert('RGB')
+    return Image.fromarray(blended, mode='RGB')
