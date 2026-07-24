@@ -9,7 +9,7 @@ from .hdr_handler import HDRHandler
 from .decorator import Decorator
 from .batch_processor import BatchProcessor
 
-__version__ = "1.0.0"
+from .._version import __version__
 __author__ = "MiLeica Frame Project"
 __all__ = [
     'ImageProcessor',

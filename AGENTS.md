@@ -41,8 +41,14 @@ src/
 
 ## 必须知道的约定
 
+### 版本标记规范
+- `src/_version.py` 是版本号**单点入口**。
+- 公开 Release 版：标记为 `v0.x.x`（如 `v0.1.0`）。
+- 内部开发版：标记为 `v1.x.x-dev`（如 `v1.9.0-dev`）。
+- 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`。
+
 ### Git 忽略规则
-- `data/` 目录被 gitignore — `camera_map.csv`、`lens_map.csv` 不在版本控制中，需要手动创建或运行程序自动生成。
+- `data/` 目录下除 `camera_map.csv` 和 `lens_map.csv` 外均被 gitignore。
 - `assets/fonts/*` 被 gitignore（除 `.gitkeep`），字体文件需自行放置。
 - `test_images/`、`debug_log.txt`、`output_test*.jpg` 被 gitignore。
 - `.vscode/` 被 gitignore。

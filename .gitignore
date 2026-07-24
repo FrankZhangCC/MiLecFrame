@@ -58,8 +58,10 @@ output_test*.png
 logs/
 error_log.txt
 
-# Data files
-data/
+# Data files (除预设映射表外全部忽略)
+data/*
+!data/camera_map.csv
+!data/lens_map.csv
 
 # Local config
 config.ini
