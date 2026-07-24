@@ -1,5 +1,56 @@
 # 更新历史
 
+## v1.9.0-dev (2026-05-19)
+
+> 内部开发版本，为公开 Release 做准备。本版本新增**原图四角独立圆角**功能并修复多行混排基线偏移 bug。
+
+### 🔧 工程化调整
+
+- 新建 `src/_version.py` 作为版本单点入口；版本标记规范：公开 Release 版 `v0.x.x`，内部开发版 `v1.x.x-dev`
+- `data/camera_map.csv`、`data/lens_map.csv` 纳入版本控制，作为预置数据随仓库分发
+- 添加 MIT License
+- 在 `launch_gui()` 中新增 `_free_port()` 函数，启动时自动释放被旧 Streamlit 实例占用的端口（仅杀命令行含 streamlit 的进程）
+- `src/core/__init__.py` 的 `__version__` 改用从 `_version.py` 导入，消除双源版本号
+
+### 🟢 原图四角独立圆角 (Corner Radius)
+
+在渲染管线中新增原图圆角裁切步骤（位于背景填充之后、装饰/文字/Logo 层之前），通过在 RGBA 通道写入圆角蒙版实现四角透明切除。
+
+**配置格式**（`src/frame_styles/configs/胶片夹风格 FilmClip.yaml` 已启用测试）：
+
+```yaml
+layout:
+  corner_radius:
+    enabled: true          # 开关，缺省视为关闭
+    top_left: 0.01         # 四角独立半径系数（相对于短边比例）
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+```
+
+- `enabled: false` 或整个字段缺失时完全跳过，零额外开销
+- 所有半径系数同时为 0 时等同于禁用，不会创建蒙版
+
+**实现细节**（`src/core/renderer.py`）：
+
+- 新增模块级函数 `_rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br)`，利用 **numpy SDF（signed distance field）** 在四个 r×r 角区域内计算像素到圆心的距离，通过 `np.clip(r - dist + 0.5, 0, 1)` 在圆弧边界产生 1px 线性过渡，同时间实现几何切除效果与抗锯齿软边过渡
+- 在 `render_frame()` 中：检测到 `corner_radius.enabled == true` 后，将原图转为 RGBA + `putalpha(mask)`，再使用 RGBA 透明通道粘贴到背景画布
+- 与 `expand_canvas`、`padding` 等现有布局参数完全兼容，四角半径与 `reference_side`（原图短边）成正比，保持响应式设计
+
+### 🐛 修复：多行混排文本基线偏移
+
+修复 `自定义文本 (custom_text)` 中输入中文时整体下移的问题。在多行文本的混排行绘制中，`_add_text_and_icons_flexible()` Phase 3 的基线计算重复加了 `ref_ascent`（`renderer.py:610`），导致实际基线位置比预期偏移了约一个字的高度。
+
+**根因**：多行混排第一行的 `current_y` 已在 line 587 正确计算为基线（`y + ref_ascent - ref_descent`），但 line 610 在绘制时又加了 `line_info['ref_ascent']`，形成 `y + 2*ref_ascent - ref_descent` 的错误基线。
+
+**修复**：将 `baseline_y = current_y + line_info['ref_ascent']` 改为 `baseline_y = current_y`，对齐单行混排的基线约定。
+
+### 🟢 文档更新
+
+- README.md 版本徽标更新至 v1.9.0-dev
+- `layout_engine.md` 更新至 v1.9.0-dev，新增第 16 节「原图圆角裁切」，含抗锯齿算法说明
+- 样式编辑器 GUI 新增 `corner_radius` 配置界面
+
 ## v1.8.0 (2026-05-19)
 
 > 本版本新增**原图圆角裁切**功能。在样式配置中通过 `corner_radius` 参数即可为原始照片的四角独立裁切圆角，半径系数基于参照边（短边）响应式计算，支持独立调节每个角的弧度。
@@ -28,6 +79,14 @@ layout:
 - 新增模块级函数 `_rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br)`，利用 **numpy SDF（signed distance field）** 在四个 r×r 角区域内计算像素到圆心的距离，通过 `np.clip(r - dist + 0.5, 0, 1)` 在圆弧边界产生 1px 线性过渡，同时间实现几何切除效果与抗锯齿软边过渡
 - 在 `render_frame()` 中：检测到 `corner_radius.enabled == true` 后，将原图转为 RGBA + `putalpha(mask)`，再使用 RGBA 透明通道粘贴到背景画布
 - 与 `expand_canvas`、`padding` 等现有布局参数完全兼容，四角半径与 `reference_side`（原图短边）成正比，保持响应式设计
+
+### 🟢 修复：多行混排文本基线偏移 (Bug Fix)
+
+修复 `自定义文本 (custom_text)` 中输入中文时整体下移的问题。在多行文本的混排行绘制中，`_add_text_and_icons_flexible()` Phase 3 的基线计算重复加了 `ref_ascent`（`renderer.py:610`），导致实际基线位置比预期偏移了约一个字的高度。
+
+**根因**：多行混排第一行的 `current_y` 已在 line 587 正确计算为基线（`y + ref_ascent - ref_descent`），但 line 610 在绘制时又加了 `line_info['ref_ascent']`，形成 `y + 2*ref_ascent - ref_descent` 的错误基线。单行混排（line 623）和单行单字体（line 619）无此问题。
+
+**修复**：将 `baseline_y = current_y + line_info['ref_ascent']` 改为 `baseline_y = current_y`，对齐单行混排的基线约定。
 
 ### 🟢 文档更新
 

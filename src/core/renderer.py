@@ -607,7 +607,7 @@ class FrameRenderer:
                                   fill=item['color'], font=line_info['font'])
                         current_y += line_info['height'] + item['line_spacing']
                     else:
-                        baseline_y = current_y + line_info['ref_ascent']
+                        baseline_y = current_y
                         seg_current_x = line_x
                         for seg_text, font, seg_width, seg_ascent, seg_descent in line_info['seg_info']:
                             seg_y = baseline_y - seg_ascent
