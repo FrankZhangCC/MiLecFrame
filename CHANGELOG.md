@@ -1,5 +1,92 @@
 # 更新历史
 
+## v1.6.0 (2026-05-10)
+
+> 本版本完全重写批量处理系统，新增 GUI 批处理页面，支持多文件上传、完整参数配置、实时进度条和结果汇总。批处理核心参数与单张处理管线完全对齐。
+
+### 🔴 批量处理器完全重写
+
+- `src/core/batch_processor.py` 从 112 行完全重写为 247 行，参数与 `ImageProcessor.process()` 完全对齐
+- 新增 `BatchResult` 数据类：`total` / `success_count` / `fail_count` / `skip_count` / `failed_files`
+- 新增 `BatchProcessor.discover_files(folder_path, recursive)` 静态方法，供 CLI/GUI 共用
+- `batch_process()` 参数从 6 个扩展至 15 个，新增：
+  - `output_format`（JPEG/PNG）、`decorations`（水印）、`logo_selection`（auto/none/文件名）
+  - `lens_display_mode` / `use_short_lens` / `saturation_override` / `use_gps_location`
+  - `progress_callback(done, total, filename, status)` — 实时进度回调接口
+  - `skip_existing` — 跳过已存在输出文件（默认启用）
+- Logo 自动匹配（`logo_selection='auto'`）：逐张读取 EXIF 相机品牌 → `LogoSelector.auto_match_logo()`，支持混合品牌文件夹
+- GPS 替换（`use_gps_location=True`）：逐张提取 GPS DMS 坐标 → 覆盖手动输入地点，无 GPS 时回退
+- 进度回调接口统一：CLI 通过 `print()` 输出进度行，GUI 通过 `st.progress()` 实时更新
+- 默认 `bg_fill_type` 修正为 `BackgroundFillManager.DEFAULT_FILL`（`gaussian_black_35`），与单张处理一致
+
+### 🟢 GUI 批量处理页面
+
+- 新增 `src/gui/batch_processing_page.py`（658 行），侧边栏「📦 批量处理」标签页
+- **文件选择**：`st.file_uploader(accept_multiple_files=True)`，支持文件夹 Ctrl+A 全选
+- **文件信息提取**：上传后通过 `file_id` 集合比对检测文件变更，PIL 仅读头部获取宽高（不解码像素），`UploadedFile.size` 获取文件大小
+- **文件列表展示**：三列布局（📄 文件名 | 宽×高 | 大小），无法读取文件标注 ⚠，>50 个折叠
+- **配置栏**：与单张处理页面风格一致的右侧灰色配置栏，包含全部配置项：
+  - ⚙️ 相框样式 / 输出格式 / 背景样式 / 字重 / 背景增强
+  - 🎨 作者姓名（自动记忆） / 拍摄地点 / GPS 替换 / 镜头显示 / 短版镜头名
+  - 🏷️ Logo（自动匹配 / 无 / 手动指定）
+  - 💧 水印（折叠扩展区）
+- **输出文件夹**：`st.text_input` + 📂 浏览按钮（tkinter 原生文件夹对话框），默认路径 `~/MiLeica_Output`
+- **实时进度**：`st.progress()` + `st.empty()` 逐文件更新进度条和当前文件名
+- **结果汇总**：三列统计卡片（成功/失败/跳过） + 成功率百分比 + 失败详情折叠列表
+- 所有 widget key 使用 `batch_*` 前缀，与单张处理页面独立互不冲突
+
+### 🟡 CLI 批处理接口扩展
+
+- `main.py` `--batch` 模式新增可选参数：
+  - `--output-format`（JPEG/PNG，默认 JPEG）
+  - `--logo`（auto/none/文件名，默认 auto）
+  - `--lens-display`（combined/camera_only/lens_only，默认 combined）
+  - `--use-short-lens`（启用短版镜头名）
+  - `--no-enhance`（关闭背景增强）
+  - `--skip-existing`（跳过已存在输出，默认启用）
+- `batch_process_images()` 函数签名从 7 个参数扩展至 13 个
+- `process_image()` 函数默认 `bg_fill` 从硬编码 `'pure_white'` 修正为 `BackgroundFillManager.DEFAULT_FILL`
+
+### 🟡 GUI 导航调整
+
+- 侧边栏按钮顺序调整：🖼️ 图像处理 → 📦 批量处理 → 📸 相机映射管理 → 🔭 镜头映射管理 → 🎨 样式编辑器
+- 批量处理移至图像处理下方，与用户最常用功能相邻
+
+### 已移除
+
+- 旧 `BatchProcessor` 的文件夹扫描模式（`input_folder` + `recursive`）：文件发现职责从 `BatchProcessor` 移至 `discover_files()` 静态方法，由调用方负责
+- 批处理页面的手动文件夹路径输入模式：完全由 `file_uploader` 替代
+- `main.py` CLI 旧的传参方式（仅传位置参数，如 `args.recursive`）：改为显式关键字参数
+
+## v1.5.2 (2026-05-10)
+
+> 本版本修复等效35mm焦距错误换算的严重bug：删除不可靠的裁切系数推算逻辑，改为优先读取EXIF直接提供的 `FocalLengthIn35mmFilm` 字段，无该字段时直接使用物理焦距。
+
+### 🔴 关键修复：等效35mm焦距计算
+
+- `extract_exif_data()` 新增读取 `FocalLengthIn35mmFilm`（Tag `0xA405`），存入 `exif_data['focal_length_35mm']`
+- `format_exif_for_display()` 焦距逻辑改为：优先使用 `focal_length_35mm`（相机提供的等效值），否则直接用物理焦距 `focal_length`
+- **删除** `_calculate_equivalent_focal()` 方法（原第544-586行）：裁切系数匹配逻辑存在子串匹配缺陷（`'canon'` 误匹配全画幅机型导致 `32mm → 51mm`），不再使用
+- GUI 侧边栏 `raw_focal_length` 不受影响，仍显示物理焦距
+
+### 🔴 侧边栏相机信息重复显示
+
+- `image_processing_page.py` 侧边栏相机显示从手动拼接 `raw_camera_make + raw_camera_model` 改为直接使用映射后的 `camera_combined` 字段
+- 解决相机 Model 字段已含品牌名时（如 `"Canon EOS 6D"`），Make + Model 拼接导致的品牌重复（如 `"Canon Canon EOS 6D"`）
+- 如果 `camera_map.csv` 中正确配置了 `mapped_model`（如 `"EOS 6D"` 不含品牌前缀），侧边栏将显示 `"Canon EOS 6D"`
+
+### 🟩 性能优化：GUI 缓存
+
+- `src/gui/image_processing_page.py` 新增 8 个缓存工厂函数（`@st.cache_resource` × 4 + `@st.cache_data` × 4），跨 rerun 复用 StyleManager / ConfigManager / ExifHelper / LogoSelector 等工具类实例及样式列表、Logo 目录、背景选项等数据加载结果
+- 工具类实例化从每次 rerun 创建改为首次创建后永久复用，消除文件系统扫描和 YAML 解析重复开销
+
+### 🔴 修复：EXIF 过长导致 JPEG 保存失败
+
+- `src/core/image_processor.py:_save_image()` 在 `piexif.dump()` 前删除 MakerNote 段（厂商私有数据块，可占用数十 KB），避免 EXIF 总大小超出 JPEG 规范 65535 字节限制
+- 增加 dump 后字节数检查（> 65533 时跳过 EXIF 嵌入），兜底其他边缘 case
+
+---
+
 ## v1.5.1 (2026-05-09)
 
 > 本版本重构 v1.5.0 的短版镜头名与竖幅自适应为 GUI 可选控制：支持镜头显示模式选择（相机+镜头 / 只显示相机 / 只显示镜头），短版镜头名开关改为全局可选（竖幅默认勾选）。
@@ -49,7 +136,7 @@
 
 - `gaussian_blur.py` 新增 `_enhance_saturation()` 函数，使用 PIL `ImageEnhance.Color` 在模糊图像与覆盖层混合前增强色彩饱和度
 - 4 个高斯模糊填充类型在 `FILL_TYPES` 中新增 `saturation` 字段，按覆盖透明度补偿：
-  - `gaussian_white_80` → 2.0 | `gaussian_white_50` → 1.5 | `gaussian_black_65` → 1.8 | `gaussian_black_35` → 1.3
+  - 统一调整为 `2.0`（`gaussian_white_80` / `gaussian_white_50` / `gaussian_black_65` / `gaussian_black_35`）
 - `BackgroundFillManager.render()` 新增 `saturation` 覆盖参数，`register()` 同步支持
 - `renderer.render_frame()` → `image_processor.process()` 全链路新增 `saturation_override` 可选参数
 - GUI `⚙️ 配置` 区新增「背景增强」复选框（默认勾选；纯色填充时灰显），取消勾选时传 1.0 禁用增强

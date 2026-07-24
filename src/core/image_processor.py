@@ -326,8 +326,16 @@ class ImageProcessor:
 
             if raw_exif:
                 try:
+                    # 移除 MakerNote（厂商私有数据段，易导致 EXIF 总大小超出 JPEG 限制 65535 字节）
+                    if "Exif" in raw_exif and piexif.ExifIFD.MakerNote in raw_exif["Exif"]:
+                        del raw_exif["Exif"][piexif.ExifIFD.MakerNote]
                     exif_bytes = piexif.dump(raw_exif)
-                    save_kwargs['exif'] = exif_bytes
+                    if len(exif_bytes) > 65533:
+                        self.logger.warning(
+                            f"EXIF 数据过大 ({len(exif_bytes)} 字节)，超出 JPEG 限制，已跳过 EXIF 嵌入"
+                        )
+                    else:
+                        save_kwargs['exif'] = exif_bytes
                 except Exception as e:
                     self.logger.warning(f"嵌入EXIF信息失败: {e}")
 

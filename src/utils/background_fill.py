@@ -33,7 +33,7 @@ class BackgroundFillManager:
             'overlay_color': 'black',
             'opacity': 65,
             'blur_radius': 200,
-            'saturation': 1.8,
+            'saturation': 2.0,
             'text_scheme': 'dark',
         },
         'gaussian_white_80': {
@@ -51,7 +51,7 @@ class BackgroundFillManager:
             'overlay_color': 'black',
             'opacity': 35,
             'blur_radius': 200,
-            'saturation': 1.3,
+            'saturation': 2.0,
             'text_scheme': 'dark',
         },
         'gaussian_white_50': {
@@ -60,12 +60,12 @@ class BackgroundFillManager:
             'overlay_color': 'white',
             'opacity': 50,
             'blur_radius': 200,
-            'saturation': 1.5,
+            'saturation': 2.0,
             'text_scheme': 'light',
         },
     }
 
-    DEFAULT_FILL = 'gaussian_white_80'
+    DEFAULT_FILL = 'gaussian_black_35'
 
     # ── 查询接口 ──────────────────────────────────────
 
