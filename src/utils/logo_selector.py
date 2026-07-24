@@ -63,12 +63,32 @@ class LogoSelector:
         except Exception as e:
             return False, f"无法打开图片文件: {str(e)}"
     
-    def auto_match_logo(self, camera_brand: str) -> Optional[str]:
+    @staticmethod
+    def _is_white_logo(filename: str) -> bool:
+        """
+        检测logo文件名是否为白色变体（用于暗色背景）
+        
+        Args:
+            filename: logo文件名（如 "canon_logo_white.png"）
+            
+        Returns:
+            是否以 _white 结尾（不区分大小写）
+        """
+        name = os.path.splitext(filename)[0].lower()
+        return name.endswith('_white')
+
+    def auto_match_logo(
+        self, camera_brand: str, is_dark_bg: Optional[bool] = None
+    ) -> Optional[str]:
         """
         根据相机品牌自动匹配logo（不区分大小写，逐词匹配）
         
         Args:
             camera_brand: 相机品牌名称
+            is_dark_bg: 背景是否为暗色（用于自动选择logo颜色变体）
+                        - True → 暗色背景，优先选择 _white 后缀的logo
+                        - False → 亮色背景，优先选择非 _white 后缀的logo
+                        - None → 不区分颜色变体，返回第一个匹配（向后兼容）
             
         Returns:
             匹配的logo文件名，如果没有匹配则返回None
@@ -83,10 +103,31 @@ class LogoSelector:
         brand_words = [w for w in brand_words if len(w) >= 3]
         brand_words.sort(key=len, reverse=True)
         
+        # 收集所有匹配品牌名称的logo
+        matched_logos = []
         for logo in logos:
             logo_name = os.path.splitext(logo)[0].lower()
             for word in brand_words:
                 if word in logo_name:
-                    return logo
+                    matched_logos.append(logo)
+                    break
         
-        return None
+        if not matched_logos:
+            return None
+        
+        # 根据背景明暗筛选logo颜色变体
+        if is_dark_bg is not None:
+            white_logos = [l for l in matched_logos if self._is_white_logo(l)]
+            dark_logos = [l for l in matched_logos if not self._is_white_logo(l)]
+            
+            if is_dark_bg:
+                # 暗色背景 → 优先白色logo（白色在暗色背景上更醒目）
+                selected = white_logos or dark_logos
+            else:
+                # 亮色背景 → 优先非白色logo（深色在亮色背景上更醒目）
+                selected = dark_logos or white_logos
+            
+            return selected[0] if selected else None
+        
+        # 未指定背景类型时，返回第一个匹配（保持向后兼容）
+        return matched_logos[0]

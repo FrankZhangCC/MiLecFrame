@@ -109,6 +109,172 @@ def render_image_processing_page():
 
     # ======================== 右侧配置栏 ========================
     with config_col:
+        # ---- 按钮区（顶部，全宽） ----
+        _sess_file = st.session_state.get('file_uploader')
+        if _sess_file is not None:
+            _snapshot = {
+                'style': st.session_state.get('style_select', ''),
+                'bg_fill_label': st.session_state.get('bg_fill_select', ''),
+                'output': st.session_state.get('output_format', ''),
+                'font_weight_label': st.session_state.get('font_weight_select', ''),
+                'author': st.session_state.get('author_input', ''),
+                'gps_active': st.session_state.get('use_gps_location', False),
+                'location': st.session_state.get('location_input', ''),
+                'lens_label': st.session_state.get('lens_display_option', ''),
+                'use_short_lens': st.session_state.get('use_short_lens', False),
+                'logo': st.session_state.get('logo_select', ''),
+                'watermark': st.session_state.get('enable_watermark', False),
+                'wm_text': st.session_state.get('watermark_text', ''),
+                'wm_pos': st.session_state.get('watermark_pos', ''),
+                'wm_opacity': st.session_state.get('watermark_opacity', 50),
+                'wm_color': st.session_state.get('watermark_color', ''),
+            }
+            _config_changed = (st.session_state.current_config is not None and
+                               st.session_state.current_config != _snapshot)
+            st.session_state.current_config = _snapshot
+
+            if _config_changed:
+                st.session_state.button_clicked = False
+
+            _btn_label = "重新生成" if _config_changed and st.session_state.processing_result else "生成相框"
+            _btn_color = '#ff6b6b' if _config_changed and st.session_state.processing_result else '#80ed99'
+            st.markdown(f"""
+<style>
+div.stButton > button:first-child {{
+    background-color: {_btn_color} !important;
+}}
+[data-testid="stSidebar"] div.stButton > button:first-child {{
+    background-color: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+}}
+</style>
+            """, unsafe_allow_html=True)
+
+            _output_ext = ".jpg" if st.session_state.get('output_format', 'JPEG') == "JPEG" else ".png"
+
+            if st.button(_btn_label, key='process_button'):
+                st.session_state.button_clicked = True
+                _error_info = None
+                _error_detail = None
+                _processing_success = False
+                with st.spinner("正在处理图片..."):
+                    try:
+                        # 收集当前配置（从 session state 读取，控件在后渲染）
+                        _bg_options = BackgroundFillManager.get_choices()
+                        _bg_key = _bg_options.get(st.session_state.get('bg_fill_select', ''), BackgroundFillManager.DEFAULT_FILL)
+                        _fw_map = {"细体 (Light)": "light", "常规 (Regular)": "regular", "中等 (Medium)": "medium"}
+                        _fw_key = _fw_map.get(st.session_state.get('font_weight_select', '常规 (Regular)'), 'regular')
+                        _lens_map = {"相机+镜头": "combined", "只显示相机": "camera_only", "只显示镜头": "lens_only"}
+                        _lens_key = _lens_map.get(st.session_state.get('lens_display_option', ''), 'combined')
+                        _gps_on = st.session_state.get('use_gps_location', False)
+                        _exif_data = st.session_state.get('exif_data', {})
+                        _gps_str = _exif_data.get('gps', '') if _exif_data else ''
+                        _loc = _gps_str if (_gps_on and _gps_str) else st.session_state.get('location_input', '')
+                        _logo_opt = st.session_state.get('logo_select', '自动匹配')
+                        _logo = None
+                        if _logo_opt == "无":
+                            _logo = ""
+                        elif _logo_opt != "自动匹配":
+                            _logo = _logo_opt
+                        else:
+                            _brand = ExifHelper.get_camera_brand(_exif_data) if _exif_data else None
+                            if _brand:
+                                _logo = logo_selector.auto_match_logo(
+                                    _brand,
+                                    is_dark_bg=BackgroundFillManager.is_dark_bg(_bg_key)
+                                )
+                        _decorations = []
+                        if st.session_state.get('enable_watermark', False):
+                            _wm_t = st.session_state.get('watermark_text', '')
+                            if _wm_t:
+                                _pos_map = {"左上": "top-left", "右上": "top-right", "左下": "bottom-left",
+                                            "右下": "bottom-right", "顶部居中": "top-center", "底部居中": "bottom-center"}
+                                _col_map = {"白色": (255, 255, 255), "黑色": (0, 0, 0)}
+                                _decorations.append({
+                                    'type': 'watermark',
+                                    'params': {
+                                        'text': _wm_t,
+                                        'position': _pos_map.get(st.session_state.get('watermark_pos', ''), 'bottom-right'),
+                                        'opacity': st.session_state.get('watermark_opacity', 50),
+                                        'color': _col_map.get(st.session_state.get('watermark_color', ''), (255, 255, 255))
+                                    }
+                                })
+
+                        # 创建临时文件
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(_sess_file.name)[1]) as _tmp_in:
+                            _tmp_in.write(_sess_file.getvalue())
+                            _tmp_in_path = _tmp_in.name
+
+                        if st.session_state.temp_output_path and os.path.exists(st.session_state.temp_output_path):
+                            try:
+                                os.unlink(st.session_state.temp_output_path)
+                            except OSError:
+                                pass
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=_output_ext) as _tmp_out:
+                            _tmp_out_path = _tmp_out.name
+
+                        processor = ImageProcessor()
+                        _success = processor.process(
+                            input_path=_tmp_in_path,
+                            output_path=_tmp_out_path,
+                            author=st.session_state.get('author_input', '') or None,
+                            location=_loc or None,
+                            style_name=st.session_state.get('style_select', ''),
+                            bg_fill_type=_bg_key,
+                            decorations=_decorations or None,
+                            font_weight=_fw_key,
+                            logo_filename=_logo,
+                            lens_display_mode=_lens_key,
+                            use_short_lens=st.session_state.get('use_short_lens', False),
+                            saturation_override=(
+                                None if st.session_state.get('enable_saturation', True)
+                                else 1.0
+                            ),
+                        )
+
+                        if _success:
+                            st.session_state.temp_input_path = _tmp_in_path
+                            st.session_state.temp_output_path = _tmp_out_path
+                            st.session_state.processing_result = _tmp_out_path
+                            _processing_success = True
+                        else:
+                            _error_info = "❌ 图片处理失败，请查看错误日志"
+
+                    except Exception as e:
+                        _error_info = f"❌ 处理过程中出现错误: {str(e)}"
+                        import traceback
+                        _error_detail = traceback.format_exc()
+
+                    finally:
+                        if '_tmp_in_path' in locals() and os.path.exists(_tmp_in_path):
+                            os.unlink(_tmp_in_path)
+                            st.session_state.temp_input_path = None
+
+                if _error_info:
+                    st.error(_error_info)
+                    if _error_detail:
+                        st.code(_error_detail)
+                elif _processing_success:
+                    st.session_state._pending_rerun = True
+
+            # 下载按钮 + 状态提示
+            if (st.session_state.processing_result and
+                st.session_state.temp_output_path and
+                os.path.exists(st.session_state.temp_output_path)):
+                with open(st.session_state.temp_output_path, "rb") as _rf:
+                    st.download_button(
+                        label="💾 下载处理后的图片",
+                        data=_rf,
+                        file_name=f"framed_{Path(_sess_file.name).stem}{_output_ext}",
+                        mime="image/jpeg" if _output_ext == ".jpg" else "image/png",
+                        key="download_processed_image_cached"
+                    )
+                if _config_changed:
+                    st.warning('⚠️ 配置已更改，请点击"重新生成"按钮更新预览')
+                else:
+                    st.success("✅ 图片处理成功！")
+
         # ---- ⚙️ 配置 ----
         st.markdown("### ⚙️ 配置")
 
@@ -141,6 +307,17 @@ def render_image_processing_page():
             "字重", list(font_weight_options.keys()), index=1, key='font_weight_select'
         )
         selected_font_weight = font_weight_options[selected_font_weight_label]
+
+        # 背景增强开关（仅在选中的是高斯模糊类型时有效）
+        _selected_bg_cfg = BackgroundFillManager.FILL_TYPES.get(selected_bg_fill, {})
+        _is_gaussian = _selected_bg_cfg.get('method') == 'gaussian'
+        _enhance_help = "增强模糊背景的色彩饱和度，补偿白色/黑色覆盖层的颜色淡化"
+        if not _is_gaussian:
+            _enhance_help += "（仅高斯模糊背景有效，当前选择为纯色填充）"
+        enable_saturation = st.checkbox(
+            "背景增强", value=True, key='enable_saturation',
+            disabled=not _is_gaussian, help=_enhance_help
+        )
 
         st.markdown("---")
 
@@ -213,7 +390,13 @@ def render_image_processing_page():
                 selected_logo = selected_logo_option
             else:
                 if camera_brand:
-                    matched_logo = logo_selector.auto_match_logo(camera_brand)
+                    bg_fill_label = st.session_state.get('bg_fill_select', '')
+                    bg_options = BackgroundFillManager.get_choices()
+                    bg_fill_key = bg_options.get(bg_fill_label, BackgroundFillManager.DEFAULT_FILL)
+                    matched_logo = logo_selector.auto_match_logo(
+                        camera_brand,
+                        is_dark_bg=BackgroundFillManager.is_dark_bg(bg_fill_key)
+                    )
                     if matched_logo:
                         selected_logo = matched_logo
         else:
@@ -331,151 +514,9 @@ def render_image_processing_page():
                 with preview_right:
                     _render_effect()
 
-            # ---- 按钮 + 状态 ----
-            current_config = {
-                'selected_style': selected_style,
-                'selected_bg_fill': selected_bg_fill,
-                'enable_watermark': enable_watermark,
-                'watermark_text': watermark_text,
-                'watermark_position': watermark_position,
-                'watermark_opacity': watermark_opacity,
-                'selected_logo': selected_logo,
-                'author': author,
-                'location': location,
-                'font_weight': selected_font_weight,
-                'output_format': output_format,
-                'lens_display_mode': lens_display_mode,
-                'use_short_lens': use_short_lens
-            }
-
-            # 检查配置是否发生变化
-            config_changed = (
-                st.session_state.current_config is not None and
-                st.session_state.current_config != current_config
-            )
-
-            # 更新当前配置
-            st.session_state.current_config = current_config
-
-            # 根据配置是否变化更新按钮状态
-            if config_changed:
-                st.session_state.button_clicked = False
-
-            # 按钮显示逻辑
-            button_label = "重新生成" if config_changed and st.session_state.processing_result else "生成相框"
-
-            # 按钮样式
-            button_color = '#ff6b6b' if config_changed and st.session_state.processing_result else '#80ed99'
-            st.markdown(f"""
-<style>
-div.stButton > button:first-child {{
-    background-color: {button_color} !important;
-}}
-[data-testid="stSidebar"] div.stButton > button:first-child {{
-    background-color: inherit !important;
-    color: inherit !important;
-    border-color: inherit !important;
-}}
-</style>
-            """, unsafe_allow_html=True)
-
-            # 生成相框按钮
-            output_ext = ".jpg" if output_format == "JPEG" else ".png"
-            if st.button(button_label, key='process_button'):
-                st.session_state.button_clicked = True
-                error_info = None
-                error_detail = None
-                processing_success = False
-                with st.spinner("正在处理图片..."):
-                    try:
-                        # 创建临时文件来保存上传的图片
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as temp_input:
-                            temp_input.write(uploaded_file.getvalue())
-                            temp_input_path = temp_input.name
-
-                        # 创建临时输出文件（先清理旧的）
-                        if st.session_state.temp_output_path and os.path.exists(st.session_state.temp_output_path):
-                            try:
-                                os.unlink(st.session_state.temp_output_path)
-                            except OSError:
-                                pass
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=output_ext) as temp_output:
-                            temp_output_path = temp_output.name
-
-                        # 构建装饰元素列表
-                        decorations = []
-                        if enable_watermark and watermark_text:
-                            decorations.append({
-                                'type': 'watermark',
-                                'params': {
-                                    'text': watermark_text,
-                                    'position': watermark_position,
-                                    'opacity': watermark_opacity,
-                                    'color': watermark_color
-                                }
-                            })
-
-                        # 处理图像
-                        processor = ImageProcessor()
-
-                        success = processor.process(
-                            input_path=temp_input_path,
-                            output_path=temp_output_path,
-                            author=author if author else None,
-                            location=location if location else None,
-                            style_name=selected_style,
-                            bg_fill_type=selected_bg_fill,
-                            decorations=decorations if decorations else None,
-                            font_weight=selected_font_weight,
-                            logo_filename=selected_logo,
-                            lens_display_mode=lens_display_mode,
-                            use_short_lens=use_short_lens
-                        )
-
-                        if success:
-                            st.session_state.temp_input_path = temp_input_path
-                            st.session_state.temp_output_path = temp_output_path
-                            st.session_state.processing_result = temp_output_path
-                            processing_success = True
-                        else:
-                            error_info = "❌ 图片处理失败，请查看错误日志"
-
-                    except Exception as e:
-                        error_info = f"❌ 处理过程中出现错误: {str(e)}"
-                        import traceback
-                        error_detail = traceback.format_exc()
-
-                    finally:
-                        # 清理临时输入文件
-                        if 'temp_input_path' in locals() and os.path.exists(temp_input_path):
-                            os.unlink(temp_input_path)
-                            st.session_state.temp_input_path = None
-
-                if error_info:
-                    st.error(error_info)
-                    if error_detail:
-                        st.code(error_detail)
-                elif processing_success:
-                    st.rerun()
-
-            # 已有处理结果时始终显示下载按钮和状态
-            if (st.session_state.processing_result and
-                st.session_state.temp_output_path and
-                os.path.exists(st.session_state.temp_output_path)):
-
-                with open(st.session_state.temp_output_path, "rb") as result_file:
-                    st.download_button(
-                        label="💾 下载处理后的图片",
-                        data=result_file,
-                        file_name=f"framed_{Path(uploaded_file.name).stem}{output_ext}",
-                        mime="image/jpeg" if output_format == "JPEG" else "image/png",
-                        key="download_processed_image_cached"
-                    )
-
-                if config_changed:
-                    st.warning('⚠️ 配置已更改，请点击"重新生成"按钮更新预览')
-                else:
-                    st.success("✅ 图片处理成功！")
+            # 延迟 rerun：确保 st.file_uploader 已在本次 run 渲染完毕
+            if st.session_state.pop('_pending_rerun', None):
+                st.rerun()
 
         else:
             st.info("👆 请先上传一张图片")

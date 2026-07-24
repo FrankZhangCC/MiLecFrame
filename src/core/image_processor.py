@@ -54,7 +54,8 @@ class ImageProcessor:
                 font_weight: Optional[str] = None,
                 logo_filename: Optional[str] = None,
                 lens_display_mode: str = 'combined',
-                use_short_lens: bool = False) -> bool:
+                use_short_lens: bool = False,
+                saturation_override: Optional[float] = None) -> bool:
         """
         处理图像并添加相框
         
@@ -69,6 +70,9 @@ class ImageProcessor:
                          例如水印: {'type': 'watermark', 'params': {'text': '...', 'position': '...', 'opacity': 0.5, 'color': '#FFFFFF'}}
             font_weight: 字体字重 (light, regular, medium)
             logo_filename: logo文件名
+            lens_display_mode: 镜头显示模式
+            use_short_lens: 是否使用短版镜头名
+            saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值，1.0=不做增强）
             
         Returns:
             是否处理成功
@@ -161,7 +165,8 @@ class ImageProcessor:
                 decorations=decorations,
                 logo_filename=logo_filename,
                 lens_display_mode=lens_display_mode,
-                use_short_lens=use_short_lens
+                use_short_lens=use_short_lens,
+                saturation_override=saturation_override,
             )
             
             # 10. 保存图像
