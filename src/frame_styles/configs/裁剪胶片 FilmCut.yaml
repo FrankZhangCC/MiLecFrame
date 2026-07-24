@@ -1,8 +1,11 @@
 name: 裁剪胶片 FilmCut
 colors:
   text: '#000000'
+  custom_bg_color: "#0B0904"
+  custom_bg_text_scheme: "dark"
+  custom_text_dark_color: "#F3D28C"
 fonts:
-  size_ratio: 0.017
+  size_ratio: 0.018
   latin:
     family: Gotham
     weights:
@@ -21,10 +24,10 @@ fonts:
 layout:
   expand_canvas:
     enabled: true
-    top: 0.05
-    bottom: 0.05
-    left: 0.02
-    right: 0.02
+    top: 0.07
+    bottom: 0.07
+    left: 0.03
+    right: 0.03
   padding:
     top: 0.01
     bottom: 0.01

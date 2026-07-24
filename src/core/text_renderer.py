@@ -1,5 +1,5 @@
 # Copyright (c) 2026 FrankZhangCC
-# MIT License - see LICENSE file for details
+# GNU General Public License v3.0 - see LICENSE file for details
 
 """
 文字排版模块
@@ -40,11 +40,11 @@ class TextRenderer:
     def _resolve_color_from_config(
         self, colors_config: Dict, dark_key: str, light_key: str, bg_fill_type: str
     ) -> Optional[Tuple[int, int, int]]:
-        if dark_key not in colors_config or light_key not in colors_config:
-            return None
         is_dark_bg = BackgroundFillManager.is_dark_bg(bg_fill_type)
-        custom_color = colors_config[dark_key] if is_dark_bg else colors_config[light_key]
-        return self._parse_color_value(custom_color)
+        target_key = dark_key if is_dark_bg else light_key
+        if target_key not in colors_config:
+            return None
+        return self._parse_color_value(colors_config[target_key])
 
     def _determine_text_color(
         self, bg_fill_type: str, colors_config: Dict, text_type: str = None

@@ -1,5 +1,86 @@
 # 更新历史
 
+## v2.1.0-dev (2026-06-12)
+
+> 新增**样式配置自定义背景填充色**特性。样式可在 `colors` 区块中声明 `custom_bg_color`（支持 `#RRGGBB` 十六进制或 `[R,G,B]` 数组），指定后渲染器自动使用纯色背景覆盖 GUI 的 `bg_fill_type` 选择，同时 GUI 的背景样式下拉框自动禁用。新增 `custom_bg_text_scheme`（`dark`/`light`）可显式声明背景明暗类型以决定文字和 Logo 配色，未声明时自动根据颜色亮度检测。
+
+### 🟢 新增：样式配置自定义背景填充色
+
+**配置方式**（`src/frame_styles/configs/样式名.yaml`）：
+
+```yaml
+colors:
+  custom_bg_color: "#28180B"           # 支持 "#RRGGBB" 或 [R,G,B]
+  custom_bg_text_scheme: "dark"        # 可选：dark / light，留空自动检测
+```
+
+- `colors` 区块下新增两个可选字段，与现有 `custom_text_light_color` / `custom_text_dark_color` 平级
+- `custom_bg_color` 接受两种格式：十六进制字符串（如 `"#FF6B6B"`）或 RGB 数组（如 `[255,107,107]`），与现有颜色配置风格一致
+- `custom_bg_text_scheme` 可选声明 `dark` 或 `light`，未声明时使用相对亮度公式（`luminance = 0.299R + 0.587G + 0.114B`）自动判定
+- 样式指定 `custom_bg_color` 后，`BackgroundFillManager.render()` 使用纯色填充覆盖扩展画布，完全不依赖用户选择的 `bg_fill_type`
+
+### 🟢 渲染器核心支持
+
+**`src/core/renderer.py`**：
+
+- `render_frame()` 在解析 `style_config` 后检测 `colors.custom_bg_color`，若存在则：
+  1. 调用 `_parse_hex_or_rgb()` 解析颜色值
+  2. 读取 `custom_bg_text_scheme`（可选），未设置时自动计算亮度判定
+  3. 调用 `BackgroundFillManager.register_custom_solid()` 动态注册填充类型
+  4. 使用注册返回的 key 作为 `effective_bg_type` 覆盖原有 `bg_fill_type`
+- 后续 `text_renderer.render()` / `logo` 自动匹配 / `is_dark_bg()` 均使用 `effective_bg_type`，零额外适配
+- 颜色解析失败时自动回退到用户选择的 `bg_fill_type`，保证鲁棒性
+
+**`src/utils/background_fill.py`**：
+
+- 新增 `register_custom_solid(color, text_scheme)` 方法：注册自定义纯色填充并返回 key
+- **预留接口**：后续 GUI 自定义颜色功能可通过同一入口调用，保证行为一致
+
+**`src/core/text_renderer.py`** — 关键修复：
+
+- `_resolve_color_from_config()` 此前强制要求 `dark_key` 和 `light_key` **成对存在**（`if dark_key not in colors_config or light_key not in colors_config: return None`），导致仅声明单侧颜色（如仅 `custom_text_dark_color`）时无法生效
+- 改为只检查当前背景明暗对应的 key，允许单侧声明，与设计意图一致
+
+### 🟢 图像处理页面 GUI
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- `_update_style_dependent_controls()` 新增 `custom_bg_color` 检测：
+  - 样式有自定义背景色 → `combo_bg_fill.setEnabled(False)` + `chk_enhance.setEnabled(False)` + tooltip 显示颜色值
+  - 样式无自定义背景色 → 恢复正常可操作状态
+- 背景增强复选框（仅高斯模糊有效）同步禁用，因纯色背景无需增强
+
+### 🟢 样式编辑器支持
+
+**`src/gui_pyside/widgets/style_config_sections/colors_section.py`**：
+
+- 在通用兜底颜色和按元素覆盖之间新增"自定义背景填充" UI 区块：
+  - `custom_bg_color` `LineEdit`：支持 `"#FF6B6B"` 或 `[255,107,107]` 输入
+  - `custom_bg_text_scheme` `ComboBox`：三选项（自动检测 / dark / light）
+- `load_from_model()` / `save_to_model()` 同步读写新字段
+
+**`src/gui_pyside/models/style_config_form.py`**：
+
+- `StyleConfigFormData` 新增 `custom_bg_color: str` 和 `custom_bg_text_scheme: str` 字段
+- `to_yaml_dict()`：在 `colors` 区块中写入 `custom_bg_color` / `custom_bg_text_scheme`
+- `from_yaml_dict()`：从 YAML 读取并恢复字段值
+
+### 🟢 演示样式
+
+**`src/frame_styles/configs/裁剪胶片 FilmCut.yaml`**：
+
+- 作为新特性演示样式，配置深褐暖色调背景：
+  - `custom_bg_color: "#28180B"` — 深棕色背景
+  - `custom_bg_text_scheme: "dark"` — 暗色背景，使用浅色文字
+  - `custom_text_dark_color: "#DFAE81"` — 所有文字显示为暖金色
+- 此样式加载后，GUI 背景样式下拉框自动禁用，背景增强开关同时禁用
+
+### 🟢 文档更新
+
+- `README.md` 版本徽标更新至 v2.1.0-dev
+- `src/frame_styles/configs/_STYLE_TEMPLATE.txt`：颜色配置节新增 `custom_bg_color` 和 `custom_bg_text_scheme` 填写示例
+- `CHANGELOG.md`：本页更新
+
 ## v2.0.0-dev (2026-06-09)
 
 > **里程碑版本**。GUI 从 Streamlit Web 界面全面迁移至 PySide6 + QFluentWidgets 原生桌面应用，实现 Fluent Design 风格界面。Streamlit 版已封存，批量处理页面因胶片栏功能覆盖而取消。新增 PyInstaller 编译支持，为独立 exe 发布奠定基础。
