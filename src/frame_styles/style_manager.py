@@ -33,6 +33,8 @@ class StyleManager:
         """
         获取所有可用的样式名称
         
+        同时扫描单文件样式和文件夹样式（文件夹内包含变体配置）
+        
         Returns:
             样式名称列表
         """
@@ -41,55 +43,155 @@ class StyleManager:
         if not os.path.exists(self.config_dir):
             return styles
         
-        for file_name in os.listdir(self.config_dir):
-            if file_name.endswith(('.json', '.yaml', '.yml', '.toml')):
-                # 移除文件扩展名作为样式名
-                style_name = os.path.splitext(file_name)[0]
-                styles.append(style_name)
+        for entry_name in os.listdir(self.config_dir):
+            entry_path = os.path.join(self.config_dir, entry_name)
+            
+            if os.path.isdir(entry_path):
+                # 文件夹样式：文件夹名即为样式名
+                styles.append(entry_name)
+            elif entry_name.endswith(('.json', '.yaml', '.yml', '.toml')):
+                # 单文件样式：文件名（去扩展名）即为样式名
+                style_name = os.path.splitext(entry_name)[0]
+                # 避免与同名文件夹冲突，文件夹优先
+                if style_name not in styles:
+                    styles.append(style_name)
         
         return styles
     
-    def get_style_config(self, style_name: str) -> Optional[Dict]:
+    def _load_config_file(self, config_path: str) -> Optional[Dict]:
+        """加载单个配置文件"""
+        ext = os.path.splitext(config_path)[1].lower()
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                if ext == '.json':
+                    config = json.load(f)
+                elif ext in ('.yaml', '.yml'):
+                    config = yaml.safe_load(f)
+                elif ext == '.toml':
+                    config = toml.load(f)
+                else:
+                    return None
+            
+            if not isinstance(config, dict):
+                self.logger.error(f"配置文件格式错误，应为字典类型: {config_path}")
+                return None
+            
+            if self._validate_config(config):
+                return config
+            else:
+                self.logger.error(f"样式配置无效: {config_path}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"读取样式配置失败 {config_path}: {str(e)}")
+            return None
+
+    def _resolve_style_variant(self, style_dir: str, context: Optional[Dict]) -> Optional[str]:
         """
-        获取指定样式的配置
+        根据上下文从文件夹中选取最佳变体配置文件
+        
+        命名规则（片段，无特定顺序）：
+          default.yaml              → 默认配置（兜底）
+          no_{field}.yaml            → 当 {field} 缺失时匹配
+          no_{field1}_no_{field2}.yaml → 当多个字段同时缺失时匹配（更具体优先）
+        
+        Args:
+            style_dir: 样式文件夹路径
+            context: 上下文字典 {'location': ..., 'author': ...}，None 表示无上下文
+        
+        Returns:
+            匹配的配置文件路径，未找到则返回 None
+        """
+        if not os.path.isdir(style_dir):
+            return None
+        
+        # 收集文件夹内的所有配置文件
+        config_files = []
+        for fname in os.listdir(style_dir):
+            if fname.endswith(('.json', '.yaml', '.yml', '.toml')):
+                config_files.append(fname)
+        
+        if not config_files:
+            return None
+        
+        # 确定缺失的字段集合
+        missing_fields = set()
+        if context:
+            for field, value in context.items():
+                if value is None or value == '':
+                    missing_fields.add(field)
+        
+        # 从文件名解析匹配条件：no_{field}_.yaml → {field}
+        def parse_missing_set(filename: str) -> set:
+            name = os.path.splitext(filename)[0].lower()
+            if name == 'default':
+                return set()
+            parts = name.split('_')
+            fields = set()
+            i = 0
+            while i < len(parts):
+                if parts[i] == 'no' and i + 1 < len(parts):
+                    fields.add(parts[i + 1])
+                    i += 2
+                else:
+                    i += 1
+            return fields
+        
+        # 按匹配精确度排序：匹配字段数越多越优先（更具体）
+        best_file = None
+        best_score = -1
+        
+        for fname in config_files:
+            required_missing = parse_missing_set(fname)
+            
+            if required_missing == set():
+                # default.yaml — 最低优先级，只在无更好选择时使用
+                continue
+            
+            # 变体文件的缺失集合必须是实际缺失集合的子集
+            if required_missing.issubset(missing_fields):
+                score = len(required_missing)
+                if score > best_score:
+                    best_score = score
+                    best_file = fname
+        
+        if best_file:
+            return os.path.join(style_dir, best_file)
+        
+        # 兜底：查找 default.*
+        for fname in config_files:
+            if os.path.splitext(fname)[0].lower() == 'default':
+                return os.path.join(style_dir, fname)
+        
+        # 无 default 文件时，返回第一个配置文件
+        return os.path.join(style_dir, config_files[0])
+
+    def get_style_config(self, style_name: str, context: Optional[Dict] = None) -> Optional[Dict]:
+        """
+        获取指定样式的配置，支持文件夹变体选择
         
         Args:
             style_name: 样式名称
+            context: 上下文信息，如 {'location': '北京', 'author': '张三'}
+                     用于从文件夹样式中选取最佳变体配置
             
         Returns:
             样式配置字典，如果不存在则返回None
         """
-        # 查找对应的配置文件
+        # 1. 尝试作为文件夹样式加载（文件夹优先）
+        style_dir = os.path.join(self.config_dir, style_name)
+        if os.path.isdir(style_dir):
+            config_path = self._resolve_style_variant(style_dir, context)
+            if config_path:
+                return self._load_config_file(config_path)
+            self.logger.error(f"样式文件夹内无有效配置文件: {style_name}")
+            return None
+        
+        # 2. 尝试作为单文件样式加载（向后兼容）
         for ext in ['.json', '.yaml', '.yml', '.toml']:
             config_path = os.path.join(self.config_dir, f"{style_name}{ext}")
-            
             if os.path.exists(config_path):
-                try:
-                    with open(config_path, 'r', encoding='utf-8') as f:
-                        if ext == '.json':
-                            config = json.load(f)
-                        elif ext in ['.yaml', '.yml']:
-                            config = yaml.safe_load(f)
-                        elif ext == '.toml':
-                            config = toml.load(f)
-                        else:
-                            continue
-                    
-                    # 确保配置是字典类型
-                    if not isinstance(config, dict):
-                        self.logger.error(f"配置文件格式错误，应为字典类型: {style_name}")
-                        return None
-                    
-                    # 验证配置
-                    if self._validate_config(config):
-                        return config
-                    else:
-                        self.logger.error(f"样式配置无效: {style_name}")
-                        return None
-                        
-                except Exception as e:
-                    self.logger.error(f"读取样式配置失败 {style_name}: {str(e)}")
-                    return None
+                return self._load_config_file(config_path)
         
         self.logger.error(f"样式配置文件不存在: {style_name}")
         return None
@@ -137,32 +239,22 @@ class StyleManager:
                 'camera_icon': {'position': 'outside', 'alignment': 'top-left', 'margin': 10}
             }
         else:
-            # 确保所有必需的信息位置都有默认值
-            default_positions = {
-                'exif': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'author': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'location': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'camera_icon': {'position': 'outside', 'alignment': 'top-left', 'margin': 10}
-            }
-            
-            for key, default_value in default_positions.items():
-                if key not in layout['info_position'] or not isinstance(layout['info_position'][key], dict):
-                    layout['info_position'][key] = default_value
+            # info_position 已有配置，不再注入默认条目
+            # 渲染器按 info_position 中实际配置的元素驱动渲染
+            pass
         
         # 检查颜色配置
         if 'colors' not in config or not isinstance(config['colors'], dict):
             config['colors'] = {
-                'text': '#000000',
-                'background': '#FFFFFF',
-                'icon': '#333333'
+                'text': '#000000'
             }
         
         # 检查字体配置
         if 'fonts' not in config or not isinstance(config['fonts'], dict):
             config['fonts'] = {
-                'regular': 'Futura-Medium',
-                'size_ratio': 0.02,
-                'line_spacing': 1.5
+                'family': 'Gotham',
+                'weight': 'medium',
+                'size_ratio': 0.02
             }
         else:
             # 确保字体大小配置存在
@@ -235,25 +327,16 @@ class StyleManager:
                 }
             },
             "colors": {
-                "text": "#000000",
-                "background": "#FFFFFF",
-                "icon": "#333333"
+                "text": "#000000"
             },
             "fonts": {
-                "regular": "Futura-Medium",
+                "family": "Gotham",
+                "weight": "medium",
                 "size_ratio": 0.02,
                 "sizes": {
                     "exif": 0.02,
                     "author": 0.018,
                     "location": 0.018
-                },
-                "line_spacing": 1.5
-            },
-            "decorations": {
-                "border": {
-                    "enabled": False,
-                    "width": 2,
-                    "color": "#000000"
                 }
             },
             "background_fill": {

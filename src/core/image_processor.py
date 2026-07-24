@@ -31,7 +31,7 @@ class ImageProcessor:
             style_config: 相框样式配置
         """
         self.style_config = style_config
-        self.supported_formats = ['JPEG', 'PNG', 'TIFF']
+        self.supported_formats = ['JPEG', 'PNG', 'TIFF', 'MPO']
         self.hdr_supported_formats = ['HEIF', 'HEIC', 'AVIF']  # HDR相关格式
         self.max_input_size = (12000, 12000)  # 最大输入尺寸
         self.max_output_size = (8192, 8192)   # 最大输出尺寸
@@ -125,9 +125,10 @@ class ImageProcessor:
             # 6. 处理色彩空间
             image = self._convert_colorspace(image)
             
-            # 7. 获取样式配置
+            # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
-                style_config = self.style_manager.get_style_config(style_name)
+                context = {'location': location, 'author': author}
+                style_config = self.style_manager.get_style_config(style_name, context)
             else:
                 style_config = self.style_manager.get_default_style()
             

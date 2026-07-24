@@ -1,5 +1,46 @@
 # 更新历史
 
+## v1.3.0 (2026-04-30)
+
+> 本版本引入**样式变体系统**，支持根据数据可用性动态切换布局，无需修改渲染器代码。
+
+### 样式变体系统
+
+#### 文件夹样式组织
+- 样式配置不再局限于单文件，支持以**文件夹**形式组织（文件夹名 = 样式名），文件夹内可包含多个变体配置文件
+- `get_available_styles()` 同时扫描单文件样式（`.yaml` / `.json` / `.toml`）和文件夹样式，GUI 中统一展示为单个选项，对用户透明
+- 同名文件夹与文件共存时，文件夹优先
+- 传统单文件样式完全向后兼容，零改动即可继续使用
+
+#### 变体命名规则与匹配
+- **命名规则**：
+  - `default.yaml` — 默认配置，无匹配变体时的兜底
+  - `no_{field}.yaml` — 当 `{field}` 缺失（`None` 或空字符串）时匹配
+  - `no_{field1}_no_{field2}.yaml` — 多字段同时缺失时匹配，越具体优先级越高
+- **匹配算法**（`_resolve_style_variant()`）：
+  1. 从传入的上下文 `{'location': ..., 'author': ...}` 提取实际缺失的字段集合
+  2. 解析变体文件名中的所需缺失字段（按 `no_` 片段解析）
+  3. 选取所需缺失集合是实际缺失集合子集**且**匹配字段数最多（最具体）的变体
+  4. 无匹配时回退到 `default.*`；文件夹内无 `default.*` 时返回首个配置文件
+
+#### 上下文传入
+- `get_style_config(style_name, context=None)` — 新增可选 `context` 参数，接受 `{'location': '北京', 'author': '张三'}` 格式
+- 不传 `context` 时行为与旧版完全一致，返回默认配置，保证 CLI、GUI 预览等路径的向后兼容
+- `ImageProcessor.process()` 在获取样式配置时自动传入 `{'location': location, 'author': author}` 上下文
+
+#### 配置加载重构
+- 新增 `_load_config_file(config_path)` — 抽取单文件加载逻辑，消除 `get_style_config` 中的重复代码
+- `get_style_config` 拆分流程：先尝试文件夹 → 文件内变体匹配 → 再回退单文件加载
+
+### 内部改进
+
+#### StyleManager 代码清理
+- `get_available_styles()` — 从纯文件扫描改为同时扫描文件夹和文件，文件夹名即为样式名，逻辑清晰化
+- `get_style_config()` — 行数从约 40 行精简整合，文件夹匹配与单文件加载共用 `_load_config_file()`
+- `_resolve_style_variant()` — 独立的变体匹配引擎，解析与匹配逻辑内聚
+
+---
+
 ## v1.2.0 (2026-04-29)
 
 > 本版本引入相对定位系统、Padding 安全区域和三阶段渲染管线，大幅提升布局灵活性和元素溢出保护能力。
@@ -11,6 +52,12 @@
 - 组合盒超出 padding 安全区域时整体平移，参考元素坐标自动回写至 `self.positions`，保证两者对齐关系不变
 - 平移量由溢出方向计算：左/上溢出取负偏移修正，右/下溢出取边界差值修正
 - 安全夹持 `max(pad_left, min(x, pad_right - w))` 兜底
+
+#### 依赖簇级联平移
+- 多个元素 `relative_to` 同一参考时，组合盒自动扩展至全部已注册从属元素，防止先注册的从属被后续移位甩开
+- `register_element()` 新增 `relative_to` 参数，自动维护 `self._dependents` 反向映射表
+- 新增 `_shift_dependents()` 递归级联平移：移位参考元素时自动沿依赖树向下传播至所有从属
+- 处理顺序示例：A(绝对) → B(relative_to=A) → C(relative_to=A)，C 计算时组合盒 = A ∪ B ∪ C，移位 A 时 B 和 C 同步平移
 
 #### Padding 安全区域
 - 新增 `_calculate_padding_bounds()` 方法，从 `layout.padding` 配置计算 `(left, top, right, bottom)` 边界
@@ -33,6 +80,48 @@
   - **Phase 3 (绘制)**：从 `layout_engine.positions` 读取最终坐标（含溢出修正后的变更）统一绘制
 - 解决了旧版"边算边画"模式中参考元素已被绘制无法回写的问题
 
+#### 渲染顺序修正
+- Logo 渲染移至文字层之后，确保 `relative_to` 可正确引用已注册的文字元素（如 `relative_to: "exif"`）
+- 此前 Logo 先于文字层执行，`get_element_bounds` 返回 `None` 导致回退到绝对定位
+
+#### 相机+镜头合并
+- `get_display_data()` 新增 `camera_lens_combined` 字段，格式 `"品牌 型号 | 镜头"`
+- 渲染器按 `info_position` 中是否有 `camera_lens` 键决定使用合并或分开模式
+
+#### timestamp_author 合并元素
+- 新增 `timestamp_author` 元素，按 `info_position` 声明驱动，输出格式 `"时间 by 作者"`
+
+#### 配置驱动渲染
+- 所有文字元素改为由 `info_position` 声明驱动：配置中有对应键则渲染，否则跳过
+- `author`、`location`、`exif`、`timestamp` 不再无条件渲染
+
+#### 渲染上下文 (RenderContext)
+- 新增 `src/utils/render_context.py`，将文字数据准备逻辑从 `renderer.py` 中解耦为独立模块
+- `RenderContext.get_text(key)` 根据样式配置声明的 key 返回显示文本，内部闭环所有条件逻辑
+- `_add_text_and_icons_flexible` 签名从 `(exif_data, author, location)` 简化为 `(context)`，17 行 if-elif 链替换为 for 循环遍历 `info_position` 的 key
+- 新增显示字段只需在 `RenderContext.get_text()` 添加分支 + YAML 声明配置，renderer 零改动
+
+#### 竖向/方形图片 camera_lens 自动替换
+- `camera_lens` 检测到原始图片纵边 ≥ 横边（竖向或方形构图）时，自动替换为 `camera`，仅显示相机型号
+- 横向图片保持原有 `"品牌 型号 | 镜头"` 合并格式
+- 判断逻辑内聚于 `RenderContext` 内部，对外透明
+
+### Logo
+
+#### Logo 选择器增加"无"选项
+- GUI 下拉菜单新增 "无" 选项，允许用户显式禁用 Logo
+- 选中"无"时 `logo_filename` 传递空字符串 `""`，renderer 跳过自动匹配和渲染
+- "无"与自动匹配行为解耦：前者显式跳过，后者 `None` 仍触发子串匹配
+
+#### 自动匹配逻辑优化
+- `auto_match_logo()` 简化为双向子串匹配（`brand_lower in logo_name or logo_name in brand_lower`），不区分大小写
+- 移除 `_normalize_brand_name()` 方法（曾剥离特殊字符，可能导致误剔除有效匹配片段）及不再使用的 `re` 导入
+- 文件名中包含品牌名称片段即可匹配（如品牌 "NIKON CORPORATION" 可匹配 `Nikon.png`）
+
+#### 渲染器匹配守卫修正
+- Logo 自动匹配条件由 `if not logo_filename` 改为 `if logo_filename is None`
+- 空字符串（GUI "无"选项）不再触发自动匹配回退，仅 `None`（自动匹配模式）执行品牌匹配
+
 ### 样式配置
 
 #### 相对定位字段
@@ -47,6 +136,15 @@ info_position:
     offset_y_ratio: 0.0          # Y 轴微调（可选）
 ```
 
+#### 新增元素类型
+- `camera_lens`：相机+镜头合并单行输出（格式 `"品牌 型号 | 镜头"`），配置后替代 `camera` + `lens` 分开模式
+- `timestamp_author`：时间+作者合并输出（格式 `"时间 by 作者"`），配置后替代独立 `timestamp`
+- 以上均通过 `info_position` 中声明驱动，配置即渲染
+
+#### 配置驱动渲染
+- `info_position` 中声明的元素才渲染，未声明自动跳过
+- `style_manager._validate_config` 移除默认条目注入（此前强行添加 `exif`/`author`/`location`/`camera_icon`）
+
 #### Padding 配置
 ```yaml
 layout:
@@ -59,9 +157,41 @@ layout:
 - 独立于 `expand_canvas` 和 `margin`，不影响原始图像位置
 - 默认四边均为 0，与旧版行为完全兼容
 
+#### 配置精简
+- `colors`：移除无效字段 `background`、`accent`、`border`、`icon`（均零引用）；颜色系统改为 `custom_{text_type}_{dark/light}_color` + `custom_text_{dark/light}_color` 两级覆盖
+- `fonts`：移除无效字段 `regular`、`line_spacing`；拆分为 `family`（字体族名）+ `weight`（字重 light/regular/medium），可通过 `--font-weight` 运行时覆盖
+- `layout`：移除无效字段 `border_position`、`border_width`（边框由 decorator 独立处理）、`info_height_ratio`（零引用）
+- `effects`：整节移除（零引用）
+- `description`：移除（非必需元数据）
+- `style_manager.py` 默认值与示例配置同步更新，移除 `_validate_config` 中的默认条目注入
+
+### 高斯模糊
+
+#### 色彩断层修复
+- `apply_dithering()` 由 Python 逐像素 Floyd-Steinberg 循环（O(n²)，且限制 ≤200万像素）改为 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，支持任意分辨率
+- 叠加混合从 8-bit `Image.alpha_composite()` 改为 float32 numpy 逐通道混合，消除色彩量化断层
+- 模糊计算由 PIL `GaussianBlur`（O(n²)）替换为 3-pass `BoxBlur`（O(n)），视觉效果几乎一致，性能大幅提升
+- 新增 `_compute_scale_factor()` 自动降采样逻辑：原图长边 ≤1200px 不降采样，超过则缩放到 1200px，下限保护 512px
+- `blur_radius` 按缩放比例动态递减，配置值（默认 200）始终代表全分辨率等效半径
+
+#### 浅色背景模糊透明度调整
+- 浅色模糊背景默认透明度调整：`gaussian_white_35` → `gaussian_white_50`，`gaussian_white_65` → `gaussian_white_80`
+- GUI 下拉选项标签同步更新："模糊背景 (浅色 35%)" → "模糊背景 (浅色 50%)"，"模糊背景 (浅色 65%)" → "模糊背景 (浅色 80%)"
+- 默认选项由 "模糊背景 (浅色 65%)" 改为 "模糊背景 (浅色 80%)"
+- CLI `--bg-fill` 可选值同步更新
+- `renderer.py` 中 `light_bg_types` 列表同步更新
+
+### Bug 修复
+
+#### 相对定位受特殊字符干扰
+- 文字元素在 Phase 1 测量时存储的 `height` 由字形级 `bbox[3] - bbox[1]` 改为字体度量 `ascent + descent`
+- 此前包含 `|`、`/` 等纵向跨度较大的字符时 bbox 变大，导致 `ty + th` 计算的下方元素间距异常增大
+- 混排文本（`max_ascent + max_descent`）本身即基于字体度量，不受此问题影响
+
 ### 代码清理
 
 - 移除 `src/frames/base_frame.py` 及 `src/frames/` 目录：该文件仅有孤立法且无类定义，全项目零引用，功能已由 `LayoutEngine` + `FontManager` 替代
+- 移除 `examples/` 目录（5 个历史残留示例文件），实际示例由 `src/frame_styles/configs/Default_TestFrame.yaml` 担任
 
 ---
 
@@ -107,9 +237,8 @@ layout:
 
 ### 文字颜色
 
-- 支持样式配置文件中的 `custom_text_color`，优先于自适应逻辑
-- 支持为亮色/暗色背景分别设置颜色：`custom_text_light_color` / `custom_text_dark_color`
-- 支持按文本类型细分配置：`custom_timestamp_light_color`、`custom_location_dark_color` 等
+- 支持样式配置文件中的 `custom_text_dark_color` / `custom_text_light_color`，根据背景类型自动选择
+- 支持按文本类型细分配置：`custom_timestamp_light_color`、`custom_exif_dark_color` 等（`{text_type}` 可选 exif/timestamp/camera/lens/author/location）
 - 背景类型使用预定义深色/浅色列表管理，新增类型只需添加名称
 
 ### 布局引擎

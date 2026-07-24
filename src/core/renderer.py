@@ -18,6 +18,7 @@ from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector
 from src.utils.gaussian_blur import apply_gaussian_blur_overlay_expansion
+from src.utils.render_context import RenderContext
 from src.core.decorator import Decorator
 
 logger = logging.getLogger(__name__)
@@ -37,8 +38,8 @@ class FrameRenderer:
         
         self.light_bg_types = [
             'pure_white',
-            'gaussian_white_65',
-            'gaussian_white_35',
+            'gaussian_white_80',
+            'gaussian_white_50',
             'gaussian_white'
         ]
         
@@ -91,6 +92,8 @@ class FrameRenderer:
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
+        context = RenderContext(image.size, exif_data, author, location)
+
         background = self._create_background_with_expansion(
             image, canvas_width, canvas_height, bg_fill_type, bg_fill_config
         )
@@ -112,22 +115,24 @@ class FrameRenderer:
         else:
             decorated_image = positioned_image
         
+        # 文字层先处理（注册元素位置供 Logo 相对定位引用）
+        image_with_text = self._add_text_and_icons_flexible(
+            decorated_image, context, colors, fonts,
+            bg_fill_type, layout_engine
+        )
+        
+        # Logo 后处理（可依赖文字层已注册的坐标）
         if logo_config.get('enabled', False):
-            if not logo_filename:
+            if logo_filename is None:
                 camera_brand = ExifHelper.get_camera_brand(exif_data) or ExifHelper.get_camera_model(exif_data)
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()
                     logo_filename = logo_selector_instance.auto_match_logo(camera_brand)
             
             if logo_filename:
-                decorated_image = self._add_logo(decorated_image, logo_filename, logo_config, layout_engine)
+                image_with_text = self._add_logo(image_with_text, logo_filename, logo_config, layout_engine)
         
-        final_image = self._add_text_and_icons_flexible(
-            decorated_image, exif_data, author, location, colors, fonts,
-            bg_fill_type, layout_engine
-        )
-        
-        return final_image
+        return image_with_text
     
     def _create_background_with_expansion(
         self, 
@@ -249,9 +254,7 @@ class FrameRenderer:
     def _add_text_and_icons_flexible(
         self, 
         image: Image.Image, 
-        exif_data: Optional[Dict], 
-        author: Optional[str], 
-        location: Optional[str],
+        context: RenderContext,
         colors: Dict,
         fonts: Dict,
         bg_fill_type: str,
@@ -264,46 +267,24 @@ class FrameRenderer:
         draw = ImageDraw.Draw(result)
         
         logger.debug("开始添加文字图层...")
-        logger.debug(f"EXIF数据: {exif_data}")
-        logger.debug(f"作者: {author}")
-        logger.debug(f"地点: {location}")
+        logger.debug(f"EXIF数据: {context.exif_data}")
+        logger.debug(f"作者: {context.author}")
+        logger.debug(f"地点: {context.location}")
         logger.debug(f"图像尺寸: {image.size}")
         logger.debug(f"原始图像尺寸: {layout_engine.original_image_size}")
         
         original_image_size = layout_engine.original_image_size
-        display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
         
         text_elements = []
         
-        if 'exif_formatted' in display_data and display_data['exif_formatted']:
-            exif_text = display_data['exif_formatted']
-            logger.debug(f"格式化后的EXIF文本: '{exif_text}'")
-            text_elements.append(('exif', exif_text))
+        info_positions = layout_engine.layout_config.get('info_position', {})
         
-        if exif_data and 'datetime_original' in exif_data:
-            timestamp_text = f"{exif_data['datetime_original']}"
-            logger.debug(f"拍摄时间文本: '{timestamp_text}'")
-            text_elements.append(('timestamp', timestamp_text))
-        
-        if 'camera_combined' in display_data:
-            camera_text = display_data['camera_combined']
-            logger.debug(f"相机型号文本: '{camera_text}'")
-            text_elements.append(('camera', camera_text))
-        
-        if 'lens_model' in display_data:
-            lens_text = display_data['lens_model']
-            logger.debug(f"镜头型号文本: '{lens_text}'")
-            text_elements.append(('lens', lens_text))
-        
-        if author:
-            author_text = f"{author}"
-            logger.debug(f"作者文本: '{author_text}'")
-            text_elements.append(('author', author_text))
-        
-        if location:
-            location_text = f"{location}"
-            logger.debug(f"地点文本: '{location_text}'")
-            text_elements.append(('location', location_text))
+        for key in info_positions:
+            if key == 'camera_icon':
+                continue
+            text = context.get_text(key)
+            if text:
+                text_elements.append((key, text))
         
         if not text_elements:
             logger.debug("没有需要显示的文本信息")
@@ -311,8 +292,6 @@ class FrameRenderer:
         
         logger.debug(f"待渲染的文本元素: {text_elements}")
         
-        info_positions = layout_engine.layout_config.get('info_position', {})
-
         # Phase 1: 测量所有元素的尺寸（不计算位置，不注册）
         draw_items = {}
         for text_type, text in text_elements:
@@ -335,7 +314,7 @@ class FrameRenderer:
 
                 draw_items[text_type] = {
                     'text': text, 'font': font, 'color': text_color,
-                    'width': text_width, 'height': text_height,
+                    'width': text_width, 'height': ascent + descent,
                     'descent': descent, 'mixed': False
                 }
             else:
@@ -399,7 +378,7 @@ class FrameRenderer:
             else:
                 y -= item['descent']
 
-            layout_engine.register_element(name, x, y, item['width'], item['height'])
+            layout_engine.register_element(name, x, y, item['width'], item['height'], cfg.get('relative_to'))
 
         # Phase 3: 从 position 注册表读取最终坐标后统一绘制
         for name in ordered_names:

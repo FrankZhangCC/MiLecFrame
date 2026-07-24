@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.3.0-blue)
 
 ## 快速开始
 
@@ -18,12 +18,12 @@
 
 ##### 单张图片处理
 ```bash
-python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_65
+python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_80
 ```
 
 ##### 批量处理
 ```bash
-python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_65 --recursive
+python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive
 ```
 
 ##### GUI模式
@@ -50,13 +50,12 @@ streamlit run src/gui/app.py
 - EXIF处理：piexif
 - GUI界面：Streamlit
 
-## 最近更新 (v1.2.0)
+## 最近更新 (v1.3.0)
 
-- **相对定位元素溢出保护**：相对定位元素与参考元素合并为组合盒，超出安全区域时整体平移，不影响对齐关系
-- **三阶段渲染管线**：Phase 1 测量 → Phase 2 拓扑序计算+注册 → Phase 3 绘制，彻底解决依赖顺序问题
-- **拓扑依赖解析**：通过 Kahn 算法自动解析 `relative_to` 依赖关系，无需手动调整元素注册顺序
-- **Padding 安全区域**：新增 `padding` 配置，控制叠加元素的绘制边界，优先级高于 margin
-- **绝对定位边界约束**：绝对定位元素同样受 padding 边界截断保护
+- **样式变体系统**：支持文件夹级样式组织，一个样式名下可包含多个变体配置文件（如 `default.yaml`、`no_location.yaml`），根据运行时上下文（数据可用性）自动选择最佳匹配的变体
+- **上下文感知匹配**：`StyleManager.get_style_config()` 新增 `context` 参数，传入 `{'location': ..., 'author': ...}` 后自动从文件夹中选取最匹配的变体配置；命名规则 `no_{field}.yaml` 清晰可扩展
+- **动态布局切换**：当 `location` 字段无数据时，`timestamp_author` 自动从左侧列移动到右侧列（exif 下方），exif 同时下移以保持视觉平衡
+- **变体配置精简规范**：变体文件中与缺失字段相关的颜色、字体、布局配置应全部移除，仅保留实际生效的配置项
 
 > 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
@@ -87,11 +86,16 @@ MiLeica_Frame/
 │   │   ├── logo_selector.py     # Logo选择器
 │   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
 │   │   ├── logging_config.py    # 日志配置
+│   │   ├── render_context.py    # 渲染上下文（统一文本数据入口）
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
-│   │   ├── configs/        # 样式配置文件
+│   │   ├── configs/        # 样式配置文件（支持单文件样式和文件夹变体样式）
+│   │   │   ├── 照片底部信息水印/  # 文件夹变体样式（示例）
+│   │   │   │   ├── default.yaml       # 默认变体（所有字段有数据）
+│   │   │   │   └── no_location.yaml   # location 缺失时的变体
+│   │   │   └── ...
 │   │   ├── __init__.py
-│   │   ├── style_manager.py # 样式管理器
+│   │   ├── style_manager.py # 样式管理器（含变体匹配引擎）
 │   │   └── ...
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
@@ -109,13 +113,67 @@ MiLeica_Frame/
 
 ## 样式配置规范
 
-样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。每个配置文件包含以下部分：
+样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
+
+### 文件夹变体样式 (v1.3.0)
+
+当需要根据数据可用性动态切换布局时，可将样式组织为**文件夹**（文件夹名 = 样式名），内放多个变体配置文件：
+
+```
+configs/
+  照片底部信息水印/
+    default.yaml              # 默认配置（兜底，所有字段有数据时使用）
+    no_location.yaml          # location 缺失时的变体
+    no_author.yaml            # author 缺失时的变体
+    no_location_no_author.yaml # 多字段同时缺失时的变体（越具体越优先）
+  OtherStyle.yaml             # 传统单文件样式（向后兼容）
+```
+
+#### 命名规则
+
+| 文件名 | 匹配条件 |
+|-------|---------|
+| `default.yaml` | 兜底，无可匹配变体时使用 |
+| `no_{field}.yaml` | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
+| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体 |
+
+支持的 `{field}` 名称与 `RenderContext.get_text()` 的 key 一致：`location`、`author` 等。
+
+#### 匹配算法
+
+1. 从上下文（`{'location': ..., 'author': ...}`）提取**实际缺失的字段集合**
+2. 扫描文件夹内所有变体文件（排除 `default.*`），解析每个文件所需缺失字段
+3. 选择**缺失字段集是实际缺失子集**且**匹配字段数最多**（最具体）的变体
+4. 无匹配变体时回退到 `default.*`
+
+#### 变体配置精简规范
+
+变体文件中**与缺失字段相关的所有配置项应全部移除**，包括但不限于：
+- `colors` 中的 `custom_{field}_{light/dark}_color`
+- `fonts.sizes` 中的 `{field}` 条目
+- `layout.info_position` 中的 `{field}` 条目
+
+仅保留实际渲染时会生效的配置。这既是代码清洁要求，也是可维护性保障。
+
+#### 调用方式
+
+```python
+# 运行时自动选择变体
+style_config = style_manager.get_style_config(
+    '照片底部信息水印',
+    context={'location': location, 'author': author}
+)
+# location=None → 自动选取 no_location.yaml
+# location='北京' → 自动选取 default.yaml
+
+# 不带 context 时（如 GUI 预览）返回 default.yaml，确保向后兼容
+style_config = style_manager.get_style_config('照片底部信息水印')
+```
 
 ### 基本信息
+
 ```yaml
-name: "样式名称"
-description: "样式描述"
-version: "版本号"
+name: "样式名称"         # 必需字段，用于标识样式
 ```
 
 ### 布局配置 (layout)
@@ -127,7 +185,10 @@ version: "版本号"
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - 绝对定位与相对定位元素均受 padding 约束
 - `info_position`: 信息位置配置
-  - `exif`, `timestamp`, `camera`, `lens`, `author`, `location`, `camera_icon`: 各项信息的位置
+  - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
+  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`, `camera_icon`
+  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
+  - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
     - **绝对定位**：
       - `position`: 位置（inside, outside, top-left, top-right, bottom-left, bottom-right, top-center, bottom-center, top, bottom, left, right, center）
       - `alignment`: 对齐方式（left, center, right, top-left, top-right, top, bottom）
@@ -145,40 +206,89 @@ version: "版本号"
       - `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 0.01
       - `alignment`: 在相对方向垂直轴上的对齐（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
       - `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（默认 0）
-      - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
-      - 元素注册顺序由拓扑排序自动解析，无需手动调整
+  - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
+  - 元素注册顺序由拓扑排序自动解析，无需手动调整
+
+### 渲染上下文 (RenderContext)
+
+`src/utils/render_context.py` 是渲染文本数据的**统一入口**。它将原本分散在 `renderer.py` 中的数据准备逻辑集中管理，实现样式配置与数据供给的解耦。
+
+#### 核心接口
+
+```python
+context = RenderContext(image.size, exif_data, author, location)
+text = context.get_text('camera_lens')  # 一行调用获取显示文本
+```
+
+- `get_text(key)` 根据 `info_position` 中声明的 key 返回对应的显示文本，无数据时返回 `None`
+- 所有条件逻辑（数据校验、相机+镜头合并/替换、时间+作者拼接等）在内部闭环，渲染器无需感知数据来源
+
+#### 支持的 key
+
+| key | 输出格式 | 数据来源 |
+|-----|----------|---------|
+| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | EXIF 格式化 |
+| `timestamp` | `"2025.01.15 14:30:00"` | EXIF 拍摄时间 |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | 时间 + 作者合并 |
+| `camera_lens` | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera` | `"Leica Q3"` | 相机品牌+型号 |
+| `lens` | `"Summilux 28mm f/1.7"` | 镜头型号 |
+| `author` | `"Frank"` | 用户输入 |
+| `location` | `"Shanghai"` | 用户输入 |
+
+#### 竖向/方形图片自动适配
+
+当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
+
+此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+- 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
+- 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
+
+#### 新增显示字段指南
+
+后续若需新增显示字段（如 GPS 坐标、海拔高度等），遵循以下步骤：
+
+1. **`RenderContext.get_text()`** — 添加 `elif key == 'xxx':` 分支，组装并返回文本
+2. **样式 YAML** — 在 `info_position` 中声明字段及其位置/字体配置
+3. **`fonts.sizes`** — 按需为新字段添加独立字体大小（可选，回退到 `size_ratio`）
+
+渲染器 (`renderer.py`) 无需任何修改——它只遍历 `info_position` 的 key 并通过 `context.get_text()` 取值。
 
 ### 颜色配置 (colors)
-- `text`: 文字颜色（传统颜色设置，保留向后兼容性）
-- `custom_text_color`: 通用自定义文字颜色（新功能，如果设置将优先使用此颜色）
-  - 支持十六进制颜色格式（如 "#FF6B6B"）
-  - 支持 RGB 元组格式（如 [255, 107, 107]）
-  - 如设置为 `null`，则使用自适应颜色逻辑
-- `custom_text_light_color`: 亮色背景下通用自定义文字颜色
-- `custom_text_dark_color`: 暗色背景下通用自定义文字颜色
-- `custom_[text_type]_light_color`: 亮色背景下特定文本类型的自定义颜色（如 `custom_timestamp_light_color`, `custom_location_light_color`）
-- `custom_[text_type]_dark_color`: 暗色背景下特定文本类型的自定义颜色（如 `custom_timestamp_dark_color`, `custom_location_dark_color`）
-- `background`: 背景颜色
-- `icon`: 图标颜色
+
+颜色由背景类型自动适配，支持按文本类型分别覆盖：
+
+- **通用自定义颜色（作为所有文本类型的兜底）**：
+  - `custom_text_light_color`: 亮色背景下的文字颜色
+  - `custom_text_dark_color`: 暗色背景下的文字颜色
+  - 支持十六进制格式（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
+- **按文本类型独立覆盖**：`custom_{text_type}_light_color` / `custom_{text_type}_dark_color`
+  - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+  - 示例：`custom_exif_light_color: [51, 51, 51]`、`custom_timestamp_dark_color: "#CCCCCC"`
+- **最终兜底**：若以上均未设置，深色背景使用白色 `(255,255,255)`，浅色背景使用黑色 `(0,0,0)`
 
 ### 字体配置 (fonts)
-- `regular`: 字体名称
-- `size_ratio`: 默认字体大小相对于画布宽度的比例
-- `sizes`: 各类信息的独立字体大小
-  - `exif`: EXIF信息字体大小比例
-  - `timestamp`: 拍摄时间信息字体大小比例
-  - `camera`: 相机型号信息字体大小比例
-  - `lens`: 镜头型号信息字体大小比例
-  - `author`: 作者信息字体大小比例
-  - `location`: 位置信息字体大小比例
-- `line_spacing`: 行间距倍数
+
+- `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
+- `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
+  - 可通过命令行 `--font-weight` 参数运行时覆盖
+- `size_ratio`: 默认字体大小比例（相对于原图长边像素数）
+- `sizes`: 各类信息的独立字体大小比例（相对于原图长边）
+  - `exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+  - 未设置的字段默认使用 `size_ratio`
 
 ### 装饰元素配置 (decorations)
-- `border`: 边框配置
-- `watermark`: 水印配置
+
+装饰元素（边框、水印、Logo、角落标记）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+- `border`: 边框（可自定义宽度和颜色）
+- `watermark`: 水印
+- `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
+- `corner_mark`: 角落标记
+
+在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
 
 ### 背景填充配置 (background_fill)
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
+- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
 - `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
 - `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
 
@@ -189,9 +299,10 @@ version: "版本号"
 - `--style`, `-s`: 相框样式
 - `--author`: 作者名
 - `--location`: 拍摄地点
-- `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35)
+- `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50)
 - `--batch`: 批量处理模式
 - `--recursive`: 递归处理子文件夹（仅批量模式）
+- `--font-weight`: 字体字重 (light, regular, medium，默认 medium)
 - `--gui`: 启动GUI界面
 
 > 完整开发历史请参见 [CHANGELOG.md](./CHANGELOG.md)
@@ -230,13 +341,13 @@ version: "版本号"
 - **尺寸处理**：输入最大尺寸12000×12000像素，输出最大尺寸8192×8192像素，超限时等比缩小
 
 ### 相框样式系统
-- **多格式支持**：支持JSON、YAML、TOML或Python文件作为样式配置
+- **多格式支持**：支持JSON、YAML、TOML文件作为样式配置
 - **扩展画布**：支持以原图尺寸百分比为基础的画布扩展，上下左右可分别设置
 - **响应式设计**：以输出尺寸的百分比作为参考比例，文字大小、边距等随输出尺寸自动调整
 - **图层顺序**（从上到下）：文字和图标层 → 装饰元素层 → 原图层 → 背景层（含扩展区域）
 - **相对定位**（v1.2.0）：支持将元素相对于其他已注册元素定位（after/below/before/above/right-of/left-of），由拓扑排序自动解析依赖顺序
 - **Padding 安全区域**（v1.2.0）：叠加元素的绘制边界约束，优先级高于 margin
-- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素整体平移，确保不超出安全区域
+- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素（及其全部已注册从属）合并为组合盒，整体平移确保不超出安全区域
 
 ### 装饰元素系统
 - **边框**：可自定义宽度和颜色
@@ -253,23 +364,24 @@ version: "版本号"
 
 ### 响应式设计特性
 - **扩展画布**：以原图尺寸的百分比为基准进行扩展
-- **文字布局**：支持行间距设置，文字位置可灵活配置
+- **文字布局**：文字位置可灵活配置
 - **字体适配**：字体大小随画布尺寸自适应调整
 - **背景填充**：扩展区域支持多种填充方式
 - **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 统一绘制，确保依赖有序、溢出可修正
 
 ### 独立信息字体大小
 - **EXIF信息**：可独立设置字体大小
-- **作者信息**：可独立设置字体大小
+- **相机/镜头**：可独立或合并（`camera_lens`）设置
+- **时间作者**：可独立或合并（`timestamp_author`）设置
 - **位置信息**：可独立设置字体大小
 
 ### 背景样式系统
 - **纯黑色**：100%黑色背景填充，覆盖包括扩展区域在内的整个画面
 - **纯白色**：100%白色背景填充，覆盖包括扩展区域在内的整个画面
-- **高斯模糊叠加**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面；叠加透明度支持 35% / 65% / 自定义，如在 `gaussian_{color}_{opacity}` 中编码
+- **高斯模糊叠加**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面；叠加透明度支持 50% / 80% / 自定义，如在 `gaussian_{color}_{opacity}` 中编码
 - **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
   - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
-  - 浅色背景类型：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 浅色背景类型：`pure_white`, `gaussian_white_80`, `gaussian_white_50`, `gaussian_white`
   - 新增背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
 - **性能优化**：大图自动降采样至1200px中间分辨率计算模糊；模糊叠加混合在 float32 空间完成，通过 PIL 内置 Floyd-Steinberg 量化消除色彩断层
 - **配置参数**：通过 `gaussian_blur_radius` 和 `gaussian_blur_opacity` 在样式配置中自定义模糊强度和叠加透明度
@@ -289,8 +401,7 @@ version: "版本号"
 ## 后续开发计划
 
 1. **GPU加速** - 实现图像处理的GPU加速功能
-
-02. **更多相框样式** - 开发更多样式的相框模板
+2. **更多相框样式** - 开发更多样式的相框模板
 3. **测试和优化** - 编写单元测试，优化性能
 
 ## 开发规范

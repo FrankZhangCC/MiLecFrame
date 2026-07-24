@@ -5,7 +5,6 @@ Logo选择器模块
 import os
 from pathlib import Path
 from typing import List, Optional
-import re
 from PIL import Image
 
 
@@ -66,7 +65,7 @@ class LogoSelector:
     
     def auto_match_logo(self, camera_brand: str) -> Optional[str]:
         """
-        根据相机品牌自动匹配logo（忽略大小写）
+        根据相机品牌自动匹配logo（不区分大小写，文件名包含品牌名称即可）
         
         Args:
             camera_brand: 相机品牌名称
@@ -77,38 +76,12 @@ class LogoSelector:
         if not camera_brand:
             return None
         
-        # 获取所有logo文件
         logos = self.scan_logos()
+        brand_lower = camera_brand.lower()
         
-        # 移除文件扩展名并转换为小写进行比较
-        logo_names = [os.path.splitext(logo)[0].lower() for logo in logos]
-        
-        # 规范化品牌名称
-        normalized_brand = self._normalize_brand_name(camera_brand).lower()
-        
-        # 查找精确匹配（忽略大小写）
-        for i, logo_name in enumerate(logo_names):
-            if normalized_brand == logo_name:
-                return logos[i]
-        
-        # 如果没有精确匹配，尝试部分匹配（忽略大小写）
-        for i, logo_name in enumerate(logo_names):
-            if normalized_brand in logo_name or logo_name in normalized_brand:
-                return logos[i]
+        for logo in logos:
+            logo_name = os.path.splitext(logo)[0].lower()
+            if brand_lower in logo_name or logo_name in brand_lower:
+                return logo
         
         return None
-    
-    def _normalize_brand_name(self, brand: str) -> str:
-        """
-        标准化品牌名称，去除特殊字符和空格
-        
-        Args:
-            brand: 原始品牌名称
-            
-        Returns:
-            标准化后的品牌名称
-        """
-        # 移除特殊字符，只保留字母数字和空格
-        cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', brand)
-        # 移除多余空格
-        return ' '.join(cleaned.split())
