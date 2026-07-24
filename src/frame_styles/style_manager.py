@@ -123,16 +123,21 @@ class StyleManager:
         
         # 从文件名解析匹配条件：no_{field}_.yaml → {field}
         def parse_missing_set(filename: str) -> set:
-            name = os.path.splitext(filename)[0].lower()
-            if name == 'default':
+            name = os.path.splitext(filename)[0]
+            if name.lower() == 'default':
                 return set()
             parts = name.split('_')
             fields = set()
             i = 0
             while i < len(parts):
-                if parts[i] == 'no' and i + 1 < len(parts):
-                    fields.add(parts[i + 1])
-                    i += 2
+                if parts[i].lower() == 'no' and i + 1 < len(parts):
+                    i += 1
+                    field_parts = []
+                    while i < len(parts) and parts[i].lower() != 'no':
+                        field_parts.append(parts[i])
+                        i += 1
+                    if field_parts:
+                        fields.add('_'.join(field_parts))
                 else:
                     i += 1
             return fields

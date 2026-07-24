@@ -2,7 +2,7 @@
 
 ## 最高优先级指令
 
-- 使用简体中文（zh-CN）思考。
+- 使用简体中文（zh-CN）呈现思维链。
 - 当发现指令不清晰时，不要擅自揣测，而是向用户发送问题。
 - 所有代码应当详细注释。
 - 新增代码时，除非必要，不要删除旧有注释。
@@ -25,13 +25,13 @@ src/
 
 ### 关键入口点
 
-| 场景 | 命令 |
-|------|------|
-| 单张处理 | `python src/main.py -i <in> -o <out> -s <style> --author "..." --bg-fill ...` |
-| 批量处理 | `python src/main.py --batch -i <dir> -o <dir> --recursive` |
-| GUI（推荐） | `streamlit run src/gui/app.py` |
-| GUI（备选） | `python src/main.py --gui`（subprocess 包装，会调用 streamlit） |
-| 环境搭建 | `python setup_env.py`（创建 venv + 安装依赖） |
+| 场景        | 命令                                                                            |
+| ----------- | ------------------------------------------------------------------------------- |
+| 单张处理    | `python src/main.py -i <in> -o <out> -s <style> --author "..." --bg-fill ...` |
+| 批量处理    | `python src/main.py --batch -i <dir> -o <dir> --recursive`                    |
+| GUI（推荐） | `streamlit run src/gui/app.py`                                                |
+| GUI（备选） | `python src/main.py --gui`（subprocess 包装，会调用 streamlit）               |
+| 环境搭建    | `python setup_env.py`（创建 venv + 安装依赖）                                 |
 
 ## 没有测试/检查框架
 
@@ -42,12 +42,14 @@ src/
 ## 必须知道的约定
 
 ### 版本标记规范
+
 - `src/_version.py` 是版本号**单点入口**。
 - 公开 Release 版：标记为 `v0.x.x`（如 `v0.1.0`）。
 - 内部开发版：标记为 `v1.x.x-dev`（如 `v1.9.0-dev`）。
 - 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`。
 
 ### Git 忽略规则
+
 - `data/` 目录下除 `camera_map.csv` 和 `lens_map.csv` 外均被 gitignore。
 - `assets/fonts/*` 被 gitignore（除 `.gitkeep`），字体文件需自行放置。
 - `test_images/`、`debug_log.txt`、`output_test*.jpg` 被 gitignore。
@@ -61,16 +63,19 @@ src/
 - **`_STYLE_TEMPLATE.txt`**（`src/frame_styles/configs/`）覆盖全部配置项，填写后交给 AI 即可生成 YAML 配置文件。
 
 ### 配置与数据
+
 - `config.json`：保存用户偏好（作者名自动记忆）。
 - `project_master_spec.json`：**最高优先级**的底层需求规范，所有开发必须严格遵循。
 - `data/camera_map.csv` ⟷ `data/lens_map.csv`：设备映射数据库，CSV 格式，GUI 中可编辑。
 
 ### 日志
+
 - DEBUG 级别 → `debug_log.txt`（项目根目录）
 - INFO 及以上 → 控制台 stderr
 - 入口点（CLI/GUI）均已调用 `setup_logging()`，带幂等守卫。
 
 ### 命令执行环境
+
 - Shell 是 **Windows PowerShell 5.1**，不支持 `&&` 连接命令。使用 `; if ($?) { ... }` 替代。
 - 所有 Python 命令必须在 venv 激活后执行。
 - 使用绝对路径执行 Python 脚本，避免路径混淆。

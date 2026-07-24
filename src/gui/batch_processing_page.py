@@ -330,12 +330,11 @@ def render_batch_processing_page():
         if is_custom_text_enabled:
             st.markdown("### ✏️ 自定义文本")
             default_custom = "Always believe that something wonderful\nis about to happen."
-            custom_text = st.text_area(
-                "输入自定义文本（支持多行）",
-                value=default_custom,
+            custom_text = st.text_input(
+                "输入自定义文本",
+                value=default_custom.replace('\n', ' '),
                 placeholder="输入要显示的自定义文本...",
                 key='batch_custom_text_input',
-                height=100
             )
             st.markdown("---")
         else:

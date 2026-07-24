@@ -81,31 +81,25 @@ div.block-container {
     elif st.session_state.current_page == "🎨 样式编辑器":
         render_style_creator_page()
     
-    # 侧边栏停止按钮（放在页面渲染之后，以便页面可以向侧边栏注入内容）
+    # 侧边栏停止按钮
     st.sidebar.markdown("---")
-    if 'confirm_stop' not in st.session_state:
-        st.session_state.confirm_stop = False
-    
-    if not st.session_state.confirm_stop:
-        if st.sidebar.button("🛑 停止程序", width='stretch'):
-            st.session_state.confirm_stop = True
-            st.rerun()
-    else:
-        col_stop1, col_stop2 = st.sidebar.columns(2)
-        with col_stop1:
-            if st.button("✅ 确认停止", width='stretch', type="primary"):
-                import os, sys, subprocess
-                if sys.platform == "win32":
-                    server_pid = os.getppid()
-                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(server_pid)], capture_output=True)
-                else:
-                    import signal
-                    os.kill(os.getppid(), signal.SIGTERM)
-                os._exit(0)
-        with col_stop2:
-            if st.button("❌ 取消", width='stretch'):
-                st.session_state.confirm_stop = False
-                st.rerun()
+    col_stop, col_cancel = st.sidebar.columns(2)
+    with col_stop:
+        if st.sidebar.button("🛑 停止", use_container_width=True):
+            import os, sys, subprocess
+            if sys.platform == "win32":
+                server_pid = os.getppid()
+                subprocess.run(['taskkill', '/F', '/T', '/PID', str(server_pid)], capture_output=True)
+            else:
+                import signal
+                os.kill(os.getppid(), signal.SIGTERM)
+            os._exit(0)
+    with col_cancel:
+        st.sidebar.markdown(
+            '<div style="padding: 0.25rem 0; font-size: 0.75rem; color: #888;">'
+            '点击即退出</div>',
+            unsafe_allow_html=True
+        )
 
     # 底部信息
     st.markdown("---")
