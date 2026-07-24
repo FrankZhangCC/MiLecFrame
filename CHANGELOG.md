@@ -1,4 +1,92 @@
-# 更新历史
+# 更新历史（开发版）
+
+> 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
+
+## v2.1.1-dev (2026-06-13)
+
+> 新增 **GUI 色彩管理（QColorSpace）** 与 **深色模式适配**。修复在广色域显示器（如 Display P3）上 sRGB 图片显示过饱和的问题；所有硬编码的 `setStyleSheet` 浅色背景色替换为 QFluentWidgets 的 `setCustomStyleSheet(lightQss, darkQss)` 双主题方案，自动跟随系统深色/浅色主题切换，无需手动监听信号。
+
+### 🟢 QColorSpace 色彩管理
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- `_create_thumbnail()`：生成缩略图 QImage 后调用 `setColorSpace(QColorSpace.NamedColorSpace.SRgb)`，告知 Qt 渲染管道的色彩空间
+- `_update_preview()`：预览大图两处 QImage 创建（`result_path` 和 `file_bytes` 分支）同样添加 `setColorSpace()`
+
+**`src/gui_pyside/widgets/style_preview.py`**：
+
+- `set_preview_image()`：样式编辑器的预览 QImage 同样标记 SRgb 色彩空间
+
+**原理**：Qt 6 在 `QPainter.drawImage()` 时会自动读取 `QImage.colorSpace()` 进行色域映射。在 sRGB 屏上原样显示，在 Display P3 等广色域屏上做正确的色域转换，消除颜色拉伸导致的过饱和。
+
+### 🟢 深色模式适配（`setCustomStyleSheet`）
+
+**`image_processing_page.py`**（11 处样式 → `setCustomStyleSheet` 双主题）：
+
+| 位置 | 样式对象 | Light | Dark |
+|------|---------|-------|------|
+| 类常量 | `_STYLE_THUMB_NORMAL` | 边框 `#ddd`，背景 `white` | 边框 `#444`，背景 `#282828` |
+| 类常量 | `_STYLE_THUMB_SELECTED` | 边框 `#0078d4`，背景 `white` | 边框 `#4da6ff`，背景 `#282828` |
+| 常量 | `_STYLE_THUMB_PROCESSED` | 边框 `#00a86b`，背景 `white` | 边框 `#6ccb5f`，背景 `#282828` |
+| `_setup_ui()` | 主 QSplitter 手柄 | 背景 `#e0e0e0`，hover `#0078d4` | 背景 `#3D3D3D`，hover `#4da6ff` |
+| `_setup_ui()` | 内容 QSplitter 手柄 | 同上 | 同上 |
+| `_create_preview_panel()` | EXIF 面板 | `#f5f5f5` | `#2B2B2B` |
+| `_create_config_panel()` | ScrollArea 配置面板 | `#f5f5f5` | `#2B2B2B` |
+| `_create_filmstrip()` | 胶片栏背景 | 顶边 `#e0e0e0`，底 `#fafafa` | 顶边 `#3D3D3D`，底 `#282828` |
+| `_update_preview()` | 显示图后预览背景 | `#fafafa` | `#282828` |
+| `_update_filmstrip_thumbnail()` | 已处理缩略图 | 绿色 `#00a86b`，hover 蓝 | 绿 `#6ccb5f`，hover `#4da6ff` |
+
+- 预览占位样式（虚线边框、灰色文字、近白背景）从 3 处硬编码（`_create_preview_panel` / `_on_clear_all` / `_remove_filmstrip_item`）抽取为 `_apply_preview_placeholder_style()` 方法，统一维护
+- `_set_thumb_style()` 从 `setStyleSheet` 字符串切换到 `setCustomStyleSheet` 双主题，引用类常量 dict 中的 `'light'` / `'dark'` 键
+
+**`style_preview.py`**（2 处样式 → `setCustomStyleSheet` 双主题）：
+
+| 位置 | Light | Dark |
+|------|-------|------|
+| `__init__()` 预览占位 | 边框 `#e0e0e0`，字 `#888`，底 `#fafafa` | 边框 `#404040`，字 `#999`，底 `#282828` |
+| `set_preview_image()` 渲染后背景 | `#fafafa` | `#282828` |
+
+**颜色设计依据**：Dark 色值参考 QFluentWidgets 源码标准：
+- `#282828` = Flyout 背景（比主窗口 `#202020` 略亮，适合卡片/预览区域）
+- `#2B2B2B` = Dialog 面板背景（适合功能面板）
+- `#3D3D3D` = Separator 分割线颜色
+- `#4da6ff` = 亮蓝强调色（Fluent Design Blue 在深色背景上的变体）
+- `#6ccb5f` = `FluentSystemColor.SUCCESS_FOREGROUND` 深色值
+
+### 🔴 修复：`setCustomStyleSheet` 未对新建 widget 生效
+
+`setCustomStyleSheet(widget, lightQss, darkQss)` 是 QFluentWidgets 提供的双主题样式接口，但其内部实现**只将 QSS 字符串存储为 widget 的动态属性**（`lightCustomQss` / `darkCustomQss`），并不调用 `widget.setStyleSheet()`。实际样式生效依赖 `CustomStyleSheetWatcher` 事件过滤器监听 `DynamicPropertyChange` 事件后触发 `addStyleSheet()`——而该事件过滤器由 `styleSheetManager.register()` 安装。
+
+**根因**：`_add_filmstrip_item()` 等场景中，thumb_label 是新创建的 QLabel，从未经过 `styleSheetManager.register()`，事件过滤器未被安装。`setCustomStyleSheet` 存储了属性但 `setStyleSheet()` 从未被调用，边框样式不生效。
+
+**修复**（`image_processing_page.py`）：
+- 新增 `_apply_custom_style(widget, lightQss, darkQss)` 辅助方法，在 `setCustomStyleSheet` 之后立即调用 `addStyleSheet(widget, CustomStyleSheet(widget))` 完成注册和应用
+- 所有 10 处 `setCustomStyleSheet` 调用替换为 `self._apply_custom_style`
+
+**`style_preview.py`**：两处 `setCustomStyleSheet` 调用后追加 `addStyleSheet(self.preview_label, CustomStyleSheet(self.preview_label))`
+
+**验证**：测试脚本确认新建 QLabel 调用 `setCustomStyleSheet` 后 `styleSheet()` 为空，`addStyleSheet` 后 `styleSheet()` 正确返回 QSS。
+
+### 🟢 硬编码强调色统一为 QFW 主题色变量
+
+所有缩略图选中/悬停边框色从硬编码 `#0078d4` / `#4da6ff` 替换为 QFluentWidgets 的 `--ThemeColorPrimary` QSS 变量：
+
+| 常量 | 替换项 | 语义 |
+|------|--------|------|
+| `_STYLE_THUMB_NORMAL` | `QLabel:hover { border-color }` | 悬停预览色 |
+| `_STYLE_THUMB_SELECTED` | `QLabel { border }` + `QLabel:hover { border-color }` | 选中强调色 |
+| `_STYLE_THUMB_PROCESSED` | `QLabel:hover { border-color }` | 悬停统一 |
+
+`--ThemeColorPrimary` 由 QFW 的 `renderQss()` 在 `StyleSheetCompose.content()` 拼接后统一替换为当前主题色值（默认 `#009faa`），主题切换和主题色变更时自动跟随，无需额外代码连接信号。绿色已处理边框（`#00a86b` / `#6ccb5f`）保留为语义状态色。
+
+### ⚙️ 架构: `setCustomStyleSheet` 机制
+
+使用 QFluentWidgets 内置 `setCustomStyleSheet(widget, lightQss, darkQss)` 替代 `widget.setStyleSheet(qss)`。该函数自动将 dark/light QSS 分别作为动态属性存储，通过 `CustomStyleSheetWatcher` 监听 `DynamicPropertyChange` 事件，在主题切换时自动刷新。无需手动连接 `qconfig.themeChanged` 信号。
+
+### 📝 文档
+
+- `README.md` 版本徽标更新至 v2.1.1-dev
+- `CHANGELOG.md`：本页更新
 
 ## v2.1.0-dev (2026-06-12)
 
