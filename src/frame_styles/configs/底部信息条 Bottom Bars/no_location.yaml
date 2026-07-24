@@ -43,7 +43,7 @@ layout:
       position: "bottom-left"
       alignment: "left"
       margin_top: 0.01
-      margin_bottom: 0.04
+      margin_bottom: 0.044
       margin_left: 0.02
       margin_right: 0.01
     timestamp_author:
@@ -67,4 +67,5 @@ logo:
   relative_margin: 0.016
   size_ratio: 0.048
   offset_y_ratio: 0.011
+  diagonal_limit_ratio: 2.0
 name: 底部信息条 BottomBars

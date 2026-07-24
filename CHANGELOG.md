@@ -1,5 +1,40 @@
 # 更新历史
 
+## v1.12.0-dev (2026-05-25)
+
+> 内部开发版本。新增布局引擎 `alignment: "both-center"` 双轴居中模式，支持元素中心点与锚点完全重合。
+
+### 🟢 新增 `alignment: "both-center"` 双轴居中
+
+`LayoutEngine._get_anchor()` 新增 `alignment: "both-center"` 值，使元素在**水平和垂直方向同时**居中于锚点：
+
+- `position='bottom'` + `alignment='both-center'`：元素整体中心与原图底部边缘中点重合
+- `position='top'` + `alignment='both-center'`：元素整体中心与原图顶部边缘中点重合
+- `position='left'` / `'right'` + `alignment='both-center'`：对应方向的双轴居中
+- `_resolve_tree_ref()` 拦截 `both-center` → 返回 `('center', 'center')`，树级定位也支持双轴居中
+- `_align_x()` / `_align_y()` / `layout_multiline_lines()` 兼容 `both-center`（等效于 `center`）
+
+**向后兼容**：现有 `alignment: "center"` 行为完全不变，`both-center` 是新增可选值。仅影响显式配置 `both-center` 的元素。
+
+### 🟢 `diagonal_limit_ratio` Logo 配置化
+
+- `renderer.py:_add_logo()` 中的硬编码 `2` 抽取为样式 YAML `logo.diagonal_limit_ratio` 字段，默认 `2.0`
+- 样式编辑器 GUI 新增 `diagonal_limit_ratio` 输入框（范围 1.0–5.0，步长 0.1），与 `size_ratio` / `alignment` 同行三列布局
+- 4 个启用 Logo 的样式文件同步写入了 `diagonal_limit_ratio: 2.0`
+- README / `_STYLE_TEMPLATE.txt` 文档同步更新
+
+### 🟢 样式更新
+
+- `胶片夹风格 FilmClip/default.yaml`：Logo 改为 `alignment: "both-center"`，`margin_bottom` 从 `0.04` 调整为 `0.07` 补偿视觉效果
+- `胶片夹风格 FilmClip/no_custom_text.yaml`：Logo 改为 `position: "top"` + `alignment: "both-center"`，`margin_top` 从 `0.045` 调整为 `0.083` 补偿视觉效果
+
+### 🟢 GUI & 文档
+
+- 样式编辑器 `ALIGNMENT_OPTIONS` 新增 `both-center` 选项，所有 8 个 alignment 下拉框自动同步
+- `_STYLE_TEMPLATE.txt` 中 alignment 说明补充 `both-center`
+- README.md 版本徽标更新至 v1.12.0-dev
+- `layout_engine.md` 更新至 v1.12.0-dev，alignment 参数表补充 `both-center`，_resolve_tree_ref 表新增 both-center 行
+
 ## v1.11.0-dev (2026-05-23)
 
 > 内部开发版本。架构重构：将文字排版从 FrameRenderer 中拆分为独立的 TextRenderer 模块，LayoutEngine 新增多行行位计算方法。

@@ -111,7 +111,7 @@ class LayoutEngine:
         - relative_margin: 间距比例
         - offset_x_ratio / offset_y_ratio: 微调偏移比例
         - position: 锚点位置 (如 'top-left', 'bottom-right', 'top', 'bottom', 'left', 'right', 'center' 等)
-        - alignment: 元素对齐方式 (如 'left', 'center', 'right')
+        - alignment: 元素对齐方式 (如 'left', 'center', 'right', 'both-center' ; 'both-center' 使元素中心与锚点重合)
         - margin / margin_top / margin_bottom / margin_left / margin_right: 边距
 
         defer_padding: 是否延迟 padding 约束。为 True 时，跳过 padding 夹持和组合盒溢出平移，
@@ -165,7 +165,7 @@ class LayoutEngine:
         placement: 'inside'（原图内部） | 'outside'（原图外部）
         position:  原图边界上的锚点位置（top-left / top / top-right / left / right /
                    bottom-left / bottom / bottom-right / top-center / bottom-center / center）
-        alignment: 元素自身如何对齐到锚点（left / center / right）
+        alignment: 元素自身如何对齐到锚点（left / center / right / both-center）
         """
         inside = (placement == 'inside')
 
@@ -185,6 +185,8 @@ class LayoutEngine:
         if position == 'top':
             y = oy + m['top'] if inside else oy - eh - m['top']
             x = self._align_x(alignment, ox, ow, ew, m)
+            if alignment == 'both-center':
+                y = y + eh // 2      # 垂直居中于锚点
             return x, y
 
         # --- 下方位置 ---
@@ -203,18 +205,24 @@ class LayoutEngine:
         if position == 'bottom':
             y = (oy + oh - eh - m['bottom']) if inside else (oy + oh + m['bottom'])
             x = self._align_x(alignment, ox, ow, ew, m)
+            if alignment == 'both-center':
+                y = y - eh // 2      # 垂直居中于锚点
             return x, y
 
         # --- 左侧 ---
         if position == 'left':
             x = ox + m['left'] if inside else ox - ew - m['right']
             y = self._align_y(alignment, oy, oh, eh, m)
+            if alignment == 'both-center':
+                x = x + ew // 2      # 水平居中于锚点
             return x, y
 
         # --- 右侧 ---
         if position == 'right':
             x = (ox + ow - ew - m['right']) if inside else (ox + ow + m['left'])
             y = self._align_y(alignment, oy, oh, eh, m)
+            if alignment == 'both-center':
+                x = x - ew // 2      # 水平居中于锚点
             return x, y
 
         # --- 居中（画布中心，不受 placement 影响）---
@@ -236,6 +244,7 @@ class LayoutEngine:
             return ox + m['left']
         if alignment in ('right', 'top-right', 'bottom-right'):
             return ox + ow - ew - m['right']
+        # both-center 与 center 在水平方向上行为一致
         return ox + (ow - ew) // 2
 
     def _align_y(
@@ -248,6 +257,7 @@ class LayoutEngine:
             return oy + m['top']
         if alignment in ('bottom', 'bottom-left', 'bottom-right'):
             return oy + oh - eh - m['bottom']
+        # both-center 与 center 在垂直方向上行为一致
         return oy + (oh - eh) // 2
 
     def _resolve_margins(self, config: Dict) -> Dict[str, int]:
@@ -402,6 +412,9 @@ class LayoutEngine:
         v_ref: 'top'  / 'center' / 'bottom'
         与 _get_anchor 的行为完全一致
         """
+        if alignment == 'both-center':
+            return 'center', 'center'
+
         # ── 上方位置组 ──
         if position in ('top-left', 'tl') or (
             position == 'top' and alignment in ('left', 'top-left', 'bottom-left')
@@ -608,7 +621,7 @@ class LayoutEngine:
             block_w: 块宽度（用于行内对齐偏移）
             lines: 每行信息，每项含 height / width / ref_ascent / ref_descent
             line_spacing: 行间距（像素）
-            alignment: 行内水平对齐 left / center / right
+            alignment: 行内水平对齐 left / center / right / both-center（等效于 center）
 
         Returns:
             [(line_x, baseline_y), ...] 每行的绘制起始坐标
@@ -619,7 +632,7 @@ class LayoutEngine:
         for ln in lines:
             if alignment in ('right', 'bottom-right', 'top-right'):
                 line_x = block_x + (block_w - ln['width'])
-            elif alignment in ('center', 'bottom-center', 'top-center'):
+            elif alignment in ('center', 'both-center', 'bottom-center', 'top-center'):
                 line_x = block_x + (block_w - ln['width']) // 2
             else:
                 line_x = block_x

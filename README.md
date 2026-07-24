@@ -1,4 +1,4 @@
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.11.0--dev-orange)
+、# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.12.0--dev-orange)
 
 > ©FrankZhangCC 2026
 > 使用DeepSeek V4系列模型开发。
@@ -354,6 +354,7 @@ name: "样式名称"         # 必需字段，用于标识样式
   - 横向：`left` / `top-left` / `bottom-left`（左对齐）、`right` / `top-right` / `bottom-right`（右对齐）、其他值居中
   - 纵向：`top` / `top-left` / `top-right`（顶对齐）、`bottom` / `bottom-left` / `bottom-right`（底对齐）、其他值居中
   - 带 `-left`/`-right`/`-top`/`-bottom` 后缀的组合格式会按对应轴向被正确解析
+  - **`both-center`** (v1.12.0)：双轴居中，元素中心点与锚点完全重合，margin 作为该偏移量
 
 **margin 边距体系**：
 
@@ -557,9 +558,10 @@ Logo 采用**独立渲染管线**：布局、尺寸、定位由 YAML 中 `logo:`
 logo:
   enabled: true                 # 是否启用
   size_ratio: 0.05              # 短边占参照边（短边）比例
+  diagonal_limit_ratio: 2.0     # 对角线上限倍数（相对于 size_ratio），默认 2.0
   placement: outside            # inside / outside
   position: "bottom-right"      # 14 种锚点位置
-  alignment: "center"           # 对齐方式
+  alignment: "center"           # 对齐方式（支持 both-center：双轴居中，元素中心与锚点重合）
   margin_top: 0                 # 四周边距（float=比例，int=像素）
   margin_bottom: 0
   margin_left: 0
@@ -572,7 +574,7 @@ logo:
   offset_y_ratio: 0
 ```
 
-- Logo 短边 = `size_ratio × 参照边（短边）`，对角线自动限制 ≤ `2 × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`
+- Logo 短边 = `size_ratio × 参照边（短边）`，对角线自动限制 ≤ `diagonal_limit_ratio × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`，`diagonal_limit_ratio = 2.0`
 - 支持绝对定位和相对定位，可引用文字元素（如 `relative_to: "camera_lens"`）
 - Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
 - Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件，并根据当前背景类型的 `text_scheme`（暗色/亮色）自动选择 `_white` / 非 `_white` 颜色变体

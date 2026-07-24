@@ -106,19 +106,17 @@ class ExifHelper:
                 exif_data['gps'] = gps_str
                 exif_data['gps_raw'] = gps_raw
             
+            # 记录设备信息到 CSV（独立 try/except，不影响 EXIF 提取结果）
+            if exif_data:
+                try:
+                    self._record_device_info(exif_data)
+                except Exception as e:
+                    self.logger.warning(f"记录设备信息失败（不影响 EXIF 提取结果）: {e}")
+            
             return exif_data
         except Exception as e:
             self.logger.warning(f"EXIF提取错误: {str(e)}")
-            exif_data = None
-        
-        # 设备信息记录（独立 try/except，不影响 EXIF 提取结果）
-        if exif_data:
-            try:
-                self._record_device_info(exif_data)
-            except Exception as e:
-                self.logger.warning(f"记录设备信息失败（不影响 EXIF 提取结果）: {e}")
-        
-        return exif_data
+            return None
     
     def extract_raw_exif(self, image_source: Union[str, bytes]) -> Optional[Dict]:
         """
