@@ -35,6 +35,26 @@
 - **图片移除自动清理**：`uploaded_file` 为空时主动清除 `exif_data`、`file_info`、`display_data`、`processing_result` 等 session state，避免残留数据
 - **所有 widget key 保留**，session state 向前兼容
 
+### Logo 背景明暗自适应 🟢 新功能
+
+- `LogoSelector.auto_match_logo()` 新增 `is_dark_bg` 参数，根据背景类型自动选择 Logo 颜色变体
+- **暗色背景**（`text_scheme='dark'`）→ 优先匹配文件名以 `_white` 结尾的 Logo（白色在暗色背景上更醒目）
+- **亮色背景**（`text_scheme='light'`）→ 优先匹配非 `_white` 结尾的 Logo（深色在亮色背景上更醒目）
+- 新增 `_is_white_logo()` 静态方法检测文件名 `_white` 后缀（不区分大小写）
+- 色调判断复用现有 `BackgroundFillManager.is_dark_bg()` 接口，零冗余
+- `renderer.py`、`image_processing_page.py` 三处调用点统一传入 `is_dark_bg` 参数
+- `is_dark_bg=None` 时行为完全向后兼容，不影响现有调用
+
+### 高斯模糊背景饱和度增强 🟢 新功能
+
+- `gaussian_blur.py` 新增 `_enhance_saturation()` 函数，使用 PIL `ImageEnhance.Color` 在模糊图像与覆盖层混合前增强色彩饱和度
+- 4 个高斯模糊填充类型在 `FILL_TYPES` 中新增 `saturation` 字段，按覆盖透明度补偿：
+  - `gaussian_white_80` → 2.0 | `gaussian_white_50` → 1.5 | `gaussian_black_65` → 1.8 | `gaussian_black_35` → 1.3
+- `BackgroundFillManager.render()` 新增 `saturation` 覆盖参数，`register()` 同步支持
+- `renderer.render_frame()` → `image_processor.process()` 全链路新增 `saturation_override` 可选参数
+- GUI `⚙️ 配置` 区新增「背景增强」复选框（默认勾选；纯色填充时灰显），取消勾选时传 1.0 禁用增强
+- CLI 始终使用 FILL_TYPES 默认饱和度值，无需额外参数
+
 ### README 更新
 
 - 版本号 1.5.0 → 1.5.1
