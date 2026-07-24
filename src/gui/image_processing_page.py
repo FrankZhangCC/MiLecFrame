@@ -40,6 +40,20 @@ def render_image_processing_page():
     if 'current_config' not in st.session_state:
         st.session_state.current_config = None
 
+    # ===== 预提取 EXIF（session_state 中的文件在 widget 渲染前就已可用） =====
+    sess_file = st.session_state.get('file_uploader')
+    if sess_file is not None and not st.session_state.get('display_data'):
+        try:
+            raw_bytes = sess_file.getvalue()
+            pil_img = PILImage.open(io.BytesIO(raw_bytes))
+            st.session_state.file_info = exif_helper.get_file_info(pil_img)
+            exif_data = exif_helper.extract_exif_data(raw_bytes)
+            if exif_data:
+                st.session_state.exif_data = exif_data
+                st.session_state.display_data = exif_helper.get_display_data(exif_data)
+        except Exception:
+            pass
+
     # ===== 侧边栏：📋 图片信息 =====
     st.sidebar.caption("📋 图片信息")
     if (st.session_state.get('display_data') and
@@ -84,11 +98,14 @@ def render_image_processing_page():
     border-radius: 12px;
     padding: 0.75rem;
 }
+.stHorizontalBlock:first-of-type > [data-testid="column"]:nth-child(2) [data-testid="column"]:nth-child(2) div[data-testid="stCheckbox"] {
+    margin-top: 1.5rem;
+}
 </style>
     """, unsafe_allow_html=True)
 
     # ===== 主布局 =====
-    main_col, config_col = st.columns([5, 3])
+    main_col, config_col = st.columns([7, 3])
 
     # ======================== 右侧配置栏 ========================
     with config_col:
@@ -133,32 +150,36 @@ def render_image_processing_page():
         saved_author = config_manager.get_saved_author()
         default_author = saved_author if saved_author else ""
 
-        col_d1, col_d2 = st.columns(2)
-        with col_d1:
-            author = st.text_input("作者姓名", value=default_author, placeholder="请输入作者姓名", key='author_input')
-        with col_d2:
-            has_gps = False
-            gps_str = ""
-            if st.session_state.get('exif_data'):
-                gps_str = st.session_state.exif_data.get('gps', '')
-                has_gps = bool(gps_str)
-            use_gps = st.checkbox("GPS替换", disabled=not has_gps, key='use_gps_location')
+        author = st.text_input("作者姓名", value=default_author, placeholder="请输入作者姓名", key='author_input')
 
         if author:
             config_manager.save_user_author(author)
 
-        if use_gps and has_gps:
-            location = gps_str
-        else:
-            location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
+        # GPS状态提前计算（选框渲染在右侧，但左侧输入框需提前知道状态）
+        has_gps = False
+        gps_str = ""
+        if st.session_state.get('exif_data'):
+            gps_str = st.session_state.exif_data.get('gps', '')
+            has_gps = bool(gps_str)
+        _gps_active = st.session_state.get('use_gps_location', False) and has_gps
 
-        col_l1, col_l2 = st.columns(2)
-        with col_l1:
+        col_loc_gps = st.columns([2, 1])
+        with col_loc_gps[0]:
+            if _gps_active:
+                st.text_input("拍摄地点", value=gps_str, disabled=True, key='location_input')
+                location = gps_str
+            else:
+                location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
+        with col_loc_gps[1]:
+            use_gps = st.checkbox("GPS替换", disabled=not has_gps, key='use_gps_location')
+
+        col_lens_short = st.columns([2, 1])
+        with col_lens_short[0]:
             lens_display_option = st.selectbox(
                 "镜头显示", ["相机+镜头", "只显示相机", "只显示镜头"],
                 index=0, key='lens_display_option'
             )
-        with col_l2:
+        with col_lens_short[1]:
             if 'use_short_lens' not in st.session_state:
                 st.session_state.use_short_lens = False
             if '_pending_use_short_lens' in st.session_state:
@@ -249,10 +270,11 @@ def render_image_processing_page():
             raw_bytes = uploaded_file.getvalue()
             pil_img = PILImage.open(io.BytesIO(raw_bytes))
 
+            w, h = pil_img.size
+
             # 新图片上传时按方向设置短版镜头名勾选
             if st.session_state.get('last_file_id') != uploaded_file.file_id:
                 st.session_state.last_file_id = uploaded_file.file_id
-                w, h = pil_img.size
                 st.session_state._pending_use_short_lens = (h >= w)
 
             # 文件信息
@@ -268,11 +290,8 @@ def render_image_processing_page():
             except Exception:
                 pass
 
-            # ---- 双栏预览 ----
-            preview_left, preview_right = st.columns(2)
-
-            with preview_left:
-                # 原始图片预览（含ICC色彩空间转换）
+            # ---- 响应式预览 ----
+            def _render_original():
                 try:
                     preview_img = pil_img
                     icc = pil_img.info.get('icc_profile')
@@ -286,8 +305,7 @@ def render_image_processing_page():
                 except Exception:
                     st.image(uploaded_file, caption="原始图片", width='stretch')
 
-            with preview_right:
-                # 效果预览（处理后显示）
+            def _render_effect():
                 if (st.session_state.processing_result and
                     st.session_state.temp_output_path and
                     os.path.exists(st.session_state.temp_output_path)):
@@ -296,6 +314,22 @@ def render_image_processing_page():
                     st.image(result_img, caption="效果预览", width='stretch')
                 else:
                     st.info("👆 请配置选项并点击\"生成相框\"按钮")
+
+            is_wide = w > h
+
+            if is_wide:
+                # 横向构图：上下排列，缩至 75% 宽度居中
+                col_l, col_img, col_r = st.columns([1, 6, 1])
+                with col_img:
+                    _render_original()
+                    _render_effect()
+            else:
+                # 竖向/方形：左右排列
+                preview_left, preview_right = st.columns(2)
+                with preview_left:
+                    _render_original()
+                with preview_right:
+                    _render_effect()
 
             # ---- 按钮 + 状态 ----
             current_config = {
