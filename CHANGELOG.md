@@ -1,8 +1,186 @@
 # 更新历史
 
+## v1.5.0 (2026-05-07)
+
+> 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
+
+### Logo 对角线保护 (2026-05-09)
+
+- **对角线上限替代长边上限**：`renderer._add_logo()` 中 Logo 尺寸上限从长边改为对角线（`math.hypot`），系数从 2.5 调为 2，对正方形 Logo 无影响，对细长 Logo 提供更均匀的双向约束
+
+### HDR 管线重构 (2026-05-09)
+
+- **移除 OpenCV 依赖**：`hdr_handler.py` 原有的 `cv2.createTonemap(gamma=1.0)` 近似恒等变换被纯 NumPy 实现的 Reinhard 全局色调映射替代，消除对 `opencv-python` 和 `scikit-image` 的依赖
+- **修正 HDR 处理顺序**：`image_processor.py` 中 HDR 图像先经 ICC 色彩空间转换（P3/BT.2020 → sRGB），再进行色调映射，避免在原始色域下做错误映射
+- **HDR 加载优化**：`HDRHandler.load_image()` 改用 `to_pillow()` 保留 ICC profile，PIL 直读 HEIF/AVIF 时获取完整色彩元数据
+- **格式检测重构**：`detect_hdr_format()` 替代 `is_hdr_format()`，检测逻辑收敛至 `HDRHandler`，移除 `image_processor` 中的 `hdr_supported_formats` 硬编码列表
+- **移除不实宣称**：README 移除 Gainmap HDR JPEG 和 UltraHDR 的错误支持描述，更新技术栈、格式表和处理管线说明
+- **依赖精简**：`requirements.txt` 移除 `opencv-python>=4.6.0` 和 `scikit-image>=0.19.0`（全项目零引用）
+
+### 色彩空间转换管线重构 🔴 关键修复
+
+- **ICC 转换前置**：`_convert_colorspace()` 将 ICC profile 转换从"模式转换之后"改为"模式转换之前"，避免 16-bit TIFF 的 `.convert('RGB')` 截断后再转换导致的精度损失
+- **渲染意图显式指定**：`profileToProfile()` 新增 `renderingIntent=ImageCms.Intent.PERCEPTUAL`，解决默认意图可能导致的 ProPhoto RGB 高饱和区域色域裁剪伪影
+- **日志可视化**：新增 `ImageCms.getProfileDescription()` 日志输出，可在调试日志中明确看到检测到的 ICC 色彩空间名称和转换成功/失败状态
+- 覆盖所有嵌入式 ICC 色彩空间（Adobe RGB、ProPhoto RGB、Display P3、DCI-P3、Apple Image P3 等），通过 ICC profile 精确数学转换至 sRGB
+
+### TIFF 保存路径修复 🔴 致命缺陷
+
+- `_save_image` else 分支原先将 `quality=95, optimize=True` 硬编码传入所有非 JPEG/PNG 格式的 `image.save()`，TIFF 写入器不接受这两个参数，直接抛 `TypeError` 导致处理中断
+- else 分支 `save_kwargs` 改为空字典 `{}`，消除 TIFF 输出硬性崩溃
+
+### 输出嵌入 sRGB ICC Profile 🟡
+
+- `process()` 在 `_convert_colorspace` 完成后捕获转换产生的 sRGB ICC 字节（`image.info['icc_profile']`），渲染后传入 `_save_image` 的 `icc_profile` 参数显式写入输出文件
+- 确保输出文件始终携带正确的色彩空间标记，下游专业软件不再误判
+
+### Pillow 12.2.0 API 兼容性修复 🔴 关键修复
+
+- Pillow 12.2.0 的 `ImageCms.ImageCmsProfile` 不接受 raw bytes，必须用 `io.BytesIO()` 包装为类文件对象传递
+- `_convert_colorspace` 和 GUI 原始预览的 ICC profile 处理统一使用 `io.BytesIO(icc_profile)` 替代直接传 bytes
+- `ImageCms.Intent.PERCEPTUAL` 的 API 路径为 `ImageCms.Intent` 枚举（非 PIL 旧版的 `ImageCms.INTENT_PERCEPTUAL` 顶层常量）
+- 修复前上述两处 API 不兼容均在 `except Exception` 中被静默捕获，回退到原始像素值（ProPhoto RGB 未转换），导致色彩空间转换看似生效实则完全失败
+
+### GUI 原始预览色彩校正 🔴 用户体验
+
+- 原始图片预览（`st.image()`）新增 ICC 检测与转换：先获取 `uploaded_file.getvalue()`，PIL 打开 → 检测 ICC → `profileToProfile` 转 sRGB → 再交给 Streamlit 渲染
+- 解决 ProPhoto RGB TIFF / Display P3 JPEG 上传后预览颜色偏灰的问题
+
+### 下载文件名匹配 🔴 用户体验
+
+- 下载文件名从 `framed_{原始文件名}`（保留 `.tiff` 等原始后缀）改为 `framed_{stem}{输出扩展名}`
+- 例如上传 `photo.tiff` 选择 JPEG 输出 → 下载文件名为 `framed_photo.jpg`，文件名与内容格式一致
+
+### 水印展平安全化
+
+- `decorator.add_watermark()` 中 `watermarked_img.convert('RGB')` 使用默认黑色背景展平 RGBA → 替换为显式白色背景 `Image.new('RGB', ..., (255,255,255))` + `paste(mask=alpha)`
+- 消除透明像素被混合到黑色上的潜在暗边问题
+
+### GUI 文件信息区域 🟢 新功能
+
+- 原始图片预览下方新增 `📋 文件信息` 区域，3 列展示：编码格式（JPEG/PNG/TIFF 等）、色彩空间（ProPhoto RGB / sRGB / Adobe RGB 等）、像素尺寸（宽×高 px）
+- 色彩空间通过 `ImageCms.getProfileDescription()` 读取嵌入式 ICC profile 描述，无 ICC 标记时显示 `sRGB（默认）`
+- PIL Image 对象一次性打开，供文件信息 + 预览 ICC 转换复用，消除重复读取
+
+### 文件元数据统一出口
+
+- `ExifHelper` 新增 `get_file_info(image)` 静态方法，返回 `{format, color_space, width, height}` 字典
+- GUI 文件信息区域从内联 PIL/ICC 提取逻辑改为调用 `exif_helper.get_file_info(pil_img)`，与 `get_display_data(exif_data)` 并列组成统一数据出口
+- 遵循项目既有架构规范：所有显示数据均通过 ExifHelper 集中提供，GUI 层只负责渲染
+
+### 边框功能移除 🟡 架构清理
+
+- `decorator.py` 删除 `add_border()` 方法及 dispatch 分支，边框功能已无调用方
+- `image_processing_page.py` 删除边框 UI 控件（checkbox / slider / selectbox）及关联配置条目
+- `image_processor.py` 删除 docstring 中边框示例
+- Logo 在 README 中从"装饰元素"独立为 `### Logo` 小节，明确其独立渲染管线定位（YAML `logo:` 节 + 文字层之后渲染 + `LogoSelector` 独立工具类）
+
+### 短版镜头名称映射 + 竖幅自适应恢复 🟢 新功能
+
+- `lens_map.csv` 新增 `short_lens` 第三列，为每个镜头配置短版名称（如 `"Summilux 28mm"`），未配置时自动回退到 `mapped_lens`
+- `DeviceMapper` 新增 `short_lens_map` 字典和 `get_short_lens()` 方法，`add_lens_mapping()` 同步支持 `short_lens` 参数
+- `ExifHelper.get_formatted_exif_for_display()` / `get_display_data()` 输出 `short_lens` 字段
+- `RenderContext` 恢复并改造竖幅/方形图片自动适配：`lens` 竖幅时使用短版名称，`camera_lens` 竖幅时使用 `"相机 | 短镜头"` 格式
+- `lens_map.csv` 旧格式（无 `short_lens` 列）自动兼容，回退使用 `mapped_lens` 作为短版名
+- 镜头映射管理页面新增"短版名称"列显示和编辑
+
+### README 更新
+
+- 版本号 1.4.1 → 1.5.0
+- 处理管线第 5 步"色彩空间检测 → 非 sRGB 转换"修正为"色彩空间检测 → 非 sRGB ICC 数学转换"
+- 输出嵌入 sRGB ICC profile 在保存步骤中体现
+- GUI 界面上传描述新增"文件信息（编码格式 / 色彩空间 / 像素尺寸）"
+- EXIF 架构文档新增 `get_file_info(image)` 静态方法描述，与 `get_display_data()` 并列组成统一数据出口
+
+---
+
+## v1.4.1 (2026-05-06)
+
+> 本版本修复布局引擎 margin 积弊、扩展 alignment 组合格式支持、新增 GPS 坐标提取与 GUI 替换选项。
+
+### 布局引擎 margin 逻辑修复
+
+- **移除布尔闸门**：`_resolve_margins()` 旧逻辑使用 `if margin_top is None or margin_left is None` 作为二选一互斥开关，导致仅定义部分方向时全部独立 margin 值被静默丢弃、回退到统一 `margin`
+- 新逻辑改为**逐方向独立回退**：统一 `margin` 作为初始值（未设默认 0），`margin_top` / `margin_bottom` / `margin_left` / `margin_right` 各自覆盖对应方向，不存在互斥激活条件
+- 向后兼容：所有现有 YAML 配置均定义了完整四个 margin 方向，计算结果不变
+- 影响：新配置可以只定义需要的方向（如仅 `margin_bottom: 0.03`），其余默认 0
+
+### alignment 组合格式扩展
+
+- `_align_x()` 新增 `bottom-left`（→ 左对齐）、`top-right` / `bottom-right`（→ 右对齐）
+- `_align_y()` 新增带 `-left`/`-right` 后缀的组合格式（`top-left` / `top-right` → 顶对齐，`bottom-left` / `bottom-right` → 底对齐）
+- 组合格式在各轴向上独立解析方向语义，互不干扰
+
+### 相对定位 alignment 文档修正
+
+- README 中相对定位 `alignment` 描述从模糊的"垂直轴对齐"改为按 `relative_position` 方向明确说明：
+  - `after`/`below`/`before`/`above` → 控制**水平**方向，以参考元素宽度为基准
+  - `right-of`/`left-of` → 控制**垂直**方向，以参考元素高度为基准
+- 补充说明相对定位 alignment 以参考元素边界计算，与绝对定位 margin_* 无关
+
+### 定位方式文档结构重构
+
+- README 样式配置规范中新增 `#### 定位方式` (H4) 独立标题
+- 下设 `##### 绝对定位` 和 `##### 相对定位` (H5) 子章节，从原 `info_position` 三级列表项中提升
+- 定位系统行为规范（拓扑排序、缺失参考保护、组合盒溢出）独立为 `##### 定位系统行为规范`
+- margin 体系从"必需"措辞改为逐方向独立描述，补充 float=比例 / int=像素 的详细计算规则和推荐优先级
+
+### GPS 坐标提取 (EXIF GPS IFD) 🟢 新功能
+
+- `ExifHelper._extract_gps()` 新增静态方法，从 piexif `"GPS"` IFD 中提取经纬度 Rational 元组
+- `ExifHelper._format_dms()` 新增静态方法，将 `((deg_num,deg_den), (min_num,min_den), (sec_num,sec_den))` 格式化为度分秒字符串（如 `40°26'46.1"N 79°56'56.1"W`）
+- `extract_exif_data()` 在 Exif 信息提取完成后自动调用 GPS 提取，写入 `exif_data['gps']` 和 `exif_data['gps_raw']`
+- `get_formatted_exif_for_display()` 和 `get_display_data()` 透传 `gps` 字段
+- 方向标识（`b'N'`/`b'S'`/`b'E'`/`b'W'`）自动 bytes 解码
+
+### GPS 渲染与 GUI 集成
+
+- `RenderContext.get_text('gps')` 新增 key，从 `exif_data['gps']` 返回 DMS 格式化坐标字符串
+- 样式 YAML 中声明 `gps` 即可渲染 GPS 坐标（与 GUI checkbox 独立）
+- 样式配置规范中 `info_position` 支持的元素类型、fonts.sizes、color 覆盖列表均新增 `gps`
+- GUI 拍摄地点输入上方新增 "使用 GPS 坐标替换拍摄地点" checkbox
+  - 图片含 GPS 数据时可选，无 GPS 时灰显 (`disabled=True`)
+  - 勾选后显示 GPS 坐标信息，`location` 自动填充为 GPS DMS 字符串
+  - 未勾选时保持手动 `st.text_input` 输入
+
+### camera_make 独立暴露与 Logo 匹配统一
+
+- `get_display_data()` 新增 `display_data['camera_make']`，存储 device_mapper 映射后的相机品牌（如 "Leica"、"Nikon"），不再仅用于拼接 `camera_combined` 后丢弃
+- `RenderContext.get_text('camera_make')` 新增 key，返回映射后品牌字符串
+- 样式 YAML 中声明 `camera_make` 即可独立显示品牌（与 `camera` 返回"品牌 型号"区分）
+- Logo 自动匹配链路重构：renderer 不再通过 `ExifHelper.get_camera_brand(exif_data)` 直接读取原始 EXIF，改为 `context.get_text('camera_make')` 经 RenderContext 统一获取
+- 匹配时对返回值 `.lower()` 处理，与 LogoSelector 子串匹配逻辑保持一致
+- 样式配置规范中 `info_position` 支持的元素类型、fonts.sizes、color 覆盖列表均新增 `camera_make`
+
+### Logo 文档修正
+
+- README 中"装饰元素不通过样式配置 YAML 定义"的描述修正为区分三种装饰元素的配置来源：border/watermark 完全由外部参数控制，Logo 采用混合模式（YAML 定义布局/尺寸/定位，GUI/CLI 决定文件选择）
+- 新增 Logo 配置文档小节，列出 `logo:` 节所有支持字段及默认值
+
+### Logo 长边限制收紧
+
+- `renderer._add_logo()` 中长边上限从 `3 × size_ratio × 原图长边` 收紧为 `2.5 × size_ratio × 原图长边`，降低细长 Logo 的视觉失控风险
+- `assets/logos/README.md` 中形状建议同步从 `≤ 3:1` 改为 `≤ 2.5:1`
+
+---
+
 ## v1.4.0 (2026-05-04)
 
-> 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。
+> 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。**GUI 性能优化**：EXIF 读取零落盘、预览缩略图生成、临时文件生命周期管理。
+
+### EXIF 输出嵌入
+
+- `ImageProcessor._save_image()` 保存时自动将原始 EXIF 嵌入输出图像，通过 `piexif.dump(exif_dict)` 生成二进制数据传入 `image.save(exif=...)`
+- 输出扩展名自动判定保存格式（`.jpg` → JPEG, `.png` → PNG），不再依赖输入格式
+- `ExifHelper.extract_raw_exif()` 新增方法，返回完整 piexif 字典（不做字段拆解）供嵌入阶段使用
+- `ExifHelper.extract_exif_data()` 参数类型扩展为 `Union[str, bytes]`，支持直接传入图片二进制数据
+
+### GUI 性能优化
+
+- **消除 EXIF 临时文件**：上传图片的 EXIF 提取从"写入临时文件 → piexif 读取 → 删除"改为直接从 `uploaded_file.getvalue()` 的 bytes 读取，减少一次磁盘 I/O 及文件清理逻辑
+- **预览缩略图**：处理完成后在内存中将输出图缩放到 1200px 长边再传给 `st.image()`，大幅降低传输带宽（全分辨率 ~15MB → 缩略图 ~200KB）
+- **孤儿临时文件清理**：创建新 `temp_output_path` 前检查并删除旧输出临时文件，避免系统临时目录堆积
+- **悬空引用修复**：删除 `temp_input_path` 后将 `session_state.temp_input_path` 置为 `None`，避免后续代码误用已删除路径
 
 ### 背景填充管理器 (BackgroundFillManager) 🔴 新模块
 

@@ -1,6 +1,6 @@
 """
 装饰元素处理模块
-负责处理相框中的装饰元素，如边框、水印、徽标等
+负责处理相框中的装饰元素，如水印等
 """
 from typing import Tuple, Dict, Optional, List
 from PIL import Image, ImageDraw, ImageFont
@@ -16,34 +16,6 @@ class Decorator:
             font_manager: FontManager实例，用于统一字体加载
         """
         self.font_manager = font_manager
-    def add_border(
-        self, 
-        image: Image.Image, 
-        width: int = 5, 
-        color: Tuple[int, int, int] = (255, 255, 255)
-    ) -> Image.Image:
-        """
-        为图像添加边框
-        
-        Args:
-            image: 输入图像
-            width: 边框宽度
-            color: 边框颜色
-            
-        Returns:
-            添加边框后的图像
-        """
-        # 创建新图像，尺寸稍大以容纳边框
-        new_width = image.width + 2 * width
-        new_height = image.height + 2 * width
-        
-        # 创建带边框的背景
-        bordered_img = Image.new('RGB', (new_width, new_height), color=color)
-        
-        # 将原图粘贴到中心位置
-        bordered_img.paste(image, (width, width))
-        
-        return bordered_img
 
     def add_watermark(
         self, 
@@ -80,13 +52,13 @@ class Decorator:
         txt_layer = Image.new('RGBA', base_img.size, (255, 255, 255, 0))
         draw = ImageDraw.Draw(txt_layer)
         
-        # 使用原始图像的长边作为计算基准
+        # 使用原始图像的参照边作为计算基准
         if original_image_size:
-            longer_side = max(original_image_size)
+            reference_side = min(original_image_size)
         else:
-            longer_side = max(image.size)
+            reference_side = min(image.size)
         
-        # 使用FontManager统一加载字体（水印文字高度为原图长边的2%）
+        # 使用FontManager统一加载字体（水印文字高度为参照边的2%）
         img_size_for_font = original_image_size if original_image_size else image.size
         if self.font_manager:
             font = self.font_manager.load_font(
@@ -102,9 +74,9 @@ class Decorator:
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # 根据位置参数计算实际位置，使用原始图像长边的2%作为边距
-        margin = int(longer_side * 0.02)  # 使用原始图像长边的2%作为边距
-        
+        # 根据位置参数计算实际位置，使用参照边的2%作为边距
+        margin = int(reference_side * 0.02)
+
         img_width, img_height = image.size
         
         # 获取当前图像与原始图像的尺寸差，用于调整边距计算
@@ -117,13 +89,13 @@ class Decorator:
                 top_exp = expand_config.get('top', 0)
                 left_exp = expand_config.get('left', 0)
                 
-                # 使用长边作为计算基准，以保持一致的扩展效果
+                # 使用参照边作为计算基准，以保持一致的扩展效果
                 orig_width, orig_height = original_image_size
-                longer_side_orig = max(orig_width, orig_height)
+                reference_side_orig = min(orig_width, orig_height)
                 
                 # 根据扩展比例计算位置
-                top_offset = int(longer_side_orig * top_exp)
-                left_offset = int(longer_side_orig * left_exp)
+                top_offset = int(reference_side_orig * top_exp)
+                left_offset = int(reference_side_orig * left_exp)
                 
                 offset_x = left_offset
                 offset_y = top_offset
@@ -188,8 +160,10 @@ class Decorator:
         
         # 合并图层
         watermarked_img = Image.alpha_composite(base_img, txt_layer)
-        
-        return watermarked_img.convert('RGB')
+
+        background = Image.new('RGB', watermarked_img.size, (255, 255, 255))
+        background.paste(watermarked_img, mask=watermarked_img.split()[-1])
+        return background
 
     def apply_decorations(
         self, 
@@ -216,9 +190,7 @@ class Decorator:
             decor_type = decoration.get('type')
             params = decoration.get('params', {})
             
-            if decor_type == 'border':
-                result_img = self.add_border(result_img, **params)
-            elif decor_type == 'watermark':
+            if decor_type == 'watermark':
                 result_img = self.add_watermark(
                     result_img, 
                     original_image_size=original_image_size, 

@@ -11,7 +11,7 @@ class LayoutEngine:
     def __init__(self, original_image_size: Tuple[int, int], layout_config: Dict):
         self.original_image_size = original_image_size
         self.original_width, self.original_height = original_image_size
-        self.original_longer_side = max(self.original_width, self.original_height)
+        self.reference_side = min(self.original_width, self.original_height)
 
         self.layout_config = layout_config
         self.canvas_size = self._calculate_canvas_size()
@@ -32,8 +32,8 @@ class LayoutEngine:
         left_exp = expand_config.get('left', 0)
         right_exp = expand_config.get('right', 0)
 
-        new_width = self.original_width + int(self.original_longer_side * (left_exp + right_exp))
-        new_height = self.original_height + int(self.original_longer_side * (top_exp + bottom_exp))
+        new_width = self.original_width + int(self.reference_side * (left_exp + right_exp))
+        new_height = self.original_height + int(self.reference_side * (top_exp + bottom_exp))
 
         return new_width, new_height
 
@@ -45,8 +45,8 @@ class LayoutEngine:
         else:
             top_exp = expand_config.get('top', 0)
             left_exp = expand_config.get('left', 0)
-            x = int(self.original_longer_side * left_exp)
-            y = int(self.original_longer_side * top_exp)
+            x = int(self.reference_side * left_exp)
+            y = int(self.reference_side * top_exp)
 
         return x, y, self.original_width, self.original_height
 
@@ -54,7 +54,7 @@ class LayoutEngine:
         """
         计算叠加元素的安全区域（padding），从画布四边向内收缩。
         返回 (left_bound, top_bound, right_bound, bottom_bound)
-        padding 值以 original_longer_side 比例为基准，默认为 0（即画布边界）
+        padding 值以 reference_side 比例为基准，默认为 0（即画布边界）
         """
         padding_config = self.layout_config.get('padding', {})
         if not padding_config:
@@ -62,7 +62,7 @@ class LayoutEngine:
 
         def to_px(value):
             if isinstance(value, (int, float)):
-                return int(self.original_longer_side * float(value))
+                return int(self.reference_side * float(value))
             return 0
 
         pad_left = to_px(padding_config.get('left', 0))
@@ -226,9 +226,9 @@ class LayoutEngine:
         ox: int, ow: int, ew: int,
         m: Dict[str, int]
     ) -> int:
-        if alignment in ('left', 'top-left'):
+        if alignment in ('left', 'top-left', 'bottom-left'):
             return ox + m['left']
-        if alignment == 'right':
+        if alignment in ('right', 'top-right', 'bottom-right'):
             return ox + ow - ew - m['right']
         return ox + (ow - ew) // 2
 
@@ -238,42 +238,39 @@ class LayoutEngine:
         oy: int, oh: int, eh: int,
         m: Dict[str, int]
     ) -> int:
-        if alignment == 'top':
+        if alignment in ('top', 'top-left', 'top-right'):
             return oy + m['top']
-        if alignment == 'bottom':
+        if alignment in ('bottom', 'bottom-left', 'bottom-right'):
             return oy + oh - eh - m['bottom']
         return oy + (oh - eh) // 2
 
     def _resolve_margins(self, config: Dict) -> Dict[str, int]:
-        longer_side = self.original_longer_side
+        reference_side = self.reference_side
 
         def to_px(value):
             if isinstance(value, float):
-                return int(longer_side * value)
+                return int(reference_side * value)
             return int(value) if value is not None else None
 
-        margin_top = config.get('margin_top', None)
-        margin_bottom = config.get('margin_bottom', None)
-        margin_left = config.get('margin_left', None)
-        margin_right = config.get('margin_right', None)
-
-        if margin_top is None or margin_left is None:
-            margin = config.get('margin', 10)
-            if isinstance(margin, float):
-                margin = int(longer_side * margin)
-            margin_top = margin_left = margin_bottom = margin_right = int(margin)
+        # 统一 margin 作为初始值（向后兼容），未设置时默认为 0
+        unified = config.get('margin', None)
+        if unified is not None:
+            base = to_px(unified)
+            base = base if base is not None else 0
         else:
-            margin_top = to_px(margin_top) if to_px(margin_top) is not None else 0
-            margin_left = to_px(margin_left) if to_px(margin_left) is not None else 0
-            margin_bottom = to_px(margin_bottom) if to_px(margin_bottom) is not None else 0
-            margin_right = to_px(margin_right) if to_px(margin_right) is not None else 0
+            base = 0
 
-        return {
-            'top': margin_top or 0,
-            'bottom': margin_bottom or 0,
-            'left': margin_left or 0,
-            'right': margin_right or 0,
-        }
+        result = {'top': base, 'bottom': base, 'left': base, 'right': base}
+
+        # 逐方向覆盖：显式定义的独立 margin 值覆盖对应方向
+        for key in ('top', 'bottom', 'left', 'right'):
+            val = config.get(f'margin_{key}', None)
+            if val is not None:
+                px = to_px(val)
+                if px is not None:
+                    result[key] = px
+
+        return result
 
     def _shift_dependents(self, name: str, shift_x: int, shift_y: int):
         if name not in self._dependents:
@@ -297,7 +294,7 @@ class LayoutEngine:
         offset_y_ratio = config.get('offset_y_ratio', 0.0)
         alignment = config.get('alignment', 'center')
 
-        relative_margin_px = int(self.original_longer_side * relative_margin)
+        relative_margin_px = int(self.reference_side * relative_margin)
 
         target_coords = self.get_element_bounds(relative_to)
         if target_coords is None:
@@ -320,8 +317,8 @@ class LayoutEngine:
         else:
             return self._calculate_absolute(element_width, element_height, config)
 
-        offset_x = int(self.original_longer_side * offset_x_ratio)
-        offset_y = int(self.original_longer_side * offset_y_ratio)
+        offset_x = int(self.reference_side * offset_x_ratio)
+        offset_y = int(self.reference_side * offset_y_ratio)
         x += offset_x
         y += offset_y
 

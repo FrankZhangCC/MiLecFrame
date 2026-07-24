@@ -8,7 +8,7 @@ import tempfile
 import io
 import pandas as pd
 from pathlib import Path
-from PIL import Image as PILImage
+from PIL import Image as PILImage, ImageCms
 
 # 使用绝对导入
 from src.core.image_processor import ImageProcessor
@@ -89,20 +89,22 @@ def render_image_processing_page():
             config_manager.save_user_author(author)
         
         # 拍摄地点输入
-        location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
+        # 检查当前图片是否包含 GPS 信息
+        has_gps = False
+        gps_string = ""
+        if 'exif_data' in st.session_state and st.session_state.exif_data:
+            gps_string = st.session_state.exif_data.get('gps', '')
+            has_gps = bool(gps_string)
         
-        # 边框配置
-        enable_border = st.checkbox("添加边框", key='enable_border')
-        border_width = 0
-        border_color = (255, 255, 255)
-        if enable_border:
-            col_b1, col_b2 = st.columns(2)
-            with col_b1:
-                border_width = st.slider("边框宽度 (px)", 1, 20, 5, key='border_width')
-            with col_b2:
-                border_color_option = st.selectbox("边框颜色", ["白色", "黑色", "灰色"], key='border_color')
-                color_map = {"白色": (255, 255, 255), "黑色": (0, 0, 0), "灰色": (128, 128, 128)}
-                border_color = color_map[border_color_option]
+        # GPS 替换选项：仅当图片包含 GPS 数据时可勾选
+        use_gps = st.checkbox("使用 GPS 坐标替换拍摄地点", disabled=not has_gps,
+                              key='use_gps_location')
+        
+        if use_gps and has_gps:
+            st.info(f"GPS 坐标: {gps_string}")
+            location = gps_string
+        else:
+            location = st.text_input("拍摄地点", placeholder="请输入拍摄地点", key='location_input')
         
         # 水印配置
         enable_watermark = st.checkbox("添加水印", key='enable_watermark')
@@ -201,100 +203,106 @@ def render_image_processing_page():
         )
         
         if uploaded_file is not None:
-            # 显示原始图片
-            st.image(uploaded_file, caption="原始图片", width='stretch')
-            
-            # 显示文件信息和EXIF
-            # 保存临时文件以读取EXIF
-            temp_exif_path = None
+            # 一次性读取并打开图像（预览+文件信息复用）
+            raw_bytes = uploaded_file.getvalue()
+            pil_img = PILImage.open(io.BytesIO(raw_bytes))
+
+            # 文件信息区域（统一走 ExifHelper 数据出口）
+            file_info = exif_helper.get_file_info(pil_img)
+            with st.container():
+                st.markdown("#### 📋 文件信息")
+                info_cols = st.columns(3)
+                with info_cols[0]:
+                    st.markdown(f"**编码格式**: {file_info['format']}")
+                with info_cols[1]:
+                    st.markdown(f"**色彩空间**: {file_info['color_space']}")
+                with info_cols[2]:
+                    st.markdown(f"**像素尺寸**: {file_info['width']} × {file_info['height']}px")
+
+            # 显示原始图片（含ICC色彩空间转换）
             try:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp:
-                    tmp.write(uploaded_file.getvalue())
-                    temp_exif_path = tmp.name
-                
-                # 提取EXIF数据
-                exif_data = exif_helper.extract_exif_data(temp_exif_path)
-                
+                preview_img = pil_img
+                icc = pil_img.info.get('icc_profile')
+                if icc:
+                    preview_img = ImageCms.profileToProfile(
+                        preview_img, io.BytesIO(icc), ImageCms.createProfile('sRGB'),
+                        outputMode='RGB',
+                        renderingIntent=ImageCms.Intent.PERCEPTUAL
+                    )
+                st.image(preview_img, caption="原始图片", width='stretch')
+            except Exception:
+                st.image(uploaded_file, caption="原始图片", width='stretch')
+
+            # 显示EXIF信息
+            try:
+                exif_data = exif_helper.extract_exif_data(raw_bytes)
+
                 # 保存EXIF数据到session state
                 st.session_state.exif_data = exif_data
-                
-                # 显示EXIF信息
+
                 if exif_data:
                     # 获取显示数据
                     display_data = exif_helper.get_display_data(exif_data)
-                    
-                    # 以更优雅的方式显示EXIF信息
+
                     with st.container():
                         # 设备信息部分 - 显示原始数据
                         st.markdown("#### 📷 设备信息")
                         device_cols = st.columns(3)
-                        
+
                         with device_cols[0]:
                             if 'raw_camera_make' in display_data:
-                                # 显示原始品牌数据
                                 st.markdown(f"**品牌**: {display_data['raw_camera_make']}")
 
                         with device_cols[1]:
                             if 'raw_camera_model' in display_data:
-                                # 显示原始型号数据
                                 st.markdown(f"**型号**: {display_data['raw_camera_model']}")
 
                         with device_cols[2]:
                             if 'raw_lens_model' in display_data:
-                                # 显示原始镜头数据
                                 st.markdown(f"**镜头**: {display_data['raw_lens_model']}")
-                            
+
                         # 拍摄参数部分
                         st.markdown("#### 📐 拍摄参数")
                         param_cols = st.columns(4)
-                        
+
                         with param_cols[0]:
                             if 'raw_focal_length' in display_data:
                                 st.markdown(f"**焦距**: {display_data['raw_focal_length']}mm")
-                        
+
                         with param_cols[1]:
                             if 'raw_aperture' in display_data:
                                 st.markdown(f"**光圈**: f/{display_data['raw_aperture']}")
-                        
+
                         with param_cols[2]:
                             if 'raw_shutter_speed' in display_data:
                                 st.markdown(f"**快门**: {display_data['raw_shutter_speed']}s")
-                        
+
                         with param_cols[3]:
                             if 'raw_iso' in display_data:
                                 st.markdown(f"**ISO**: {display_data['raw_iso']}")
-                        
+
                         # 时间信息部分
                         if 'raw_datetime_original' in display_data:
                             st.markdown("#### 📅 拍摄时间")
                             st.markdown(f"**{display_data['raw_datetime_original']}**")
-                        
+
                         # 显示格式化的EXIF信息（用于相框显示）
                         formatted_display = display_data.get('exif_formatted', '')
                         if formatted_display:
                             st.markdown("#### 💬 相框显示")
-                            
-                            # 显示组合后的相机型号（品牌+型号）
+
                             if 'camera_combined' in display_data:
                                 st.markdown(f"**相机型号**: {display_data['camera_combined']}")
-                            
-                            # 显示映射后的镜头型号
+
                             if 'lens_model' in display_data:
                                 st.markdown(f"**镜头型号**: {display_data['lens_model']}")
-                            
-                            # 显示格式化的曝光参数
+
                             st.markdown(f"**曝光参数**: {formatted_display}")
                 else:
-                    # 如果没有EXIF，至少显示基本文件信息
-                    image = PILImage.open(io.BytesIO(uploaded_file.getvalue()))
-                    width, height = image.size
-                    st.info(f"📄 文件: {uploaded_file.name} | 尺寸: {width} x {height}px")
-                    
+                    st.info("该图片不包含 EXIF 信息")
+
             except Exception as e:
                 st.warning(f"读取EXIF信息时出错: {str(e)}")
-            finally:
-                if temp_exif_path and os.path.exists(temp_exif_path):
-                    os.unlink(temp_exif_path)
                     
         else:
             st.info("👆 请先上传一张图片")
@@ -307,9 +315,6 @@ def render_image_processing_page():
             current_config = {
                 'selected_style': selected_style,
                 'selected_bg_fill': selected_bg_fill,
-                'enable_border': enable_border,
-                'border_width': border_width,
-                'border_color': border_color,
                 'enable_watermark': enable_watermark,
                 'watermark_text': watermark_text,
                 'watermark_position': watermark_position,
@@ -353,6 +358,7 @@ div.stButton > button:first-child {{
             """, unsafe_allow_html=True)
             
             # 生成相框按钮
+            output_ext = ".jpg" if output_format == "JPEG" else ".png"
             if st.button(button_label, key='process_button'):
                 st.session_state.button_clicked = True
                 with st.spinner("正在处理图片..."):
@@ -362,21 +368,17 @@ div.stButton > button:first-child {{
                             temp_input.write(uploaded_file.getvalue())
                             temp_input_path = temp_input.name
                         
-                        # 创建临时输出文件
-                        output_ext = ".jpg" if output_format == "JPEG" else ".png"
+                        # 创建临时输出文件（先清理旧的）
+                        if st.session_state.temp_output_path and os.path.exists(st.session_state.temp_output_path):
+                            try:
+                                os.unlink(st.session_state.temp_output_path)
+                            except OSError:
+                                pass
                         with tempfile.NamedTemporaryFile(delete=False, suffix=output_ext) as temp_output:
                             temp_output_path = temp_output.name
                         
                         # 构建装饰元素列表
                         decorations = []
-                        if enable_border:
-                            decorations.append({
-                                'type': 'border',
-                                'params': {
-                                    'width': border_width,
-                                    'color': border_color
-                                }
-                            })
                         if enable_watermark and watermark_text:
                             decorations.append({
                                 'type': 'watermark',
@@ -417,9 +419,10 @@ div.stButton > button:first-child {{
                         st.code(error_details)
                     
                     finally:
-                        # 清理临时输入文件，保留输出文件供后续使用
+                        # 清理临时输入文件
                         if 'temp_input_path' in locals() and os.path.exists(temp_input_path):
                             os.unlink(temp_input_path)
+                            st.session_state.temp_input_path = None
             
             # 已有处理结果时始终显示预览
             if (st.session_state.processing_result and
@@ -430,7 +433,7 @@ div.stButton > button:first-child {{
                     st.download_button(
                         label="💾 下载处理后的图片",
                         data=result_file,
-                        file_name=f"framed_{uploaded_file.name}",
+                        file_name=f"framed_{Path(uploaded_file.name).stem}{output_ext}",
                         mime="image/jpeg" if output_format == "JPEG" else "image/png",
                         key="download_processed_image_cached"
                     )
@@ -440,7 +443,9 @@ div.stButton > button:first-child {{
                 else:
                     st.success("✅ 图片处理成功！")
 
-                st.image(st.session_state.temp_output_path, caption="添加相框后的图片", width='stretch')
+                preview_img = PILImage.open(st.session_state.temp_output_path)
+                preview_img.thumbnail((1200, 1200), PILImage.Resampling.LANCZOS)
+                st.image(preview_img, caption="添加相框后的图片", width='stretch')
             else:
                 if not st.session_state.processing_result:
                     st.info('👆 请配置选项并点击"生成相框"按钮')

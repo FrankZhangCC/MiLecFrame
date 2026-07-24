@@ -3,6 +3,7 @@
 负责相框的图层合成、背景填充、高斯模糊等功能
 """
 import sys
+import math
 import logging
 from pathlib import Path
 
@@ -109,10 +110,10 @@ class FrameRenderer:
         # Logo 后处理（可依赖文字层已注册的坐标）
         if logo_config.get('enabled', False):
             if logo_filename is None:
-                camera_brand = ExifHelper.get_camera_brand(exif_data) or ExifHelper.get_camera_model(exif_data)
+                camera_brand = context.get_text('camera_make')
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()
-                    logo_filename = logo_selector_instance.auto_match_logo(camera_brand)
+                    logo_filename = logo_selector_instance.auto_match_logo(camera_brand.lower())
             
             if logo_filename:
                 image_with_text = self._add_logo(image_with_text, logo_filename, logo_config, layout_engine)
@@ -396,20 +397,20 @@ class FrameRenderer:
             return image
         
         original_image_size = layout_engine.original_image_size
-        longer_side = max(original_image_size)
+        reference_side = min(original_image_size)
 
         size_ratio = logo_config.get('size_ratio', 0.05)
 
         logo_width, logo_height = logo.size
         logo_short_side = min(logo_width, logo_height)
-        target_short_side = int(longer_side * size_ratio)
+        target_short_side = int(reference_side * size_ratio)
         scale = target_short_side / logo_short_side
 
-        # 长边上限：防止细长条Logo失控，上限为原图长边的 3*size_ratio
-        max_long_side = int(longer_side * 3 * size_ratio)
-        logo_long_side = max(logo_width, logo_height)
-        if logo_long_side * scale > max_long_side:
-            scale = max_long_side / logo_long_side
+        # Logo 对角线上限保护：防止细长条 Logo 失控
+        max_diagonal = int(reference_side * 2 * size_ratio)
+        logo_diagonal = math.hypot(logo_width, logo_height)
+        if logo_diagonal * scale > max_diagonal:
+            scale = max_diagonal / logo_diagonal
 
         new_logo_width = int(logo_width * scale)
         new_logo_height = int(logo_height * scale)
