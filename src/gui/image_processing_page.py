@@ -29,8 +29,8 @@ def _get_config_manager():
     return ConfigManager()
 
 
-@st.cache_resource
 def _get_exif_helper():
+    """返回 ExifHelper 实例（内部 DeviceMapper 需读取最新 CSV，故不缓存）"""
     return ExifHelper()
 
 
@@ -110,7 +110,7 @@ def render_image_processing_page():
         fi = st.session_state.file_info
         dd = st.session_state.display_data
         parts = ['<div style="font-size:0.9rem;line-height:2;">']
-        parts.append(f"<b>文件</b>: {fi['format']} | {fi.get('color_space','')}<br>")
+        parts.append(f"<b>文件</b>: {fi['format']} | {fi.get('color_space','')} | {fi['width']}×{fi['height']} px<br>")
         cam = dd.get('camera_combined', '')
         if cam:
             parts.append(f"<b>相机</b>: {cam}<br>")

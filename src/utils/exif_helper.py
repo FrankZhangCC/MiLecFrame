@@ -2,6 +2,7 @@
 EXIF信息处理辅助模块
 负责提取、解析和格式化照片的EXIF信息
 """
+import logging
 import io
 import piexif
 from PIL import Image, ImageCms
@@ -15,6 +16,7 @@ class ExifHelper:
     
     def __init__(self):
         """初始化EXIF助手，创建设备映射器实例"""
+        self.logger = logging.getLogger(__name__)
         self.device_mapper = DeviceMapper()
     
     def extract_exif_data(self, image_source: Union[str, bytes]) -> Optional[Dict[str, str]]:
@@ -104,13 +106,19 @@ class ExifHelper:
                 exif_data['gps'] = gps_str
                 exif_data['gps_raw'] = gps_raw
             
-            # 将设备信息记录到CSV文件中
-            self._record_device_info(exif_data)
-            
             return exif_data
         except Exception as e:
-            print(f"EXIF提取错误: {str(e)}")
-            return None
+            self.logger.warning(f"EXIF提取错误: {str(e)}")
+            exif_data = None
+        
+        # 设备信息记录（独立 try/except，不影响 EXIF 提取结果）
+        if exif_data:
+            try:
+                self._record_device_info(exif_data)
+            except Exception as e:
+                self.logger.warning(f"记录设备信息失败（不影响 EXIF 提取结果）: {e}")
+        
+        return exif_data
     
     def extract_raw_exif(self, image_source: Union[str, bytes]) -> Optional[Dict]:
         """
@@ -125,7 +133,7 @@ class ExifHelper:
         try:
             return piexif.load(image_source)
         except Exception as e:
-            print(f"EXIF原始提取错误: {str(e)}")
+            self.logger.warning(f"EXIF原始提取错误: {str(e)}")
             return None
 
     def _safe_decode(self, byte_string):
@@ -185,23 +193,9 @@ class ExifHelper:
             original_brand = exif_data['camera_make']
             original_model = exif_data['camera_model']
             
-            # 检查相机信息是否已存在
-            camera_recorded = False
-            camera_map_file = Path(camera_map_path)
-            
-            if camera_map_file.exists():
-                with open(camera_map_file, 'r', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        if (
-                            row.get('original_brand') == original_brand and
-                            row.get('original_model') == original_model
-                        ):
-                            camera_recorded = True
-                            break
-            
-            # 如果未记录过，则添加新记录
-            if not camera_recorded:
+            # 通过 DeviceMapper 已加载的 dict 检查是否已存在（避免冗余 CSV 读取）
+            if (original_brand, original_model) not in self.device_mapper.camera_map:
+                camera_map_file = Path(camera_map_path)
                 header_exists = camera_map_file.exists()
                 with open(camera_map_path, 'a', newline='', encoding='utf-8') as csvfile:
                     fieldnames = ['original_brand', 'original_model', 'mapped_brand', 'mapped_model', 'timestamp']
@@ -223,20 +217,9 @@ class ExifHelper:
         if 'lens_model' in exif_data:
             original_lens = exif_data['lens_model']
             
-            # 检查镜头信息是否已存在
-            lens_recorded = False
-            lens_map_file = Path(lens_map_path)
-            
-            if lens_map_file.exists():
-                with open(lens_map_file, 'r', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        if row.get('original_lens') == original_lens:
-                            lens_recorded = True
-                            break
-            
-            # 如果未记录过，则添加新记录
-            if not lens_recorded:
+            # 通过 DeviceMapper 已加载的 dict 检查是否已存在（避免冗余 CSV 读取）
+            if original_lens not in self.device_mapper.lens_map:
+                lens_map_file = Path(lens_map_path)
                 header_exists = lens_map_file.exists()
                 with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
                     fieldnames = ['original_lens', 'mapped_lens', 'short_lens']

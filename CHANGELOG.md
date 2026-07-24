@@ -1,5 +1,21 @@
 # 更新历史
 
+## v1.6.1 (2026-05-11)
+
+> 本版本修复 CSV 编码异常导致设备映射失效的问题，统一日志输出并补充侧边栏图片尺寸显示。
+
+### 🔴 修复：CSV 编码异常导致设备映射失效
+
+- `src/utils/exif_helper.py:_record_device_info()` 消除冗余 CSV 读取，改用 `DeviceMapper` 已加载的 dict 做存在性检查，避免 CSV 编码错误导致 `extract_exif_data()` 返回 None
+- `extract_exif_data()` 将 `_record_device_info()` 移出 try/except 核心块，设备信息记录失败不再影响 EXIF 提取结果
+- `_get_exif_helper()` 移除 `@st.cache_resource`，确保 ExifHelper/DeviceMapper 每次 rerun 重新读取最新 CSV 映射数据
+- `print()` → `logging` 统一：`exif_helper.py`、`device_mapper.py` 全部异常/信息输出纳入日志系统
+- `README.md` 设备映射规范新增 UTF-8 编码警告说明，α7 → a7 示例变更，防止非 UTF-8 保存再次引发解码错误
+
+### 🟢 侧边栏图片信息补充宽×高
+
+- `image_processing_page.py` 侧边栏文件信息行补充 `| {width}×{height} px`，恢复原 GUI 文件信息区域中的像素尺寸显示
+
 ## v1.6.0 (2026-05-10)
 
 > 本版本完全重写批量处理系统，新增 GUI 批处理页面，支持多文件上传、完整参数配置、实时进度条和结果汇总。批处理核心参数与单张处理管线完全对齐。
@@ -35,17 +51,18 @@
 - **结果汇总**：三列统计卡片（成功/失败/跳过） + 成功率百分比 + 失败详情折叠列表
 - 所有 widget key 使用 `batch_*` 前缀，与单张处理页面独立互不冲突
 
-### 🟡 CLI 批处理接口扩展
+### 🟡 CLI 接口全面对齐（v1.6.0 后续更新）
 
-- `main.py` `--batch` 模式新增可选参数：
-  - `--output-format`（JPEG/PNG，默认 JPEG）
-  - `--logo`（auto/none/文件名，默认 auto）
-  - `--lens-display`（combined/camera_only/lens_only，默认 combined）
-  - `--use-short-lens`（启用短版镜头名）
-  - `--no-enhance`（关闭背景增强）
-  - `--skip-existing`（跳过已存在输出，默认启用）
-- `batch_process_images()` 函数签名从 7 个参数扩展至 13 个
-- `process_image()` 函数默认 `bg_fill` 从硬编码 `'pure_white'` 修正为 `BackgroundFillManager.DEFAULT_FILL`
+- **单张模式 Bug 修复**：`process_image()` 补齐 `logo`、`lens_display`、`use_short_lens`、`no_enhance` 参数传递至 `ImageProcessor.process()`（此前 CLI 解析但未使用，参数设置无效）
+- **单张模式新增能力**：
+  - `--output-format` 输出格式选择（JPEG/PNG），扩展名自动纠正
+  - `--skip-existing` 跳过已存在输出文件
+  - `--watermark-text` / `--watermark-position` / `--watermark-opacity` / `--watermark-color` 水印装饰
+- **批量模式补齐**：
+  - `--use-gps-location` 逐张使用 GPS 坐标替换手动拍摄地点
+  - `--watermark-*` 水印装饰参数对齐单张模式
+- `batch_process_images()` 函数签名扩展至 17 个参数，`process_image()` 扩展至 15 个参数
+- CLI 与 GUI 功能覆盖完全对齐：所有 GUI 核心处理参数均已可在 CLI 中使用
 
 ### 🟡 GUI 导航调整
 
