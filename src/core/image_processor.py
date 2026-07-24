@@ -52,7 +52,9 @@ class ImageProcessor:
                 bg_fill_type: str = "white",
                 decorations: Optional[List[Dict]] = None,
                 font_weight: Optional[str] = None,
-                logo_filename: Optional[str] = None) -> bool:
+                logo_filename: Optional[str] = None,
+                lens_display_mode: str = 'combined',
+                use_short_lens: bool = False) -> bool:
         """
         处理图像并添加相框
         
@@ -157,7 +159,9 @@ class ImageProcessor:
                 style_config=style_config,
                 bg_fill_type=bg_fill_type,
                 decorations=decorations,
-                logo_filename=logo_filename
+                logo_filename=logo_filename,
+                lens_display_mode=lens_display_mode,
+                use_short_lens=use_short_lens
             )
             
             # 10. 保存图像

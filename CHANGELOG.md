@@ -1,5 +1,33 @@
 # 更新历史
 
+## v1.5.1 (2026-05-09)
+
+> 本版本重构 v1.5.0 的短版镜头名与竖幅自适应为 GUI 可选控制：支持镜头显示模式选择（相机+镜头 / 只显示相机 / 只显示镜头），短版镜头名开关改为全局可选（竖幅默认勾选）。
+
+### 镜头显示模式重构 🟡 功能增强
+
+- `RenderContext` 新增 `lens_display_mode`（combined / camera_only / lens_only）和 `use_short_lens` 参数，替代原 `is_vertical_or_square` 硬编码判断
+- `lens_display_mode`：选择 `camera_only` 时 `camera_lens` → 相机；选择 `lens_only` 时 → 镜头
+- `use_short_lens`：全局开关，控制 `camera_lens` 和 `lens` 是否使用短版名称，不再限于竖幅
+- GUI 装饰元素板块新增：
+  - **镜头显示** radio：`相机+镜头` / `只显示相机` / `只显示镜头`
+  - **使用短版镜头名** checkbox：上传竖幅/方形图片时默认勾选
+- `ImageProcessor.process()` → `FrameRenderer.render_frame()` → `RenderContext` 全链路透传新参数
+- CLI（`main.py`）和批量处理（`batch_processor.py`）不改动，默认走 `combined` + 短版关闭，行为无变化
+
+### 数据层优化
+
+- `ExifHelper.get_display_data()` 新增 `camera_lens_combined_short` 字段，数据组装逻辑在 exif_helper 闭环
+- `add_lens_mapping()` / `_record_device_info()` 同步写入 `short_lens` 列
+
+### README 更新
+
+- 版本号 1.5.0 → 1.5.1
+- "竖向/方形图片自动适配"重写为"镜头显示模式 & 短版镜头名"，补充完整行为矩阵表
+- 相机信息字段从三级扩展为五级（新增 `camera_lens_combined_short`）
+
+---
+
 ## v1.5.0 (2026-05-07)
 
 > 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
@@ -75,14 +103,13 @@
 - `image_processor.py` 删除 docstring 中边框示例
 - Logo 在 README 中从"装饰元素"独立为 `### Logo` 小节，明确其独立渲染管线定位（YAML `logo:` 节 + 文字层之后渲染 + `LogoSelector` 独立工具类）
 
-### 短版镜头名称映射 + 竖幅自适应恢复 🟢 新功能
+### 短版镜头名称映射 🟢 新功能
 
-- `lens_map.csv` 新增 `short_lens` 第三列，为每个镜头配置短版名称（如 `"Summilux 28mm"`），未配置时自动回退到 `mapped_lens`
-- `DeviceMapper` 新增 `short_lens_map` 字典和 `get_short_lens()` 方法，`add_lens_mapping()` 同步支持 `short_lens` 参数
-- `ExifHelper.get_formatted_exif_for_display()` / `get_display_data()` 输出 `short_lens` 字段
-- `RenderContext` 恢复并改造竖幅/方形图片自动适配：`lens` 竖幅时使用短版名称，`camera_lens` 竖幅时使用 `"相机 | 短镜头"` 格式
-- `lens_map.csv` 旧格式（无 `short_lens` 列）自动兼容，回退使用 `mapped_lens` 作为短版名
-- 镜头映射管理页面新增"短版名称"列显示和编辑
+- `lens_map.csv` 新增 `short_lens` 第三列，`DeviceMapper` 新增 `get_short_lens()` 方法
+- `ExifHelper.get_display_data()` 输出 `short_lens` 和 `camera_lens_combined_short` 字段
+- `RenderContext` 竖幅/方形图片自动适配恢复：`lens` / `camera_lens` 竖幅时使用短版名称
+- 镜头映射管理页面新增"短版名称"列
+- （v1.5.1 重构为 GUI 可选控制，详见上方）
 
 ### README 更新
 
