@@ -1,0 +1,95 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output images - these are large files that don't need version control
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.gif
+
+# Specific output files
+output_test*.jpg
+output_test*.png
+
+# Logs
+*.log
+logs/
+error_log.txt
+
+# Data files
+data/
+
+# Local config
+config.ini
+*.ini
+
+# User data
+.user.ini
+
+# Compiled files
+*.exe
+*.dll
+*.class
+*.o
+
+# Large files
+*.bin
+*.dmg
+*.iso
+*.img
+
+# ML/DL related
+*.pth
+*.ckpt
+*.h5
+*.onnx
+
+# Assets that are tracked elsewhere
+assets/fonts/*
+!assets/fonts/.gitkeep
+data/camera_map.csv
+data/lens_map.csv
+debug_log.txt

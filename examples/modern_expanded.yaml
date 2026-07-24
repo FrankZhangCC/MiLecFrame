@@ -1,0 +1,96 @@
+# Modern Expanded Frame Style Configuration
+# 现代扩展相框样式配置
+
+# 样式基本信息
+name: "Modern Expanded"
+description: "现代风格扩展相框，具有可调节的扩展画布和灵活的文字布局"
+version: "1.0"
+
+# 布局配置
+layout:
+  # 扩展画布配置（相对于原图尺寸的百分比）
+  expand_canvas:
+    enabled: true
+    top: 0.1      # 上方扩展10%
+    bottom: 0.15  # 下方扩展15%，用于显示EXIF信息
+    left: 0.05    # 左侧扩展5%
+    right: 0.05   # 右侧扩展5%
+  
+  # 信息位置配置（可指定在内部或外部）
+  info_position:
+    # EXIF信息位置
+    exif:
+      position: "outside"  # 位置：inside（内部）或 outside（外部）
+      alignment: "center"  # 对齐方式：left, center, right
+      margin: 10           # 距离边缘的像素或百分比（如果是外部）
+      
+    # 作者信息位置
+    author:
+      position: "outside"      # 位置：inside（内部）或 outside（外部）
+      alignment: "left"        # 对齐方式：left, center, right
+      margin_top: 0.01         # 顶部边距
+      margin_bottom: 0.01      # 底部边距
+      margin_left: 0           # 左边距 - 设为0
+      margin_right: 0.01       # 右边距
+      
+    # 位置信息位置
+    location:
+      position: "outside"      # 位置：inside（内部）或 outside（外部）
+      alignment: "right"       # 对齐方式：left, center, right
+      margin_top: 0.01         # 顶部边距
+      margin_bottom: 0.01      # 底部边距
+      margin_left: 0.01        # 左边距
+      margin_right: 0          # 右边距 - 设为0
+      
+    # 相机图标位置
+    camera_icon:
+      position: "inside"   # 位置：inside（内部）或 outside（外部）
+      alignment: "top-left" # 对齐方式：top-left, top-right, bottom-left, bottom-right
+      margin: 10           # 距离边缘的像素或百分比
+
+# 颜色配置
+colors:
+  text: "#000000"      # 文字颜色 (黑色) - 传统颜色设置
+  custom_text_color: null  # 自定义文字颜色，如果不设置则使用自适应颜色
+  background: "#FFFFFF" # 背景颜色 (白色)
+  icon: "#333333"      # 图标颜色 (深灰)
+
+# 字体配置
+fonts:
+  family: "Gotham"              # 字体系列
+  weight: "medium"              # 字体粗细: light, regular, medium
+  size_ratio: 0.02              # 默认字体大小相对于画布宽度的比例
+  sizes:                        # 各类信息的独立字体大小
+    exif: 0.018                 # EXIF信息字体大小比例
+    author: 0.015               # 作者信息字体大小比例
+    location: 0.015             # 位置信息字体大小比例
+  line_spacing: 1.5             # 行间距倍数
+
+# 装饰元素配置
+decorations:
+  border:
+    enabled: false
+    width: 2
+    color: "#000000"
+  
+  watermark:
+    enabled: false
+    text: "© MiLeica Frame"
+    position: "bottom-right"
+    opacity: 50
+
+# 背景填充配置
+background_fill:
+  type: "gaussian_white_35"  # 35%透明度
+  gaussian_blur_radius: 200  # 高斯模糊半径
+  gaussian_blur_opacity: 35  # 高斯模糊叠加透明度 (%)
+
+# Logo配置
+logo:
+  enabled: true
+  size_ratio: 0.05
+  position: "top-right"
+  margin_top: 0.01
+  margin_bottom: 0.01
+  margin_left: 0.01
+  margin_right: 0.01

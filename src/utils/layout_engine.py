@@ -1,0 +1,273 @@
+"""
+布局引擎模块
+负责画布尺寸计算、原图边界定位、元素（文字与非文字）的绝对/相对位置计算
+"""
+from typing import Dict, Tuple, Optional
+
+
+class LayoutEngine:
+    """统一布局引擎，支持文字和非文字元素的定位，以及位置注册表"""
+
+    def __init__(self, original_image_size: Tuple[int, int], layout_config: Dict):
+        self.original_image_size = original_image_size
+        self.original_width, self.original_height = original_image_size
+        self.original_longer_side = max(self.original_width, self.original_height)
+
+        self.layout_config = layout_config
+        self.canvas_size = self._calculate_canvas_size()
+        self.canvas_width, self.canvas_height = self.canvas_size
+        self.original_bounds = self._calculate_original_bounds()
+
+        self.positions: Dict[str, dict] = {}
+
+    def _calculate_canvas_size(self) -> Tuple[int, int]:
+        expand_config = self.layout_config.get('expand_canvas', {})
+        if not expand_config.get('enabled', False):
+            return self.original_image_size
+
+        top_exp = expand_config.get('top', 0)
+        bottom_exp = expand_config.get('bottom', 0)
+        left_exp = expand_config.get('left', 0)
+        right_exp = expand_config.get('right', 0)
+
+        new_width = self.original_width + int(self.original_longer_side * (left_exp + right_exp))
+        new_height = self.original_height + int(self.original_longer_side * (top_exp + bottom_exp))
+
+        return new_width, new_height
+
+    def _calculate_original_bounds(self) -> Tuple[int, int, int, int]:
+        expand_config = self.layout_config.get('expand_canvas', {})
+        if not expand_config.get('enabled', False):
+            x = (self.canvas_width - self.original_width) // 2
+            y = (self.canvas_height - self.original_height) // 2
+        else:
+            top_exp = expand_config.get('top', 0)
+            left_exp = expand_config.get('left', 0)
+            x = int(self.original_longer_side * left_exp)
+            y = int(self.original_longer_side * top_exp)
+
+        return x, y, self.original_width, self.original_height
+
+    def register_element(self, name: str, x: int, y: int, width: int, height: int):
+        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
+
+    def get_element_bounds(self, name: str) -> Optional[Tuple[int, int, int, int]]:
+        if name in self.positions:
+            pos = self.positions[name]
+            return pos['x'], pos['y'], pos['width'], pos['height']
+        for key, pos in self.positions.items():
+            if key == name or key.endswith(name) or name.endswith(key):
+                return pos['x'], pos['y'], pos['width'], pos['height']
+        return None
+
+    def calculate_position(
+        self,
+        element_width: int,
+        element_height: int,
+        config: Dict
+    ) -> Tuple[int, int]:
+        """
+        计算元素的绘制坐标（统一处理文字和非文字元素）
+
+        config 支持的键：
+        - relative_to: 参考元素名（有此键则使用相对定位）
+        - relative_position: 'after', 'before', 'below', 'above', 'right-of', 'left-of'
+        - relative_margin: 间距比例
+        - offset_x_ratio / offset_y_ratio: 偏移比例
+        - position: 绝对位置名 (如 'top-left', 'bottom-right', 'outside', 'inside' 等)
+        - alignment: 对齐方式 (如 'left', 'center', 'right', 'top-left' 等)
+        - margin / margin_top / margin_bottom / margin_left / margin_right: 边距
+        """
+        if config.get('relative_to'):
+            return self._calculate_relative(element_width, element_height, config)
+        return self._calculate_absolute(element_width, element_height, config)
+
+    def _calculate_absolute(
+        self,
+        element_width: int,
+        element_height: int,
+        config: Dict
+    ) -> Tuple[int, int]:
+        orig_x, orig_y, orig_w, orig_h = self.original_bounds
+
+        margins = self._resolve_margins(config)
+        position = config.get('position', 'outside')
+        alignment = config.get('alignment', 'center')
+
+        x, y = self._get_anchor(
+            position, alignment,
+            orig_x, orig_y, orig_w, orig_h,
+            element_width, element_height,
+            margins
+        )
+        return x, y
+
+    def _get_anchor(
+        self,
+        position: str,
+        alignment: str,
+        ox: int, oy: int, ow: int, oh: int,
+        ew: int, eh: int,
+        m: Dict[str, int]
+    ) -> Tuple[int, int]:
+        """
+        根据 position + alignment 计算坐标。
+
+        position 决定主锚点（上下左右/内部/外部）
+        alignment 决定垂直锚点轴的偏移（左中右/上中下）
+        """
+        # --- 上方位置 ---
+        if position in ('top-left', 'tl'):
+            return ox + m['left'], oy - eh - m['top']
+        if position in ('top-right', 'tr'):
+            return ox + ow - ew - m['right'], oy - eh - m['top']
+        if position in ('top-center', 'tc'):
+            return ox + (ow - ew) // 2, oy - eh - m['top']
+        if position == 'top':
+            y = oy - eh - m['top']
+            x = self._align_x(alignment, ox, ow, ew, m)
+            return x, y
+
+        # --- 下方位置 ---
+        if position in ('bottom-left', 'bl'):
+            return ox + m['left'], oy + oh + m['bottom']
+        if position in ('bottom-right', 'br'):
+            return ox + ow - ew - m['right'], oy + oh + m['bottom']
+        if position in ('bottom-center', 'bc'):
+            return ox + (ow - ew) // 2, oy + oh + m['bottom']
+        if position in ('bottom', 'outside'):
+            if alignment == 'top-left':
+                return ox + m['left'], oy - eh - m['top']
+            y = oy + oh + m['bottom']
+            x = self._align_x(alignment, ox, ow, ew, m)
+            return x, y
+
+        # --- 内部 ---
+        if position == 'inside':
+            if alignment == 'top-left':
+                return ox + m['left'], oy + m['top']
+            y = oy + oh - eh - m['bottom']
+            x = self._align_x(alignment, ox, ow, ew, m)
+            return x, y
+
+        # --- 左侧 ---
+        if position == 'left':
+            x = ox - ew - m['right']
+            y = self._align_y(alignment, oy, oh, eh, m)
+            return x, y
+
+        # --- 右侧 ---
+        if position == 'right':
+            x = ox + ow + m['left']
+            y = self._align_y(alignment, oy, oh, eh, m)
+            return x, y
+
+        # --- 居中 ---
+        if position == 'center':
+            x = (self.canvas_width - ew) // 2
+            y = (self.canvas_height - eh) // 2
+            return x, y
+
+        # --- 默认：下方居中 ---
+        return ox + (ow - ew) // 2, oy + oh + m['bottom']
+
+    def _align_x(
+        self,
+        alignment: str,
+        ox: int, ow: int, ew: int,
+        m: Dict[str, int]
+    ) -> int:
+        if alignment in ('left', 'top-left'):
+            return ox + m['left']
+        if alignment == 'right':
+            return ox + ow - ew - m['right']
+        return ox + (ow - ew) // 2
+
+    def _align_y(
+        self,
+        alignment: str,
+        oy: int, oh: int, eh: int,
+        m: Dict[str, int]
+    ) -> int:
+        if alignment == 'top':
+            return oy + m['top']
+        if alignment == 'bottom':
+            return oy + oh - eh - m['bottom']
+        return oy + (oh - eh) // 2
+
+    def _resolve_margins(self, config: Dict) -> Dict[str, int]:
+        longer_side = self.original_longer_side
+
+        def to_px(value):
+            if isinstance(value, float):
+                return int(longer_side * value)
+            return int(value) if value is not None else None
+
+        margin_top = config.get('margin_top', None)
+        margin_bottom = config.get('margin_bottom', None)
+        margin_left = config.get('margin_left', None)
+        margin_right = config.get('margin_right', None)
+
+        if margin_top is None or margin_left is None:
+            margin = config.get('margin', 10)
+            if isinstance(margin, float):
+                margin = int(longer_side * margin)
+            margin_top = margin_left = margin_bottom = margin_right = int(margin)
+        else:
+            margin_top = to_px(margin_top) if to_px(margin_top) is not None else 0
+            margin_left = to_px(margin_left) if to_px(margin_left) is not None else 0
+            margin_bottom = to_px(margin_bottom) if to_px(margin_bottom) is not None else 0
+            margin_right = to_px(margin_right) if to_px(margin_right) is not None else 0
+
+        return {
+            'top': margin_top or 0,
+            'bottom': margin_bottom or 0,
+            'left': margin_left or 0,
+            'right': margin_right or 0,
+        }
+
+    def _calculate_relative(
+        self,
+        element_width: int,
+        element_height: int,
+        config: Dict
+    ) -> Tuple[int, int]:
+        relative_to = config.get('relative_to')
+        relative_position = config.get('relative_position', 'after')
+        relative_margin = config.get('relative_margin', 0.01)
+        offset_x_ratio = config.get('offset_x_ratio', 0.0)
+        offset_y_ratio = config.get('offset_y_ratio', 0.0)
+        alignment = config.get('alignment', 'center')
+
+        relative_margin_px = int(self.original_longer_side * relative_margin)
+
+        target_coords = self.get_element_bounds(relative_to)
+        if target_coords is None:
+            return self._calculate_absolute(element_width, element_height, config)
+
+        tx, ty, tw, th = target_coords
+
+        if relative_position in ('after', 'below'):
+            y = ty + th + relative_margin_px
+            x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+        elif relative_position in ('before', 'above'):
+            y = ty - element_height - relative_margin_px
+            x = self._align_x(alignment, tx, tw, element_width, {'left': 0, 'right': 0})
+        elif relative_position == 'right-of':
+            x = tx + tw + relative_margin_px
+            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
+        elif relative_position == 'left-of':
+            x = tx - element_width - relative_margin_px
+            y = self._align_y(alignment, ty, th, element_height, {'top': 0, 'bottom': 0})
+        else:
+            return self._calculate_absolute(element_width, element_height, config)
+
+        offset_x = int(self.original_longer_side * offset_x_ratio)
+        offset_y = int(self.original_longer_side * offset_y_ratio)
+        x += offset_x
+        y += offset_y
+
+        x = max(0, min(x, self.canvas_width - element_width))
+        y = max(0, min(y, self.canvas_height - element_height))
+
+        return x, y
