@@ -48,7 +48,7 @@ class ExifHelper:
                 if piexif.ExifIFD.LensModel in exif_dict["Exif"]:
                     exif_data['lens_model'] = self._safe_decode(exif_dict["Exif"][piexif.ExifIFD.LensModel])
                 
-                # 焦距信息（转换为35mm等效焦距）
+                # 焦距信息
                 if piexif.ExifIFD.FocalLength in exif_dict["Exif"]:
                     focal_length = exif_dict["Exif"][piexif.ExifIFD.FocalLength]
                     if isinstance(focal_length, tuple):
@@ -57,6 +57,12 @@ class ExifHelper:
                         exif_data['focal_length'] = f"{actual_focal:.1f}"
                     else:
                         exif_data['focal_length'] = str(focal_length)
+                
+                # 35mm等效焦距（相机直接提供的，优先使用）
+                if piexif.ExifIFD.FocalLengthIn35mmFilm in exif_dict["Exif"]:
+                    fl35 = exif_dict["Exif"][piexif.ExifIFD.FocalLengthIn35mmFilm]
+                    fl35_value = fl35[0] / fl35[1] if isinstance(fl35, tuple) else float(fl35)
+                    exif_data['focal_length_35mm'] = str(int(round(fl35_value)))
                 
                 # 光圈
                 if piexif.ExifIFD.FNumber in exif_dict["Exif"]:
@@ -519,13 +525,11 @@ class ExifHelper:
         # 组装相框显示文本
         parts = []
         
-        # 焦距 - 使用35mm等效焦距
-        if 'focal_length' in exif_data:
-            # 获取物理焦距
-            physical_focal = float(exif_data['focal_length'])
-            # 计算35mm等效焦距
-            equivalent_focal = ExifHelper._calculate_equivalent_focal(physical_focal, exif_data)
-            parts.append(f"{equivalent_focal}mm")
+        # 焦距 - 优先使用EXIF提供的35mm等效焦距，否则直接用物理焦距
+        if 'focal_length_35mm' in exif_data:
+            parts.append(f"{exif_data['focal_length_35mm']}mm")
+        elif 'focal_length' in exif_data:
+            parts.append(f"{exif_data['focal_length']}mm")
         
         # 光圈
         if 'aperture' in exif_data:
@@ -540,50 +544,6 @@ class ExifHelper:
             parts.append(f"ISO{exif_data['iso']}")
         
         return ", ".join(parts)
-    
-    @staticmethod
-    def _calculate_equivalent_focal(physical_focal: float, exif_data: Dict[str, str]) -> int:
-        """
-        计算35mm等效焦距
-        
-        Args:
-            physical_focal: 物理焦距
-            exif_data: EXIF数据，可能包含传感器信息
-            
-        Returns:
-            35mm等效焦距（整数）
-        """
-        # 尝试从相机型号获取裁切系数，这里我们使用常见的裁切系数
-        camera_model = exif_data.get('camera_model', '').lower()
-        
-        # 常见相机型号的裁切系数
-        crop_factors = {
-            # 小米系列
-            'xiaomi 15 pro': 2.7,  # 假设值，实际需要根据具体传感器尺寸
-            'xiaomi': 2.7,
-            # 微型四三系统
-            'om': 2.0,  # Olympus/Panasonic Micro Four Thirds
-            # APS-C画幅
-            'canon': 1.6,  # Canon APS-C
-            'nikon': 1.5,  # Nikon DX
-            'sony': 1.5,   # Sony APS-C
-            'fuji': 1.5,   # Fujifilm X系列
-            # 全画幅
-            'r5': 1.0,     # Canon R5
-            'a7r': 1.0,    # Sony A7R series
-            'd850': 1.0,   # Nikon D850
-        }
-        
-        # 尝试匹配相机型号
-        crop_factor = 1.0  # 默认为全画幅
-        for model, factor in crop_factors.items():
-            if model in camera_model:
-                crop_factor = factor
-                break
-        
-        # 计算等效焦距
-        equivalent_focal = physical_focal * crop_factor
-        return round(equivalent_focal)
     
     @staticmethod
     def get_camera_brand(exif_data: Dict[str, str]) -> Optional[str]:

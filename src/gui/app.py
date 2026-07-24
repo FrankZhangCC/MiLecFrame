@@ -12,6 +12,7 @@ from src.gui.image_processing_page import render_image_processing_page
 from src.gui.camera_mapping_page import render_camera_mapping_page
 from src.gui.lens_mapping_page import render_lens_mapping_page
 from src.gui.style_creator_page import render_style_creator_page
+from src.gui.batch_processing_page import render_batch_processing_page
 
 
 def run_app():
@@ -53,6 +54,8 @@ div.block-container {
     # 使用按钮进行页面切换
     if st.sidebar.button("🖼️ 图像处理", width='stretch'):
         st.session_state.current_page = "🖼️ 图像处理"
+    if st.sidebar.button("📦 批量处理", width='stretch'):
+        st.session_state.current_page = "📦 批量处理"
     if st.sidebar.button("📸 相机映射管理", width='stretch'):
         st.session_state.current_page = "📸 相机映射管理"
     if st.sidebar.button("🔭 镜头映射管理", width='stretch'):
@@ -63,6 +66,8 @@ div.block-container {
     # 根据当前页面状态渲染相应页面
     if st.session_state.current_page == "🖼️ 图像处理":
         render_image_processing_page()
+    elif st.session_state.current_page == "📦 批量处理":
+        render_batch_processing_page()
     elif st.session_state.current_page == "📸 相机映射管理":
         render_camera_mapping_page()
     elif st.session_state.current_page == "🔭 镜头映射管理":
