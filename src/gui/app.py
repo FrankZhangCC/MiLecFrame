@@ -11,6 +11,7 @@ setup_logging()
 from src.gui.image_processing_page import render_image_processing_page
 from src.gui.camera_mapping_page import render_camera_mapping_page
 from src.gui.lens_mapping_page import render_lens_mapping_page
+from src.gui.style_creator_page import render_style_creator_page
 
 
 def run_app():
@@ -39,6 +40,8 @@ def run_app():
         st.session_state.current_page = "📸 相机映射管理"
     if st.sidebar.button("🔭 镜头映射管理", width='stretch'):
         st.session_state.current_page = "🔭 镜头映射管理"
+    if st.sidebar.button("🎨 样式编辑器", width='stretch'):
+        st.session_state.current_page = "🎨 样式编辑器"
     
     # 侧边栏停止按钮
     st.sidebar.markdown("---")
@@ -73,6 +76,8 @@ def run_app():
         render_camera_mapping_page()
     elif st.session_state.current_page == "🔭 镜头映射管理":
         render_lens_mapping_page()
+    elif st.session_state.current_page == "🎨 样式编辑器":
+        render_style_creator_page()
 
     # 底部信息
     st.markdown("---")

@@ -233,10 +233,9 @@ class StyleManager:
         # 检查信息位置配置
         if 'info_position' not in layout or not isinstance(layout['info_position'], dict):
             layout['info_position'] = {
-                'exif': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'author': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'location': {'position': 'outside', 'alignment': 'center', 'margin': 10},
-                'camera_icon': {'position': 'outside', 'alignment': 'top-left', 'margin': 10}
+                'exif': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10},
+                'author': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10},
+                'location': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10}
             }
         else:
             # info_position 已有配置，不再注入默认条目
@@ -260,14 +259,6 @@ class StyleManager:
             # 确保字体大小配置存在
             if 'sizes' not in config['fonts'] or not isinstance(config['fonts']['sizes'], dict):
                 config['fonts']['sizes'] = {}
-        
-        # 检查背景填充配置
-        if 'background_fill' not in config or not isinstance(config['background_fill'], dict):
-            config['background_fill'] = {
-                'type': 'pure_white',
-                'gaussian_blur_radius': 200,
-                'gaussian_blur_opacity': 50
-            }
         
         return True
     
@@ -305,23 +296,21 @@ class StyleManager:
                 },
                 "info_position": {
                     "exif": {
-                        "position": "outside",
+                        "placement": "outside",
+                        "position": "bottom",
                         "alignment": "center",
                         "margin": 10
                     },
                     "author": {
-                        "position": "outside", 
-                        "alignment": "left",
+                        "placement": "outside",
+                        "position": "left",
+                        "alignment": "center",
                         "margin": 10
                     },
                     "location": {
-                        "position": "outside",
-                        "alignment": "right", 
-                        "margin": 10
-                    },
-                    "camera_icon": {
-                        "position": "inside",
-                        "alignment": "top-left",
+                        "placement": "outside",
+                        "position": "right", 
+                        "alignment": "center",
                         "margin": 10
                     }
                 }
@@ -338,11 +327,6 @@ class StyleManager:
                     "author": 0.018,
                     "location": 0.018
                 }
-            },
-            "background_fill": {
-                "type": "pure_white",
-                "gaussian_blur_radius": 200,
-                "gaussian_blur_opacity": 50
             }
         }
         

@@ -65,7 +65,7 @@ class LogoSelector:
     
     def auto_match_logo(self, camera_brand: str) -> Optional[str]:
         """
-        根据相机品牌自动匹配logo（不区分大小写，文件名包含品牌名称即可）
+        根据相机品牌自动匹配logo（不区分大小写，逐词匹配）
         
         Args:
             camera_brand: 相机品牌名称
@@ -77,11 +77,16 @@ class LogoSelector:
             return None
         
         logos = self.scan_logos()
-        brand_lower = camera_brand.lower()
+        brand_words = camera_brand.lower().split()
+        
+        # 优先匹配较长单词（品牌核心词），跳过过短的无意义词（如 AG、KG、Co 等）
+        brand_words = [w for w in brand_words if len(w) >= 3]
+        brand_words.sort(key=len, reverse=True)
         
         for logo in logos:
             logo_name = os.path.splitext(logo)[0].lower()
-            if brand_lower in logo_name or logo_name in brand_lower:
-                return logo
+            for word in brand_words:
+                if word in logo_name:
+                    return logo
         
         return None

@@ -22,16 +22,18 @@ def main():
     """程序主入口点"""
     from utils.logging_config import setup_logging
     setup_logging()
+    
+    from utils.background_fill import BackgroundFillManager
 
-    parser = argparse.ArgumentParser(description="MiLeica照片相框程序")
-    parser.add_argument("--input", "-i", help="输入图片路径")
-    parser.add_argument("--output", "-o", help="输出图片路径")
-    parser.add_argument("--style", "-s", help="相框样式")
+    parser = argparse.ArgumentParser(description="MiLeica Frame - 照片相框程序")
+    parser.add_argument("-i", "--input", help="输入图片路径")
+    parser.add_argument("-o", "--output", help="输出图片路径")
+    parser.add_argument("-s", "--style", help="相框样式名称")
     parser.add_argument("--gui", action="store_true", default=True, help="启动GUI界面（默认）")
     parser.add_argument("--author", help="作者名")
     parser.add_argument("--location", help="拍摄地点")
-    parser.add_argument("--bg-fill", choices=['pure_black', 'pure_white', 'gaussian_black_65', 'gaussian_white_80', 'gaussian_black_35', 'gaussian_white_50'], 
-                        default='pure_white', help="背景填充类型")
+    parser.add_argument("--bg-fill", choices=BackgroundFillManager.get_keys(), 
+                        default=BackgroundFillManager.DEFAULT_FILL, help="背景填充类型")
     parser.add_argument("--font-weight", choices=['light', 'regular', 'medium'], 
                         default='medium', help="字体字重（细体、中等、粗体）")
     parser.add_argument("--batch", action="store_true", help="批量处理模式")

@@ -17,7 +17,7 @@ from src.utils.exif_helper import ExifHelper
 from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.logo_selector import LogoSelector
-from src.utils.gaussian_blur import apply_gaussian_blur_overlay_expansion
+from src.utils.background_fill import BackgroundFillManager
 from src.utils.render_context import RenderContext
 from src.core.decorator import Decorator
 
@@ -29,25 +29,11 @@ class FrameRenderer:
     
     def __init__(self):
         """初始化渲染器"""
-        self.dark_bg_types = [
-            'pure_black',
-            'gaussian_black_65',
-            'gaussian_black_35',
-            'gaussian_black'
-        ]
-        
-        self.light_bg_types = [
-            'pure_white',
-            'gaussian_white_80',
-            'gaussian_white_50',
-            'gaussian_white'
-        ]
-        
-        # 初始化装饰器
-        self.decorator = Decorator()
-        
         # 字体管理器
         self.font_manager = FontManager()
+
+        # 初始化装饰器
+        self.decorator = Decorator(font_manager=self.font_manager)
 
     def _get_logo_selector(self):
         """获取LogoSelector实例"""
@@ -86,7 +72,6 @@ class FrameRenderer:
         layout = style_config.get('layout', {})
         colors = style_config.get('colors', {})
         fonts = style_config.get('fonts', {})
-        bg_fill_config = style_config.get('background_fill', {})
         logo_config = style_config.get('logo', {})
 
         layout_engine = LayoutEngine(image.size, layout)
@@ -94,8 +79,8 @@ class FrameRenderer:
 
         context = RenderContext(image.size, exif_data, author, location)
 
-        background = self._create_background_with_expansion(
-            image, canvas_width, canvas_height, bg_fill_type, bg_fill_config
+        background = BackgroundFillManager.render(
+            image, canvas_width, canvas_height, bg_fill_type
         )
 
         orig_x, orig_y, orig_w, orig_h = layout_engine.original_bounds
@@ -133,34 +118,7 @@ class FrameRenderer:
                 image_with_text = self._add_logo(image_with_text, logo_filename, logo_config, layout_engine)
         
         return image_with_text
-    
-    def _create_background_with_expansion(
-        self, 
-        image: Image.Image, 
-        canvas_width: int, 
-        canvas_height: int, 
-        bg_fill_type: str,
-        bg_fill_config: Dict
-    ) -> Image.Image:
-        """
-        创建背景层（包含扩展区域的填充）
-        """
-        if bg_fill_type.startswith('gaussian_'):
-            parts = bg_fill_type.split('_')
-            color = parts[1]
-            opacity = int(parts[2]) if len(parts) >= 3 else bg_fill_config.get('gaussian_blur_opacity', 50)
-            blur_radius = bg_fill_config.get('gaussian_blur_radius', 200)
-            return apply_gaussian_blur_overlay_expansion(
-                image, canvas_width, canvas_height, color,
-                opacity=opacity,
-                blur_radius=blur_radius,
-            )
-        elif bg_fill_type.startswith('pure_'):
-            color = bg_fill_type.split('_')[1]
-            return Image.new('RGB', (canvas_width, canvas_height), color=color)
-        else:
-            return Image.new('RGB', (canvas_width, canvas_height), color='white')
-    
+
     def _parse_color_value(self, custom_color) -> Optional[Tuple[int, int, int]]:
         """
         解析自定义颜色值，支持十六进制和RGB元组/列表格式
@@ -181,7 +139,7 @@ class FrameRenderer:
         """
         if dark_key not in colors_config or light_key not in colors_config:
             return None
-        is_dark_bg = any(bg_fill_type.startswith(dark_type) for dark_type in self.dark_bg_types)
+        is_dark_bg = BackgroundFillManager.is_dark_bg(bg_fill_type)
         custom_color = colors_config[dark_key] if is_dark_bg else colors_config[light_key]
         return self._parse_color_value(custom_color)
 
@@ -207,7 +165,7 @@ class FrameRenderer:
         if color:
             return color
 
-        if any(bg_fill_type.startswith(dark_type) for dark_type in self.dark_bg_types):
+        if BackgroundFillManager.is_dark_bg(bg_fill_type):
             return (255, 255, 255)
         else:
             return (0, 0, 0)
@@ -280,8 +238,6 @@ class FrameRenderer:
         info_positions = layout_engine.layout_config.get('info_position', {})
         
         for key in info_positions:
-            if key == 'camera_icon':
-                continue
             text = context.get_text(key)
             if text:
                 text_elements.append((key, text))
@@ -357,6 +313,17 @@ class FrameRenderer:
                 }
 
         # Phase 2: 按依赖拓扑序计算位置并注册（保证 relative_to 指向的元素已就位）
+        # 预注册缺失的参考元素：当 relative_to 指向的元素因无文本而被跳过时，
+        # 以 0x0 尺寸注册其绝对位置锚点，避免依赖元素降级为绝对定位导致位置偏移
+        for name in draw_items:
+            cfg = info_positions.get(name, {})
+            ref = cfg.get('relative_to')
+            if ref and ref not in draw_items and ref in info_positions:
+                ref_cfg = info_positions[ref]
+                if not ref_cfg.get('relative_to'):
+                    rx, ry = layout_engine.calculate_position(0, 0, ref_cfg)
+                    layout_engine.register_element(ref, rx, ry, 0, 0)
+
         ordered_names = self._resolve_element_order(text_elements, info_positions)
 
         for name in ordered_names:
@@ -432,14 +399,24 @@ class FrameRenderer:
         longer_side = max(original_image_size)
 
         size_ratio = logo_config.get('size_ratio', 0.05)
-        logo_height = int(longer_side * size_ratio)
 
-        logo_aspect_ratio = logo.width / logo.height
-        logo_width = int(logo_height * logo_aspect_ratio)
+        logo_width, logo_height = logo.size
+        logo_short_side = min(logo_width, logo_height)
+        target_short_side = int(longer_side * size_ratio)
+        scale = target_short_side / logo_short_side
 
-        logo = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
+        # 长边上限：防止细长条Logo失控，上限为原图长边的 3*size_ratio
+        max_long_side = int(longer_side * 3 * size_ratio)
+        logo_long_side = max(logo_width, logo_height)
+        if logo_long_side * scale > max_long_side:
+            scale = max_long_side / logo_long_side
 
-        x, y = layout_engine.calculate_position(logo_width, logo_height, logo_config)
+        new_logo_width = int(logo_width * scale)
+        new_logo_height = int(logo_height * scale)
+
+        logo = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+
+        x, y = layout_engine.calculate_position(new_logo_width, new_logo_height, logo_config)
 
         result = image.copy()
         if logo.mode == 'RGBA':
@@ -447,6 +424,6 @@ class FrameRenderer:
         else:
             result.paste(logo, (x, y))
 
-        layout_engine.register_element('logo', x, y, logo_width, logo_height)
+        layout_engine.register_element('logo', x, y, new_logo_width, new_logo_height)
         
         return result
