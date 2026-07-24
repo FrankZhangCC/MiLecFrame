@@ -4105,3 +4105,705 @@
 2026-04-29 00:03:27,840 - src.core.renderer - DEBUG - [Pos] location: calc=(4753, 3213), bbox=(1427x175), config=outside/right marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 0}
 2026-04-29 00:03:27,842 - src.core.renderer - DEBUG - 文字图层添加完成
 2026-04-29 00:03:28,097 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmprfwxjo1o.jpg -> C:\Users\frank\AppData\Local\Temp\tmphbsupk7w.jpg
+2026-04-29 13:59:22,530 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:22,531 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:22,532 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:23,701 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:23,701 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:23,701 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,701 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,702 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:23,703 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:23,915 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:23,916 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:23,917 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:23,918 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:23,918 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:23,918 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:26,277 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 13:59:26,278 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 13:59:26,278 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 13:59:26,278 - src.core.renderer - DEBUG - 地点: None
+2026-04-29 13:59:26,278 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 13:59:26,278 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 13:59:26,279 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 13:59:26,279 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 13:59:26,279 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 13:59:26,279 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 13:59:26,280 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 13:59:26,280 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang')]
+2026-04-29 13:59:26,286 - src.core.renderer - DEBUG - [Pos] exif: calc=(2326, 3213), bbox=(1707x112), config=outside/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 13:59:26,286 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(2599, 3416), bbox=(1161x86), config=outside/center marg={'top': 60, 'bottom': 360, 'left': 60, 'right': 60}
+2026-04-29 13:59:26,286 - src.core.renderer - DEBUG - [Pos] camera: calc=(180, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 13:59:26,286 - src.core.renderer - DEBUG - [Pos] lens: calc=(180, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 13:59:26,286 - src.core.renderer - DEBUG - [Pos] author: calc=(180, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 13:59:26,297 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 13:59:26,550 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpz4m1ag0j.jpg -> C:\Users\frank\AppData\Local\Temp\tmpgnuxd_2m.jpg
+2026-04-29 13:59:31,191 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,191 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,191 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,191 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,192 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,193 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,194 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,194 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,194 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,194 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,272 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,273 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,274 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,274 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,274 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,274 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,274 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,530 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,530 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,530 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,530 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,530 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,531 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,531 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,531 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,531 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,531 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,532 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 13:59:31,533 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 13:59:31,534 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 13:59:31,534 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 13:59:33,776 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 13:59:33,777 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - 地点文本: '英国伦敦 ロンドン London UK'
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang'), ('location', '英国伦敦 ロンドン London UK')]
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - [Pos] exif: calc=(2326, 3213), bbox=(1707x112), config=outside/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 13:59:33,778 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(2599, 3416), bbox=(1161x86), config=outside/center marg={'top': 60, 'bottom': 360, 'left': 60, 'right': 60}
+2026-04-29 13:59:33,779 - src.core.renderer - DEBUG - [Pos] camera: calc=(180, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 13:59:33,779 - src.core.renderer - DEBUG - [Pos] lens: calc=(180, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 13:59:33,779 - src.core.renderer - DEBUG - [Pos] author: calc=(180, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 13:59:33,792 - src.core.renderer - DEBUG - [Pos] location: calc=(4477, 3213), bbox=(1703x175), config=outside/right marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 0}
+2026-04-29 13:59:33,803 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 13:59:34,049 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmphoq16wru.jpg -> C:\Users\frank\AppData\Local\Temp\tmp8ow94dpm.jpg
+2026-04-29 14:19:40,377 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:40,377 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:40,378 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:40,379 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:40,379 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:40,379 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:40,380 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:41,837 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:41,838 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:41,839 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:42,058 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:42,058 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:42,058 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,058 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:42,059 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:42,060 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 地点: None
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:19:44,391 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:19:44,392 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:19:44,392 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:19:44,392 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:19:44,392 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:19:44,392 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang')]
+2026-04-29 14:19:44,393 - src.core.renderer - DEBUG - [Pos] exif: calc=(4413, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:19:44,393 - src.core.renderer - DEBUG - [Pos] camera: calc=(180, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:19:44,393 - src.core.renderer - DEBUG - [Pos] lens: calc=(180, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:19:44,393 - src.core.renderer - DEBUG - [Pos] author: calc=(180, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:19:44,393 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(180, 3411), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:19:44,400 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:19:44,662 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmptbp9_zjd.jpg -> C:\Users\frank\AppData\Local\Temp\tmp0f9kywml.jpg
+2026-04-29 14:19:48,252 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,252 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,252 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,252 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,252 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,253 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,254 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,327 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,327 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,327 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,327 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,327 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,328 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,329 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,329 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,329 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,329 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,586 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:19:48,587 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:19:51,002 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 地点文本: '英国伦敦 ロンドン London UK'
+2026-04-29 14:19:51,003 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang'), ('location', '英国伦敦 ロンドン London UK')]
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] exif: calc=(4413, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] camera: calc=(180, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] lens: calc=(180, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] author: calc=(180, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] location: calc=(4413, 3416), bbox=(1703x175), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:19:51,005 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(180, 3411), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:19:51,013 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:19:51,293 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp_3x2ne5l.jpg -> C:\Users\frank\AppData\Local\Temp\tmprbq6gu9j.jpg
+2026-04-29 14:20:01,040 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,040 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,040 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,041 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,042 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,114 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,115 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,116 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,386 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,387 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,387 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,387 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,387 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,387 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,388 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:20:01,389 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:20:01,390 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:20:01,390 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK 测试一下更长的文字
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:20:03,809 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 地点文本: '英国伦敦 ロンドン London UK 测试一下更长的文字'
+2026-04-29 14:20:03,810 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang'), ('location', '英国伦敦 ロンドン London UK 测试一下更长的文字')]
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] exif: calc=(4413, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] camera: calc=(180, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] lens: calc=(180, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] author: calc=(180, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] location: calc=(3541, 3416), bbox=(2819x175), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:20:03,822 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(180, 3411), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:20:03,844 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:20:04,104 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpcwlekyc8.jpg -> C:\Users\frank\AppData\Local\Temp\tmpu6l8q07q.jpg
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:43,588 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:43,589 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:45,023 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:45,023 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:45,023 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,023 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:45,024 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:45,025 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:45,025 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:45,025 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,025 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:45,026 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:45,250 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:45,250 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:45,251 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:45,252 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - 地点: None
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:45:47,531 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:45:47,532 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang')]
+2026-04-29 14:45:47,533 - src.core.renderer - DEBUG - [Pos] exif: calc=(4353, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:45:47,533 - src.core.renderer - DEBUG - [Pos] camera: calc=(300, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:45:47,533 - src.core.renderer - DEBUG - [Pos] lens: calc=(300, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:45:47,533 - src.core.renderer - DEBUG - [Pos] author: calc=(300, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:45:47,533 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(300, 3367), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:45:47,540 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:45:47,793 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmp0f3aa7iy.jpg -> C:\Users\frank\AppData\Local\Temp\tmphrpucqg5.jpg
+2026-04-29 14:45:57,261 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,261 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,261 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,261 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,262 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,263 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,263 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,263 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,263 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,537 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,538 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,539 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,772 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:45:57,773 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:45:57,774 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:45:57,774 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:45:57,774 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK 测试一下更长的文字
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:46:00,072 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 地点文本: '英国伦敦 ロンドン London UK 测试一下更长的文字'
+2026-04-29 14:46:00,073 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang'), ('location', '英国伦敦 ロンドン London UK 测试一下更长的文字')]
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] exif: calc=(4353, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] camera: calc=(300, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] lens: calc=(300, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] author: calc=(300, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] location: calc=(3241, 3278), bbox=(2819x175), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:46:00,075 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(300, 3367), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:46:00,086 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:46:00,323 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpelvcpenb.jpg -> C:\Users\frank\AppData\Local\Temp\tmp04eybl69.jpg
+2026-04-29 14:46:19,796 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:46:19,796 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:46:19,796 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:19,796 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:19,796 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:19,797 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:46:19,798 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:46:20,012 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Make (271) - type: string (2) Tag Location: 22 - Data Location: 134 - value: b'SONY\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Model (272) - type: string (2) Tag Location: 34 - Data Location: 140 - value: b'ILCE-7M3\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 46 - Data Location: 150 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 58 - Data Location: 158 - value: b',\x01\x00\x00\x01\x00\x00\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: Software (305) - type: string (2) Tag Location: 82 - Data Location: 166 - value: <table: 44 bytes>
+2026-04-29 14:46:20,013 - PIL.TiffImagePlugin - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 94 - Data Location: 210 - value: b'2024:01:01 17:32:02\x00'
+2026-04-29 14:46:20,014 - PIL.TiffImagePlugin - DEBUG - tag: Artist (315) - type: string (2) Tag Location: 106 - Data Location: 230 - value: b'Chenchen Frank Zhang\x00'
+2026-04-29 14:46:20,014 - PIL.TiffImagePlugin - DEBUG - tag: Copyright (33432) - type: string (2) Tag Location: 118 - Data Location: 252 - value: b'Zhang Chenchen\x00'
+2026-04-29 14:46:20,014 - PIL.TiffImagePlugin - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x0c\x01\x00\x00'
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - 开始添加文字图层...
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - EXIF数据: {'camera_make': 'SONY', 'camera_model': 'ILCE-7M3', 'lens_model': 'E 28-75mm F2.8-2.8', 'focal_length': '35.0', 'aperture': '2.8', 'shutter_speed': '1/320', 'iso': '640', 'datetime_original': '2024.01.01 15:00:29'}
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - 作者: Frank Zhang
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - 地点: 英国伦敦 ロンドン London UK 测试一下更长的文字
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - 图像尺寸: (6360, 3753)
+2026-04-29 14:46:22,205 - src.core.renderer - DEBUG - 原始图像尺寸: (6000, 2553)
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 格式化后的EXIF文本: '35mm, f/2.8, 1/320s, ISO640'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 拍摄时间文本: '2024.01.01 15:00:29'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 相机型号文本: 'SONY a7 III'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 镜头型号文本: 'TAMRON 28-75mm F2.8 Di III RXD'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 作者文本: 'Frank Zhang'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 地点文本: '英国伦敦 ロンドン London UK 测试一下更长的文字'
+2026-04-29 14:46:22,206 - src.core.renderer - DEBUG - 待渲染的文本元素: [('exif', '35mm, f/2.8, 1/320s, ISO640'), ('timestamp', '2024.01.01 15:00:29'), ('camera', 'SONY a7 III'), ('lens', 'TAMRON 28-75mm F2.8 Di III RXD'), ('author', 'Frank Zhang'), ('location', '英国伦敦 ロンドン London UK 测试一下更长的文字')]
+2026-04-29 14:46:22,207 - src.core.renderer - DEBUG - [Pos] exif: calc=(4353, 3213), bbox=(1707x112), config=bottom-right/center marg={'top': 60, 'bottom': 180, 'left': 60, 'right': 60}
+2026-04-29 14:46:22,207 - src.core.renderer - DEBUG - [Pos] camera: calc=(300, 274), bbox=(678x86), config=outside/top-left marg={'top': 120, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:46:22,207 - src.core.renderer - DEBUG - [Pos] lens: calc=(300, 123), bbox=(2065x87), config=outside/top-left marg={'top': 270, 'bottom': 60, 'left': 0, 'right': 60}
+2026-04-29 14:46:22,207 - src.core.renderer - DEBUG - [Pos] author: calc=(300, 3213), bbox=(755x107), config=outside/left marg={'top': 60, 'bottom': 180, 'left': 0, 'right': 60}
+2026-04-29 14:46:22,207 - src.core.renderer - DEBUG - [Pos] location: calc=(3241, 3416), bbox=(2819x175), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:46:22,208 - src.core.renderer - DEBUG - [Pos] timestamp: calc=(300, 3411), bbox=(1161x86), config=?/left marg={'top': 10, 'bottom': 10, 'left': 10, 'right': 10}
+2026-04-29 14:46:22,218 - src.core.renderer - DEBUG - 文字图层添加完成
+2026-04-29 14:46:22,453 - src.core.image_processor - INFO - 成功处理图像: C:\Users\frank\AppData\Local\Temp\tmpq00jfoql.jpg -> C:\Users\frank\AppData\Local\Temp\tmpc4gtu1vk.jpg

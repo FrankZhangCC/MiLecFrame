@@ -207,6 +207,45 @@ class FrameRenderer:
         else:
             return (0, 0, 0)
 
+    def _resolve_element_order(
+        self,
+        text_elements: List[Tuple[str, str]],
+        info_positions: Dict
+    ) -> List[str]:
+        """
+        按 relative_to 依赖关系拓扑排序，保证参考元素先于被引用元素处理
+        """
+        names_in_list = [t[0] for t in text_elements]
+        names_set = set(names_in_list)
+
+        dependents = {name: [] for name in names_in_list}
+        in_degree = {name: 0 for name in names_in_list}
+
+        for name in names_in_list:
+            cfg = info_positions.get(name, {})
+            ref = cfg.get('relative_to')
+            if ref and ref in names_set:
+                dependents[ref].append(name)
+                in_degree[name] += 1
+
+        queue = [name for name in names_in_list if in_degree[name] == 0]
+        ordered = []
+
+        while queue:
+            name = queue.pop(0)
+            ordered.append(name)
+            for dep in dependents[name]:
+                in_degree[dep] -= 1
+                if in_degree[dep] == 0:
+                    queue.append(dep)
+
+        # 兜底：未被拓扑覆盖的元素（循环依赖等）按原序追加
+        for name in names_in_list:
+            if name not in ordered:
+                ordered.append(name)
+
+        return ordered
+
     def _add_text_and_icons_flexible(
         self, 
         image: Image.Image, 
@@ -273,7 +312,9 @@ class FrameRenderer:
         logger.debug(f"待渲染的文本元素: {text_elements}")
         
         info_positions = layout_engine.layout_config.get('info_position', {})
-        
+
+        # Phase 1: 测量所有元素的尺寸（不计算位置，不注册）
+        draw_items = {}
         for text_type, text in text_elements:
             text_config = info_positions.get(text_type, {})
 
@@ -290,21 +331,13 @@ class FrameRenderer:
                 bbox = font.getbbox(text)
                 text_width = bbox[2] - bbox[0]
                 text_height = bbox[3] - bbox[1]
-
-                x, y = layout_engine.calculate_position(text_width, text_height, text_config)
-
-                logger.debug(
-                    f"[Pos] {text_type}: calc=({x}, {y}), bbox=({text_width}x{text_height}), "
-                    f"config={text_config.get('position', '?')}/{text_config.get('alignment', '?')} "
-                    f"marg={layout_engine._resolve_margins(text_config)}"
-                )
-
                 ascent, descent = font.getmetrics()
-                y -= descent
 
-                draw.text((x, y), text, fill=text_color, font=font)
-
-                layout_engine.register_element(text_type, x, y, text_width, text_height)
+                draw_items[text_type] = {
+                    'text': text, 'font': font, 'color': text_color,
+                    'width': text_width, 'height': text_height,
+                    'descent': descent, 'mixed': False
+                }
             else:
                 # 中英文混排：按 CJK / 拉丁片段拆分，分别加载对应字体，
                 # 以拉丁字体（Gotham）的基线为基准对齐所有片段
@@ -338,28 +371,56 @@ class FrameRenderer:
                 max_descent = max(s[4] for s in seg_info)
                 text_height = max_ascent + max_descent
 
-                x, y = layout_engine.calculate_position(total_width, text_height, text_config)
+                draw_items[text_type] = {
+                    'seg_info': seg_info, 'ref_ascent': ref_ascent,
+                    'ref_descent': ref_descent, 'color': text_color,
+                    'width': total_width, 'height': text_height, 'mixed': True
+                }
 
-                logger.debug(
-                    f"[Pos] {text_type}: calc=({x}, {y}), bbox=({total_width}x{text_height}), "
-                    f"config={text_config.get('position', '?')}/{text_config.get('alignment', '?')} "
-                    f"marg={layout_engine._resolve_margins(text_config)}"
-                )
+        # Phase 2: 按依赖拓扑序计算位置并注册（保证 relative_to 指向的元素已就位）
+        ordered_names = self._resolve_element_order(text_elements, info_positions)
 
+        for name in ordered_names:
+            item = draw_items[name]
+            cfg = info_positions.get(name, {})
+
+            x, y = layout_engine.calculate_position(item['width'], item['height'], cfg)
+
+            logger.debug(
+                f"[Pos] {name}: calc=({x}, {y}), bbox=({item['width']}x{item['height']}), "
+                f"config={cfg.get('position', '?')}/{cfg.get('alignment', '?')} "
+                f"marg={layout_engine._resolve_margins(cfg)}"
+            )
+
+            if item['mixed']:
                 # 应用 refer 字体的 descent 偏移（与单字体路径一致），
                 # 然后以 refer 字体的 ascent 确定共享基线
-                y -= ref_descent
-                baseline_y = y + ref_ascent
+                y -= item['ref_descent']
+            else:
+                y -= item['descent']
 
+            layout_engine.register_element(name, x, y, item['width'], item['height'])
+
+        # Phase 3: 从 position 注册表读取最终坐标后统一绘制
+        for name in ordered_names:
+            bounds = layout_engine.get_element_bounds(name)
+            if bounds is None:
+                continue
+            x, y, w, h = bounds
+
+            item = draw_items[name]
+            if not item['mixed']:
+                draw.text((x, y), item['text'], fill=item['color'], font=item['font'])
+            else:
+                # 以 refer 字体的 ascent 确定共享基线
+                baseline_y = y + item['ref_ascent']
+                current_x = x
                 # 逐片段绘制，各片段基线对齐到共享基线
                 # CJK 字体 ascent 较大时自动上移，适配拉丁基线
-                current_x = x
-                for seg_text, font, seg_width, ascent, descent in seg_info:
+                for seg_text, font, seg_width, ascent, descent in item['seg_info']:
                     seg_y = baseline_y - ascent
-                    draw.text((current_x, seg_y), seg_text, fill=text_color, font=font)
+                    draw.text((current_x, seg_y), seg_text, fill=item['color'], font=font)
                     current_x += seg_width
-
-                layout_engine.register_element(text_type, x, y, total_width, text_height)
         
         logger.debug("文字图层添加完成")
         return result

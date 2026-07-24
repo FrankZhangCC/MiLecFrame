@@ -32,25 +32,25 @@ layout:
     bottom: 0.12
     left: 0.03
     right: 0.03
+  padding:
+    left: 0.05     # X: 与原图左侧对齐，叠加元素不超出原图左边界
+    right: 0.05    # X: 与原图右侧对齐，叠加元素不超出原图右边界
+    top: 0.00         
+    bottom: 0.00      
   info_height_ratio: 0.0125
   info_position:
     exif:
-      position: "outside"
+      position: "bottom-right"  # 原图外侧右下角
       alignment: "center"
       margin_top: 0.01    # 顶部边距
       margin_bottom: 0.03 # 底部边距
       margin_left: 0.01   # 左边距
       margin_right: 0.01  # 右边距
     timestamp:
-      position: "outside"
-      alignment: "center"
-      margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.06 # 底部边距
-      margin_left: 0.01   # 左边距
-      margin_right: 0.01  # 右边距
-      relative_to: "exif"        # 相对于exif元素
-      relative_position: "below" # 位于exif下方
-      relative_margin: 0.02      # 与exif的间距为原图长边的2%
+      relative_to: "author"        # 相对于作者名称定位
+      relative_position: "below"   # 位于作者名称下方
+      alignment: "left"            # 左对齐（相对于作者名称左侧）
+      relative_margin: 0.02        # 与作者名称的间距为原图长边的2%
     camera:
       position: "outside"
       alignment: "top-left"
@@ -73,12 +73,10 @@ layout:
       margin_left: 0      # 左边距 - 修改为0
       margin_right: 0.01  # 右边距
     location:
-      position: "outside"
-      alignment: "right"
-      margin_top: 0.01    # 顶部边距
-      margin_bottom: 0.03 # 底部边距
-      margin_left: 0.01   # 左边距
-      margin_right: 0     # 右边距 - 修改为0
+      relative_to: "exif"          # 相对于EXIF信息定位
+      relative_position: "below"   # 位于EXIF下方
+      alignment: "left"            # 相对于EXIF左侧对齐
+      relative_margin: 0.02        # 间距与timestamp一致
     camera_icon:
       position: "outside"
       alignment: "top-left"

@@ -17,6 +17,7 @@ class LayoutEngine:
         self.canvas_size = self._calculate_canvas_size()
         self.canvas_width, self.canvas_height = self.canvas_size
         self.original_bounds = self._calculate_original_bounds()
+        self.padding_bounds = self._calculate_padding_bounds()
 
         self.positions: Dict[str, dict] = {}
 
@@ -47,6 +48,33 @@ class LayoutEngine:
             y = int(self.original_longer_side * top_exp)
 
         return x, y, self.original_width, self.original_height
+
+    def _calculate_padding_bounds(self) -> Tuple[int, int, int, int]:
+        """
+        计算叠加元素的安全区域（padding），从画布四边向内收缩。
+        返回 (left_bound, top_bound, right_bound, bottom_bound)
+        padding 值以 original_longer_side 比例为基准，默认为 0（即画布边界）
+        """
+        padding_config = self.layout_config.get('padding', {})
+        if not padding_config:
+            return 0, 0, self.canvas_width, self.canvas_height
+
+        def to_px(value):
+            if isinstance(value, (int, float)):
+                return int(self.original_longer_side * float(value))
+            return 0
+
+        pad_left = to_px(padding_config.get('left', 0))
+        pad_top = to_px(padding_config.get('top', 0))
+        pad_right = to_px(padding_config.get('right', 0))
+        pad_bottom = to_px(padding_config.get('bottom', 0))
+
+        return (
+            pad_left,
+            pad_top,
+            self.canvas_width - pad_right,
+            self.canvas_height - pad_bottom
+        )
 
     def register_element(self, name: str, x: int, y: int, width: int, height: int):
         self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
@@ -100,6 +128,12 @@ class LayoutEngine:
             element_width, element_height,
             margins
         )
+
+        # padding 约束：确保最终坐标不超出安全区域（优先级高于 margin）
+        pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
+        x = max(pad_left, min(x, pad_right - element_width))
+        y = max(pad_top, min(y, pad_bottom - element_height))
+
         return x, y
 
     def _get_anchor(
@@ -267,7 +301,40 @@ class LayoutEngine:
         x += offset_x
         y += offset_y
 
-        x = max(0, min(x, self.canvas_width - element_width))
-        y = max(0, min(y, self.canvas_height - element_height))
+        # 组合盒约束：将参考元素与当前元素当作整体，整体平移确保不超出 padding 安全区域
+        # padding 优先级高于 margin：margin 参与位置计算，但最终结果受 padding 截断
+        pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
+
+        group_left = min(tx, x)
+        group_top = min(ty, y)
+        group_right = max(tx + tw, x + element_width)
+        group_bottom = max(ty + th, y + element_height)
+
+        shift_x = 0
+        shift_y = 0
+        if group_left < pad_left:
+            shift_x = pad_left - group_left
+        elif group_right > pad_right:
+            shift_x = pad_right - group_right
+        if group_top < pad_top:
+            shift_y = pad_top - group_top
+        elif group_bottom > pad_bottom:
+            shift_y = pad_bottom - group_bottom
+
+        if shift_x != 0 or shift_y != 0:
+            ref_key = relative_to
+            if ref_key not in self.positions:
+                for key in self.positions:
+                    if key.endswith(relative_to) or relative_to.endswith(key):
+                        ref_key = key
+                        break
+            if ref_key in self.positions:
+                self.positions[ref_key]['x'] += shift_x
+                self.positions[ref_key]['y'] += shift_y
+            x += shift_x
+            y += shift_y
+
+        x = max(pad_left, min(x, pad_right - element_width))
+        y = max(pad_top, min(y, pad_bottom - element_height))
 
         return x, y
