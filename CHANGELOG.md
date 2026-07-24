@@ -1,5 +1,70 @@
 # 更新历史
 
+## v1.2.0 (2026-04-29)
+
+> 本版本引入相对定位系统、Padding 安全区域和三阶段渲染管线，大幅提升布局灵活性和元素溢出保护能力。
+
+### 布局引擎
+
+#### 相对定位元素溢出保护
+- `_calculate_relative` 新增组合盒约束：将参考元素 A 和相对元素 B 合并为最小包围盒 `A ∪ B`
+- 组合盒超出 padding 安全区域时整体平移，参考元素坐标自动回写至 `self.positions`，保证两者对齐关系不变
+- 平移量由溢出方向计算：左/上溢出取负偏移修正，右/下溢出取边界差值修正
+- 安全夹持 `max(pad_left, min(x, pad_right - w))` 兜底
+
+#### Padding 安全区域
+- 新增 `_calculate_padding_bounds()` 方法，从 `layout.padding` 配置计算 `(left, top, right, bottom)` 边界
+- padding 值以 `original_longer_side` 比例计算，未配置时默认 0（= 画布边界），向后兼容
+- 绝对定位元素（`_calculate_absolute`）在计算完毕后应用 padding 截断，不再允许越界
+- 优先级：padding > margin，即 margin 参与位置计算但最终坐标受 padding 约束
+
+#### 拓扑依赖解析
+- 新增 `_resolve_element_order()` 方法，基于 Kahn 算法（入度计数）对 `text_elements` 进行拓扑排序
+- 从 `info_position` 中读取 `relative_to` 构建依赖图，无依赖元素（绝对定位）优先处理
+- 循环依赖或其他未覆盖元素兜底原序追加，保证全部元素参与渲染
+- 彻底消除手动调序需求：`text_elements` 按 append 自然序构建，渲染时自动按拓扑序执行
+
+### 渲染引擎
+
+#### 三阶段渲染管线
+- `_add_text_and_icons_flexible` 拆分为三阶段：
+  - **Phase 1 (测量)**：加载字体、测量尺寸、解析颜色，存入 `draw_items` dict，不触碰 `layout_engine`
+  - **Phase 2 (计算+注册)**：按拓扑序 `calculate_position` → 基线调整 → `register_element`，保证 `relative_to` 引用立即可用
+  - **Phase 3 (绘制)**：从 `layout_engine.positions` 读取最终坐标（含溢出修正后的变更）统一绘制
+- 解决了旧版"边算边画"模式中参考元素已被绘制无法回写的问题
+
+### 样式配置
+
+#### 相对定位字段
+```yaml
+info_position:
+  timestamp:
+    relative_to: "author"        # 相对于作者名称
+    relative_position: "below"   # after/below/before/above/right-of/left-of
+    alignment: "left"            # 相对方向垂直轴的对齐
+    relative_margin: 0.02        # 间距比例，默认 0.01
+    offset_x_ratio: 0.0          # X 轴微调（可选）
+    offset_y_ratio: 0.0          # Y 轴微调（可选）
+```
+
+#### Padding 配置
+```yaml
+layout:
+  padding:
+    left: 0.03     # 叠加元素不超出左边界
+    right: 0.03    # 叠加元素不超出右边界
+    top: 0         # 叠加元素不超出上边界
+    bottom: 0      # 叠加元素不超出下边界
+```
+- 独立于 `expand_canvas` 和 `margin`，不影响原始图像位置
+- 默认四边均为 0，与旧版行为完全兼容
+
+### 代码清理
+
+- 移除 `src/frames/base_frame.py` 及 `src/frames/` 目录：该文件仅有孤立法且无类定义，全项目零引用，功能已由 `LayoutEngine` + `FontManager` 替代
+
+---
+
 ## v1.1.0 (2026-04-29)
 
 > 本版本使用 **DeepSeek V4 Pro** 模型进行了大规模的核心组件重构。
