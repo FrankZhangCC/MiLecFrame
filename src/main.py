@@ -44,6 +44,8 @@ def main():
     parser.add_argument("--lens-display", choices=['combined', 'camera_only', 'lens_only'],
                         default='combined', help="镜头显示模式")
     parser.add_argument("--use-short-lens", action="store_true", help="使用短版镜头名")
+    parser.add_argument("--timestamp-display", choices=['full', 'date_only', 'hide'],
+                        default='full', help="拍摄时间显示模式：full=日期与时刻, date_only=仅日期, hide=不显示")
     parser.add_argument("--no-enhance", action="store_true", help="关闭背景增强")
     parser.add_argument("--skip-existing", action="store_true", default=True,
                         help="跳过已存在的输出文件（默认启用）")
@@ -91,6 +93,7 @@ def main():
                 logo=args.logo,
                 lens_display=args.lens_display,
                 use_short_lens=args.use_short_lens,
+                timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 skip_existing=args.skip_existing,
                 use_gps_location=args.use_gps_location,
@@ -119,6 +122,7 @@ def main():
                 logo=args.logo,
                 lens_display=args.lens_display,
                 use_short_lens=args.use_short_lens,
+                timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 output_format=args.output_format,
                 skip_existing=args.skip_existing,
@@ -148,7 +152,7 @@ def launch_pyside_gui():
 
 def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill=None,
                   font_weight='medium', logo="auto", lens_display='combined',
-                  use_short_lens=False, no_enhance=False, output_format="JPEG",
+                  use_short_lens=False, timestamp_display='full', no_enhance=False, output_format="JPEG",
                   skip_existing=True, watermark_text=None, watermark_position='bottom-right',
                   watermark_opacity=50, watermark_color='white', custom_text=None):
     """
@@ -230,7 +234,8 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
                                 lens_display_mode=lens_display,
                                 use_short_lens=use_short_lens,
                                 saturation_override=saturation_override,
-                                custom_text=custom_text)
+                                custom_text=custom_text,
+                                timestamp_display_mode=timestamp_display)
 
     if not success:
         print("图片处理失败")
@@ -250,6 +255,7 @@ def batch_process_images(
     logo="auto",
     lens_display='combined',
     use_short_lens=False,
+    timestamp_display='full',
     no_enhance=False,
     skip_existing=True,
     use_gps_location=False,
@@ -340,6 +346,7 @@ def batch_process_images(
         use_gps_location=use_gps_location,
         decorations=decorations,
         custom_text=custom_text,
+        timestamp_display_mode=timestamp_display,
     )
 
     # 输出结果汇总

@@ -19,7 +19,8 @@ class RenderContext:
     def __init__(self, image_size: Tuple[int, int], exif_data: Optional[Dict] = None,
                  author: Optional[str] = None, location: Optional[str] = None,
                  lens_display_mode: str = 'combined', use_short_lens: bool = False,
-                 custom_text: Optional[str] = None):
+                 custom_text: Optional[str] = None,
+                 timestamp_display_mode: str = 'full'):
         self.image_size = image_size
         self.exif_data = exif_data
         self.author = author
@@ -27,6 +28,7 @@ class RenderContext:
         self.lens_display_mode = lens_display_mode
         self.use_short_lens = use_short_lens
         self.custom_text = custom_text
+        self.timestamp_display_mode = timestamp_display_mode
 
         self._display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
 
@@ -43,13 +45,28 @@ class RenderContext:
         if key == 'exif':
             return self._display_data.get('exif_formatted') or None
         elif key == 'timestamp':
+            # 根据 timestamp_display_mode 控制拍摄时间的显示格式
+            mode = self.timestamp_display_mode
+            if mode == 'hide':
+                return None
             if self.exif_data and 'datetime_original' in self.exif_data:
-                return self.exif_data['datetime_original']
+                raw = self.exif_data['datetime_original']
+                # date_only: 取前10字符 "yyyy.mm.dd"；full: 完整格式 "yyyy.mm.dd hh:mm:ss"
+                return raw[:10] if mode == 'date_only' else raw
         elif key == 'timestamp_author':
-            if self.exif_data and 'datetime_original' in self.exif_data:
-                ts = self.exif_data['datetime_original']
-                auth = self.author or ''
-                return f"{ts} by {auth}" if auth else ts
+            ts = self.get_text('timestamp')
+            auth = self.author or ''
+            if ts and auth:
+                # 情况1: 时间 + 作者 → "2024.01.15 by Frank"
+                return f"{ts} by {auth}"
+            elif ts:
+                # 情况3: 仅时间（作者未填）→ "2024.01.15"
+                return ts
+            elif auth:
+                # 情况2: 仅作者（时间不显示）→ "Shot by Frank"
+                return f"Shot by {auth}"
+            # 情况4: 两者都没有 → 不渲染
+            return None
         elif key == 'camera_lens':
             if self.lens_display_mode == 'camera_only':
                 return self._display_data.get('camera_combined')
