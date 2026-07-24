@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
     QFileDialog, QApplication, QSizePolicy,
 )
 from PySide6.QtCore import Qt, Signal, QSize, QTimer, QEvent, QObject
-from PySide6.QtGui import QImage, QPixmap, QWheelEvent
+from PySide6.QtGui import QImage, QPixmap, QWheelEvent, QColorSpace
 
 from qfluentwidgets import (
     PrimaryPushButton, PushButton, TransparentPushButton,
@@ -32,6 +32,10 @@ from qfluentwidgets import (
     FluentIcon, SwitchButton, LineEdit, Slider,
     SmoothScrollArea, StateToolTip, RoundMenu, Action, ScrollArea,
     ExpandLayout,
+)
+from qfluentwidgets.common.style_sheet import (
+    setCustomStyleSheet as _qfw_setCustomStyleSheet,
+    addStyleSheet, CustomStyleSheet,
 )
 
 from ..models.file_item import FileItem
@@ -81,17 +85,44 @@ class ImageProcessingPage(QWidget):
     └─────────────────────────────────────────┘
     """
 
-    # ── 缩略图边框样式 ──
-    _STYLE_THUMB_NORMAL = (
-        "QLabel { border: 2px solid #ddd; border-radius: 4px; padding: 2px;"
-        " background-color: white; }"
-        " QLabel:hover { border-color: #0078d4; }"
-    )
-    _STYLE_THUMB_SELECTED = (
-        "QLabel { border: 2px solid #0078d4; border-radius: 4px; padding: 2px;"
-        " background-color: white; }"
-        " QLabel:hover { border-color: #0078d4; }"
-    )
+    # ── 缩略图边框样式（light / dark 双主题）──
+    _STYLE_THUMB_NORMAL = {
+        'light': (
+            "QLabel { border: 2px solid #ddd; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid #444; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
+    _STYLE_THUMB_SELECTED = {
+        'light': (
+            "QLabel { border: 2px solid --ThemeColorPrimary; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid --ThemeColorPrimary; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
+    # ── 已处理缩略图边框样式（light / dark 双主题）──
+    _STYLE_THUMB_PROCESSED = {
+        'light': (
+            "QLabel { border: 2px solid #00a86b; border-radius: 4px; padding: 2px;"
+            " background-color: white; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+        'dark': (
+            "QLabel { border: 2px solid #6ccb5f; border-radius: 4px; padding: 2px;"
+            " background-color: #282828; }"
+            " QLabel:hover { border-color: --ThemeColorPrimary; }"
+        ),
+    }
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -126,27 +157,31 @@ class ImageProcessingPage(QWidget):
         splitter = QSplitter(Qt.Orientation.Vertical)
         splitter.setChildrenCollapsible(False)
         splitter.setHandleWidth(4)
-        splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #e0e0e0;
-            }
-            QSplitter::handle:hover {
-                background-color: #0078d4;
-            }
-        """)
+        self._apply_custom_style(splitter,
+            lightQss="""
+                QSplitter::handle { background-color: #e0e0e0; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+            darkQss="""
+                QSplitter::handle { background-color: #3D3D3D; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+        )
 
         # 上部：主内容区（预览 + 配置），用水平 QSplitter 可调宽度
         content_splitter = QSplitter(Qt.Orientation.Horizontal)
         content_splitter.setChildrenCollapsible(False)
         content_splitter.setHandleWidth(4)
-        content_splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #e0e0e0;
-            }
-            QSplitter::handle:hover {
-                background-color: #0078d4;
-            }
-        """)
+        self._apply_custom_style(content_splitter,
+            lightQss="""
+                QSplitter::handle { background-color: #e0e0e0; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+            darkQss="""
+                QSplitter::handle { background-color: #3D3D3D; }
+                QSplitter::handle:hover { background-color: --ThemeColorPrimary; }
+            """,
+        )
 
         left_panel = self._create_preview_panel()
         right_panel = self._create_config_panel()
@@ -191,27 +226,28 @@ class ImageProcessingPage(QWidget):
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setMinimumSize(200, 200)
         self.preview_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                border: 2px dashed #ccc;
-                border-radius: 8px;
-                color: #888;
-                font-size: 14px;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_preview_placeholder_style()
         layout.addWidget(self.preview_label, stretch=1)
 
         # ── EXIF 信息面板（固定高度，两行网格布局） ──
         self.exif_panel = QWidget()
         self.exif_panel.setFixedHeight(60)
-        self.exif_panel.setStyleSheet("""
-            QWidget#exifPanel {
-                background-color: #f5f5f5;
-                border-radius: 6px;
-                padding: 4px 12px;
-            }
-        """)
+        self._apply_custom_style(self.exif_panel,
+            lightQss="""
+                QWidget#exifPanel {
+                    background-color: #f5f5f5;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                }
+            """,
+            darkQss="""
+                QWidget#exifPanel {
+                    background-color: #2B2B2B;
+                    border-radius: 6px;
+                    padding: 4px 12px;
+                }
+            """,
+        )
         self.exif_panel.setObjectName("exifPanel")
 
         exif_grid = QGridLayout(self.exif_panel)
@@ -279,12 +315,10 @@ class ImageProcessingPage(QWidget):
         """创建右侧配置面板（5 个手风琴折叠 Tab）"""
         panel = ScrollArea()
         panel.setWidgetResizable(True)
-        panel.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: #f5f5f5;
-            }
-        """)
+        self._apply_custom_style(panel,
+            lightQss="QScrollArea { border: none; background-color: #f5f5f5; }",
+            darkQss="QScrollArea { border: none; background-color: #2B2B2B; }",
+        )
 
         config_container = QWidget()
         config_layout = QVBoxLayout(config_container)
@@ -329,12 +363,20 @@ class ImageProcessingPage(QWidget):
         filmstrip = QWidget()
         filmstrip.setMinimumHeight(100)
         filmstrip.setMaximumHeight(250)
-        filmstrip.setStyleSheet("""
-            QWidget {
-                border-top: 1px solid #e0e0e0;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_custom_style(filmstrip,
+            lightQss=(
+                "QWidget {"
+                " border-top: 1px solid #e0e0e0;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QWidget {"
+                " border-top: 1px solid #3D3D3D;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
 
         layout = QVBoxLayout(filmstrip)
         layout.setContentsMargins(16, 8, 16, 8)
@@ -685,6 +727,7 @@ class ImageProcessingPage(QWidget):
             pil_thumb = pil_thumb.convert('RGB')
         data = pil_thumb.tobytes()
         q_img = QImage(data, pil_thumb.width, pil_thumb.height, 3 * pil_thumb.width, QImage.Format.Format_RGB888)
+        q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
         return q_img.copy()  # copy() 确保数据独立
 
     def _add_filmstrip_item(self, item: FileItem):
@@ -773,12 +816,46 @@ class ImageProcessingPage(QWidget):
                                   Qt.TransformationMode.SmoothTransformation)
                 )
 
+    def _apply_custom_style(self, widget, lightQss, darkQss):
+        """设置自定义主题样式并确保新 widget 首次即生效"""
+        _qfw_setCustomStyleSheet(widget, lightQss, darkQss)
+        addStyleSheet(widget, CustomStyleSheet(widget))
+
     def _set_thumb_style(self, label: QLabel, selected: bool):
-        """设置缩略图边框样式：选中=蓝色，未选=灰色"""
+        """设置缩略图边框样式：选中=蓝色，未选=灰色（自动适配 light/dark 主题）"""
         if selected:
-            label.setStyleSheet(self._STYLE_THUMB_SELECTED)
+            self._apply_custom_style(label,
+                lightQss=self._STYLE_THUMB_SELECTED['light'],
+                darkQss=self._STYLE_THUMB_SELECTED['dark'],
+            )
         else:
-            label.setStyleSheet(self._STYLE_THUMB_NORMAL)
+            self._apply_custom_style(label,
+                lightQss=self._STYLE_THUMB_NORMAL['light'],
+                darkQss=self._STYLE_THUMB_NORMAL['dark'],
+            )
+
+    def _apply_preview_placeholder_style(self):
+        """为预览区 QLabel 设置占位样式（自动适配 light/dark 主题）"""
+        self._apply_custom_style(self.preview_label,
+            lightQss=(
+                "QLabel {"
+                " border: 2px dashed #ccc;"
+                " border-radius: 8px;"
+                " color: #888;"
+                " font-size: 14px;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QLabel {"
+                " border: 2px dashed #555;"
+                " border-radius: 8px;"
+                " color: #999;"
+                " font-size: 14px;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
 
     def _select_item(self, index: int):
         """选中胶片栏中的某个项"""
@@ -818,20 +895,20 @@ class ImageProcessingPage(QWidget):
                 if pil_img.mode != 'RGB':
                     pil_img = pil_img.convert('RGB')
                 data = pil_img.tobytes()
-                pixmap = QPixmap.fromImage(
-                    QImage(data, pil_img.width, pil_img.height,
-                           3 * pil_img.width, QImage.Format.Format_RGB888)
-                )
+                q_img = QImage(data, pil_img.width, pil_img.height,
+                               3 * pil_img.width, QImage.Format.Format_RGB888)
+                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
+                pixmap = QPixmap.fromImage(q_img)
             elif item.file_bytes:
                 pil_img = PILImage.open(io.BytesIO(item.file_bytes))
                 pil_img = self._convert_to_srgb(pil_img)
                 if pil_img.mode != 'RGB':
                     pil_img = pil_img.convert('RGB')
                 data = pil_img.tobytes()
-                pixmap = QPixmap.fromImage(
-                    QImage(data, pil_img.width, pil_img.height,
-                           3 * pil_img.width, QImage.Format.Format_RGB888)
-                )
+                q_img = QImage(data, pil_img.width, pil_img.height,
+                               3 * pil_img.width, QImage.Format.Format_RGB888)
+                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
+                pixmap = QPixmap.fromImage(q_img)
             else:
                 return
             item.cached_pixmap = pixmap
@@ -847,7 +924,10 @@ class ImageProcessingPage(QWidget):
                 Qt.TransformationMode.SmoothTransformation,
             )
             self.preview_label.setPixmap(scaled)
-            self.preview_label.setStyleSheet("border: none; background-color: #fafafa;")
+            self._apply_custom_style(self.preview_label,
+                lightQss="QLabel { border: none; background-color: #fafafa; }",
+                darkQss="QLabel { border: none; background-color: #282828; }",
+            )
             self.preview_label.setText("")
 
     def _update_filmstrip_thumbnail(self, item: FileItem):
@@ -873,10 +953,9 @@ class ImageProcessingPage(QWidget):
                 if is_selected:
                     self._set_thumb_style(label, True)
                 else:
-                    label.setStyleSheet(
-                        "QLabel { border: 2px solid #00a86b; border-radius: 4px; padding: 2px;"
-                        " background-color: white; }"
-                        " QLabel:hover { border-color: #0078d4; }"
+                    self._apply_custom_style(label,
+                        lightQss=self._STYLE_THUMB_PROCESSED['light'],
+                        darkQss=self._STYLE_THUMB_PROCESSED['dark'],
                     )
 
     def _update_exif_info(self, item: FileItem):
@@ -1127,15 +1206,7 @@ class ImageProcessingPage(QWidget):
         # 清空预览
         self.preview_label.clear()
         self.preview_label.setText("请从底部胶片栏选择图片，或拖拽图片到此处")
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                border: 2px dashed #ccc;
-                border-radius: 8px;
-                color: #888;
-                font-size: 14px;
-                background-color: #fafafa;
-            }
-        """)
+        self._apply_preview_placeholder_style()
 
         # 清空 EXIF
         self.exif_file.setText("文件: <b>—</b>")
@@ -1188,15 +1259,7 @@ class ImageProcessingPage(QWidget):
             self.current_index = -1
             self.preview_label.clear()
             self.preview_label.setText("请从底部胶片栏选择图片，或拖拽图片到此处")
-            self.preview_label.setStyleSheet("""
-                QLabel {
-                    border: 2px dashed #ccc;
-                    border-radius: 8px;
-                    color: #888;
-                    font-size: 14px;
-                    background-color: #fafafa;
-                }
-            """)
+            self._apply_preview_placeholder_style()
         elif self.current_index > index:
             self.current_index -= 1
 
