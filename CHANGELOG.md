@@ -1,8 +1,29 @@
 # 更新历史
 
-## v1.6.1 (2026-05-11)
+## v1.6.2 (2026-05-16)
 
-> 本版本修复 CSV 编码异常导致设备映射失效的问题，统一日志输出并补充侧边栏图片尺寸显示。
+> 本版本修复 float32 模糊管线中 zero-padding 边界导致的画布四周发黑问题。
+
+### 🔴 修复：float32 管线边界处理
+
+- `src/utils/gaussian_blur.py` 中 `_box_blur_numpy()` 初始实现使用了 `np.convolve(mode='same')`，其 zero-padding 边界策略导致画布边缘像素与黑色 0 平均 → 发暗。修正为 edge-padding（`np.pad(mode='edge')` + `mode='valid'`），边界行为与 PIL `BoxBlur` 一致
+
+## v1.6.1 (2026-05-16)
+
+> 本版本统一软件名称为 MiLecFrame，新增版权信息；将高斯模糊与饱和度增强管线迁移至 float32 域运算，消除 uint8 量化误差在饱和度倍增（2×）时被放大导致的色彩断层；修复 CSV 编码异常导致设备映射失效的问题。
+
+### 🟡 软件名称统一 & 版权信息
+
+- `README.md`、`src/__init__.py`、`src/gui/app.py` 三处软件名称统一改为「MiLecFrame」
+- `src/gui/app.py` 侧边栏标题下方新增版权信息（`st.sidebar.caption`），底部版权同步更新
+- `README.md` 标题下方、`src/__init__.py` 模块 docstring 中加入版权信息
+- `src/__init__.py` / `__author__` 从 "MiLeica Frame Project" 改为 "Frank Zhang"
+
+### 🔴 重构：高斯模糊管线 float32 化
+
+- `src/utils/gaussian_blur.py` 将 box blur 从 PIL `ImageFilter.BoxBlur`（uint8）替换为纯 numpy float32 实现（`np.convolve`），消除 3-pass blur → 饱和度 2× 过程中量化误差逐级放大的问题
+- `_enhance_saturation()` 从 PIL `ImageEnhance.Color`（uint8 域）替换为 numpy 感知亮度色度缩放法（float32 域），避免饱和度倍增时的量化放大
+- 保留 PIL LANCZOS 降采样用于缩小到工作尺寸（max 1200px），模糊后 LANCZOS 上采样回画布尺寸
 
 ### 🔴 修复：CSV 编码异常导致设备映射失效
 
@@ -429,12 +450,14 @@
 ### 样式变体系统
 
 #### 文件夹样式组织
+
 - 样式配置不再局限于单文件，支持以**文件夹**形式组织（文件夹名 = 样式名），文件夹内可包含多个变体配置文件
 - `get_available_styles()` 同时扫描单文件样式（`.yaml` / `.json` / `.toml`）和文件夹样式，GUI 中统一展示为单个选项，对用户透明
 - 同名文件夹与文件共存时，文件夹优先
 - 传统单文件样式完全向后兼容，零改动即可继续使用
 
 #### 变体命名规则与匹配
+
 - **命名规则**：
   - `default.yaml` — 默认配置，无匹配变体时的兜底
   - `no_{field}.yaml` — 当 `{field}` 缺失（`None` 或空字符串）时匹配
@@ -446,17 +469,20 @@
   4. 无匹配时回退到 `default.*`；文件夹内无 `default.*` 时返回首个配置文件
 
 #### 上下文传入
+
 - `get_style_config(style_name, context=None)` — 新增可选 `context` 参数，接受 `{'location': '北京', 'author': '张三'}` 格式
 - 不传 `context` 时行为与旧版完全一致，返回默认配置，保证 CLI、GUI 预览等路径的向后兼容
 - `ImageProcessor.process()` 在获取样式配置时自动传入 `{'location': location, 'author': author}` 上下文
 
 #### 配置加载重构
+
 - 新增 `_load_config_file(config_path)` — 抽取单文件加载逻辑，消除 `get_style_config` 中的重复代码
 - `get_style_config` 拆分流程：先尝试文件夹 → 文件内变体匹配 → 再回退单文件加载
 
 ### 内部改进
 
 #### StyleManager 代码清理
+
 - `get_available_styles()` — 从纯文件扫描改为同时扫描文件夹和文件，文件夹名即为样式名，逻辑清晰化
 - `get_style_config()` — 行数从约 40 行精简整合，文件夹匹配与单文件加载共用 `_load_config_file()`
 - `_resolve_style_variant()` — 独立的变体匹配引擎，解析与匹配逻辑内聚
@@ -464,6 +490,7 @@
 ### 样式编辑器
 
 #### GUI 样式编辑页面
+
 - 新增 `src/gui/style_creator_page.py`，在侧边栏「🎨 样式编辑器」入口，提供可视化表单
 - **新建/编辑双模式**：顶部下拉框选择已有样式（含变体文件夹子级）或新建，选中后自动加载配置到表单
 - **动态元素列表**：支持增删信息元素（exif / camera_lens / timestamp_author 等 9 种 key），每个元素独立切换绝对/相对定位
@@ -472,6 +499,7 @@
 - **变体文件夹支持**：下拉框自动扫描 `configs/` 子目录中的变体 YAML 文件，以 `文件夹名/文件名.yaml` 层级展示
 
 #### 样式模板文件
+
 - 新增 `src/frame_styles/configs/_STYLE_TEMPLATE.txt`，覆盖全部 9 个配置区的填空式模板，填写后交给 AI 即可生成对应 YAML
 
 ---
@@ -483,24 +511,28 @@
 ### 布局引擎
 
 #### 相对定位元素溢出保护
+
 - `_calculate_relative` 新增组合盒约束：将参考元素 A 和相对元素 B 合并为最小包围盒 `A ∪ B`
 - 组合盒超出 padding 安全区域时整体平移，参考元素坐标自动回写至 `self.positions`，保证两者对齐关系不变
 - 平移量由溢出方向计算：左/上溢出取负偏移修正，右/下溢出取边界差值修正
 - 安全夹持 `max(pad_left, min(x, pad_right - w))` 兜底
 
 #### 依赖簇级联平移
+
 - 多个元素 `relative_to` 同一参考时，组合盒自动扩展至全部已注册从属元素，防止先注册的从属被后续移位甩开
 - `register_element()` 新增 `relative_to` 参数，自动维护 `self._dependents` 反向映射表
 - 新增 `_shift_dependents()` 递归级联平移：移位参考元素时自动沿依赖树向下传播至所有从属
 - 处理顺序示例：A(绝对) → B(relative_to=A) → C(relative_to=A)，C 计算时组合盒 = A ∪ B ∪ C，移位 A 时 B 和 C 同步平移
 
 #### Padding 安全区域
+
 - 新增 `_calculate_padding_bounds()` 方法，从 `layout.padding` 配置计算 `(left, top, right, bottom)` 边界
 - padding 值以 `original_longer_side` 比例计算，未配置时默认 0（= 画布边界），向后兼容
 - 绝对定位元素（`_calculate_absolute`）在计算完毕后应用 padding 截断，不再允许越界
 - 优先级：padding > margin，即 margin 参与位置计算但最终坐标受 padding 约束
 
 #### 拓扑依赖解析
+
 - 新增 `_resolve_element_order()` 方法，基于 Kahn 算法（入度计数）对 `text_elements` 进行拓扑排序
 - 从 `info_position` 中读取 `relative_to` 构建依赖图，无依赖元素（绝对定位）优先处理
 - 循环依赖或其他未覆盖元素兜底原序追加，保证全部元素参与渲染
@@ -509,6 +541,7 @@
 ### 渲染引擎
 
 #### 三阶段渲染管线
+
 - `_add_text_and_icons_flexible` 拆分为三阶段：
   - **Phase 1 (测量)**：加载字体、测量尺寸、解析颜色，存入 `draw_items` dict，不触碰 `layout_engine`
   - **Phase 2 (计算+注册)**：按拓扑序 `calculate_position` → 基线调整 → `register_element`，保证 `relative_to` 引用立即可用
@@ -516,27 +549,33 @@
 - 解决了旧版"边算边画"模式中参考元素已被绘制无法回写的问题
 
 #### 渲染顺序修正
+
 - Logo 渲染移至文字层之后，确保 `relative_to` 可正确引用已注册的文字元素（如 `relative_to: "exif"`）
 - 此前 Logo 先于文字层执行，`get_element_bounds` 返回 `None` 导致回退到绝对定位
 
 #### 相机+镜头合并
+
 - `get_display_data()` 新增 `camera_lens_combined` 字段，格式 `"品牌 型号 | 镜头"`
 - 渲染器按 `info_position` 中是否有 `camera_lens` 键决定使用合并或分开模式
 
 #### timestamp_author 合并元素
+
 - 新增 `timestamp_author` 元素，按 `info_position` 声明驱动，输出格式 `"时间 by 作者"`
 
 #### 配置驱动渲染
+
 - 所有文字元素改为由 `info_position` 声明驱动：配置中有对应键则渲染，否则跳过
 - `author`、`location`、`exif`、`timestamp` 不再无条件渲染
 
 #### 渲染上下文 (RenderContext)
+
 - 新增 `src/utils/render_context.py`，将文字数据准备逻辑从 `renderer.py` 中解耦为独立模块
 - `RenderContext.get_text(key)` 根据样式配置声明的 key 返回显示文本，内部闭环所有条件逻辑
 - `_add_text_and_icons_flexible` 签名从 `(exif_data, author, location)` 简化为 `(context)`，17 行 if-elif 链替换为 for 循环遍历 `info_position` 的 key
 - 新增显示字段只需在 `RenderContext.get_text()` 添加分支 + YAML 声明配置，renderer 零改动
 
 #### 竖向/方形图片 camera_lens 自动替换
+
 - `camera_lens` 检测到原始图片纵边 ≥ 横边（竖向或方形构图）时，自动替换为 `camera`，仅显示相机型号
 - 横向图片保持原有 `"品牌 型号 | 镜头"` 合并格式
 - 判断逻辑内聚于 `RenderContext` 内部，对外透明
@@ -544,22 +583,26 @@
 ### Logo
 
 #### Logo 选择器增加"无"选项
+
 - GUI 下拉菜单新增 "无" 选项，允许用户显式禁用 Logo
 - 选中"无"时 `logo_filename` 传递空字符串 `""`，renderer 跳过自动匹配和渲染
 - "无"与自动匹配行为解耦：前者显式跳过，后者 `None` 仍触发子串匹配
 
 #### 自动匹配逻辑优化
+
 - `auto_match_logo()` 简化为双向子串匹配（`brand_lower in logo_name or logo_name in brand_lower`），不区分大小写
 - 移除 `_normalize_brand_name()` 方法（曾剥离特殊字符，可能导致误剔除有效匹配片段）及不再使用的 `re` 导入
 - 文件名中包含品牌名称片段即可匹配（如品牌 "NIKON CORPORATION" 可匹配 `Nikon.png`）
 
 #### 渲染器匹配守卫修正
+
 - Logo 自动匹配条件由 `if not logo_filename` 改为 `if logo_filename is None`
 - 空字符串（GUI "无"选项）不再触发自动匹配回退，仅 `None`（自动匹配模式）执行品牌匹配
 
 ### 样式配置
 
 #### 相对定位字段
+
 ```yaml
 info_position:
   timestamp:
@@ -572,15 +615,18 @@ info_position:
 ```
 
 #### 新增元素类型
+
 - `camera_lens`：相机+镜头合并单行输出（格式 `"品牌 型号 | 镜头"`），配置后替代 `camera` + `lens` 分开模式
 - `timestamp_author`：时间+作者合并输出（格式 `"时间 by 作者"`），配置后替代独立 `timestamp`
 - 以上均通过 `info_position` 中声明驱动，配置即渲染
 
 #### 配置驱动渲染
+
 - `info_position` 中声明的元素才渲染，未声明自动跳过
 - `style_manager._validate_config` 移除默认条目注入（此前强行添加 `exif`/`author`/`location`/`camera_icon`）
 
 #### Padding 配置
+
 ```yaml
 layout:
   padding:
@@ -589,10 +635,12 @@ layout:
     top: 0         # 叠加元素不超出上边界
     bottom: 0      # 叠加元素不超出下边界
 ```
+
 - 独立于 `expand_canvas` 和 `margin`，不影响原始图像位置
 - 默认四边均为 0，与旧版行为完全兼容
 
 #### 配置精简
+
 - `colors`：移除无效字段 `background`、`accent`、`border`、`icon`（均零引用）；颜色系统改为 `custom_{text_type}_{dark/light}_color` + `custom_text_{dark/light}_color` 两级覆盖
 - `fonts`：移除无效字段 `regular`、`line_spacing`；拆分为 `family`（字体族名）+ `weight`（字重 light/regular/medium），可通过 `--font-weight` 运行时覆盖
 - `layout`：移除无效字段 `border_position`、`border_width`（边框由 decorator 独立处理）、`info_height_ratio`（零引用）
@@ -603,6 +651,7 @@ layout:
 ### 高斯模糊
 
 #### 色彩断层修复
+
 - `apply_dithering()` 由 Python 逐像素 Floyd-Steinberg 循环（O(n²)，且限制 ≤200万像素）改为 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，支持任意分辨率
 - 叠加混合从 8-bit `Image.alpha_composite()` 改为 float32 numpy 逐通道混合，消除色彩量化断层
 - 模糊计算由 PIL `GaussianBlur`（O(n²)）替换为 3-pass `BoxBlur`（O(n)），视觉效果几乎一致，性能大幅提升
@@ -610,6 +659,7 @@ layout:
 - `blur_radius` 按缩放比例动态递减，配置值（默认 200）始终代表全分辨率等效半径
 
 #### 浅色背景模糊透明度调整
+
 - 浅色模糊背景默认透明度调整：`gaussian_white_35` → `gaussian_white_50`，`gaussian_white_65` → `gaussian_white_80`
 - GUI 下拉选项标签同步更新："模糊背景 (浅色 35%)" → "模糊背景 (浅色 50%)"，"模糊背景 (浅色 65%)" → "模糊背景 (浅色 80%)"
 - 默认选项由 "模糊背景 (浅色 65%)" 改为 "模糊背景 (浅色 80%)"
@@ -619,6 +669,7 @@ layout:
 ### Bug 修复
 
 #### 相对定位受特殊字符干扰
+
 - 文字元素在 Phase 1 测量时存储的 `height` 由字形级 `bbox[3] - bbox[1]` 改为字体度量 `ascent + descent`
 - 此前包含 `|`、`/` 等纵向跨度较大的字符时 bbox 变大，导致 `ty + th` 计算的下方元素间距异常增大
 - 混排文本（`max_ascent + max_descent`）本身即基于字体度量，不受此问题影响
@@ -637,12 +688,14 @@ layout:
 ### 字体渲染
 
 #### 中英日混排
+
 - 中英文混排字符串（如 "焦距 24mm"）自动按 CJK / 拉丁片段拆分，各片段使用对应字体（GlowSansSC / Gotham）渲染，不再全文统一 fallback
 - 混排以拉丁字体基线为基准，CJK 字符自动上移适配，确保中英日混排时视觉基线一致
 - CJK 检测码位扩展覆盖ひらがな（U+3040–U+309F）、カタカナ（U+30A0–U+30FF）及カタカナ拡張（U+31F0–U+31FF），日文不再错误回退到西文字体
 - `FontManager.split_mixed_text()` 与 `load_font()` 复用同一 `_CJK_CHAR_RE` 正则，保证拆分和字体选择逻辑一致
 
 #### 智能字体选择
+
 - 根据文本内容自动检测，西文使用 Gotham Medium，中文/日文使用 GlowSansSC
 - 支持 light、medium、regular 三种字重，Gotham regular 自动映射到 Gotham-Book
 - 基于 `(字体系列, 字重, 字号, 是否CJK)` 键值缓存字体，避免重复加载
@@ -652,6 +705,7 @@ layout:
 ### 渲染引擎
 
 #### 高斯模糊模块
+
 - 高斯模糊叠加和 Floyd-Steinberg 抖动算法独立为 `src/utils/gaussian_blur.py`
 - 用 3-pass Box Blur 近似高斯模糊，时间复杂度 O(n)，视觉效果几乎一致
 - `apply_dithering` 改用 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，消除逐像素 Python 循环
@@ -660,12 +714,14 @@ layout:
 - `gaussian_blur_radius` 和 `gaussian_blur_opacity` 配置参数真正生效
 
 #### 渲染器优化
+
 - `renderer.py` 通过 FontManager / LayoutEngine 抽取，从 1234 行精简至约 570 行
 - `_parse_color_value()` 和 `_resolve_color_from_config()` 消除 40 行重复颜色解析逻辑
 - `_create_background_with_expansion` 用字符串解析替代 6 分支 if/elif
 - 调试 `print()` 替换为 `logging` 模块
 
 #### 日志系统
+
 - `src/utils/logging_config.py` 提供 `setup_logging()` 统一初始化
 - DEBUG 级别输出到 `debug_log.txt`，INFO 及以上输出到控制台
 - 幂等守卫，CLI 和 GUI 入口均已集成

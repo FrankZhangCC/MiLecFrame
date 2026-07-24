@@ -10,8 +10,8 @@ from .gui import *
 from .utils import *
 from .frame_styles import *
 
-__version__ = "1.4.0"
-__author__ = "Frank Zhang"
+__version__ = "1.6.2"
+__author__ = "FrankZCC"
 __all__ = [
     'core',
     'gui', 
