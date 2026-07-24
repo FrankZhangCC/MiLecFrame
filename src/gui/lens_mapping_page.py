@@ -34,7 +34,8 @@ def render_lens_mapping_page():
     if search_term:
         filtered_lens_df = st.session_state.lens_df[
             st.session_state.lens_df['original_lens'].str.contains(search_term, case=False, na=False) |
-            st.session_state.lens_df['mapped_lens'].str.contains(search_term, case=False, na=False)
+            st.session_state.lens_df['mapped_lens'].str.contains(search_term, case=False, na=False) |
+            st.session_state.lens_df['short_lens'].str.contains(search_term, case=False, na=False)
         ]
     
     # 显示可编辑的镜头映射表格
@@ -47,6 +48,7 @@ def render_lens_mapping_page():
         column_config={
             "original_lens": st.column_config.TextColumn("原始镜头", width="medium"),
             "mapped_lens": st.column_config.TextColumn("映射镜头", width="medium"),
+            "short_lens": st.column_config.TextColumn("短版名称", width="medium"),
         },
     )
     

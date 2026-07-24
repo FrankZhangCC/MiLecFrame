@@ -8,7 +8,7 @@ from .gui import *
 from .utils import *
 from .frame_styles import *
 
-__version__ = "1.0.0"
+__version__ = "1.4.0"
 __author__ = "MiLeica Frame Project"
 __all__ = [
     'core',

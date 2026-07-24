@@ -3,11 +3,12 @@
 负责图像的基本处理、色彩空间转换、尺寸调整等
 """
 import os
+import io
 import logging
 from pathlib import Path
 from typing import Tuple, Optional, Dict, List
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageCms, ImageDraw, ImageFont
 # 设置PIL最大图像像素限制，解决解压炸弹警告
 Image.MAX_IMAGE_PIXELS = 200000000  # 2亿像素，可根据需要调整
 
@@ -32,7 +33,6 @@ class ImageProcessor:
         """
         self.style_config = style_config
         self.supported_formats = ['JPEG', 'PNG', 'TIFF', 'MPO']
-        self.hdr_supported_formats = ['HEIF', 'HEIC', 'AVIF']  # HDR相关格式
         self.max_input_size = (12000, 12000)  # 最大输入尺寸
         self.max_output_size = (8192, 8192)   # 最大输出尺寸
         
@@ -65,7 +65,6 @@ class ImageProcessor:
             bg_fill_type: 背景填充类型
             decorations: 装饰元素列表。每个元素是一个字典，包含 'type' 和 'params'。
                          例如水印: {'type': 'watermark', 'params': {'text': '...', 'position': '...', 'opacity': 0.5, 'color': '#FFFFFF'}}
-                         例如边框: {'type': 'border', 'params': {'width': 10, 'color': '#000000'}}
             font_weight: 字体字重 (light, regular, medium)
             logo_filename: logo文件名
             
@@ -89,16 +88,15 @@ class ImageProcessor:
                 return False
             
             # 3. 根据图像类型读取图像
-            if self.hdr_handler.is_hdr_format(input_path):
-                # 如果是HDR图像，使用HDR处理器
-                image = self.hdr_handler.process_hdr_image(input_path)
+            is_hdr = self.hdr_handler.detect_hdr_format(input_path)
+            if is_hdr:
+                image = self.hdr_handler.load_image(input_path)
                 if image is None:
-                    error_msg = f"错误: 无法处理HDR图像 - {input_path}"
+                    error_msg = f"错误: 无法加载HDR图像 - {input_path}"
                     self.logger.error(error_msg)
                     print(error_msg)
                     return False
             else:
-                # 普通图像直接用PIL打开
                 image = Image.open(input_path)
             
             # 4. 检查EXIF信息
@@ -107,6 +105,8 @@ class ImageProcessor:
                 warn_msg = f"警告: 未找到EXIF信息 - {input_path}"
                 self.logger.warning(warn_msg)
                 print(warn_msg)
+            
+            raw_exif = self.exif_helper.extract_raw_exif(input_path)
             
             # 获取格式化的EXIF数据用于显示（如果需要传递给renderer或后续处理）
             # 注意：如果renderer仍然需要原始exif_data，我们保留它。
@@ -122,8 +122,13 @@ class ImageProcessor:
                 # 缩放图像
                 image = self._resize_image_proportionally(image)
             
-            # 6. 处理色彩空间
+            # 6. 处理色彩空间（ICC转换在色调映射之前，确保色域已校正至sRGB）
             image = self._convert_colorspace(image)
+            sRGB_icc_bytes = image.info.get('icc_profile')
+
+            # 6a. HDR色调映射（色彩空间已统一为sRGB后再压缩动态范围）
+            if is_hdr:
+                image = self.hdr_handler.convert_hdr_to_sdr(image)
             
             # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
@@ -156,7 +161,7 @@ class ImageProcessor:
             )
             
             # 10. 保存图像
-            self._save_image(rendered_image, output_path, img_format)
+            self._save_image(rendered_image, output_path, img_format, raw_exif, sRGB_icc_bytes)
             
             success_msg = f"成功处理图像: {input_path} -> {output_path}"
             self.logger.info(success_msg)
@@ -184,8 +189,8 @@ class ImageProcessor:
         """
         try:
             img_format = Image.open(image_path).format
-            if img_format and (img_format in self.supported_formats or 
-                              self.hdr_handler.is_hdr_format(image_path)):
+            if img_format and (img_format in self.supported_formats or
+                              self.hdr_handler.detect_hdr_format(image_path)):
                 return img_format
             return None
         except Exception:
@@ -231,18 +236,40 @@ class ImageProcessor:
     def _convert_colorspace(self, image: Image.Image) -> Image.Image:
         """
         转换图像色彩空间到sRGB
-        
+
+        处理流程：
+        1. ICC 色彩配置文件转换（Adobe RGB / ProPhoto RGB / Display P3 等 → sRGB）
+        2. 像素模式转换（P/RGBA/LA/非RGB → RGB）
+
         Args:
             image: 原始图像
-            
+
         Returns:
-            转换后的图像
+            转换后的 sRGB 图像
         """
+        icc_profile = image.info.get('icc_profile')
+
+        # 步骤1: ICC色彩空间转换（前置，在模式转换之前保留原始位深）
+        if icc_profile:
+            try:
+                icc_stream = io.BytesIO(icc_profile)
+                profile_desc = ImageCms.getProfileDescription(icc_stream)
+                self.logger.info(f"检测到ICC色彩空间: {profile_desc}，转换为sRGB")
+                icc_stream.seek(0)
+                srgb_profile = ImageCms.createProfile('sRGB')
+                image = ImageCms.profileToProfile(
+                    image, icc_stream, srgb_profile,
+                    outputMode='RGB',
+                    renderingIntent=ImageCms.Intent.PERCEPTUAL
+                )
+                self.logger.info("ICC色彩空间转换成功")
+            except Exception as e:
+                self.logger.warning(f"ICC色彩空间转换失败，使用像素模式转换: {e}")
+
+        # 步骤2: 像素模式转换（此时已在sRGB空间内）
         if image.mode in ('RGBA', 'LA', 'P'):
-            # 保留透明通道的图像需要特殊处理
             if image.mode == 'P':
                 image = image.convert('RGBA')
-            # 对于有透明通道的图像，我们先转为RGB
             if image.mode in ('RGBA', 'LA'):
                 background = Image.new('RGB', image.size, (255, 255, 255))
                 if image.mode == 'RGBA':
@@ -252,27 +279,50 @@ class ImageProcessor:
                 image = background
         elif image.mode != 'RGB':
             image = image.convert('RGB')
-        
+
         return image
     
     def _save_image(self, image: Image.Image, output_path: str, 
-                    original_format: str) -> None:
+                    original_format: str, raw_exif: Optional[Dict] = None,
+                    icc_profile_bytes: Optional[bytes] = None) -> None:
         """
         保存图像
-        
+
         Args:
             image: 要保存的图像
             output_path: 输出路径
             original_format: 原始图像格式
+            raw_exif: 原始EXIF字典（piexif格式），用于嵌入输出图
+            icc_profile_bytes: sRGB ICC profile字节，用于嵌入输出图
         """
         try:
-            # 确保输出目录存在
             output_dir = os.path.dirname(output_path)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            
-            # 保存图像
-            image.save(output_path, format=original_format, quality=95, optimize=True)
+
+            output_ext = os.path.splitext(output_path)[1].lower()
+            if output_ext in ('.jpg', '.jpeg'):
+                save_format = 'JPEG'
+                save_kwargs = {'quality': 95, 'optimize': True}
+            elif output_ext == '.png':
+                save_format = 'PNG'
+                save_kwargs = {'optimize': True}
+            else:
+                save_format = original_format
+                save_kwargs = {}
+
+            # 嵌入 sRGB ICC profile
+            if icc_profile_bytes:
+                save_kwargs['icc_profile'] = icc_profile_bytes
+
+            if raw_exif:
+                try:
+                    exif_bytes = piexif.dump(raw_exif)
+                    save_kwargs['exif'] = exif_bytes
+                except Exception as e:
+                    self.logger.warning(f"嵌入EXIF信息失败: {e}")
+
+            image.save(output_path, format=save_format, **save_kwargs)
         except Exception as e:
             error_msg = f"保存图像时出错: {str(e)}"
             self.logger.error(error_msg)

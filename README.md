@@ -1,4 +1,4 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.5.0-blue)
 
 ## 快速开始
 
@@ -58,23 +58,26 @@ streamlit run src/gui/app.py
 
 ### 图像处理
 
-- **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间
-- **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF 等 HDR 格式
-- **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB 自动识别并转换至 sRGB
+- **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间、GPS 坐标（度分秒格式化）
+- **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF（高位深 HDR 自动色调映射转 SDR）
+- **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB / Display P3 等嵌入式 ICC 色彩空间自动数学转换至 sRGB
 
 ### 相框与布局
 
 - **多种相框样式**：JSON / YAML / TOML 配置文件，支持单文件或文件夹变体组织
 - **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
-- **响应式布局**：画布扩展、文字大小、边距、间距均以原图长边比例为基准自适应
+- **响应式布局**：画布扩展、文字大小、边距、间距均以原图参照边（短边）比例为基准自适应
 - **绝对与相对定位**：元素可固定位置或相对于其他元素排列（after / below / left-of 等），拓扑排序自动解析依赖
 - **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
 
 ### 装饰元素
 
-- **边框**：可自定义宽度与颜色
 - **水印**：可自定义文字、位置、透明度与颜色
-- **Logo**：支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
+
+### Logo
+
+- 支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
+- 布局、尺寸、定位由样式 YAML 的 `logo:` 节独立定义，渲染顺序在文字层之后（可引用文字元素坐标做相对定位）
 
 ### 使用方式
 
@@ -84,7 +87,8 @@ streamlit run src/gui/app.py
 
 ## 技术栈
 
-- 核心图像处理：Pillow、OpenCV
+- 核心图像处理：Pillow、NumPy
+- HDR 色调映射：Reinhard 全局算子（NumPy 实现）
 - EXIF处理：piexif
 - GUI界面：Streamlit
 
@@ -138,7 +142,7 @@ MiLeica_Frame/
 │   └── fonts/              # 字体文件
 ├── data/                   # 数据文件
 │   ├── camera_map.csv      # 相机品牌型号映射
-│   └── lens_map.csv        # 镜头映射
+│   └── lens_map.csv        # 镜头映射（原始 → 映射 → 短版）
 ├── tests/                  # 测试文件
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
@@ -219,35 +223,92 @@ name: "样式名称"         # 必需字段，用于标识样式
 - `expand_canvas`: 扩展画布配置
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
-- `padding`: 叠加元素安全区域配置（v1.2.0 新增，优先级高于 margin）
-  - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于原图长边），默认值为 0（= 画布边界）
+- `padding`: 叠加元素安全区域配置（v1.2.0 新增，**推荐优先使用 padding 控制全局边距**）
+  - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
-  - 绝对定位与相对定位元素均受 padding 约束
+  - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
-  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`
-  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
+  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
+  - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"（横幅）或 "品牌 型号 | 短镜头"（竖幅）；`camera` + `lens` 则分开两行；`lens` 在竖幅时自动使用短版名称
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
-    - **绝对定位**：
-      - `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
-      - `position`: 锚点相对于原图边界的位置（`top-left`, `top-center`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom-center`, `bottom-right`, `top`, `bottom`）
-      - `alignment`: 元素自身对齐到锚点的方式（`left` 左对齐 / `center` 居中 / `right` 右对齐 / `top` / `bottom` / `top-left` / `top-right`）
-      - `margin`: 传统边距（可选，用于向后兼容）
-      - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
-        - **顶部文字**（如 camera, lens）：必须定义 `margin_top`
-        - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
-        - **左对齐文字**（如 author, camera, lens）：必须定义 `margin_left`
-        - **右对齐文字**（如 location）：必须定义 `margin_right`
-        - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
-        - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
-    - **相对定位**（v1.2.0 新增）：
-      - `relative_to`: 参考元素名称（如 `"exif"`, `"author"`），设置后 `position` 和独立 margin 失效
-      - `relative_position`: 相对位置，可选 `after`/`below`（下方）、`before`/`above`（上方）、`right-of`（右侧）、`left-of`（左侧）
-      - `relative_margin`: 与参考元素的间距比例（相对于原图长边），默认 0.01
-      - `alignment`: 在相对方向垂直轴上的对齐（如 `relative_position: below` + `alignment: left` 表示置于参考元素下方且左对齐）
-      - `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（默认 0）
-  - 相对定位元素与参考元素合并为组合盒，超出 padding 安全区域时整体平移
-  - 元素注册顺序由拓扑排序自动解析，无需手动调整
+  - 元素的定位参数见下方 [定位方式](#定位方式)
+
+#### 定位方式
+
+元素的定位方式分为绝对定位和相对定位，二者互斥（`relative_to` 有值时优先采用相对定位）。
+
+##### 绝对定位
+
+以**原始图片边界**为参考坐标系，元素通过锚点绑定到图片边界上，再通过 margin 偏移。
+
+- `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
+  - `inside`：元素绘制在原图矩形内部，margin 从边界向内偏移
+  - `outside`：元素绘制在原图矩形外部，margin 从边界向外偏移
+- `position`: 锚点相对于原图边界的位置，支持 14 种：
+  `top-left` / `tl`, `top-center` / `tc`, `top-right` / `tr`, `top`, `left`, `center`, `right`, `bottom-left` / `bl`, `bottom-center` / `bc`, `bottom-right` / `br`, `bottom`
+  - 注：`center` 锚点以画布中心为基准，不受 `placement` / margin 影响
+- `alignment`: 元素自身对齐到锚点的方式
+  - 横向：`left` / `top-left` / `bottom-left`（左对齐）、`right` / `top-right` / `bottom-right`（右对齐）、其他值居中
+  - 纵向：`top` / `top-left` / `top-right`（顶对齐）、`bottom` / `bottom-left` / `bottom-right`（底对齐）、其他值居中
+  - 带 `-left`/`-right`/`-top`/`-bottom` 后缀的组合格式会按对应轴向被正确解析
+
+**margin 边距体系**：
+
+margin 是元素相对于原始图片对应边界的偏移距离，每个方向**独立计算、互不影响**。
+
+- `margin`：统一边距，值为浮点数时按参照边（短边）比例计算（如 `0.02` = 参照边的 2%），值为整数时表示绝对像素。未设置时默认 `0`
+  - 此为向后兼容选项，设置后覆盖四个方向的初始值
+- `margin_top` / `margin_bottom` / `margin_left` / `margin_right`：独立四周边距，每个方向分别覆盖 `margin` 统一值
+  - 值类型规则与 `margin` 相同：浮点数 → 比例，整数 → 像素，不设默认 `0`
+  - 四个方向**完全独立**，不存在互斥激活条件，可以只定义需要的方向
+  - **推荐使用浮点数比例**（如 `0.03` 表示参照边（短边）的 3%）以保持响应式设计特性
+- 计算优先级：`margin_*`（逐方向精调）> `margin`（统一兜底）> 默认 `0`
+- 全局约束：padding 对最终坐标有截断权，margin 的计算结果可能被 padding clamp 修正
+
+定位元素在 `info_position` 中的绝对定位声明示例：
+
+```yaml
+camera_lens:
+  placement: outside
+  position: "bottom-left"
+  alignment: "left"
+  margin_top: 0.01
+  margin_bottom: 0.022
+  margin_left: 0.02
+  margin_right: 0.01
+```
+
+##### 相对定位
+
+以**另一已注册元素**为参考坐标系，元素相对于该参考元素排列。
+
+- `relative_to`: 参考元素名称（如 `"exif"`, `"camera_lens"`）。有值时 `position` 和 `margin_*` 系列失效，转而使用相对定位
+- `relative_position`: 相对位置：
+  `after` / `below`（下方）、`before` / `above`（上方）、`right-of`（右侧）、`left-of`（左侧）
+- `relative_margin`: 与参考元素的间距比例（相对于参照边（短边）），默认 `0.01`，**推荐使用浮点数比例**
+- `alignment`: 元素在参考元素范围内的对齐方式，默认 `center`
+  - `relative_position` 为 `after` / `below` / `before` / `above` 时，控制**水平方向**：`left`（左对齐）、`right`（右对齐）、其他值居中，以参考元素宽度为基准
+  - `relative_position` 为 `right-of` / `left-of` 时，控制**垂直方向**：`top`（顶对齐）、`bottom`（底对齐）、其他值居中，以参考元素高度为基准
+  - 注：相对定位中的 `alignment` 以参考元素边界计算，与绝对定位的 `margin_*` 无关
+- `offset_x_ratio` / `offset_y_ratio`: 微调偏移比例（相对于参照边（短边），默认 `0`）
+
+定位元素在 `info_position` 中的相对定位声明示例：
+
+```yaml
+timestamp_author:
+  relative_to: "camera_lens"
+  relative_position: "below"
+  alignment: "left"
+  relative_margin: 0.010
+```
+
+##### 定位系统行为规范
+
+- 元素注册顺序由拓扑排序（Kahn 算法）自动解析，基于 `relative_to` 依赖关系决定处理顺序，无需手动调整
+- 缺失参考元素保护（v1.4.0）：当 `relative_to` 指向的元素因无文本被跳过时，以其绝对定位参数预注册 0×0 锚点，避免依赖元素降级偏移
+- 组合盒溢出保护（v1.2.0）：相对定位元素与参考元素（及其全部从属）合并为组合盒，超出 padding 边界时整体平移，保持对齐关系不变
+- 所有定位坐标均以参照边（短边）比例为基准，确保响应式自适应
 
 ### 渲染上下文 (RenderContext)
 
@@ -270,20 +331,26 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化        |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间      |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并    |
-| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头, 竖幅=相机+短镜头 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号      |
-| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号           |
+| `camera_make`      | `"Leica"`                                      | 映射后相机品牌     |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称 |
 | `author`           | `"Frank"`                                      | 用户输入           |
 | `location`         | `"Shanghai"`                                   | 用户输入           |
+| `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）    |
 
 #### 竖向/方形图片自动适配
 
-当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
+当检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，`lens` 和 `camera_lens` 自动使用短版镜头名称，避免竖幅窄图空间不足时文字过长的问题。
 
-此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+此逻辑内聚在 `RenderContext` 中：
 
-- 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
-- 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
+| key            | 横向图片                                 | 竖向/方形图片                              |
+| -------------- | ---------------------------------------- | ------------------------------------------ |
+| `camera_lens`  | `"品牌 型号 \| 镜头"`（完整合并格式）    | `"品牌 型号 \| 短镜头"`（相机 + 短版镜头） |
+| `lens`         | `"镜头"`（完整镜头名）                   | `"短镜头"`（短版镜头名）                   |
+
+短版镜头名在 `lens_map.csv` 的 `short_lens` 列中配置，未配置时自动回退到 `mapped_lens`。
 
 #### 新增显示字段指南
 
@@ -304,7 +371,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
   - `custom_text_dark_color`: 暗色背景下的文字颜色
   - 支持十六进制格式（如 `"#FF6B6B"`）或 RGB 数组（如 `[255, 107, 107]`）
 - **按文本类型独立覆盖**：`custom_{text_type}_light_color` / `custom_{text_type}_dark_color`
-  - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+  - `text_type` 可选值：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 示例：`custom_exif_light_color: [51, 51, 51]`、`custom_timestamp_dark_color: "#CCCCCC"`
 - **最终兜底**：若以上均未设置，深色背景使用白色 `(255,255,255)`，浅色背景使用黑色 `(0,0,0)`
 
@@ -313,20 +380,48 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 - `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
 - `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
   - 可通过命令行 `--font-weight` 参数运行时覆盖
-- `size_ratio`: 默认字体大小比例（相对于原图长边像素数）
-- `sizes`: 各类信息的独立字体大小比例（相对于原图长边）
-  - `exif`、`timestamp`、`timestamp_author`、`camera`、`lens`、`camera_lens`、`author`、`location`
+- `size_ratio`: 默认字体大小比例（相对于参照边（短边）像素数）
+- `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
+  - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 未设置的字段默认使用 `size_ratio`
 
-### 装饰元素配置 (decorations)
+### 水印配置 (decorations)
 
-装饰元素（边框、水印、Logo）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+水印完全由 GUI/CLI 外部参数控制，不通过样式 YAML 定义。
 
-- `border`: 边框（可自定义宽度和颜色）
-- `watermark`: 水印
-- `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
+- `watermark`: 水印（可自定义文字、位置、透明度、颜色），完全外部参数
 
-在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
+在 GUI 模式下，水印由界面控件动态组装并传入渲染器。
+
+### Logo 配置
+
+Logo 采用**独立渲染管线**：布局、尺寸、定位由 YAML 中 `logo:` 节定义，文件选择由 GUI（自动匹配 / 手动选择 / 无）或 CLI 传入，渲染顺序在文字层之后。
+
+样式 YAML 中 `logo:` 节定义 Logo 的表现形式：
+
+```yaml
+logo:
+  enabled: true                 # 是否启用
+  size_ratio: 0.05              # 短边占参照边（短边）比例
+  placement: outside            # inside / outside
+  position: "bottom-right"      # 14 种锚点位置
+  alignment: "center"           # 对齐方式
+  margin_top: 0                 # 四周边距（float=比例，int=像素）
+  margin_bottom: 0
+  margin_left: 0
+  margin_right: 0
+  # 相对定位（与绝对定位互斥）
+  relative_to: "camera_lens"    # 参考元素名
+  relative_position: "below"    # after / before / below / above / right-of / left-of
+  relative_margin: 0.01         # 与参考元素的间距比例
+  offset_x_ratio: 0             # 微调偏移比例
+  offset_y_ratio: 0
+```
+
+- Logo 短边 = `size_ratio × 参照边（短边）`，对角线自动限制 ≤ `2 × size_ratio × 参照边（短边）`（防止细长 Logo 失控），默认 `size_ratio = 0.05`
+- 支持绝对定位和相对定位，可引用文字元素（如 `relative_to: "camera_lens"`）
+- Logo 在文字层之后渲染，渲染后以 `"logo"` 注册，供后续元素通过 `relative_to: logo` 引用
+- Logo 文件来源：GUI 三选一（自动匹配 / 手动选择 / 无）；自动匹配时通过 `context.get_text('camera_make')` 获取相机品牌后由 `LogoSelector.auto_match_logo()` 逐词子串匹配 `assets/logos/` 下 PNG 文件
 
 ## 核心功能规格
 
@@ -355,6 +450,8 @@ EXIF Helper（解析原始二进制 → 纯净字段，_safe_decode 多编码容
 
 统一数据出口 `exif_helper.get_display_data()`，同时提供 `raw_*`（原始值，GUI 设备信息区展示）和映射后字段（相机/镜头组合、格式化曝光参数），确保 GUI 预览与最终渲染数据一致。
 
+`exif_helper.get_file_info(image)` 提供文件级元数据（编码格式 / 色彩空间 / 像素尺寸），与 `get_display_data()` 并列组成统一数据出口，GUI 文件信息区域仅消费此方法的返回值。
+
 #### 渲染上下文（RenderContext）
 
 `src/utils/render_context.py` 是渲染文本数据的**统一入口**，将数据准备逻辑从渲染器中完全解耦：
@@ -373,13 +470,24 @@ text = context.get_text('camera_lens')  # 一行调用获取最终显示文本
 | `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化曝光参数                          |
 | `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间                                |
 | `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并（作者为空时仅显示时间）      |
-| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 相机+镜头合并，竖向/方形图片自动替换为仅相机 |
+| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3 \| Summilux 28mm"` | 横幅=相机+镜头，竖幅=相机+短镜头 |
 | `camera`           | `"Leica Q3"`                                   | 相机品牌+型号                                |
-| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号                                     |
+| `camera_make`      | `"Leica"`                                      | 映射后相机品牌（v1.4.1）                     |
+| `lens`             | `"Summilux 28mm f/1.7"` / `"Summilux 28mm"`   | 镜头型号，竖幅使用短版名称                   |
 | `author`           | `"Frank"`                                      | 用户输入                                     |
 | `location`         | `"Shanghai"`                                   | 用户输入                                     |
+| `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS 度分秒格式化坐标（v1.4.1）          |
 
-**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`camera_lens` 自动替换为 `camera`（仅显示相机型号），避免竖幅窄图空间不足。
+**相机信息的四级字段**（`get_display_data()` 内部构造，按粒度递增）：
+
+| 内部字段                 | 对外 key        | 输出示例                       | 说明                             |
+| ------------------------ | --------------- | ------------------------------ | -------------------------------- |
+| `camera_make`          | `camera_make` | `"Leica"`                    | 映射后品牌名                     |
+| `camera_combined`      | `camera`      | `"Leica Q3"`                 | 品牌 + 型号                      |
+| `camera_lens_combined` | `camera_lens` | `"Leica Q3 \| Summilux 28mm"` | 品牌 + 型号 + 镜头（横幅默认）   |
+| `short_lens`           | `lens` (竖幅) | `"Summilux 28mm"`            | 短版镜头名（竖幅时 `lens` 使用） |
+
+**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`lens` 自动替换为短版镜头名（`short_lens`），`camera_lens` 自动替换为 `"相机 | 短镜头"`。短版名称在 `lens_map.csv` 的 `short_lens` 列中配置。
 
 **新增显示字段**：只需在 `RenderContext.get_text()` 添加 `elif key == 'xxx':` 分支 + 在 YAML 的 `info_position` 中声明配置，渲染器零改动。
 
@@ -395,11 +503,11 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 #### 支持的格式
 
-| 类别     | 格式                                         | 处理方式                            |
-| -------- | -------------------------------------------- | ----------------------------------- |
-| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                        |
-| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR     |
-| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB                  | 自动识别，非 sRGB 警告并转换至 sRGB |
+| 类别     | 格式                                         | 处理方式                        |
+| -------- | -------------------------------------------- | ------------------------------- |
+| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                    |
+| HDR      | HEIF、HEIC、AVIF                               | `HDRHandler` 加载 ICC profile，色彩空间转换后 Reinhard 色调映射至 SDR |
+| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB、Display P3 等   | 自动 ICC 数学转换至 sRGB        |
 
 #### 尺寸限制
 
@@ -412,13 +520,14 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 ```
 1. 验证输入文件存在 + 格式支持
-2. HDR 检测 → HDRHandler 预处理（Gainmap/UltraHDR/HEIF/AVIF）
+2. HDR 检测 → HDRHandler 加载（保留 ICC profile）
 3. EXIF 提取（piexif + 多编码解码）→ 设备映射 → 记录到 camera_map.csv / lens_map.csv
 4. 尺寸验证 → 超限等比缩小
-5. 色彩空间检测 → 非 sRGB 转换
-6. 加载样式配置（StyleManager，含变体上下文匹配）
-7. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
-8. 保存输出（JPEG/PNG，quality=95，optimize=True）
+5. 色彩空间检测 → 非 sRGB ICC 数学转换
+6. HDR 色调映射 → Reinhard 全局算子压缩动态范围（仅 HEIF/AVIF）
+7. 加载样式配置（StyleManager，含变体上下文匹配）
+8. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
+9. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
 ```
 
 ---
@@ -429,7 +538,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 `src/utils/layout_engine.py` 负责画布计算与元素定位：
 
-- **画布扩展**：以原图长边比例扩展四边（`expand_canvas`），上下左右独立设置
+- **画布扩展**：以参照边（短边）比例扩展四边（`expand_canvas`），上下左右独立设置
 - **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
 - **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
 - **相对定位**（v1.2.0）：`relative_to` + `relative_position`（`below` / `above` / `right-of` / `left-of`），`relative_margin` 间距 + `offset` 微调
@@ -451,7 +560,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
 - **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
-- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 原图长边`），长边自动限制 ≤ `3 * size_ratio * 原图长边`（即隐含要求 Logo 长宽比 ≤ 3:1）。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
+- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 参照边（短边）`），对角线自动限制 ≤ `2 * size_ratio * 参照边（短边）`。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
 - **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名
 
 #### 背景填充管理器 (BackgroundFillManager) (v1.4.0)
@@ -497,7 +606,6 @@ BackgroundFillManager.register(
 
 `src/core/decorator.py` 独立于样式 YAML，由 GUI 或 CLI 动态传入：
 
-- **边框**：自定义宽度（px）与颜色（RGB 元组），作用于原图外缘
 - **水印**：自定义文字内容、位置（9 种锚点）、不透明度（0-100%）、颜色
 
 #### 样式变体系统（v1.3.0）
@@ -512,9 +620,10 @@ BackgroundFillManager.register(
 
 基于 Streamlit 的 Web 界面（`src/gui/app.py`），提供以下功能区域：
 
-- **图片上传与预览**：支持拖拽上传，实时显示原图及 EXIF 信息（设备信息 + 拍摄参数 + 相框显示预览）
+- **图片上传与预览**：支持拖拽上传，实时显示原图及文件信息（编码格式 / 色彩空间 / 像素尺寸）和 EXIF 信息（设备信息 + 拍摄参数 + 相框显示预览）；上传阶段 EXIF 直接从内存读取，无需落盘临时文件
+- **缩略图预览**：处理完成后自动生成 1200px 长边缩略图用于页面预览，大幅降低传输带宽；下载按钮提供全分辨率原始输出
 - **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
-- **文字与装饰**：作者姓名（自动保存）、拍摄地点、字体字重选择；边框（宽度/颜色）、水印（内容/位置/透明度/颜色）独立控制
+- **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；水印（内容/位置/透明度/颜色）独立控制
 - **Logo 设置**：自动匹配（根据相机品牌）/ 手动选择 / 无，三选一；自动匹配无结果时不显示
 - **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）
 - **输出格式**：JPEG / PNG 可选
