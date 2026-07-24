@@ -110,7 +110,7 @@ div.block-container {
     # 底部信息
     st.markdown("---")
     st.caption("💡 提示：本程序支持设备映射，自动识别并显示相机型号等信息")
-    st.caption("📋 ©Frank Zhang 2025")
+    st.caption("📋 ©FrankZCC 2025")
     st.caption("📋 使用 DeepSeek V4 系列模型开发。")
 
 
