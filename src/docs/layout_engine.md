@@ -2,7 +2,7 @@
 
 > 对应模块：`src/utils/layout_engine.py`（LayoutEngine）和 `src/core/renderer.py`（FrameRenderer）
 >
-> 版本：v1.11.0-dev，2026-05-23
+> 版本：v1.12.0-dev，2026-05-25
 
 ---
 
@@ -348,7 +348,7 @@ def _calculate_absolute(self, ew, eh, config):
 |------|--------|--------|--------|
 | `placement` | `inside` / `outside` | `outside` | 元素在原图矩形内侧还是外侧 |
 | `position` | 14 种锚点 | `bottom` | 绑定到原图的哪条边或哪个角 |
-| `alignment` | `left` / `center` / `right` | `center` | 元素自身相对于锚点的对齐方式 |
+| `alignment` | `left` / `center` / `both-center` / `right` | `center` | 元素自身相对于锚点的对齐方式；`both-center` 使元素中心与锚点重合 |
 
 ### 4.3 14 种 position 的完整行为矩阵
 
@@ -382,7 +382,7 @@ def _align_x(alignment, ox, ow, ew, m):
     if alignment in ('right', 'top-right', 'bottom-right'):
         return ox + ow - ew - m['right']
     
-    # 其他（包括 'center'、默认）：元素水平居中于原图
+    # 其他（包括 'center'、'both-center'、默认）：元素水平居中于原图
     return ox + (ow - ew) // 2
 ```
 
@@ -398,7 +398,7 @@ def _align_y(alignment, oy, oh, eh, m):
     if alignment in ('bottom', 'bottom-left', 'bottom-right'):
         return oy + oh - eh - m['bottom']
     
-    # 其他（包括 'center'、默认）：元素垂直居中于原图
+    # 其他（包括 'center'、'both-center'、默认）：元素垂直居中于原图
     return oy + (oh - eh) // 2
 ```
 
@@ -844,13 +844,16 @@ defined_texts:
 | `right` | `bottom` / `bottom-*` | `right` | `bottom` |
 | `right` | 其他 | `right` | `center` |
 | `center` | 任意 | `center` | `center` |
+| 任意 | **`both-center`** | `center` | `center` |
+
+> **v1.12.0 新增**：`alignment='both-center'` 时 `_resolve_tree_ref` 直接返 `('center', 'center')`，整棵树以中心为参考点进行树级定位。
 
 当 `position` 为 `top` 或 `bottom` 时，它本身不指定水平方向，此时：
 - `alignment` 为 `left` / `top-left` / `bottom-left` → `h_ref = 'left'`
 - `alignment` 为 `right` / `top-right` / `bottom-right` → `h_ref = 'right'`
-- 其他 → `h_ref = 'center'`
+- 其他（含 `both-center`）→ `h_ref = 'center'`
 
-当 `position` 为 `left` 或 `right` 时，垂直方向由 `alignment` 决定（见上表）。
+当 `position` 为 `left` 或 `right` 时，垂直方向由 `alignment` 决定（见上表，`both-center` 落入"其他"类）。
 
 ### 8.5 目标参考 y 的校正
 
@@ -1201,7 +1204,7 @@ for line_info in lines:
 |------|------|------|
 | `placement` | `'inside'` / `'outside'` | 元素在原图内侧还是外侧 |
 | `position` | 14 种锚点 | 绑定到原图的哪条边/角 |
-| `alignment` | `'left'` / `'center'` / `'right'` | 元素自身对齐方式 |
+| `alignment` | `'left'` / `'center'` / `'both-center'` / `'right'` | 元素自身对齐方式；`both-center` 使元素中心与锚点重合 |
 | `margin` | `float` / `int` | 统一边距 |
 | `margin_top` / `_bottom` / `_left` / `_right` | `float` / `int` | 各方向独立边距 |
 | `tree_align` | `boolean` | v1.7.0：启用树级组合定位 |
@@ -1211,7 +1214,7 @@ for line_info in lines:
 |------|------|------|
 | `relative_to` | `string` | 参考元素名称 |
 | `relative_position` | `'after'` / `'below'` / `'before'` / `'above'` / `'right-of'` / `'left-of'` | 相对位置 |
-| `alignment` | `'left'` / `'center'` / `'right'` | 相对于参考元素的对齐方向 |
+| `alignment` | `'left'` / `'center'` / `'both-center'` / `'right'` | 相对于参考元素的对齐方向；`both-center` 等价于 `center` |
 | `relative_margin` | `float` | 间距比例（默认 0.01） |
 | `offset_x_ratio` / `offset_y_ratio` | `float` | 微调偏移（默认 0） |
 
@@ -1262,7 +1265,7 @@ defined_texts:
     relative_position: "right-of"  # 水平链
 ```
 
-根元素的 `position: "bottom"` + `alignment: "center"` + `tree_align: true` 会将整棵依赖树居中。
+根元素的 `position: "bottom"` + `alignment: "center"` + `tree_align: true` 会将整棵依赖树居中。若需双轴居中（元素中心与锚点重合），使用 `alignment: "both-center"`。
 
 ### Q: `tree_align: true` 对单元素有影响吗？
 

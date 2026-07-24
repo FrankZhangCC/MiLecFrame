@@ -79,12 +79,12 @@
   │ 元素1: [______________]  (key)                                       │
   │   定位方式: □ 绝对  □ 相对                                          │
   │   [绝对] position: [______________]  (bottom-left / bottom-right / ...)
-  │          alignment: [______________]  (left / center / right / ...)
+  │          alignment: [______________]  (left / center / both-center / right / ...)
   │          margin_top: [____]  margin_bottom: [____]                   │
   │          margin_left: [____]  margin_right: [____]                   │
   │   [相对] relative_to: [______________]                              │
   │          relative_position: [______________]  (below / above / left-of / right-of)
-  │          alignment: [______________]                                 │
+  │          alignment: [______________]  (both-center 等效于 center)    │
   │          relative_margin: [____]  (默认 0.01)                        │
   │          offset_x_ratio: [____]  offset_y_ratio: [____]  (可选, 默认 0)
   ├─────────────────────────────────────────────────────────────────────┤
@@ -141,14 +141,15 @@
   - 启用: □ 是  □ 否
   - 若启用:
       position: [______________]  (bottom-right / top-left / ...)
-      alignment: [______________]
+      alignment: [______________]  (left / center / both-center / right / ...)
       size_ratio: [____]
+      diagonal_limit_ratio: [____]  (可选，默认 2.0；对角线上限 = ratio × size_ratio × reference_side)
       margin_top: [____]  margin_bottom: [____]
       margin_left: [____]  margin_right: [____]
       或使用相对定位:
       relative_to: [______________]
       relative_position: [______________]
-      alignment: [______________]
+      alignment: [______________]  (both-center 等效于 center)
       relative_margin: [____]
 
 
