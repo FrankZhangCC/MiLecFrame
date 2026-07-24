@@ -1,5 +1,82 @@
 # 更新历史
 
+## v1.4.0 (2026-05-04)
+
+> 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。
+
+### 背景填充管理器 (BackgroundFillManager) 🔴 新模块
+
+- 新增 `src/utils/background_fill.py`，作为背景填充功能的**唯一入口**
+- 所有填充类型在 `FILL_TYPES` 类属性注册表中集中定义，明确定义各类型的 `method`（solid/gaussian）、颜色、透明度、模糊半径、`text_scheme`（dark/light）等属性
+- **GUI/CLI 统一**：`get_choices()` 返回 `{label: key}` 映射供 GUI 下拉框，`get_keys()` 返回 key 列表供 CLI argparse
+- **文字颜色自适应**：`is_dark_bg(key)` 替代 renderer 中硬编码的 `dark_bg_types`/`light_bg_types` 列表和字符串 `startswith` 判断
+- **渲染统一**：`render(image, w, h, fill_type, *, color, opacity, blur_radius)` 封装背景创建逻辑，支持参数覆盖
+- **预留扩展**：`register()` 方法支持运行时动态添加新填充类型，新增类型无需修改任何渲染器或界面代码
+- **代码精简**：renderer 移除 `_create_background_with_expansion` 方法（24 行）、`dark_bg_types`/`light_bg_types` 列表（12 行）、`bg_fill_config` 参数传递链
+- GUI 中 `bg_fill_options` 硬编码字典 → `BackgroundFillManager.get_choices()`；CLI `choices` 列表 → `get_keys()`；默认选项 → `DEFAULT_FILL`
+
+### 布局引擎 placement/position 拆分 🔴 破坏性变更
+
+- `position` 字段原先同时承担 inside/outside + 14 种锚点两维语义，现拆分为三个正交参数：
+  - **`placement`**（新增）：`inside`（内部）/ `outside`（外部），默认 `outside`
+  - **`position`**（简化）：14 种锚点位置（`top-left` / `top` / `bottom-right` / `left` / `center` 等）
+  - **`alignment`**：元素自身对齐方式（`left` / `center` / `right`），语义不变
+- `layout_engine._get_anchor()` 重构：新增 `placement` 参数，每个 position 分支拆分 inside/outside 两条 Y 计算路径
+- 旧 `position: "inside"` / `position: "outside"` 自动映射为新格式
+- 所有 YAML 配置、style_manager fallback 模板、样式创建器同步迁移
+
+### Logo 尺寸逻辑重构
+
+- 取消正方形限制，改为**短边基准等比缩放**：`logo.size_ratio * 原图长边` 确定 Logo 短边尺寸
+- 新增长边上限保护：长边 ≤ `3 * size_ratio * 原图长边`，防止细长条 Logo 失控
+- `renderer._add_logo()` 和 `decorator.add_logo()` 两处同步更新
+- `assets/logos/README.md` 更新：形状建议从"正方形"改为"任意长宽比，建议 ≤ 3:1"
+
+### FontManager 集成
+
+- `Decorator.__init__` 接收 `FontManager` 实例（依赖注入，与 `renderer.py` 一致）
+- `add_watermark()` 和 `add_corner_mark()`（已删除）中 ~70 行手写字体检测+路径拼接+逐个加载逻辑 → 替换为 `FontManager.load_font()` 调用
+- 字体加载（中西文检测、字重映射、缓存、回退）统一由 `FontManager` 管理
+
+### 死代码清理
+
+- **`corner_mark` 全链路删除**：`decorator.add_corner_mark()` 方法（70 行）、`_calculate_position()` 方法（49 行）、`available_decorations` 中的 `corner_mark` 条目、`apply_decorations` 调度分支。无任何地方构造 `{type: 'corner_mark'}` decoration
+- **`Decorator.add_logo()` 删除**（81 行）：唯一调用方 `apply_decorations` logo 分支无人触发。真实 Logo 路径为 `renderer._add_logo()`
+- **`camera_icon` 全局移除**：renderer 中显式 `continue` 跳过，属无效元素。从 `ELEMENT_KEYS`、style_manager fallback 模板、3 个 YAML 配置、`_STYLE_TEMPLATE.txt`、README 中清除
+- **`background_fill` YAML 段删除**：`background_fill.type` 从未被渲染器读取（由 GUI/CLI 参数决定），`gaussian_blur_radius` 和 `gaussian_blur_opacity` 硬编码到 `BackgroundFillManager` 注册表。从 4 个 YAML 配置、style_manager 验证/模板、样式创建器 UI、`_STYLE_TEMPLATE.txt`、README 中移除
+- **`os` / `ImageFilter` / `re` 无用导入清理**
+
+### Logo 相对定位支持
+
+- 样式编辑器中 Logo 配置新增定位方式单选（absolute / relative）
+- 相对模式支持 `relative_to`、`relative_position`、`relative_margin`、`offset_x_ratio`/`offset_y_ratio`
+- 绝对模式保持原有 `placement`、`position`、alignment、四向 margin
+- `_load_existing_style()` / `_collect_config()` 同步支持相对定位字段的读写
+
+### 缺失参考元素预注册修复
+
+- 当 `relative_to` 指向的元素因 EXIF 缺失无文本被跳过时，渲染器自动以 0x0 尺寸预注册其绝对位置锚点
+- 避免了依赖元素降级为默认绝对定位导致的位置偏移（如 `timestamp_author` → `camera_lens` 在无 EXIF 时偏移）
+- 仅 9 行代码，不修改其他逻辑
+
+### 样式编辑器改进
+
+- 新增 `placement` 下拉框（`outside`/`inside`），应用于元素编辑器和 Logo 编辑器
+- `POSITION_OPTIONS` 拆分为 `PLACEMENT_OPTIONS` + `ANCHOR_POSITION_OPTIONS`
+- 移除 `_render_background()` 函数及 `BG_TYPE_OPTIONS`（背景填充已由 `BackgroundFillManager` 接管）
+- Logo 编辑器新增相对定位 mode radio + 全部相对定位参数 UI
+
+### 内部优化
+
+- `renderer.py`：从 471 行降至 429 行（删除 `_create_background_with_expansion`、`dark/light_bg_types`；替换为 `BackgroundFillManager` 调用）
+- `decorator.py`：从 432 行降至 231 行（删除 `add_corner_mark`、`add_logo`、`_calculate_position`、`available_decorations`）
+- `style_creator_page.py`：从 874 行降至 837 行（移除 background_fill UI）
+- `style_manager.py`：移除 `background_fill` 验证注入和 fallback 模板字段、`camera_icon` 条目
+- `main.py`：CLI `choices` 列表 → `BackgroundFillManager.get_keys()`；默认值 → `DEFAULT_FILL`
+- 所有 YAML 配置文件精简
+
+---
+
 ## v1.3.0 (2026-04-30)
 
 > 本版本引入**样式变体系统**，支持根据数据可用性动态切换布局，无需修改渲染器代码。
@@ -38,6 +115,19 @@
 - `get_available_styles()` — 从纯文件扫描改为同时扫描文件夹和文件，文件夹名即为样式名，逻辑清晰化
 - `get_style_config()` — 行数从约 40 行精简整合，文件夹匹配与单文件加载共用 `_load_config_file()`
 - `_resolve_style_variant()` — 独立的变体匹配引擎，解析与匹配逻辑内聚
+
+### 样式编辑器
+
+#### GUI 样式编辑页面
+- 新增 `src/gui/style_creator_page.py`，在侧边栏「🎨 样式编辑器」入口，提供可视化表单
+- **新建/编辑双模式**：顶部下拉框选择已有样式（含变体文件夹子级）或新建，选中后自动加载配置到表单
+- **动态元素列表**：支持增删信息元素（exif / camera_lens / timestamp_author 等 9 种 key），每个元素独立切换绝对/相对定位
+- **覆盖全部配置项**：画布扩展、padding、字体族/字重/独立尺寸、颜色（通用 + 按元素类型覆盖）、背景填充、Logo 开关
+- **留空字段智能清理**：未填写的颜色、字体尺寸等字段生成 YAML 时不写入，保持配置文件精简
+- **变体文件夹支持**：下拉框自动扫描 `configs/` 子目录中的变体 YAML 文件，以 `文件夹名/文件名.yaml` 层级展示
+
+#### 样式模板文件
+- 新增 `src/frame_styles/configs/_STYLE_TEMPLATE.txt`，覆盖全部 9 个配置区的填空式模板，填写后交给 AI 即可生成对应 YAML
 
 ---
 

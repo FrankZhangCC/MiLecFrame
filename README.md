@@ -1,10 +1,11 @@
-# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.3.0-blue)
+# MiLeica Frame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
 
 ## 快速开始
 
 ### 启动程序
 
 #### 环境搭建
+
 1. 克隆项目
 2. 创建虚拟环境并安装依赖：
    ```bash
@@ -17,47 +18,75 @@
 #### 使用方法
 
 ##### 单张图片处理
+
 ```bash
 python src/main.py --input input.jpg --output output.jpg --style modern --author "Your Name" --bg-fill gaussian_white_80
 ```
 
 ##### 批量处理
+
 ```bash
 python src/main.py --batch --input /path/to/input/folder --output /path/to/output/folder --style modern --author "Your Name" --bg-fill gaussian_white_80 --recursive
 ```
 
 ##### GUI模式
+
 ```bash
 streamlit run src/gui/app.py
 ```
 
 > **注意**: 当使用Streamlit GUI模式时，若要停止程序，请在终端中按下 `Ctrl+C` 来中断服务。关闭浏览器标签页不会自动停止后台服务。
 
+#### 命令行选项
+
+| 参数              | 简写   | 说明                                           |
+| ----------------- | ------ | ---------------------------------------------- |
+| `--input`       | `-i` | 输入图片路径                                   |
+| `--output`      | `-o` | 输出图片路径                                   |
+| `--style`       | `-s` | 相框样式名称                                   |
+| `--author`      |        | 作者姓名                                       |
+| `--location`    |        | 拍摄地点                                       |
+| `--bg-fill`     |        | 背景填充类型                                   |
+| `--batch`       |        | 启用批量处理模式                               |
+| `--recursive`   |        | 递归处理子文件夹（仅批量模式）                 |
+| `--font-weight` |        | 字体字重：`light` / `regular` / `medium` |
+| `--gui`         |        | 启动 Streamlit GUI 界面                        |
+
+`--bg-fill` 可选值由 `BackgroundFillManager.FILL_TYPES` 注册表管理，当前支持：`pure_black`, `pure_white`, `gaussian_black_65`, `gaussian_white_80`, `gaussian_black_35`, `gaussian_white_50`
+
 ## 功能特性
 
-- **EXIF信息展示**：自动提取并显示照片的拍摄参数（相机型号、焦距、光圈等）
-- **多种相框样式**：支持通过配置文件自定义相框样式
-- **响应式布局**：相框元素根据图片尺寸自适应调整
-- **背景填充选项**：支持纯色、高斯模糊等多种背景填充方式
-- **装饰元素**：支持边框、水印等装饰元素
-- **多格式支持**：支持JPEG、PNG、TIFF等常见图片格式，以及HEIF、HEIC、AVIF等HDR格式
-- **批量处理**：支持批量处理整个文件夹中的图片
-- **GUI界面**：提供直观的Web界面进行操作
+### 图像处理
+
+- **EXIF 信息提取**：自动读取相机品牌/型号、镜头、焦距、光圈、快门、ISO、拍摄时间
+- **多格式支持**：JPEG、PNG、TIFF、MPO，以及 HEIF/HEIC/AVIF 等 HDR 格式
+- **色彩空间自动转换**：sRGB / AdobeRGB / ProPhotoRGB 自动识别并转换至 sRGB
+
+### 相框与布局
+
+- **多种相框样式**：JSON / YAML / TOML 配置文件，支持单文件或文件夹变体组织
+- **样式变体系统**：根据 location / author 等字段的数据可用性自动匹配最佳布局变体
+- **响应式布局**：画布扩展、文字大小、边距、间距均以原图长边比例为基准自适应
+- **绝对与相对定位**：元素可固定位置或相对于其他元素排列（after / below / left-of 等），拓扑排序自动解析依赖
+- **背景填充**：纯色（黑/白）或高斯模糊叠加，深色/浅色背景类型自动适配文字颜色。由 `BackgroundFillManager` 集中管理，GUI/CLI 统一从注册表获取可选类型
+
+### 装饰元素
+
+- **边框**：可自定义宽度与颜色
+- **水印**：可自定义文字、位置、透明度与颜色
+- **Logo**：支持手动选择或根据 EXIF 相机品牌自动匹配（逐词匹配，兼容多词品牌名如 "NIKON CORPORATION"）
+
+### 使用方式
+
+- **CLI 命令行**：单张图片或批量文件夹处理
+- **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载
+- **批量处理**：多线程并发、递归子文件夹、实时进度统计、单文件失败不中断其余任务
 
 ## 技术栈
 
 - 核心图像处理：Pillow、OpenCV
 - EXIF处理：piexif
 - GUI界面：Streamlit
-
-## 最近更新 (v1.3.0)
-
-- **样式变体系统**：支持文件夹级样式组织，一个样式名下可包含多个变体配置文件（如 `default.yaml`、`no_location.yaml`），根据运行时上下文（数据可用性）自动选择最佳匹配的变体
-- **上下文感知匹配**：`StyleManager.get_style_config()` 新增 `context` 参数，传入 `{'location': ..., 'author': ...}` 后自动从文件夹中选取最匹配的变体配置；命名规则 `no_{field}.yaml` 清晰可扩展
-- **动态布局切换**：当 `location` 字段无数据时，`timestamp_author` 自动从左侧列移动到右侧列（exif 下方），exif 同时下移以保持视觉平衡
-- **变体配置精简规范**：变体文件中与缺失字段相关的颜色、字体、布局配置应全部移除，仅保留实际生效的配置项
-
-> 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)
 
 ## 项目结构
 
@@ -74,7 +103,11 @@ MiLeica_Frame/
 │   │   └── ...
 │   ├── gui/                # GUI界面相关
 │   │   ├── __init__.py
-│   │   ├── app.py          # Streamlit GUI主文件
+│   │   ├── app.py                    # Streamlit GUI主文件
+│   │   ├── image_processing_page.py  # 图像处理页面
+│   │   ├── camera_mapping_page.py    # 相机映射管理页面
+│   │   ├── lens_mapping_page.py      # 镜头映射管理页面
+│   │   ├── style_creator_page.py     # 样式编辑器页面
 │   │   └── ...
 │   ├── utils/              # 工具函数
 │   │   ├── __init__.py
@@ -83,6 +116,7 @@ MiLeica_Frame/
 │   │   ├── config_manager.py    # 配置管理
 │   │   ├── font_manager.py      # 字体管理器
 │   │   ├── layout_engine.py     # 布局引擎
+│   │   ├── background_fill.py   # 背景填充管理器（v1.4.0）
 │   │   ├── logo_selector.py     # Logo选择器
 │   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
 │   │   ├── logging_config.py    # 日志配置
@@ -90,6 +124,7 @@ MiLeica_Frame/
 │   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件（支持单文件样式和文件夹变体样式）
+│   │   │   ├── _STYLE_TEMPLATE.txt   # 规格化填空模板
 │   │   │   ├── 照片底部信息水印/  # 文件夹变体样式（示例）
 │   │   │   │   ├── default.yaml       # 默认变体（所有字段有数据）
 │   │   │   │   └── no_location.yaml   # location 缺失时的变体
@@ -115,6 +150,8 @@ MiLeica_Frame/
 
 样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
 
+> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
+
 ### 文件夹变体样式 (v1.3.0)
 
 当需要根据数据可用性动态切换布局时，可将样式组织为**文件夹**（文件夹名 = 样式名），内放多个变体配置文件：
@@ -131,11 +168,11 @@ configs/
 
 #### 命名规则
 
-| 文件名 | 匹配条件 |
-|-------|---------|
-| `default.yaml` | 兜底，无可匹配变体时使用 |
-| `no_{field}.yaml` | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
-| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体 |
+| 文件名                           | 匹配条件                                        |
+| -------------------------------- | ----------------------------------------------- |
+| `default.yaml`                 | 兜底，无可匹配变体时使用                        |
+| `no_{field}.yaml`              | 当 `{field}` 的值为 `None` 或空字符串时匹配 |
+| `no_{field1}_no_{field2}.yaml` | 当多个字段同时缺失时匹配，优先级高于单字段变体  |
 
 支持的 `{field}` 名称与 `RenderContext.get_text()` 的 key 一致：`location`、`author` 等。
 
@@ -149,6 +186,7 @@ configs/
 #### 变体配置精简规范
 
 变体文件中**与缺失字段相关的所有配置项应全部移除**，包括但不限于：
+
 - `colors` 中的 `custom_{field}_{light/dark}_color`
 - `fonts.sizes` 中的 `{field}` 条目
 - `layout.info_position` 中的 `{field}` 条目
@@ -177,6 +215,7 @@ name: "样式名称"         # 必需字段，用于标识样式
 ```
 
 ### 布局配置 (layout)
+
 - `expand_canvas`: 扩展画布配置
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
@@ -186,17 +225,18 @@ name: "样式名称"         # 必需字段，用于标识样式
   - 绝对定位与相对定位元素均受 padding 约束
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
-  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`, `camera_icon`
+  - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `lens`, `camera_lens`, `author`, `location`
   - `camera_lens` 输出合并格式 "品牌 型号 | 镜头"；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
     - **绝对定位**：
-      - `position`: 位置（inside, outside, top-left, top-right, bottom-left, bottom-right, top-center, bottom-center, top, bottom, left, right, center）
-      - `alignment`: 对齐方式（left, center, right, top-left, top-right, top, bottom）
+      - `placement`: 元素位于原图内部 (`inside`) 或外部 (`outside`)，默认 `outside`
+      - `position`: 锚点相对于原图边界的位置（`top-left`, `top-center`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom-center`, `bottom-right`, `top`, `bottom`）
+      - `alignment`: 元素自身对齐到锚点的方式（`left` 左对齐 / `center` 居中 / `right` 右对齐 / `top` / `bottom` / `top-left` / `top-right`）
       - `margin`: 传统边距（可选，用于向后兼容）
       - **必需的四周独立边距配置**（根据位置和对齐方式设置）：
-        - **顶部文字**（如 camera, lens, camera_icon）：必须定义 `margin_top`
+        - **顶部文字**（如 camera, lens）：必须定义 `margin_top`
         - **底部文字**（如 exif, timestamp）：必须定义 `margin_bottom`
-        - **左对齐文字**（如 author, camera, lens, camera_icon）：必须定义 `margin_left`
+        - **左对齐文字**（如 author, camera, lens）：必须定义 `margin_left`
         - **右对齐文字**（如 location）：必须定义 `margin_right`
         - **所有文字元素**：应当定义完整的四个方向边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`）
         - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
@@ -225,22 +265,23 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 
 #### 支持的 key
 
-| key | 输出格式 | 数据来源 |
-|-----|----------|---------|
-| `exif` | `"35mm, f/2.8, 1/125s, ISO200"` | EXIF 格式化 |
-| `timestamp` | `"2025.01.15 14:30:00"` | EXIF 拍摄时间 |
-| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"` | 时间 + 作者合并 |
-| `camera_lens` | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
-| `camera` | `"Leica Q3"` | 相机品牌+型号 |
-| `lens` | `"Summilux 28mm f/1.7"` | 镜头型号 |
-| `author` | `"Frank"` | 用户输入 |
-| `location` | `"Shanghai"` | 用户输入 |
+| key                  | 输出格式                                         | 数据来源           |
+| -------------------- | ------------------------------------------------ | ------------------ |
+| `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化        |
+| `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间      |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并    |
+| `camera_lens`      | `"Leica Q3"` 或 `"Leica Q3 \| Summilux 28mm"` | 见下方"竖向自适应" |
+| `camera`           | `"Leica Q3"`                                   | 相机品牌+型号      |
+| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号           |
+| `author`           | `"Frank"`                                      | 用户输入           |
+| `location`         | `"Shanghai"`                                   | 用户输入           |
 
 #### 竖向/方形图片自动适配
 
 当 `camera_lens` 检测到原始图片为**竖向构图**或**方形图片**（纵边 ≥ 横边）时，自动将 `camera_lens` 替换为 `camera`，即仅显示相机型号，不拼接镜头信息。避免竖幅窄图空间不足时文字过长的问题。
 
 此逻辑内聚在 `RenderContext.get_text('camera_lens')` 中：
+
 - 横向图片 → 返回 `"品牌 型号 | 镜头"`（完整合并格式）
 - 竖向/方形图片 → 返回 `"品牌 型号"`（仅相机信息）
 
@@ -279,151 +320,234 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 
 ### 装饰元素配置 (decorations)
 
-装饰元素（边框、水印、Logo、角落标记）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+装饰元素（边框、水印、Logo）**不通过样式配置 YAML 定义**，而是作为独立参数传入 `render_frame()`。支持的类型：
+
 - `border`: 边框（可自定义宽度和颜色）
 - `watermark`: 水印
 - `logo`: 品牌 Logo（支持根据 EXIF 相机品牌自动匹配）
-- `corner_mark`: 角落标记
 
 在 GUI 模式下，装饰元素由界面控件动态组装并传入渲染器。
 
-### 背景填充配置 (background_fill)
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
-- `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
-- `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
-
-## 命令行选项
-
-- `--input`, `-i`: 输入图片路径
-- `--output`, `-o`: 输出图片路径
-- `--style`, `-s`: 相框样式
-- `--author`: 作者名
-- `--location`: 拍摄地点
-- `--bg-fill`: 背景填充类型 (pure_black, pure_white, gaussian_black_65, gaussian_white_80, gaussian_black_35, gaussian_white_50)
-- `--batch`: 批量处理模式
-- `--recursive`: 递归处理子文件夹（仅批量模式）
-- `--font-weight`: 字体字重 (light, regular, medium，默认 medium)
-- `--gui`: 启动GUI界面
-
-> 完整开发历史请参见 [CHANGELOG.md](./CHANGELOG.md)
-
 ## 核心功能规格
 
-### EXIF信息处理
-- **必需字段**：相机品牌、相机型号、镜头型号、等效35mm焦距、光圈、快门速度、感光度、拍摄时间
-- **格式规则**：
-  - 相框数据格式：[焦距]mm, f/[光圈], [快门]s, ISO[感光度]
-  - 快门速度格式化：<1秒显示分数，≥1秒显示小数
-  - 拍摄时间格式化为：[yyyy].[mm].[dd] [hh]:[mm]:[ss]
-  - 相机品牌信息用于自动选择对应品牌图标
-- **错误处理**：EXIF缺失则记录警告但仍继续处理
+### EXIF 信息处理与渲染上下文
 
-### 新增信息类型
-- **拍摄时间信息**：显示在EXIF信息下方，格式为"yyyy.mm.dd hh:mm:ss"
-- **相机型号信息**：显示在原图外侧扩展区域的左上角
-- **镜头型号信息**：显示在相机型号信息下方，同样在原图外侧扩展区域的左上角
+#### EXIF 提取与格式化
 
-### 统一数据处理与展示
-- **分层架构**：采用三层架构处理EXIF数据
-  - **底层解析层**（EXIF Helper）：仅负责读取和解析原始二进制数据，返回纯净的原始字段
-  - **业务映射层**（Device Mapper/Service）：负责执行品牌/机型映射、字符串拼接（如`品牌 + " " + 型号`）、格式化等业务逻辑
-  - **展示层**（GUI/Renderer）：仅负责接收处理后的最终数据对象进行渲染
-- **统一数据出口**：通过`exif_helper.get_display_data()`方法提供统一的展示数据
-  - 返回标准化的数据结构，包含`raw_value`（原始数据）和`display_value`（映射后数据）
-  - 在"相框预览"和"最终渲染"中使用相同的`display_value`，确保一致性
-  - GUI的"设备信息"部分显示`raw_value`，"相框显示"部分显示`display_value`
-- **结构化排版**：将数据按逻辑类别拆分，使用Markdown标题、分隔线等组织内容，采用"标签+内容"换行展示，每项独立占行，使用明确中文标签（如"相机型号："、"镜头型号："）
+**必需字段**：相机品牌（Make）、相机型号（Model）、镜头型号（LensModel）、35mm 等效焦距、光圈（FNumber）、快门速度（ExposureTime）、感光度（ISO）、拍摄时间（DateTimeOriginal）。
 
-### 图像支持格式
-- **支持格式**：JPEG、PNG、TIFF
-- **特殊支持**：Gainmap HDR JPEG格式、谷歌UltraHDR标准图片、HEIF/HEIC/AVIF格式
-- **色彩空间**：自动识别sRGB、AdobeRGB、ProPhotoRGB，非sRGB时显示警告并自动转换至sRGB
-- **尺寸处理**：输入最大尺寸12000×12000像素，输出最大尺寸8192×8192像素，超限时等比缩小
+**格式规则**：
 
-### 相框样式系统
-- **多格式支持**：支持JSON、YAML、TOML文件作为样式配置
-- **扩展画布**：支持以原图尺寸百分比为基础的画布扩展，上下左右可分别设置
-- **响应式设计**：以输出尺寸的百分比作为参考比例，文字大小、边距等随输出尺寸自动调整
-- **图层顺序**（从上到下）：文字和图标层 → 装饰元素层 → 原图层 → 背景层（含扩展区域）
-- **相对定位**（v1.2.0）：支持将元素相对于其他已注册元素定位（after/below/before/above/right-of/left-of），由拓扑排序自动解析依赖顺序
-- **Padding 安全区域**（v1.2.0）：叠加元素的绘制边界约束，优先级高于 margin
-- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素（及其全部已注册从属）合并为组合盒，整体平移确保不超出安全区域
+| 字段     | 输出格式                                                                                           | 说明                                   |
+| -------- | -------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 曝光参数 | `35mm, f/2.8, 1/125s, ISO200`                                                                    | 逗号分隔，单行字符串                   |
+| 快门速度 | `<1s` 显示分数（`1/125`），`≥1s` 显示小数（`2.5`）                                        | `_format_shutter_speed()`            |
+| 拍摄时间 | `yyyy.mm.dd hh:mm:ss`                                                                            | 原始 EXIF 格式 `yyyy:mm:dd HH:MM:SS` |
+| 相机品牌 | 经 `_safe_decode()` 多编码（utf-8 / latin-1 / shift-jis 等）兼容处理后，小写化用于 Logo 逐词匹配 | `get_camera_brand()`                 |
 
-### 装饰元素系统
-- **边框**：可自定义宽度和颜色
-- **水印**：可自定义文字内容、位置和透明度
-- **Logo**：可自定义位置、大小比例和透明度
-- **角落标记**：可自定义文本、位置和样式
-- **图标支持**：从指定文件夹读取 PNG 文件列表，支持根据 EXIF 相机品牌信息自动选择对应品牌图标
+**三层数据处理架构**：
 
-### 批量处理功能
-- **并发处理**：支持多线程并发处理以提高效率
-- **递归处理**：可选择是否递归处理子文件夹
-- **进度跟踪**：实时显示处理进度和统计信息
-- **错误恢复**：单个文件处理失败不影响其他文件
+```
+EXIF Helper（解析原始二进制 → 纯净字段，_safe_decode 多编码容错）
+  → Device Mapper（品牌/机型/镜头映射、字符串拼接 "品牌 型号"、格式化）
+    → Renderer / GUI（展示层，仅消费最终数据，不感知数据来源）
+```
 
-### 响应式设计特性
-- **扩展画布**：以原图尺寸的百分比为基准进行扩展
-- **文字布局**：文字位置可灵活配置
-- **字体适配**：字体大小随画布尺寸自适应调整
-- **背景填充**：扩展区域支持多种填充方式
-- **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 统一绘制，确保依赖有序、溢出可修正
+统一数据出口 `exif_helper.get_display_data()`，同时提供 `raw_*`（原始值，GUI 设备信息区展示）和映射后字段（相机/镜头组合、格式化曝光参数），确保 GUI 预览与最终渲染数据一致。
 
-### 独立信息字体大小
-- **EXIF信息**：可独立设置字体大小
-- **相机/镜头**：可独立或合并（`camera_lens`）设置
-- **时间作者**：可独立或合并（`timestamp_author`）设置
-- **位置信息**：可独立设置字体大小
+#### 渲染上下文（RenderContext）
 
-### 背景样式系统
-- **纯黑色**：100%黑色背景填充，覆盖包括扩展区域在内的整个画面
-- **纯白色**：100%白色背景填充，覆盖包括扩展区域在内的整个画面
-- **高斯模糊叠加**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面；叠加透明度支持 50% / 80% / 自定义，如在 `gaussian_{color}_{opacity}` 中编码
-- **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
-  - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
-  - 浅色背景类型：`pure_white`, `gaussian_white_80`, `gaussian_white_50`, `gaussian_white`
-  - 新增背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
-- **性能优化**：大图自动降采样至1200px中间分辨率计算模糊；模糊叠加混合在 float32 空间完成，通过 PIL 内置 Floyd-Steinberg 量化消除色彩断层
-- **配置参数**：通过 `gaussian_blur_radius` 和 `gaussian_blur_opacity` 在样式配置中自定义模糊强度和叠加透明度
-- **命令行选择**：通过 `--bg-fill` 参数指定
-- **GUI选择**：在界面上提供选项
+`src/utils/render_context.py` 是渲染文本数据的**统一入口**，将数据准备逻辑从渲染器中完全解耦：
 
-### 用户输入
-- **作者**：手动输入作者姓名，保存到配置文件
-- **地点**：手动输入拍摄地点，格式选项包括"从小到大"或"从大到小"，不保存
+```python
+context = RenderContext(image.size, exif_data, author, location)
+text = context.get_text('camera_lens')  # 一行调用获取最终显示文本
+```
 
-### 错误日志系统
-- **调试日志**：`debug_log.txt` — 包含所有 DEBUG 级别日志（渲染流程、定位计算等详细信息）
-- **日志格式**：`时间 - 模块名 - 级别 - 消息`
-- **控制台输出**：INFO 及以上级别的日志同步输出到 stderr
-- **配置入口**：`src/utils/logging_config.py` 中的 `setup_logging()` 函数统一管理，CLI 和 GUI 入口均已集成
+`get_text(key)` 根据样式 YAML 中 `info_position` 声明的 key 返回对应文本，内部闭环所有条件逻辑（数据校验、相机+镜头合并/替换、时间+作者拼接、竖向自适应等），无数据时返回 `None` 自动跳过渲染。
 
-## 后续开发计划
+**支持的 key**：
 
-1. **GPU加速** - 实现图像处理的GPU加速功能
-2. **更多相框样式** - 开发更多样式的相框模板
-3. **测试和优化** - 编写单元测试，优化性能
+| key                  | 输出格式                                         | 说明                                         |
+| -------------------- | ------------------------------------------------ | -------------------------------------------- |
+| `exif`             | `"35mm, f/2.8, 1/125s, ISO200"`                | EXIF 格式化曝光参数                          |
+| `timestamp`        | `"2025.01.15 14:30:00"`                        | EXIF 拍摄时间                                |
+| `timestamp_author` | `"2025.01.15 14:30:00 by Frank"`               | 时间 + 作者合并（作者为空时仅显示时间）      |
+| `camera_lens`      | `"Leica Q3 \| Summilux 28mm"` 或 `"Leica Q3"` | 相机+镜头合并，竖向/方形图片自动替换为仅相机 |
+| `camera`           | `"Leica Q3"`                                   | 相机品牌+型号                                |
+| `lens`             | `"Summilux 28mm f/1.7"`                        | 镜头型号                                     |
+| `author`           | `"Frank"`                                      | 用户输入                                     |
+| `location`         | `"Shanghai"`                                   | 用户输入                                     |
+
+**竖向/方形图片自动适配**：当原始图片纵边 ≥ 横边时，`camera_lens` 自动替换为 `camera`（仅显示相机型号），避免竖幅窄图空间不足。
+
+**新增显示字段**：只需在 `RenderContext.get_text()` 添加 `elif key == 'xxx':` 分支 + 在 YAML 的 `info_position` 中声明配置，渲染器零改动。
+
+**中英日混排**：字符串自动按 CJK / 拉丁片段拆分，各片段使用对应字体（GlowSansSC / Gotham）渲染，以拉丁字体基线对齐确保视觉统一。
+
+#### 错误处理
+
+EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可解码字节使用多编码回退 + 控制字符过滤，保证程序鲁棒性。
+
+---
+
+### 图像支持与处理管线
+
+#### 支持的格式
+
+| 类别     | 格式                                         | 处理方式                            |
+| -------- | -------------------------------------------- | ----------------------------------- |
+| 常规     | JPEG、PNG、TIFF、MPO                         | PIL 直接打开                        |
+| HDR      | HEIF、HEIC、AVIF、Gainmap HDR JPEG、UltraHDR | `HDRHandler` 预处理后转为 SDR     |
+| 色彩空间 | sRGB、AdobeRGB、ProPhotoRGB                  | 自动识别，非 sRGB 警告并转换至 sRGB |
+
+#### 尺寸限制
+
+| 阶段 | 上限            | 超限行为         |
+| ---- | --------------- | ---------------- |
+| 输入 | 12000×12000 px | 等比缩小至限制内 |
+| 输出 | 8192×8192 px   | 等比缩小至限制内 |
+
+#### 处理管线
+
+```
+1. 验证输入文件存在 + 格式支持
+2. HDR 检测 → HDRHandler 预处理（Gainmap/UltraHDR/HEIF/AVIF）
+3. EXIF 提取（piexif + 多编码解码）→ 设备映射 → 记录到 camera_map.csv / lens_map.csv
+4. 尺寸验证 → 超限等比缩小
+5. 色彩空间检测 → 非 sRGB 转换
+6. 加载样式配置（StyleManager，含变体上下文匹配）
+7. 渲染相框（FrameRenderer — 详见下方相框渲染系统）
+8. 保存输出（JPEG/PNG，quality=95，optimize=True）
+```
+
+---
+
+### 相框与装饰渲染系统
+
+#### 布局引擎（LayoutEngine）
+
+`src/utils/layout_engine.py` 负责画布计算与元素定位：
+
+- **画布扩展**：以原图长边比例扩展四边（`expand_canvas`），上下左右独立设置
+- **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
+- **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
+- **相对定位**（v1.2.0）：`relative_to` + `relative_position`（`below` / `above` / `right-of` / `left-of`），`relative_margin` 间距 + `offset` 微调
+- **拓扑排序**：基于 `relative_to` 依赖关系自动解析处理顺序（Kahn 算法），无需手动调整元素声明顺序
+- **三阶段渲染管线**（v1.2.0）：Phase 1 测量所有元素尺寸 → Phase 2 拓扑序计算位置并注册 → Phase 3 从注册表读取最终坐标统一绘制，确保依赖有序、溢出可修正
+- **缺失参考元素保护**（v1.4.0）：当 `relative_to` 指向的元素因无文本被跳过时，自动以 0x0 尺寸预注册其绝对位置锚点，避免依赖元素降级为绝对定位导致位置偏移
+- **组合盒溢出保护**（v1.2.0）：相对定位元素与参考元素（及其全部从属）合并为组合盒，超出 padding 边界时整体平移，保持对齐关系不变
+
+#### 渲染器（FrameRenderer）
+
+`src/core/renderer.py` 负责图层合成与元素绘制：
+
+- **背景填充**：
+  - 由 `BackgroundFillManager` 统一管理（`src/utils/background_fill.py`），所有填充类型在 `FILL_TYPES` 注册表中集中定义
+  - 纯色：`pure_black` / `pure_white`，覆盖含扩展区域的全画布
+  - 高斯模糊叠加：3-pass Box Blur 近似（O(n)），全分辨率等效半径 200px，大图自动降采样至 1200px 计算；float32 混合 + PIL 内置 Floyd-Steinberg 量化消除色彩断层
+  - 每种填充类型同时声明 `text_scheme`（`dark`/`light`），渲染器通过 `BackgroundFillManager.is_dark_bg()` 自动适配文字颜色
+  - 支持运行时覆盖 `color`、`opacity`、`blur_radius` 参数，预留自定义背景注册接口 `register()`
+- **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
+- **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
+- **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
+- **Logo 渲染**：支持 PNG（RGBA 透明背景），尺寸以短边为基准（`logo.size_ratio * 原图长边`），长边自动限制 ≤ `3 * size_ratio * 原图长边`（即隐含要求 Logo 长宽比 ≤ 3:1）。通过 `relative_to` 绝对/相对定位，在文字层之后渲染以确保可引用文字元素坐标
+- **Logo 自动匹配**（`LogoSelector.auto_match_logo()`）：将相机品牌按空格拆词，逐词与 `assets/logos/` 下 PNG 文件名进行子串匹配，过滤 ≤2 字符的无意义词（AG、KG 等），支持 "NIKON CORPORATION" 等复合品牌名
+
+#### 背景填充管理器 (BackgroundFillManager) (v1.4.0)
+
+`src/utils/background_fill.py` 是背景填充功能的**唯一入口**，集中管理所有填充类型的注册、查询和渲染。
+
+##### 核心职责
+
+- **类型注册**：所有可用背景类型在 `FILL_TYPES` 类属性中统一定义，包括纯色和高斯模糊两种方法
+- **GUI/CLI 统一**：`get_choices()` 返回 `{label: key}` 供 GUI 下拉框使用，`get_keys()` 返回 key 列表供 CLI argparse 使用
+- **深色/浅色判断**：`is_dark_bg(key)` 根据注册的 `text_scheme` 判断，供渲染器自动适配文字颜色
+- **背景渲染**：`render(image, w, h, fill_type)` 根据注册表配置创建背景图像
+- **预留扩展**：`register()` 方法支持运行时动态添加新填充类型
+
+##### 注册表结构
+
+```python
+FILL_TYPES = {
+    'pure_black': {
+        'label': '纯黑背景', 'method': 'solid',
+        'color': (0, 0, 0), 'text_scheme': 'dark'
+    },
+    'gaussian_black_65': {
+        'label': '模糊背景 (深色 65%)', 'method': 'gaussian',
+        'overlay_color': 'black', 'opacity': 65, 'blur_radius': 200,
+        'text_scheme': 'dark'
+    },
+    # ...
+}
+```
+
+##### 扩展方式
+
+```python
+# 新增背景类型只需注册，GUI 下拉和 CLI 自动同步
+BackgroundFillManager.register(
+    'pure_gray', label='纯灰背景', method='solid',
+    text_scheme='dark', color=(128, 128, 128)
+)
+```
+
+#### 装饰器（Decorator）
+
+`src/core/decorator.py` 独立于样式 YAML，由 GUI 或 CLI 动态传入：
+
+- **边框**：自定义宽度（px）与颜色（RGB 元组），作用于原图外缘
+- **水印**：自定义文字内容、位置（9 种锚点）、不透明度（0-100%）、颜色
+
+#### 样式变体系统（v1.3.0）
+
+- 样式可组织为文件夹（文件夹名 = 样式名），内含多个变体 YAML 文件
+- 命名规则 `no_{field}.yaml`（如 `no_location.yaml`），由 `StyleManager._resolve_style_variant()` 根据运行时上下文自动选取最佳匹配
+- GUI 中统一展示为单个样式选项，对用户透明
+
+---
+
+### GUI 界面
+
+基于 Streamlit 的 Web 界面（`src/gui/app.py`），提供以下功能区域：
+
+- **图片上传与预览**：支持拖拽上传，实时显示原图及 EXIF 信息（设备信息 + 拍摄参数 + 相框显示预览）
+- **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
+- **文字与装饰**：作者姓名（自动保存）、拍摄地点、字体字重选择；边框（宽度/颜色）、水印（内容/位置/透明度/颜色）独立控制
+- **Logo 设置**：自动匹配（根据相机品牌）/ 手动选择 / 无，三选一；自动匹配无结果时不显示
+- **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）
+- **输出格式**：JPEG / PNG 可选
+- **结果下载**：处理后图片预览 + 一键下载
+- **设备映射管理**：独立的相机/镜头映射表界面，支持品牌筛选、表格内编辑实时保存
+- **样式编辑器**：可视化表单页面，支持新建与编辑已有样式配置文件，填参后可一键生成 YAML
 
 ## 开发规范
 
 ### 项目开发环境
+
 - 所有开发必须在虚拟环境(venv)中进行
 - Windows PowerShell激活命令: `.\venv\Scripts\activate`
 - 确保在激活虚拟环境后执行依赖安装或脚本运行
 
 ### 代码规范
+
 - 代码采用模块化设计，各模块职责明确
 - 使用适当的错误处理机制，避免程序挂起
 - 添加充分的日志记录以便调试
 
 ### 调试规范
+
 - 在PowerShell环境中调试
 - 使用绝对路径执行Python脚本
-- 避免使用`&&`作为命令连接符
+- 避免使用 `&&`作为命令连接符
 
 ### 技术规范参考
+
 - 项目技术规范详细内容请参见 [project_master_spec.json](./project_master_spec.json)，后续开发必须严格遵循此规范
 
 ## 贡献
 
 欢迎提交Issue和Pull Request。
+
+> 完整更新历史请参见 [CHANGELOG.md](./CHANGELOG.md)

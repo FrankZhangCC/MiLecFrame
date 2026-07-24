@@ -104,12 +104,13 @@ class LayoutEngine:
         计算元素的绘制坐标（统一处理文字和非文字元素）
 
         config 支持的键：
+        - placement: 'inside' 或 'outside'（默认 'outside'），元素位于原图内部或外部
         - relative_to: 参考元素名（有此键则使用相对定位）
         - relative_position: 'after', 'before', 'below', 'above', 'right-of', 'left-of'
         - relative_margin: 间距比例
         - offset_x_ratio / offset_y_ratio: 偏移比例
-        - position: 绝对位置名 (如 'top-left', 'bottom-right', 'outside', 'inside' 等)
-        - alignment: 对齐方式 (如 'left', 'center', 'right', 'top-left' 等)
+        - position: 锚点位置 (如 'top-left', 'bottom-right', 'top', 'bottom', 'left', 'right', 'center' 等)
+        - alignment: 元素对齐方式 (如 'left', 'center', 'right')
         - margin / margin_top / margin_bottom / margin_left / margin_right: 边距
         """
         if config.get('relative_to'):
@@ -125,11 +126,12 @@ class LayoutEngine:
         orig_x, orig_y, orig_w, orig_h = self.original_bounds
 
         margins = self._resolve_margins(config)
-        position = config.get('position', 'outside')
+        placement = config.get('placement', 'outside')
+        position = config.get('position', 'bottom')
         alignment = config.get('alignment', 'center')
 
         x, y = self._get_anchor(
-            position, alignment,
+            placement, position, alignment,
             orig_x, orig_y, orig_w, orig_h,
             element_width, element_height,
             margins
@@ -144,6 +146,7 @@ class LayoutEngine:
 
     def _get_anchor(
         self,
+        placement: str,
         position: str,
         alignment: str,
         ox: int, oy: int, ow: int, oh: int,
@@ -151,64 +154,70 @@ class LayoutEngine:
         m: Dict[str, int]
     ) -> Tuple[int, int]:
         """
-        根据 position + alignment 计算坐标。
+        根据 placement + position + alignment 计算元素坐标。
 
-        position 决定主锚点（上下左右/内部/外部）
-        alignment 决定垂直锚点轴的偏移（左中右/上中下）
+        placement: 'inside'（原图内部） | 'outside'（原图外部）
+        position:  原图边界上的锚点位置（top-left / top / top-right / left / right /
+                   bottom-left / bottom / bottom-right / top-center / bottom-center / center）
+        alignment: 元素自身如何对齐到锚点（left / center / right）
         """
+        inside = (placement == 'inside')
+
         # --- 上方位置 ---
         if position in ('top-left', 'tl'):
-            return ox + m['left'], oy - eh - m['top']
+            y = oy + m['top'] if inside else oy - eh - m['top']
+            x = ox + m['left']
+            return x, y
         if position in ('top-right', 'tr'):
-            return ox + ow - ew - m['right'], oy - eh - m['top']
+            y = oy + m['top'] if inside else oy - eh - m['top']
+            x = ox + ow - ew - m['right']
+            return x, y
         if position in ('top-center', 'tc'):
-            return ox + (ow - ew) // 2, oy - eh - m['top']
+            y = oy + m['top'] if inside else oy - eh - m['top']
+            x = ox + (ow - ew) // 2
+            return x, y
         if position == 'top':
-            y = oy - eh - m['top']
+            y = oy + m['top'] if inside else oy - eh - m['top']
             x = self._align_x(alignment, ox, ow, ew, m)
             return x, y
 
         # --- 下方位置 ---
         if position in ('bottom-left', 'bl'):
-            return ox + m['left'], oy + oh + m['bottom']
-        if position in ('bottom-right', 'br'):
-            return ox + ow - ew - m['right'], oy + oh + m['bottom']
-        if position in ('bottom-center', 'bc'):
-            return ox + (ow - ew) // 2, oy + oh + m['bottom']
-        if position in ('bottom', 'outside'):
-            if alignment == 'top-left':
-                return ox + m['left'], oy - eh - m['top']
-            y = oy + oh + m['bottom']
-            x = self._align_x(alignment, ox, ow, ew, m)
+            y = (oy + oh - eh - m['bottom']) if inside else (oy + oh + m['bottom'])
+            x = ox + m['left']
             return x, y
-
-        # --- 内部 ---
-        if position == 'inside':
-            if alignment == 'top-left':
-                return ox + m['left'], oy + m['top']
-            y = oy + oh - eh - m['bottom']
+        if position in ('bottom-right', 'br'):
+            y = (oy + oh - eh - m['bottom']) if inside else (oy + oh + m['bottom'])
+            x = ox + ow - ew - m['right']
+            return x, y
+        if position in ('bottom-center', 'bc'):
+            y = (oy + oh - eh - m['bottom']) if inside else (oy + oh + m['bottom'])
+            x = ox + (ow - ew) // 2
+            return x, y
+        if position == 'bottom':
+            y = (oy + oh - eh - m['bottom']) if inside else (oy + oh + m['bottom'])
             x = self._align_x(alignment, ox, ow, ew, m)
             return x, y
 
         # --- 左侧 ---
         if position == 'left':
-            x = ox - ew - m['right']
+            x = ox + m['left'] if inside else ox - ew - m['right']
             y = self._align_y(alignment, oy, oh, eh, m)
             return x, y
 
         # --- 右侧 ---
         if position == 'right':
-            x = ox + ow + m['left']
+            x = (ox + ow - ew - m['right']) if inside else (ox + ow + m['left'])
             y = self._align_y(alignment, oy, oh, eh, m)
             return x, y
 
-        # --- 居中 ---
+        # --- 居中（画布中心，不受 placement 影响）---
         if position == 'center':
             x = (self.canvas_width - ew) // 2
             y = (self.canvas_height - eh) // 2
             return x, y
 
-        # --- 默认：下方居中 ---
+        # --- 默认：外部下方居中 ---
         return ox + (ow - ew) // 2, oy + oh + m['bottom']
 
     def _align_x(
