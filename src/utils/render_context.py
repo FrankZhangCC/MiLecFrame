@@ -15,13 +15,15 @@ class RenderContext:
 
     def __init__(self, image_size: Tuple[int, int], exif_data: Optional[Dict] = None,
                  author: Optional[str] = None, location: Optional[str] = None,
-                 lens_display_mode: str = 'combined', use_short_lens: bool = False):
+                 lens_display_mode: str = 'combined', use_short_lens: bool = False,
+                 custom_text: Optional[str] = None):
         self.image_size = image_size
         self.exif_data = exif_data
         self.author = author
         self.location = location
         self.lens_display_mode = lens_display_mode
         self.use_short_lens = use_short_lens
+        self.custom_text = custom_text
 
         self._display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
 
@@ -32,7 +34,8 @@ class RenderContext:
         """根据 key 返回对应的显示文本，无数据时返回 None
 
         支持的 key:
-            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps
+            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps, custom_text,
+            focal_length_formatted, aperture_formatted, shutter_speed_formatted, iso_formatted
         """
         if key == 'exif':
             return self._display_data.get('exif_formatted') or None
@@ -70,6 +73,21 @@ class RenderContext:
         elif key == 'gps':
             if self.exif_data and 'gps' in self.exif_data:
                 return self.exif_data['gps']
+        elif key == 'focal_length_formatted':
+            fl = self._display_data.get('raw_focal_length_35mm') or \
+                 self._display_data.get('raw_focal_length')
+            return f"{fl}mm" if fl else None
+        elif key == 'aperture_formatted':
+            ap = self._display_data.get('raw_aperture')
+            return f"f/{ap}" if ap else None
+        elif key == 'shutter_speed_formatted':
+            ss = self._display_data.get('raw_shutter_speed')
+            return f"{ss}s" if ss else None
+        elif key == 'iso_formatted':
+            iso_val = self._display_data.get('raw_iso')
+            return iso_val if iso_val else None
+        elif key == 'custom_text':
+            return self.custom_text or None
         return None
 
     @property

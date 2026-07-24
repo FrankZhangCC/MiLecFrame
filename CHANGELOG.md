@@ -1,6 +1,191 @@
 # 更新历史
 
-## v1.6.3 (2026-05-17)
+## v1.8.0 (2026-05-19)
+
+> 本版本新增**原图圆角裁切**功能。在样式配置中通过 `corner_radius` 参数即可为原始照片的四角独立裁切圆角，半径系数基于参照边（短边）响应式计算，支持独立调节每个角的弧度。
+
+### 🟢 原图四角独立圆角 (Corner Radius)
+
+在渲染管线中新增原图圆角裁切步骤（位于背景填充之后、装饰/文字/Logo 层之前），通过在 RGBA 通道写入圆角蒙版实现四角透明切除。
+
+**配置格式**（`src/frame_styles/configs/胶片夹风格 FilmClip.yaml` 已启用测试）：
+
+```yaml
+layout:
+  corner_radius:
+    enabled: true          # 开关，缺省视为关闭
+    top_left: 0.01         # 四角独立半径系数（相对于短边比例）
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+```
+
+- `enabled: false` 或整个字段缺失时完全跳过，零额外开销
+- 所有半径系数同时为 0 时等同于禁用，不会创建蒙版
+
+**实现细节**（`src/core/renderer.py`）：
+
+- 新增模块级函数 `_rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br)`，利用 **numpy SDF（signed distance field）** 在四个 r×r 角区域内计算像素到圆心的距离，通过 `np.clip(r - dist + 0.5, 0, 1)` 在圆弧边界产生 1px 线性过渡，同时间实现几何切除效果与抗锯齿软边过渡
+- 在 `render_frame()` 中：检测到 `corner_radius.enabled == true` 后，将原图转为 RGBA + `putalpha(mask)`，再使用 RGBA 透明通道粘贴到背景画布
+- 与 `expand_canvas`、`padding` 等现有布局参数完全兼容，四角半径与 `reference_side`（原图短边）成正比，保持响应式设计
+
+### 🟢 文档更新
+
+- README.md 版本号更新至 v1.8.0，新增 `corner_radius` 配置说明
+- `layout_engine.md` 更新至 v1.8.0，新增第 16 节「原图圆角裁切」
+
+## v1.7.0 (2026-05-18)
+
+> 本版本为重大功能更新，引入**预定义文本与自定义文本系统**、**独立格式化 EXIF 字段**、**依赖树组合定位**三大新能力。从根本上解决了"多个文本块组合后整体定位"这一长期需求。同时修复相对定位中基线偏移导致的对齐偏差积弊。
+
+### 🔴 架构级重构：依赖树组合定位 (Tree Positioning)
+
+一直以来，元素的定位只有「自身绝对定位」和「相对于另一个元素定位」两种模式。当用户需要将多个文本块组成一条链（如 `FL 35mm Aperture f/2.8 Shutter 1/125s ISO ISO200`）并整体居中时，由于链中除根元素外均使用 `relative_to` 跟随前一个元素，根元素只能影响自身位置，整条链必然偏向一侧。
+
+`LayoutEngine.apply_tree_positioning()` 新增 **Phase 2.5** 定位阶段（Phase 2 独立注册之后，Phase 3 绘制之前），将每棵依赖树视作整体，按根元素的 `position` / `alignment` / `margin_*` 参数对整棵树进行一次绝对定位。
+
+**算法流程**（三步法，`src/utils/layout_engine.py`）：
+1. **收集树成员**：从 `positions` 注册表 + `_dependents` 依赖图递归获取根及所有子孙
+2. **计算视觉包围盒**：遍历树成员，使用注册的 `ascent` 校正基线偏移，得到 (tree_left, tree_top, tree_right, tree_bottom)
+3. **平移整棵树**：
+   - 调用 `_calculate_absolute(tree_w, tree_h, root_cfg)` 获取目标左上角
+   - `_resolve_tree_ref(position, alignment)` 解析水平/垂直参考方向
+   - `shift = target_ref - current_ref`，通过 `_shift_dependents()` 级联平移
+   - 最终 padding 约束保护
+
+**opt-in 机制**：树级组合定位仅在根元素添加显式标记 `tree_align: true` 后生效。未声明的依赖树（如原版 `exif → timestamp_author` 垂直链）完全不受影响，行为与 v1.6.3 一致。
+
+```yaml
+defined_texts:
+  defined_text_01:
+    content: "FL"
+    position: "bottom"
+    alignment: "center"
+    tree_align: true       # ← 启用
+    margin_bottom: 0.07
+```
+
+**设计关键**：
+- `_resolve_tree_ref()` 完全对齐 `_get_anchor()` 的 14 种 position + alignment 组合行为
+- 单元素树自动跳过，不影响现有所有样式配置
+- 支持多条独立依赖树，互不干扰
+
+### 🔴 架构重构：统一坐标注册 + 绘制时基线转换
+
+此前 `renderer.py` Phase 2 在每个元素定位后做 `y -= descent` 将包围盒顶注册为基线，导致 `positions` 中的 y 坐标语义混乱。`_calculate_relative` 读取时不得不做 `ref_ascent` 校正来推测真实视觉边界；`_compute_visual_bounds` 也需做相同校正。整个系统被"基线偏移"问题长期困扰。
+
+**根治**：取消 Phase 2 的 `y -= descent`，`positions` 统一存储包围盒顶（bounding box top）坐标。所有元素——无论文字还是非文字——遵循同一注册规则。基线偏移仅在 Phase 3 绘制时单点应用：
+
+- `_calculate_relative()`：回归 v1.6.3 原始公式，使用最简洁的 `_align_y` + `ty + th`，累计砍掉约 30 行 ascent 校正代码
+- `_compute_visual_bounds()`：回归 `y + height`，砍掉 8 行 ascent 校正
+- `register_element()`：不再需要 `ascent` 参数（保留为可选，但不参与运算）
+- Phase 3 绘制：单字体 `draw.text(x, y - descent)`，混排 `baseline_y = y + ref_ascent - ref_descent`
+- 多行文本：第一行基线 = `y - first_line_descent` 或 `y + (ref_ascent - ref_descent)`
+
+**净效果**：总代码减少约 40 行，positions 语义统一，`_calculate_relative` 可读性回归原始水平，所有已知样式配置视觉输出完全不变。
+
+### 🟢 预定义文本 (defined_texts) 与自定义文本 (custom_text)
+
+**`defined_texts`**（`src/core/renderer.py`）：
+- 样式配置中写死文本内容，适合固定标签（如 "FL"、"Aperture" 等）
+- Key 采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 避免与 `info_position` 的保留 key 冲突
+- 定位参数与 `info_position` 完全相同（绝对/相对定位均可），`relative_to` 可跨区域引用
+
+**`custom_text`**：
+- `layout.custom_text.enabled: true` 时，GUI 显示多行文本输入框（`st.text_area`）
+- 默认内容 "Always believe that something wonderful\nis about to happen."
+- 完整透传链：GUI → `ImageProcessor.process()` → `FrameRenderer.render_frame()` → `RenderContext.get_text('custom_text')`
+- CLI 通过 `--custom-text` 参数传入
+
+**三源文本统一管线**（`_add_text_and_icons_flexible`）：
+- 三种文本来源使用同一 `all_positions` 注册表和 `text_elements` 列表
+- 共用 Phase 1 测量 → Phase 2 拓扑排序 → Phase 2.5 树定位 → Phase 3 绘制
+- 字体大小复用 `fonts.sizes.{key}`，颜色复用 `colors.custom_{key}_light/dark_color`
+
+### 🟢 独立格式化 EXIF 字段
+
+新增 4 个 `RenderContext.get_text()` key，将原本仅以组合字符串 `exif` 输出的焦距/光圈/快门/ISO 拆分为独立字段：
+
+| Key | 格式 | 数据来源 |
+|-----|------|---------|
+| `focal_length_formatted` | `"35mm"` | `exif_data['focal_length_35mm']` → 回退 `raw_focal_length` |
+| `aperture_formatted` | `"f/2.8"` | `raw_aperture` |
+| `shutter_speed_formatted` | `"1/125s"` | `raw_shutter_speed`（已由 `_format_shutter_speed` 格式化） |
+| `iso_formatted` | `"ISO200"` | `raw_iso` |
+
+- `exif_helper.py:373` 的 raw keys 循环补充 `'focal_length_35mm'` 字段
+- 焦距优先使用 35mm 等效值，缺失时回退到物理焦距
+- 支持在 `info_position` / `defined_texts` 中通过 `relative_to` 组合进链式排版
+
+### 🟢 多行文本行间距
+
+- `fonts.line_spacing_ratio` 新增字段（默认 `0.005`），行间距 = `reference_side * ratio`
+- 可在 `custom_text` 或 `defined_texts` 元素配置中覆盖全局值
+- 行间距仅在文本包含 `\n` 时生效
+
+### 🔴 演示样式配置
+
+新增 `扩展宝丽来风格 Polaroid Motto.yaml`，是首个展示全部 v1.7.0 新功能的示例样式：
+- 用 `defined_text_01-04` + `focal_length_formatted` / `aperture_formatted` / `shutter_speed_formatted` / `iso_formatted` 组成 8 元素水平链
+- 整链通过 `apply_tree_positioning()` 居中，替换原有 4 行独立 EXIF 显示
+- `custom_text` 展示多行自定义文本
+
+### 已修改文件清单
+
+| 文件 | 改动内容 |
+|------|---------|
+| `src/utils/render_context.py` | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key |
+| `src/core/renderer.py` | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用 |
+| `src/core/image_processor.py` | `process()` 透传 `custom_text` |
+| `src/core/batch_processor.py` | `batch_process()` 透传 `custom_text` |
+| `src/utils/layout_engine.py` | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
+| `src/utils/exif_helper.py` | raw keys 补充 `focal_length_35mm` |
+| `src/gui/image_processing_page.py` | 条件显示 `custom_text` 输入框 |
+| `src/gui/batch_processing_page.py` | 同上 |
+| `src/main.py` | 添加 `--custom-text` CLI 参数 |
+| `src/frame_styles/style_manager.py` | `fonts.line_spacing_ratio` 默认值 |
+| `src/frame_styles/configs/_STYLE_TEMPLATE.txt` | 模板新增 defined_texts / custom_text / line_spacing_ratio |
+| `src/frame_styles/configs/扩展宝丽来风格 Polaroid Motto.yaml` | 新建：v1.7.0 演示样式 |
+| `README.md` | 文档补充 |
+| `CHANGELOG.md` | 更新记录 |
+
+### 样式配置规范更新
+
+```yaml
+# 预定义文本
+layout:
+  defined_texts:
+    defined_text_01:
+      content: "FL"
+      position: "bottom"            # 树级定位根
+      alignment: "center"
+      margin_bottom: 0.035
+
+# 独立 EXIF 字段
+info_position:
+  focal_length_formatted:
+    relative_to: "defined_text_01"
+    relative_position: "right-of"
+
+# 行间距
+fonts:
+  line_spacing_ratio: 0.008
+
+# 自定义文本
+layout:
+  custom_text:
+    enabled: true
+    position: "bottom-center"
+    alignment: "center"
+    line_spacing_ratio: 0.008
+```
+
+### 向后兼容保证
+
+- 无 `defined_texts` / `custom_text` 字段的旧配置：行为完全不变
+- 单元素树（无 `relative_to` + 无子元素）：`apply_tree_positioning` 自动跳过
+- `register_element.ascent` 可选参数（默认 None）：Logo / 占位锚点不受影响
+- 所有现有 3 个样式配置文件通过验证
 
 > 本版本修复非标准 EXIF 类型导致写入失败的问题，并为 debug_log 引入行数滚动机制。
 

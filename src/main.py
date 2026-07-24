@@ -56,6 +56,7 @@ def main():
                         help="水印颜色（默认: white）")
     parser.add_argument("--use-gps-location", action="store_true",
                         help="使用GPS坐标替换手动拍摄地点（批量模式逐张处理）")
+    parser.add_argument("--custom-text", default=None, help="自定义文本内容（支持多行，用双引号包裹）")
     
     args = parser.parse_args()
     
@@ -97,6 +98,7 @@ def main():
                 watermark_position=args.watermark_position,
                 watermark_opacity=args.watermark_opacity,
                 watermark_color=args.watermark_color,
+                custom_text=args.custom_text,
             )
         except ImportError as e:
             print(f"批量处理模块导入失败: {str(e)}")
@@ -124,6 +126,7 @@ def main():
                 watermark_position=args.watermark_position,
                 watermark_opacity=args.watermark_opacity,
                 watermark_color=args.watermark_color,
+                custom_text=args.custom_text,
             )
         except ImportError as e:
             print(f"图像处理模块导入失败: {str(e)}")
@@ -184,7 +187,7 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
                   font_weight='medium', logo="auto", lens_display='combined',
                   use_short_lens=False, no_enhance=False, output_format="JPEG",
                   skip_existing=True, watermark_text=None, watermark_position='bottom-right',
-                  watermark_opacity=50, watermark_color='white'):
+                  watermark_opacity=50, watermark_color='white', custom_text=None):
     """
     处理单张图片
 
@@ -263,7 +266,8 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
                                 logo_filename=logo_filename,
                                 lens_display_mode=lens_display,
                                 use_short_lens=use_short_lens,
-                                saturation_override=saturation_override)
+                                saturation_override=saturation_override,
+                                custom_text=custom_text)
 
     if not success:
         print("图片处理失败")
@@ -290,6 +294,7 @@ def batch_process_images(
     watermark_position='bottom-right',
     watermark_opacity=50,
     watermark_color='white',
+    custom_text=None,
 ):
     """
     批量处理图片
@@ -371,6 +376,7 @@ def batch_process_images(
         skip_existing=skip_existing,
         use_gps_location=use_gps_location,
         decorations=decorations,
+        custom_text=custom_text,
     )
 
     # 输出结果汇总

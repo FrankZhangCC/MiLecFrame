@@ -253,12 +253,16 @@ class StyleManager:
             config['fonts'] = {
                 'family': 'Gotham',
                 'weight': 'medium',
-                'size_ratio': 0.02
+                'size_ratio': 0.02,
+                'line_spacing_ratio': 0.005
             }
         else:
             # 确保字体大小配置存在
             if 'sizes' not in config['fonts'] or not isinstance(config['fonts']['sizes'], dict):
                 config['fonts']['sizes'] = {}
+            # 确保行间距配置存在
+            if 'line_spacing_ratio' not in config['fonts']:
+                config['fonts']['line_spacing_ratio'] = 0.005
         
         return True
     

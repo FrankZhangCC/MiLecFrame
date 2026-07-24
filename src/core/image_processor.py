@@ -56,7 +56,8 @@ class ImageProcessor:
                 logo_filename: Optional[str] = None,
                 lens_display_mode: str = 'combined',
                 use_short_lens: bool = False,
-                saturation_override: Optional[float] = None) -> bool:
+                saturation_override: Optional[float] = None,
+                custom_text: Optional[str] = None) -> bool:
         """
         处理图像并添加相框
         
@@ -74,6 +75,7 @@ class ImageProcessor:
             lens_display_mode: 镜头显示模式
             use_short_lens: 是否使用短版镜头名
             saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值，1.0=不做增强）
+            custom_text: 自定义文本内容（GUI 输入，仅当样式配置 custom_text.enabled=True 时生效）
             
         Returns:
             是否处理成功
@@ -168,6 +170,7 @@ class ImageProcessor:
                 lens_display_mode=lens_display_mode,
                 use_short_lens=use_short_lens,
                 saturation_override=saturation_override,
+                custom_text=custom_text,
             )
             
             # 10. 保存图像
