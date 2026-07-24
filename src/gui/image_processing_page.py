@@ -353,7 +353,7 @@ div.stButton > button:first-child {{
             "中等 (Medium)": "medium"
         }
         selected_font_weight_label = st.selectbox(
-            "字重", list(font_weight_options.keys()), index=1, key='font_weight_select'
+            "字重", list(font_weight_options.keys()), index=2, key='font_weight_select'
         )
         selected_font_weight = font_weight_options[selected_font_weight_label]
 

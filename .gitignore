@@ -63,6 +63,12 @@ data/*
 !data/camera_map.csv
 !data/lens_map.csv
 
+# User config
+config.json
+
+# Backup files
+*.bak
+
 # Local config
 config.ini
 *.ini

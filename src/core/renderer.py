@@ -382,17 +382,18 @@ class FrameRenderer:
                     segments = FontManager.split_mixed_text(line_text)
 
                     if len(segments) <= 1:
-                        # 单字体行
+                        # 单字体行 → 转为单段 seg_info，与混排行共用同一条绘制路径
                         font = self.font_manager.load_font(fonts, original_image_size, text_specific_size_ratio, line_text)
                         bbox = font.getbbox(line_text)
                         line_width = bbox[2] - bbox[0]
                         ascent, descent = font.getmetrics()
                         line_height = ascent + descent
 
+                        seg_info = [(line_text, font, line_width, ascent, descent)]
                         line_infos.append({
-                            'text': line_text, 'font': font, 'width': line_width,
-                            'height': line_height, 'ascent': ascent, 'descent': descent,
-                            'mixed': False
+                            'seg_info': seg_info, 'ref_ascent': ascent,
+                            'ref_descent': descent, 'width': line_width,
+                            'height': line_height, 'mixed': True
                         })
                         total_width = max(total_width, line_width)
                         total_height += line_height + line_spacing_px
@@ -424,6 +425,13 @@ class FrameRenderer:
                         max_ascent = max(s[3] for s in seg_info)
                         max_descent = max(s[4] for s in seg_info)
                         line_height = max_ascent + max_descent
+
+                        logger.debug(f"[测量 混排行] text_type={text_type}, line_text={line_text}, "
+                                     f"ref_ascent={ref_ascent}, ref_descent={ref_descent}, "
+                                     f"max_ascent={max_ascent}, max_descent={max_descent}, "
+                                     f"line_height={line_height}")
+                        for i, (st, _, sw, sa, sd) in enumerate(seg_info):
+                            logger.debug(f"  段{i}: text={st}, width={sw}, ascent={sa}, descent={sd}")
 
                         line_infos.append({
                             'seg_info': seg_info, 'ref_ascent': ref_ascent,
@@ -579,22 +587,17 @@ class FrameRenderer:
             cfg = all_positions.get(name, {})
 
             if item.get('type') == 'multiline':
-                # --- 多行文本绘制 ---
+                # --- 多行文本绘制（统一 seg_info 路径） ---
                 alignment = cfg.get('alignment', 'left')
-                # 第一行基线 = 包围盒顶 - descent（与单字体/混排统一）
                 first_line = item['lines'][0] if item['lines'] else {}
-                if first_line.get('mixed'):
-                    current_y = y + first_line.get('ref_ascent', 0) - first_line.get('ref_descent', 0)
-                else:
-                    current_y = y - first_line.get('descent', 0)
+                current_y = y + first_line.get('ref_ascent', 0) - first_line.get('ref_descent', 0)
                 for line_info in item['lines']:
-                    if 'text' not in line_info and 'seg_info' not in line_info:
+                    if 'seg_info' not in line_info:
                         # 空行占位
                         current_y += item['line_spacing']
                         continue
 
                     line_width = line_info['width']
-                    # 行内对齐（相对于整体块宽）
                     if alignment in ('right', 'bottom-right', 'top-right'):
                         line_x = x + (w - line_width)
                     elif alignment in ('center', 'bottom-center', 'top-center'):
@@ -602,19 +605,14 @@ class FrameRenderer:
                     else:
                         line_x = x
 
-                    if not line_info.get('mixed'):
-                        draw.text((line_x, current_y), line_info['text'],
-                                  fill=item['color'], font=line_info['font'])
-                        current_y += line_info['height'] + item['line_spacing']
-                    else:
-                        baseline_y = current_y
-                        seg_current_x = line_x
-                        for seg_text, font, seg_width, seg_ascent, seg_descent in line_info['seg_info']:
-                            seg_y = baseline_y - seg_ascent
-                            draw.text((seg_current_x, seg_y), seg_text,
-                                      fill=item['color'], font=font)
-                            seg_current_x += seg_width
-                        current_y += line_info['height'] + item['line_spacing']
+                    baseline_y = current_y
+                    seg_current_x = line_x
+                    for seg_text, font, seg_width, seg_ascent, seg_descent in line_info['seg_info']:
+                        seg_y = baseline_y - seg_ascent
+                        draw.text((seg_current_x, seg_y), seg_text,
+                                  fill=item['color'], font=font)
+                        seg_current_x += seg_width
+                    current_y += line_info['height'] + item['line_spacing']
             elif not item['mixed']:
                 # 单字体：绘制基线在包围盒顶 - descent 处
                 draw.text((x, y - item['descent']), item['text'],

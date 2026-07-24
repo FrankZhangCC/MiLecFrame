@@ -29,7 +29,6 @@ ALIGNMENT_OPTIONS = ['left', 'center', 'right', 'top-left', 'top-right', 'top', 
 RELATIVE_POSITION_OPTIONS = ['below', 'above', 'left-of', 'right-of']
 
 WEIGHT_OPTIONS = ['medium', 'regular', 'light']
-FAMILY_OPTIONS = ['Gotham']
 
 CONFIGS_DIR = os.path.normpath(os.path.join(
     os.path.dirname(__file__), '..', 'frame_styles', 'configs'))
@@ -163,7 +162,8 @@ def _init_new_style():
         'sc_canvas_left': 0.02, 'sc_canvas_right': 0.02,
         'sc_pad_top': 0.02, 'sc_pad_bottom': 0.02,
         'sc_pad_left': 0.02, 'sc_pad_right': 0.02,
-        'sc_font_family': 'Gotham', 'sc_font_weight': 'medium',
+        'sc_font_latin_family': '', 'sc_font_latin_weight': 'medium', 'sc_font_latin_system': False,
+        'sc_font_cjk_family': '', 'sc_font_cjk_weight': 'medium', 'sc_font_cjk_system': False,
         'sc_font_size': 0.015,
         'sc_logo_enabled': False,
         'sc_logo_placement': 'outside', 'sc_logo_position': 'top-right',
@@ -243,8 +243,17 @@ def _load_existing_style(filename: str):
 
     # fonts
     fonts = config.get('fonts', {})
-    st.session_state.sc_font_family = str(fonts.get('family', 'Gotham'))
-    st.session_state.sc_font_weight = str(fonts.get('weight', 'medium'))
+    latin_cfg = fonts.get('latin', {})
+    cjk_cfg = fonts.get('cjk', {})
+    # 向后兼容：旧格式 {family, weight}
+    if 'family' in fonts and 'latin' not in fonts:
+        latin_cfg = {'family': fonts['family'], 'weight': fonts.get('weight', 'medium')}
+    st.session_state.sc_font_latin_family = latin_cfg.get('family', '')
+    st.session_state.sc_font_latin_weight = latin_cfg.get('weight', 'medium')
+    st.session_state.sc_font_latin_system = bool(latin_cfg.get('system'))
+    st.session_state.sc_font_cjk_family = cjk_cfg.get('family', '')
+    st.session_state.sc_font_cjk_weight = cjk_cfg.get('weight', 'medium')
+    st.session_state.sc_font_cjk_system = bool(cjk_cfg.get('system'))
     st.session_state.sc_font_size = float(fonts.get('size_ratio', 0.015))
     st.session_state.sc_font_line_spacing = float(fonts.get('line_spacing_ratio', 0.005))
     sizes = fonts.get('sizes', {}) or {}
@@ -492,14 +501,36 @@ def _render_corner_radius():
 def _render_fonts():
     """字体配置"""
     st.subheader('字体 fonts')
-    c1, c2, c3 = st.columns(3)
+
+    st.markdown('**拉丁字体 (Latin)**')
+    c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
     with c1:
-        st.selectbox('字体族 (family)', FAMILY_OPTIONS, key='sc_font_family')
+        st.text_input('family (留空=系统字体 Segoe UI)', key='sc_font_latin_family', placeholder='例: Gotham')
     with c2:
-        st.selectbox('字重 (weight)', WEIGHT_OPTIONS, key='sc_font_weight')
+        st.selectbox('weight', WEIGHT_OPTIONS, key='sc_font_latin_weight')
     with c3:
+        st.checkbox('使用系统字体', key='sc_font_latin_system', help='勾选后忽略 family，直接使用 Segoe UI')
+    with c4:
+        pass
+
+    st.markdown('**CJK 字体 (中文/日文)**')
+    c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
+    with c1:
+        st.text_input('family (留空=系统字体 Microsoft JhengHei UI)', key='sc_font_cjk_family', placeholder='例: GlowSansSC-Normal')
+    with c2:
+        st.selectbox('weight', WEIGHT_OPTIONS, key='sc_font_cjk_weight')
+    with c3:
+        st.checkbox('使用系统字体', key='sc_font_cjk_system', help='勾选后忽略 family，直接使用 Microsoft JhengHei UI')
+    with c4:
+        pass
+
+    c1, c2 = st.columns(2)
+    with c1:
         st.number_input('默认尺寸 (size_ratio)', min_value=0.001, max_value=0.2,
                         step=0.001, format='%.3f', key='sc_font_size')
+    with c2:
+        st.number_input('行间距 (line_spacing_ratio)', min_value=0.0, max_value=0.1,
+                        step=0.001, format='%.3f', key='sc_font_line_spacing')
 
     st.caption('各元素独立尺寸（留空使用默认值）')
     cols = st.columns(4)
@@ -507,13 +538,9 @@ def _render_fonts():
                  'lens', 'camera_lens', 'author', 'location', 'gps',
                  'focal_length_formatted', 'aperture_formatted',
                  'shutter_speed_formatted', 'iso_formatted', 'custom_text']
-
-    # line_spacing_ratio 在最后单独一行，不与字体尺寸共用格子
     for i, k in enumerate(size_keys):
         with cols[i % 4]:
             st.text_input(k, key=f'sc_font_{k}', placeholder='留空=默认')
-    st.number_input('行间距 (line_spacing_ratio)', min_value=0.0, max_value=0.1,
-                    step=0.001, format='%.3f', key='sc_font_line_spacing')
 
 
 def _render_logo():
@@ -923,10 +950,32 @@ def _collect_config() -> dict:
 
     # fonts
     fonts = {
-        'family': st.session_state.get('sc_font_family', 'Gotham'),
-        'weight': st.session_state.get('sc_font_weight', 'medium'),
         'size_ratio': st.session_state.get('sc_font_size', 0.015),
     }
+    # Latin 字体
+    latin = {}
+    if st.session_state.get('sc_font_latin_system', False):
+        latin['system'] = 'Segoe UI'
+    else:
+        latin_family = st.session_state.get('sc_font_latin_family', '').strip()
+        if latin_family:
+            latin['family'] = latin_family
+            latin['weights'] = {'light': 'Light', 'regular': 'Book', 'medium': 'Medium'}
+    latin['weight'] = st.session_state.get('sc_font_latin_weight', 'medium')
+    if latin:
+        fonts['latin'] = latin
+    # CJK 字体
+    cjk = {}
+    if st.session_state.get('sc_font_cjk_system', False):
+        cjk['system'] = 'Microsoft JhengHei UI'
+    else:
+        cjk_family = st.session_state.get('sc_font_cjk_family', '').strip()
+        if cjk_family:
+            cjk['family'] = cjk_family
+            cjk['weights'] = {'light': 'Light', 'regular': 'Regular', 'medium': 'Medium'}
+    cjk['weight'] = st.session_state.get('sc_font_cjk_weight', 'medium')
+    if cjk:
+        fonts['cjk'] = cjk
     ls_val = st.session_state.get('sc_font_line_spacing', 0.005)
     if ls_val:
         fonts['line_spacing_ratio'] = ls_val
