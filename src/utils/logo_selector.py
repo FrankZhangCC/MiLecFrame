@@ -9,6 +9,8 @@ import logging
 import os
 from pathlib import Path
 from typing import List, Optional
+
+import yaml
 from PIL import Image
 
 logger = logging.getLogger(__name__)
@@ -17,33 +19,76 @@ logger = logging.getLogger(__name__)
 class LogoSelector:
     """Logo选择器类"""
 
-    # 品牌独立缩放系数映射表
-    # keyword: 文件名关键字（不区分大小写），factor: 缩放系数（1.0=不变，<1缩小，>1放大）
-    BRAND_SCALE_FACTORS: dict = {
-        # 示例：细长条 logo 可缩小，紧凑型 logo 可放大
-         'hasselblad_logo': 1.5,
-         'sony_logo': 0.7,
-         'canon_logo': 0.7,
-         'fujifilm_logo': 0.7
-    }
-    
-    def __init__(self, logos_dir: str = None):
+    # 默认品牌缩放系数 YAML 内容（仅在配置文件不存在时写入）
+    DEFAULT_SCALE_CONFIG = """# LOGO 品牌尺寸补偿系数
+# keyword: 文件名匹配关键字（不区分大小写）
+# scale_factor: 缩放系数（1.0=不变，<1.0 缩小，>1.0 放大）
+# 细长条 LOGO（如索尼/佳能/富士）需缩小，紧凑型 LOGO（如哈苏）需放大
+
+hasselblad_logo: 1.5
+sony_logo: 0.7
+canon_logo: 0.7
+fujifilm_logo: 0.7
+"""
+
+    def __init__(self, logos_dir: str = None, scale_config_path: str = None):
         """
         初始化Logo选择器
         
         Args:
             logos_dir: logos目录路径，默认为assets/logos/
+            scale_config_path: 品牌缩放系数配置文件路径，默认为data/logo_scale.yaml
         """
+        project_root = Path(__file__).resolve().parent.parent.parent
+
         if logos_dir is None:
-            # 设置默认logos目录
-            project_root = Path(__file__).resolve().parent.parent.parent
             self.logos_dir = project_root / 'assets' / 'logos'
         else:
             self.logos_dir = Path(logos_dir)
-        
-        # 确保目录存在
         self.logos_dir.mkdir(parents=True, exist_ok=True)
-    
+
+        # 品牌缩放系数配置文件
+        if scale_config_path is None:
+            self.scale_config_path = project_root / 'data' / 'logo_scale.yaml'
+        else:
+            self.scale_config_path = Path(scale_config_path)
+        self._ensure_scale_file_exists()
+        self.brand_scale_factors = self._load_scale_factors()
+
+    def _ensure_scale_file_exists(self) -> None:
+        """
+        如果品牌缩放系数配置文件不存在，则创建默认文件
+        """
+        if self.scale_config_path.exists():
+            return
+        self.scale_config_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self.scale_config_path.write_text(self.DEFAULT_SCALE_CONFIG, encoding='utf-8')
+            logger.info(f"已创建默认品牌缩放系数配置文件: {self.scale_config_path}")
+        except Exception as e:
+            logger.error(f"无法创建品牌缩放系数配置文件: {e}")
+
+    def _load_scale_factors(self) -> dict:
+        """
+        从YAML文件加载品牌缩放系数
+        """
+        try:
+            with open(self.scale_config_path, 'r', encoding='utf-8') as f:
+                factors = yaml.safe_load(f)
+            if not isinstance(factors, dict):
+                logger.warning(
+                    f"品牌缩放系数配置文件格式错误，期望 dict，实际为 {type(factors).__name__}"
+                )
+                return {}
+            for key, val in list(factors.items()):
+                if not isinstance(val, (int, float)):
+                    logger.warning(f"品牌缩放系数无效: '{key}' = {val}，已跳过")
+                    del factors[key]
+            return factors
+        except Exception as e:
+            logger.error(f"无法加载品牌缩放系数配置文件: {e}")
+            return {}
+
     def scan_logos(self) -> List[str]:
         """
         扫描logos目录中的PNG文件
@@ -154,7 +199,7 @@ class LogoSelector:
         关键字匹配时不区分大小写
         """
         logo_lower = os.path.splitext(logo_filename)[0].lower()
-        for keyword, factor in self.BRAND_SCALE_FACTORS.items():
+        for keyword, factor in self.brand_scale_factors.items():
             if keyword.lower() in logo_lower:
                 logger.debug(f"品牌缩放系数匹配: '{keyword}' → {factor} (logo: {logo_filename})")
                 return factor

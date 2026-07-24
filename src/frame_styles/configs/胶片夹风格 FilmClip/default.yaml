@@ -66,10 +66,10 @@ layout:
 
   corner_radius:
     enabled: true
-    top_left: 0.04
-    top_right: 0.04
-    bottom_left: 0.04
-    bottom_right: 0.04
+    top_left: 0.025
+    top_right: 0.025
+    bottom_left: 0.025
+    bottom_right: 0.025
 
   info_position:
     camera_lens:

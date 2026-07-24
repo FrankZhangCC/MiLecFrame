@@ -29,7 +29,7 @@ layout:
   expand_canvas:
     enabled: true
     top: 0.0
-    bottom: 0.1
+    bottom: 0.105
     left: 0.00
     right: 0.00
   padding:

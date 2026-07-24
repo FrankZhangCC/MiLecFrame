@@ -36,6 +36,7 @@ class ProcessingConfig:
     custom_text: Optional[str] = None
 
     # ── 拍摄信息配置 ──
+    timestamp_display_mode: str = "full"  # "full" / "date_only" / "hide"
     lens_display_mode: str = "combined"  # "combined" / "camera_only" / "lens_only"
     use_short_lens: bool = False
     logo_selection: str = "auto"  # "auto" / "none" / 具体文件名
