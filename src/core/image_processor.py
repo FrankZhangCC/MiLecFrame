@@ -4,6 +4,7 @@
 """
 import os
 import io
+import re
 import logging
 from pathlib import Path
 from typing import Tuple, Optional, Dict, List
@@ -329,7 +330,37 @@ class ImageProcessor:
                     # 移除 MakerNote（厂商私有数据段，易导致 EXIF 总大小超出 JPEG 限制 65535 字节）
                     if "Exif" in raw_exif and piexif.ExifIFD.MakerNote in raw_exif["Exif"]:
                         del raw_exif["Exif"][piexif.ExifIFD.MakerNote]
-                    exif_bytes = piexif.dump(raw_exif)
+
+                    # 容错式序列化：遇到类型不兼容的标签自动丢弃并重试
+                    def _try_dump_exif(exif_dict):
+                        """尝试序列化EXIF，丢弃无法写入的标签后重试。"""
+                        removed = []
+                        while True:
+                            try:
+                                result = piexif.dump(exif_dict)
+                                if removed:
+                                    self.logger.info(
+                                        f"已移除 {len(removed)} 个不兼容的EXIF标签: {removed}"
+                                    )
+                                return result
+                            except (ValueError, TypeError) as e:
+                                msg = str(e)
+                                # 从异常消息中解析问题标签，格式:
+                                #   "dump" got wrong type of exif value.
+                                #   41729 in Exif IFD. Got as <class 'int'>.
+                                match = re.search(r'(\d+) in (\w+) IFD', msg)
+                                if not match:
+                                    raise
+                                tag_id = int(match.group(1))
+                                ifd_name = match.group(2)
+                                if (exif_dict.get(ifd_name) and
+                                        tag_id in exif_dict[ifd_name]):
+                                    del exif_dict[ifd_name][tag_id]
+                                    removed.append(f"{ifd_name}.{tag_id}")
+                                else:
+                                    raise
+
+                    exif_bytes = _try_dump_exif(raw_exif)
                     if len(exif_bytes) > 65533:
                         self.logger.warning(
                             f"EXIF 数据过大 ({len(exif_bytes)} 字节)，超出 JPEG 限制，已跳过 EXIF 嵌入"
