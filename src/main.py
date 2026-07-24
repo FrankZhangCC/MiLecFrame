@@ -20,6 +20,9 @@ import subprocess
 
 def main():
     """程序主入口点"""
+    from utils.logging_config import setup_logging
+    setup_logging()
+
     parser = argparse.ArgumentParser(description="MiLeica照片相框程序")
     parser.add_argument("--input", "-i", help="输入图片路径")
     parser.add_argument("--output", "-o", help="输出图片路径")
@@ -98,8 +101,8 @@ def launch_gui():
     try:
         subprocess.run([python_executable, "-m", "streamlit", "run", str(gui_app_path)], check=True)
     except subprocess.CalledProcessError as e:
-        if e.returncode == -2:  # 用户中断
-            print("\nGUI服务已被用户中断。")
+        if e.returncode in (-2, 1):
+            print("\nGUI服务已被用户停止。")
             return
         else:
             print(f"GUI启动失败: {str(e)}")
@@ -113,8 +116,8 @@ def launch_gui():
             print("可通过以下命令安装: pip install streamlit")
             sys.exit(1)
         except subprocess.CalledProcessError as e:
-            if e.returncode == -2:  # 用户中断
-                print("\nGUI服务已被用户中断。")
+            if e.returncode in (-2, 1):
+                print("\nGUI服务已被用户停止。")
                 return
             else:
                 print(f"GUI启动失败: {str(e)}")

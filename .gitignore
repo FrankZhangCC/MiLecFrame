@@ -1,15 +1,12 @@
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
-.env/
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -28,7 +25,14 @@ wheels/
 *.egg
 MANIFEST
 
-# IDE
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -38,9 +42,25 @@ MANIFEST
 .DS_Store
 Thumbs.db
 
+# Output images - these are large files that don't need version control
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.gif
+
+# Specific output files
+output_test*.jpg
+output_test*.png
+
 # Logs
 *.log
 logs/
+error_log.txt
+
+# Data files
+data/
 
 # Local config
 config.ini
@@ -70,3 +90,6 @@ config.ini
 # Assets that are tracked elsewhere
 assets/fonts/*
 !assets/fonts/.gitkeep
+data/camera_map.csv
+data/lens_map.csv
+debug_log.txt

@@ -50,13 +50,15 @@ layout:
 
 # 颜色配置
 colors:
-  text: "#000000"      # 文字颜色 (黑色)
+  text: "#000000"      # 文字颜色 (黑色) - 传统颜色设置
+  custom_text_color: null  # 自定义文字颜色，如果不设置则使用自适应颜色
   background: "#FFFFFF" # 背景颜色 (白色)
   icon: "#333333"      # 图标颜色 (深灰)
 
 # 字体配置
 fonts:
-  regular: "Futura-Medium"      # 常规字体
+  family: "Gotham"              # 字体系列
+  weight: "medium"              # 字体粗细: light, regular, medium
   size_ratio: 0.02              # 默认字体大小相对于画布宽度的比例
   sizes:                        # 各类信息的独立字体大小
     exif: 0.018                 # EXIF信息字体大小比例
@@ -82,3 +84,13 @@ background_fill:
   type: "gaussian_white_35"  # 35%透明度
   gaussian_blur_radius: 200  # 高斯模糊半径
   gaussian_blur_opacity: 35  # 高斯模糊叠加透明度 (%)
+
+# Logo配置
+logo:
+  enabled: true
+  size_ratio: 0.05
+  position: "top-right"
+  margin_top: 0.01
+  margin_bottom: 0.01
+  margin_left: 0.01
+  margin_right: 0.01

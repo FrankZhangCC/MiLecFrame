@@ -52,6 +52,49 @@ streamlit run src/gui/app.py
 
 ## 最新功能更新
 
+### 高斯模糊模块独立化
+- **独立模块**：将高斯模糊叠加和 Floyd-Steinberg 抖动算法从 `renderer.py` 抽取为 `src/utils/gaussian_blur.py` 独立模块
+- **可复用性**：`apply_gaussian_blur_overlay_expansion()` 和 `apply_dithering()` 作为独立函数，不再依赖 `FrameRenderer` 实例
+- **精简渲染器**：`renderer.py` 移除约 120 行高斯模糊相关代码，依赖更清晰
+
+### 高斯模糊模块性能优化
+- **Box Blur 替代 GaussianBlur**：用 3-pass `ImageFilter.BoxBlur` 近似高斯模糊，时间复杂度从 O(n²) 降至 O(n)，视觉效果几乎一致
+- **内置量化替代 Python dithering**：`apply_dithering` 改用 PIL 内置 `image.quantize(dither=Image.Dither.FLOYDSTEINBERG)`，由 C 层实现，消除逐像素纯 Python 循环，移除 200 万像素阈值限制
+- **自适应缩放**：中间分辨率根据原图长边动态调整——≤1200px 不降采样，超过 1200px 固定缩放到 1200px 计算模糊，替代硬编码的 2000/512 常量
+- **Float 空间混合**：overlay 叠加从 8-bit `alpha_composite` 改为 float32 numpy 混合后统一量化，减少中间色彩断层
+- **配置参数生效**：`gaussian_blur_radius` 和 `gaussian_blur_opacity` 现在真正从 `bg_fill_config` 读取并传入函数（之前配置定义后被忽略）
+- **新增 `blur_radius` 参数**：`apply_gaussian_blur_overlay_expansion()` 接受 `blur_radius` 参数（默认 200），支持运行时调整模糊强度
+
+### 渲染器代码优化
+- **死代码清理**：移除高斯模糊提取后不再使用的 `self.color_options`
+- **显式传参**：`bg_fill_type` 和 `layout_engine` 从隐式实例属性改为显式参数传递，消除跨方法耦合
+- **颜色解析复用**：提取 `_parse_color_value()` 和 `_resolve_color_from_config()` 方法，消除 40 行重复的十六进制/RGB 解析逻辑
+- **分支精简**：`_create_background_with_expansion` 用字符串解析替代 6 分支 if/elif，从 28 行缩减为 12 行，且自动兼容未来的 `gaussian_*_*` 类型
+- **全局日志**：调试 `print()` 替换为 `logging` 模块调用，支持通过日志级别控制输出
+
+### 日志系统统一化
+- **集中配置**：新增 `src/utils/logging_config.py`，提供 `setup_logging()` 函数统一初始化日志
+- **分级输出**：DEBUG 级别日志输出到 `debug_log.txt`，INFO 及以上输出到控制台
+- **幂等守卫**：多次调用不会重复配置，各入口（CLI `main.py` / GUI `app.py`）安全调用
+- **清理重复**：移除 `image_processor.py` 和 `style_manager.py` 中重复的 `logging.basicConfig()` 调用
+
+### 文字颜色自定义与背景类型管理
+- **自定义文字颜色**：现在可以在样式配置文件中通过 `custom_text_color` 字段指定文字颜色
+  - 如果配置了 `custom_text_color`，将优先使用此颜色
+  - 如果未配置 `custom_text_color` 或设置为 `null`，则使用自适应颜色逻辑
+  - 支持十六进制颜色格式（如 "#FF6B6B"）和 RGB 元组格式
+- **针对背景类型的自定义颜色**：支持为亮色和暗色背景分别设置不同的自定义颜色
+  - 使用 `custom_[text_type]_light_color` 和 `custom_[text_type]_dark_color` 格式配置特定文本类型的亮/暗色背景颜色
+  - 例如 `custom_timestamp_light_color` 和 `custom_timestamp_dark_color` 为时间戳分别设置亮色和暗色背景下的颜色
+  - 例如 `custom_location_light_color` 和 `custom_location_dark_color` 为地点分别设置亮色和暗色背景下的颜色
+- **背景类型管理**：使用预定义的深色和浅色背景类型列表进行管理
+  - 深色背景类型包括：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
+  - 浅色背景类型包括：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 未来添加新背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
+- **自适应颜色逻辑**：
+  - 深色背景（包括纯黑和黑色高斯模糊）→ 白色文字
+  - 浅色背景（包括纯白和白色高斯模糊）→ 黑色文字
+
 ### 字体渲染增强
 - **智能字体选择**：根据文本内容自动检测，西文使用Gotham Medium字体，中文使用Glow Sans SC Medium字体
 - **字体大小调整**：文字高度现为原图长度的2%，提供更合适的视觉比例
@@ -69,9 +112,47 @@ streamlit run src/gui/app.py
 - **35mm等效焦距**：显示焦距时使用35mm等效焦距而非物理焦距，更符合摄影习惯
 - **精确定位**：文字位置计算使用原始图像长边作为基准，确保定位准确
 
+### 元素相对位置计算功能
+- **相对定位**：元素可以相对于另一个元素进行定位，支持多种相对位置：`after`, `before`, `below`, `above`, `right-of`, `left-of`
+- **偏移功能**：支持`offset_x_ratio`和`offset_y_ratio`参数，允许在相对定位的基础上进行偏移
+- **配置参数**：
+  - `relative_to`: 指定参考的目标元素名称（如 "exif", "logo" 等）
+  - `relative_position`: 定义相对方位，支持值包括 "after", "before", "below", "above", "right-of", "left-of"
+  - `relative_margin`: 定义与目标元素之间的间距，必须为相对于原图长边的比例值（浮点数），例如 0.01 表示原图长边的 1%
+  - `offset_x_ratio`: 横向偏移量，相对于原图长边的比例，正值向右，负值向左
+  - `offset_y_ratio`: 竖向偏移量，相对于原图长边的比例，正值向下，负值向上
+- **布局逻辑**：
+  - 优先使用相对位置配置计算坐标
+  - 若未配置或目标元素不存在，则回退到绝对定位或默认布局逻辑
+  - 支持链式布局，即后续元素可依次相对于前一个已定位的元素进行排列
+  - 偏移量在相对位置计算完成后应用，用于微调元素位置
+- **适用范围**：此功能可用于任何元素，包括文字、图标、Logo等
+
 ### 样式配置更新
 - **配置驱动**：通过YAML配置文件灵活管理字体、颜色和布局参数
 - **独立边距设置**：左对齐文字（如author）的左margin设为0，右对齐文字（如location）的右margin设为0，实现更紧密的对齐效果
+
+### 模块化重构 — FontManager 与 LayoutEngine
+
+#### FontManager（字体管理器）
+- **独立字体模块**：将字体加载逻辑从渲染引擎中抽取为独立的 `FontManager` 类（`src/utils/font_manager.py`）
+- **核心能力**：
+  - 智能字体选择：根据文本内容自动检测中西文字符，选择对应字体
+  - 字重映射：支持 light、medium、regular 三种字重，Gotham regular 自动映射到 Gotham-Book
+  - 字体缓存：基于 `(字体系列, 字重, 字号, 文本内容)` 键值缓存，避免重复加载
+  - 响应式字号：以原始图像长边为基准，按比例计算字号（最小12px）
+  - 自动回退：所有字体加载失败时使用 PIL 默认字体
+
+#### LayoutEngine（布局引擎）
+- **统一布局模块**：将定位逻辑从渲染引擎中抽取为独立的 `LayoutEngine` 类（`src/utils/layout_engine.py`）
+- **核心能力**：
+  - 画布尺寸计算：根据 `expand_canvas` 配置自动计算扩展后的画布尺寸
+  - 原图边界计算：统一提供原始图像在画布中的位置和尺寸，消除代码重复
+  - 统一绝对定位：支持 `top-left`, `top-right`, `bottom-left`, `bottom-right`, `top-center`, `bottom-center`, `top`, `bottom`, `left`, `right`, `center`, `inside`, `outside` 等位置
+  - 统一相对定位：支持 `after`, `before`, `below`, `above`, `right-of`, `left-of` 等相对位置，配合 `offset_x_ratio`/`offset_y_ratio` 偏移微调
+  - 位置注册表：元素渲染后自动注册坐标，后续元素可通过 `relative_to` 引用
+  - **文字与非文字元素统一接口**：`calculate_position(width, height, config)` 适用于任何元素类型，便于后续扩展
+- **重构效果**：`renderer.py` 从 1234 行精简至 570 行，减少 664 行
 
 ## 开发历史
 
@@ -85,10 +166,42 @@ streamlit run src/gui/app.py
 - **批量处理**：增加批量处理功能，提升工作效率
 
 ### 近期更新
-- **文字渲染优化**：修复文字位置计算错误，确保文字在正确位置显示
-- **字体加载机制**：解决字体加载问题，确保使用正确的字体文件
-- **视觉呈现优化**：根据背景颜色自动调整文字颜色，提升可读性
-- **国际化支持**：增加中英文自动识别，使用对应字体渲染
+
+#### 设备映射管理功能
+- **顶部标签页导航**：将主要功能导航放置在页面顶部，使用"图像处理"、"相机映射管理"和"镜头映射管理"三个标签页，与侧边栏设置项进行功能分区
+- **相机映射管理**：
+  - 实现双排品牌筛选按钮，第一排为Canon（佳能）、Nikon（尼康）、Sony（索尼）、Fujifilm（富士）、Hasselblad（哈苏）；第二排为DJI（大疆）、OM System（奥之心）、RICOH（理光）、Xiaomi（小米）、Vivo、Oppo、Huawei（华为）、其它
+  - 支持直接在表格中编辑映射数据，实时保存并应用更改
+- **镜头映射管理**：
+  - 提供搜索框，支持按原始或映射镜头名称搜索
+  - 支持直接在表格中编辑映射数据，实时保存并应用更改
+- **数据实时同步**：编辑后的映射数据立即保存到CSV文件并刷新内存中的映射
+
+#### Logo自动匹配优化
+- **智能匹配**：当选择"自动匹配"选项时，系统会根据相机品牌自动匹配对应的logo文件
+- **无匹配处理**：如果无法匹配到对应的图标，系统将不显示logo，保持界面整洁
+- **配置驱动**：仅在样式配置中启用Logo功能时才显示Logo选择器
+
+#### 字体渲染增强
+- **智能字体选择**：根据文本内容自动检测，西文使用Gotham Medium字体，中文使用Glow Sans SC Medium字体
+- **字体大小调整**：文字高度现为原图长度的2%，提供更合适的视觉比例
+- **无前缀显示**：作者和地点信息不再添加"作者："和"地点："前缀，直接显示原始内容
+- **多种字重选项**：支持 light、medium、regular 三种字重选择，其中Gotham的regular字重映射到Gotham-Book，以符合实际视觉效果需求
+- **独立边距配置**：支持为每个文本元素单独配置四个方向的边距（`margin_top`, `margin_bottom`, `margin_left`, `margin_right`），确保更精确的定位控制
+
+#### 背景与文字颜色优化
+- **自适应文字颜色**：根据背景类型自动选择最佳文字颜色
+  - 深色背景（包括纯黑和黑色高斯模糊）→ 白色文字
+  - 浅色背景（包括纯白和白色高斯模糊）→ 黑色文字
+- **高对比度保证**：确保文字在各种背景下都有良好的可读性
+
+#### EXIF信息优化
+- **35mm等效焦距**：显示焦距时使用35mm等效焦距而非物理焦距，更符合摄影习惯
+- **精确定位**：文字位置计算使用原始图像长边作为基准，确保定位准确
+
+#### 样式配置更新
+- **配置驱动**：通过YAML配置文件灵活管理字体、颜色和布局参数
+- **独立边距设置**：左对齐文字（如author）的左margin设为0，右对齐文字（如location）的右margin设为0，实现更紧密的对齐效果
 
 ## 项目结构
 
@@ -101,20 +214,41 @@ MiLeica_Frame/
 │   │   ├── renderer.py         # 渲染引擎
 │   │   ├── hdr_handler.py      # HDR处理
 │   │   ├── decorator.py        # 装饰元素处理
-│   │   └── batch_processor.py  # 批量处理
+│   │   ├── batch_processor.py  # 批量处理
+│   │   └── ...
 │   ├── gui/                # GUI界面相关
+│   │   ├── __init__.py
+│   │   ├── app.py          # Streamlit GUI主文件
+│   │   └── ...
 │   ├── utils/              # 工具函数
+│   │   ├── __init__.py
+│   │   ├── exif_helper.py       # EXIF数据处理
+│   │   ├── device_mapper.py     # 设备映射数据库
+│   │   ├── config_manager.py    # 配置管理
+│   │   ├── font_manager.py      # 字体管理器
+│   │   ├── layout_engine.py     # 布局引擎
+│   │   ├── logo_selector.py     # Logo选择器
+│   │   ├── gaussian_blur.py     # 高斯模糊与抖动算法
+│   │   ├── logging_config.py    # 日志配置
+│   │   └── ...
 │   ├── frame_styles/       # 相框样式配置
 │   │   ├── configs/        # 样式配置文件
-│   │   └── style_manager.py # 样式管理器
+│   │   ├── __init__.py
+│   │   ├── style_manager.py # 样式管理器
+│   │   └── ...
+│   ├── frames/             # 相框基类
+│   │   └── base_frame.py   # 相框基类定义
 │   └── main.py             # 主程序入口
 ├── assets/                 # 静态资源
 │   ├── icons/              # 图标文件
 │   └── fonts/              # 字体文件
 ├── data/                   # 数据文件
+│   ├── camera_map.csv      # 相机品牌型号映射
+│   └── lens_map.csv        # 镜头映射
 ├── tests/                  # 测试文件
 ├── requirements.txt        # 依赖包列表
 ├── setup_env.py           # 环境配置脚本
+├── streamlit_app.py       # Streamlit应用入口
 └── README.md
 ```
 
@@ -147,7 +281,15 @@ version: "版本号"
       - 所有边距值推荐使用浮点数比例（如0.03表示长边的3%），以保持响应式设计特性
 
 ### 颜色配置 (colors)
-- `text`: 文字颜色
+- `text`: 文字颜色（传统颜色设置，保留向后兼容性）
+- `custom_text_color`: 通用自定义文字颜色（新功能，如果设置将优先使用此颜色）
+  - 支持十六进制颜色格式（如 "#FF6B6B"）
+  - 支持 RGB 元组格式（如 [255, 107, 107]）
+  - 如设置为 `null`，则使用自适应颜色逻辑
+- `custom_text_light_color`: 亮色背景下通用自定义文字颜色
+- `custom_text_dark_color`: 暗色背景下通用自定义文字颜色
+- `custom_[text_type]_light_color`: 亮色背景下特定文本类型的自定义颜色（如 `custom_timestamp_light_color`, `custom_location_light_color`）
+- `custom_[text_type]_dark_color`: 暗色背景下特定文本类型的自定义颜色（如 `custom_timestamp_dark_color`, `custom_location_dark_color`）
 - `background`: 背景颜色
 - `icon`: 图标颜色
 
@@ -168,9 +310,9 @@ version: "版本号"
 - `watermark`: 水印配置
 
 ### 背景填充配置 (background_fill)
-- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35）
-- `gaussian_blur_radius`: 高斯模糊半径
-- `gaussian_blur_opacity`: 高斯模糊叠加透明度
+- `type`: 填充类型（pure_black, pure_white, gaussian_black_65, gaussian_white_65, gaussian_black_35, gaussian_white_35, 以及格式为 `gaussian_{color}_{opacity}` 的自定义组合）
+- `gaussian_blur_radius`: 高斯模糊半径（默认 200，原图全分辨率下的等效值；实际计算时按缩放比例递减）
+- `gaussian_blur_opacity`: 叠加透明度百分比（0-100，作为 `type` 中已编码透明度的回退默认值）
 
 ## 命令行选项
 
@@ -220,6 +362,11 @@ version: "版本号"
    - 实现了CSV格式的设备映射数据库
    - 支持品牌名称和别名的映射
    - 提供了添加和查询功能
+   - **设备映射系统重构**：将原有的 `brand_map.csv`、`model_map.csv` 和 `device_records.csv` 合并为 `camera_map.csv`，简化数据管理结构
+     - `camera_map.csv` 结构：[原始品牌, 原始机型, 映射品牌, 映射机型, 时间戳]
+     - `lens_map.csv` 保持独立，存储镜头映射信息
+     - 新增 [get_mapped_brand_and_model](file:///d:/Coding/MiLeica_Frame/src/utils/device_mapper.py#L128-L145) 方法，同时获取品牌和机型的映射
+     - 自动记录新设备信息到映射数据库，便于用户后续编辑映射关系
 
 6. **配置管理** (`src/utils/config_manager.py`)
    - 实现了JSON格式的配置文件管理
@@ -232,6 +379,10 @@ version: "版本号"
    - 支持多种背景填充选项（纯黑、纯白、高斯模糊叠加黑白）
    - 实现了响应式设计，尺寸和字体大小随输出尺寸自动调整
    - 集成了文字渲染和图标显示功能
+   - **新增自定义文字颜色功能**：可在样式配置中通过 `custom_text_color` 指定文字颜色，如果未指定则使用自适应颜色逻辑
+   - **增强自定义颜色功能**：支持针对亮色和暗色背景分别设置不同的自定义颜色
+   - **背景类型管理优化**：使用预定义的深色和浅色背景类型列表进行管理，便于后续扩展新背景类型
+   - **特定文本类型颜色配置**：支持为特定文本类型（如时间戳、地点等）配置针对不同背景的自定义颜色
 
 2. **HDR图像处理** (`src/core/hdr_handler.py`)
    - 支持Gainmap HDR JPEG格式和UltraHDR标准图片
@@ -293,6 +444,17 @@ version: "版本号"
 - **相机型号信息**：显示在原图外侧扩展区域的左上角
 - **镜头型号信息**：显示在相机型号信息下方，同样在原图外侧扩展区域的左上角
 
+### 统一数据处理与展示
+- **分层架构**：采用三层架构处理EXIF数据
+  - **底层解析层**（EXIF Helper）：仅负责读取和解析原始二进制数据，返回纯净的原始字段
+  - **业务映射层**（Device Mapper/Service）：负责执行品牌/机型映射、字符串拼接（如`品牌 + " " + 型号`）、格式化等业务逻辑
+  - **展示层**（GUI/Renderer）：仅负责接收处理后的最终数据对象进行渲染
+- **统一数据出口**：通过`exif_helper.get_display_data()`方法提供统一的展示数据
+  - 返回标准化的数据结构，包含`raw_value`（原始数据）和`display_value`（映射后数据）
+  - 在"相框预览"和"最终渲染"中使用相同的`display_value`，确保一致性
+  - GUI的"设备信息"部分显示`raw_value`，"相框显示"部分显示`display_value`
+- **结构化排版**：将数据按逻辑类别拆分，使用Markdown标题、分隔线等组织内容，采用"标签+内容"换行展示，每项独立占行，使用明确中文标签（如"相机型号："、"镜头型号："）
+
 ### 图像支持格式
 - **支持格式**：JPEG、PNG、TIFF
 - **特殊支持**：Gainmap HDR JPEG格式、谷歌UltraHDR标准图片、HEIF/HEIC/AVIF格式
@@ -331,25 +493,30 @@ version: "版本号"
 ### 背景样式运行时选择
 - **纯黑色**：100%黑色背景填充，覆盖包括扩展区域在内的整个画面
 - **纯白色**：100%白色背景填充，覆盖包括扩展区域在内的整个画面
-- **高斯模糊叠加黑色 (65%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度黑色 (`gaussian_black_65`)
-- **高斯模糊叠加白色 (65%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度白色 (`gaussian_white_65`)
-- **高斯模糊叠加黑色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度黑色 (`gaussian_black_35`)
-- **高斯模糊叠加白色 (35%)**：原图半径200像素高斯模糊，等比放大填充至包括扩展区域在内的整个画面，叠加35%透明度白色 (`gaussian_white_35`)
+- **高斯模糊叠加黑色 (65%)**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度黑色 (`gaussian_black_65`)
+- **高斯模糊叠加白色 (65%)**：原图使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），等比放大填充至包括扩展区域在内的整个画面，叠加65%透明度白色 (`gaussian_white_65`)
+- **高斯模糊叠加黑色 (35%)**：同上，叠加35%透明度黑色 (`gaussian_black_35`)
+- **高斯模糊叠加白色 (35%)**：同上，叠加35%透明度白色 (`gaussian_white_35`)
+- **背景类型管理**：系统内部使用预定义的深色和浅色背景类型列表进行管理
+  - 深色背景类型：`pure_black`, `gaussian_black_65`, `gaussian_black_35`, `gaussian_black`
+  - 浅色背景类型：`pure_white`, `gaussian_white_65`, `gaussian_white_35`, `gaussian_white`
+  - 新增背景类型时，只需将类型名称添加到对应的列表中，无需修改条件判断逻辑
 - **命令行选择**：通过 `--bg-fill` 参数指定
 - **GUI选择**：在界面上提供选项
 
 ### 资源管理
 - **图标支持**：从指定文件夹读取PNG文件列表，支持根据EXIF相机品牌信息自动选择对应品牌图标
-- **高斯模糊**：支持半径参数配置（默认200像素），支持透明度叠加（50%透明度）
+- **高斯模糊**：使用3-pass Box Blur 近似高斯模糊（默认全分辨率等效半径200px），支持半径参数配置，通过 `gaussian_blur_radius` 和 `gaussian_blur_opacity` 在样式配置中自定义模糊强度和叠加透明度。大图自动降采样至1200px中间分辨率计算以优化性能。模糊叠加混合在 float32 空间完成，通过 PIL 内置 Floyd-Steinberg 量化消除色彩断层
 
 ### 用户输入
 - **作者**：手动输入作者姓名，保存到配置文件
 - **地点**：手动输入拍摄地点，格式选项包括"从小到大"或"从大到小"，不保存
 
 ### 错误日志系统
-- **日志文件**：error_log.txt
-- **日志格式**：时间戳（精确到秒）、错误文件全路径、详细错误原因
-- **用户通知**：程序结束时提示用户查看日志
+- **调试日志**：`debug_log.txt` — 包含所有 DEBUG 级别日志（渲染流程、定位计算等详细信息）
+- **日志格式**：`时间 - 模块名 - 级别 - 消息`
+- **控制台输出**：INFO 及以上级别的日志同步输出到 stderr
+- **配置入口**：`src/utils/logging_config.py` 中的 `setup_logging()` 函数统一管理，CLI 和 GUI 入口均已集成
 
 ## 后续开发计划
 
