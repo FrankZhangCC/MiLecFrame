@@ -351,7 +351,7 @@ class ExifHelper:
         camera_str = display_data.get('camera_combined', '')
         lens_str = display_data.get('lens_model', '')
         if camera_str and lens_str:
-            display_data['camera_lens_combined'] = f"{camera_str} | {lens_str}"
+            display_data['camera_lens_combined'] = f"{camera_str}  |  {lens_str}"
         elif camera_str:
             display_data['camera_lens_combined'] = camera_str
         elif lens_str:
@@ -360,7 +360,7 @@ class ExifHelper:
         # 竖幅/方形图片专用：相机 + 短版镜头合并
         short_lens_str = display_data.get('short_lens', '')
         if camera_str and short_lens_str:
-            display_data['camera_lens_combined_short'] = f"{camera_str} | {short_lens_str}"
+            display_data['camera_lens_combined_short'] = f"{camera_str}  |  {short_lens_str}"
         elif camera_str:
             display_data['camera_lens_combined_short'] = camera_str
         elif short_lens_str:
@@ -370,7 +370,7 @@ class ExifHelper:
         display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)
         
         # 添加原始数据用于GUI展示
-        for key in ['camera_make', 'camera_model', 'focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
+        for key in ['camera_make', 'camera_model', 'focal_length', 'focal_length_35mm', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
             if key in exif_data:
                 display_data[f'raw_{key}'] = exif_data[key]
         

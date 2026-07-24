@@ -1,4 +1,4 @@
-# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.6.2-blue)
+# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.8.0-blue)
 
 > ©FrankZCC 2026
 > 使用 DeepSeek V4 系列模型开发。
@@ -244,12 +244,42 @@ name: "样式名称"         # 必需字段，用于标识样式
   - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
+- `corner_radius`: 原图四角圆角配置 (v1.8.0)
+  - `enabled`: 布尔值，设为 `true` 时启用在原始图像上裁切圆角；缺省或值为 `false` 时完全跳过此步骤
+  - `top_left`, `top_right`, `bottom_left`, `bottom_right`: 四角独立半径系数（相对于参照边（短边）的比例），如 `0.01` = 短边的 1%
+  - 所有半径系数为 0 时等同于禁用，不会执行蒙版创建和粘贴操作
+
+  ```yaml
+  corner_radius:
+    enabled: true
+    top_left: 0.01
+    top_right: 0.01
+    bottom_left: 0.01
+    bottom_right: 0.01
+  ```
+
+  **实现原理**：在将原图粘贴到画布前，创建一个灰度蒙版，在每个角用 `rectangle + pieslice` 组合绘制四分圆切除区域，再通过 `putalpha` 写入 RGBA 通道后粘贴。
+
 - `info_position`: 信息位置配置
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
   - `camera_lens` 输出格式由 GUI 中"镜头显示"选项控制（相机+镜头 / 只显示相机 / 只显示镜头），搭配"使用短版镜头名"开关可全局切换为短版镜头名；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
+- `defined_texts`: 预定义文本配置 (v1.7.0)
+  - 内容在配置文件中写死，采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 以此类推
+  - 此命名惯例确保 key 不与 `info_position` 的保留名（如 `exif`、`author` 等）冲突，且补零保证字典自然排序
+  - 每个条目包含 `content`（文本内容）和标准布局参数，与 `info_position` 共用定位系统
+  - `tree_align: true`（可选，用于根元素）：将整棵依赖树按根元素的 position/alignment/margin 做整体绝对定位，适合水平链式排版居中。未声明时不影响已有垂直链
+  - 示例：`defined_text_01: { content: "FL", position: "bottom", alignment: "center", tree_align: true, margin_bottom: 0.07 }`
+- `custom_text`: 自定义文本配置 (v1.7.0)
+  - `enabled`: 布尔值，设为 `true` 时 GUI 显示多行文本输入框，CLI 通过 `--custom-text` 参数传入
+  - 布局参数与 `info_position` 相同，`relative_to` 可跨区域引用（包括 `defined_texts` 和 `info_position` 中的元素）
+  - 默认输入内容：`"Always believe that something wonderful\nis about to happen."`
+- 多行文本行间距 (v1.7.0)
+  - `fonts.line_spacing_ratio`：全局行间距系数（相对于参照边，默认 `0.005`），仅多行文本生效
+  - 可在 `defined_texts` 或 `custom_text` 条目中通过 `line_spacing_ratio` 覆盖全局值
+  - 行间距 = `reference_side * line_spacing_ratio` 像素
 
 #### 定位方式
 
@@ -355,6 +385,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `author`           | `"Frank"`                                      | 用户输入                      |
 | `location`         | `"Shanghai"`                                   | 用户输入                      |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）               |
+| `custom_text`      | 用户在 GUI 中输入的文本内容                    | 用户输入（v1.7.0）             |
 
 #### 镜头显示模式 & 短版镜头名
 
@@ -382,6 +413,15 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 2. **样式 YAML** — 在 `info_position` 中声明字段及其位置/字体配置
 3. **`fonts.sizes`** — 按需为新字段添加独立字体大小（可选，回退到 `size_ratio`）
 
+#### 预定义文本 (defined_texts) 与自定义文本 (custom_text)
+
+v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染管线（测量 → 拓扑排序 → 定位绘制）：
+
+- **`defined_texts`**：内容在样式 YAML 中写死，适合固定标签文本（如 "FL"、"ISO" 等）
+- **`custom_text`**：内容由用户在 GUI 文本框输入或 CLI `--custom-text` 传入，适合个性化的寄语文本
+
+两类文本的元素定位参数与 `info_position` 完全相同（支持绝对/相对定位），`relative_to` 可跨区域引用。defined_texts 的 key 采用补零编号命名（如 `defined_text_01`、`defined_text_02`），避免与 info_position 的保留 key 冲突。
+
 渲染器 (`renderer.py`) 无需任何修改——它只遍历 `info_position` 的 key 并通过 `context.get_text()` 取值。
 
 ### 颜色配置 (colors)
@@ -406,6 +446,7 @@ GUI 装饰元素板块提供两个控件控制 `camera_lens` 和 `lens` 的输�
 - `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
   - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
   - 未设置的字段默认使用 `size_ratio`
+- `line_spacing_ratio`: 行间距系数（v1.7.0，默认 `0.005`），相对于参照边，仅多行文本生效。可在 `fonts` 级别设全局值，也可在 `defined_texts` 或 `custom_text` 条目中覆盖
 
 ### 水印配置 (decorations)
 
@@ -643,6 +684,8 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
 
 `src/utils/layout_engine.py` 负责画布计算与元素定位：
 
+> **算法详情**：布局引擎的完整定位系统（绝对定位 / 相对定位 / 基线校正 / 组合盒约束 / 树级组合定位 / 拓扑排序等）以及渲染器的三阶段管线，请参见独立的 **[布局引擎与渲染器算法文档](src/docs/layout_engine.md)**。
+
 - **画布扩展**：以参照边（短边）比例扩展四边（`expand_canvas`），上下左右独立设置
 - **安全区域**：`padding` 约束所有叠加元素的绘制边界，优先级高于 margin，原图位置不受影响
 - **绝对定位**（v1.4.0 重构）：`placement`（`inside`/`outside`，元素在图片内/外）+ `position`（14 种锚点位置）+ `alignment`（元素自对齐）+ 独立四周 margin（比例或像素）。三参数正交，替代旧版 `position` 字段同时承载 inside/outside/锚点的混乱设计
@@ -752,7 +795,11 @@ BackgroundFillManager.register(
 - **EXIF 预提取**：利用 `session_state` widget 预置机制，上传后侧边栏信息即时刷新，无需额外交互
 - **缩略图预览**：处理完成后自动生成 1200px 长边缩略图用于页面预览，大幅降低传输带宽；下载按钮提供全分辨率原始输出
 - **样式选择**：下拉菜单列出所有可用样式（含文件夹变体样式），配置变更时按钮自动切换为"重新生成"
-- **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；水印（内容/位置/透明度/颜色）独立控制
+- **文字与装饰**：作者姓名（自动保存）、拍摄地点（支持 GPS 坐标替换）、字体字重选择；
+  - v1.7.0 新增 ✏️ **自定义文本**：样式启用时显示多行文本输入框，支持换行
+  - v1.7.0 新增 **独立格式化 EXIF**：`focal_length_formatted` / `aperture_formatted` / `shutter_speed_formatted` / `iso_formatted` 四个独立 key 可在样式中直接引用
+  - v1.7.0 新增 **预定义文本**：`defined_texts` 配置节支持写死固定内容文本块
+- **水印**（内容/位置/透明度/颜色）独立控制
 - **Logo 设置**：自动匹配（根据相机品牌）/ 手动选择 / 无，三选一；自动匹配无结果时不显示
 - **背景样式**：6 种预定义背景类型（纯黑/纯白 + 4 种高斯模糊组合）；高斯模糊支持"背景增强"复选框（默认开启），增强色彩饱和度以补偿覆盖层淡化
 - **输出格式**：JPEG / PNG 可选
