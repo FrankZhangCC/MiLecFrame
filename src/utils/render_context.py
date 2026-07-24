@@ -14,11 +14,14 @@ class RenderContext:
     """渲染上下文，统一管理所有可显示文本信息"""
 
     def __init__(self, image_size: Tuple[int, int], exif_data: Optional[Dict] = None,
-                 author: Optional[str] = None, location: Optional[str] = None):
+                 author: Optional[str] = None, location: Optional[str] = None,
+                 lens_display_mode: str = 'combined', use_short_lens: bool = False):
         self.image_size = image_size
         self.exif_data = exif_data
         self.author = author
         self.location = location
+        self.lens_display_mode = lens_display_mode
+        self.use_short_lens = use_short_lens
 
         self._display_data = ExifHelper().get_display_data(exif_data) if exif_data else {}
 
@@ -42,15 +45,22 @@ class RenderContext:
                 auth = self.author or ''
                 return f"{ts} by {auth}" if auth else ts
         elif key == 'camera_lens':
-            if self.is_vertical_or_square:
-                return self._display_data.get('camera_lens_combined_short')
-            return self._display_data.get('camera_lens_combined')
+            if self.lens_display_mode == 'camera_only':
+                return self._display_data.get('camera_combined')
+            elif self.lens_display_mode == 'lens_only':
+                if self.use_short_lens:
+                    return self._display_data.get('short_lens')
+                return self._display_data.get('lens_model')
+            else:
+                if self.use_short_lens:
+                    return self._display_data.get('camera_lens_combined_short')
+                return self._display_data.get('camera_lens_combined')
         elif key == 'camera':
             return self._display_data.get('camera_combined') or None
         elif key == 'camera_make':
             return self._display_data.get('camera_make') or None
         elif key == 'lens':
-            if self.is_vertical_or_square:
+            if self.use_short_lens:
                 return self._display_data.get('short_lens') or None
             return self._display_data.get('lens_model') or None
         elif key == 'author':
