@@ -1,6 +1,6 @@
 # MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.6.2-blue)
 
-> ©FrankZCC 2025
+> ©FrankZCC 2026
 > 使用 DeepSeek V4 系列模型开发。
 
 ## 快速开始
