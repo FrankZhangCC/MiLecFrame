@@ -142,6 +142,8 @@ class ImageProcessor:
             # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
                 context = {'location': location, 'author': author}
+                if not custom_text:
+                    context['custom_text'] = None
                 style_config = self.style_manager.get_style_config(style_name, context)
             else:
                 style_config = self.style_manager.get_default_style()

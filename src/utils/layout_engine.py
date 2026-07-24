@@ -589,3 +589,41 @@ class LayoutEngine:
                 root_pos2 = self.positions[name]
                 root_pos2['x'] += clip_x
                 root_pos2['y'] += clip_y
+
+    def layout_multiline_lines(
+        self,
+        block_x: int,
+        block_y: int,
+        block_w: int,
+        block_h: int,
+        lines: list,
+        line_spacing: int,
+        alignment: str = 'center',
+    ) -> list:
+        """
+        计算多行文本块内每行的绘制位置。
+
+        Args:
+            block_x, block_y: 文本块包围盒左上角（来自 calculate_position）
+            block_w: 块宽度（用于行内对齐偏移）
+            lines: 每行信息，每项含 height / width / ref_ascent / ref_descent
+            line_spacing: 行间距（像素）
+            alignment: 行内水平对齐 left / center / right
+
+        Returns:
+            [(line_x, baseline_y), ...] 每行的绘制起始坐标
+        """
+        result = []
+        current_y = block_y + lines[0]['ref_ascent'] - lines[0]['ref_descent']
+
+        for ln in lines:
+            if alignment in ('right', 'bottom-right', 'top-right'):
+                line_x = block_x + (block_w - ln['width'])
+            elif alignment in ('center', 'bottom-center', 'top-center'):
+                line_x = block_x + (block_w - ln['width']) // 2
+            else:
+                line_x = block_x
+            result.append((line_x, current_y))
+            current_y += ln['height'] + line_spacing
+
+        return result
