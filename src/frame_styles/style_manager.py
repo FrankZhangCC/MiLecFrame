@@ -250,12 +250,7 @@ class StyleManager:
         
         # 检查字体配置
         if 'fonts' not in config or not isinstance(config['fonts'], dict):
-            config['fonts'] = {
-                'family': 'Gotham',
-                'weight': 'medium',
-                'size_ratio': 0.02,
-                'line_spacing_ratio': 0.005
-            }
+            config['fonts'] = {}
         else:
             # 确保字体大小配置存在
             if 'sizes' not in config['fonts'] or not isinstance(config['fonts']['sizes'], dict):

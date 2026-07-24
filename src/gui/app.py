@@ -50,7 +50,7 @@ div.block-container {
     st.sidebar.markdown("""
 <div style="line-height: 1.3; margin-bottom: 0.5rem;">
     <h1 style="margin: 0 0 2px 0; padding: 0; font-size: 1.5rem;">MiLecFrame</h1>
-    <p style="font-size: 0.75rem; color: #888; margin: 0; padding: 0;">©FrankZCC 2026</p>
+    <p style="font-size: 0.75rem; color: #888; margin: 0; padding: 0;">©FrankZhangCC 2026</p>
     <p style="font-size: 0.75rem; color: #888; margin: 0; padding: 0;">使用 DeepSeek V4 系列模型开发。</p>
 </div>
 """, unsafe_allow_html=True)
@@ -110,7 +110,7 @@ div.block-container {
     # 底部信息
     st.markdown("---")
     st.caption("💡 提示：本程序支持设备映射，自动识别并显示相机型号等信息")
-    st.caption("📋 ©FrankZCC 2026")
+    st.caption("📋 ©FrankZhangCC 2026")
     st.caption("📋 使用 DeepSeek V4 系列模型开发。")
 
 

@@ -1,8 +1,50 @@
 # 更新历史
 
+## v1.10.0-dev (2026-05-21)
+
+> 内部开发版本。重写字体加载系统，支持系统字体回退和多行混排基线统一。
+
+### 🔴 重构：统一多行文本绘制路径
+
+此前多行文本中的非混排行（纯拉丁）和混排行（Latin + CJK 混合）使用两套不同的公式计算 `current_y`：
+
+- 非混排行：`current_y = y - descent`（y 作为 PIL `draw.text()` 的传入值）
+- 混排行：`current_y = y + ref_ascent - ref_descent`（y 作为包围盒顶，绘制前转基线）
+
+两套公式的基线位置不同，导致混排行和非混排行交替时行间视觉间隙不一致（偏大或偏小），表现为混排行"上移"。
+
+**根因**：`draw.text((x, current_y), text)` 中 PIL 对 `current_y` 的解释方式与显式 `baseline_y - seg_ascent` 的计算方式不一致。
+
+**修复**（`src/core/renderer.py`）：
+
+- Phase 1 测量中，非混排行也生成 `seg_info`（单段），标注 `mixed: True`
+- Phase 3 绘制中，删除独立的 `draw.text` 分支，所有行通入统一的 `seg_info` 循环
+- `current_y` 统一使用 `y + ref_ascent - ref_descent` 初始化
+
+### 🟢 字体系统重构
+
+- Latin 和 CJK 字体独立配置，支持样式 YAML 中分别声明 `latin`/`cjk` 子段
+- 无自定义字体时自动回退到系统预装字体（Segoe UI / Microsoft JhengHei UI）
+- 样式 YAML 新增 `weights:` 映射段，显式声明三档字重（light/regular/medium）对应的具体字重字符串，`weight` 字段使用抽象值引用此映射
+- CLI `--font-weight` 与 GUI 字重选择均通过此映射表解析，无需硬编码
+- 系统字体多级降级回退链：`当前weight → Regular → Medium → Light → Bold`
+- 旧格式 `fonts.family` + `fonts.weight` 不再支持（迁移到新格式）
+
+### 🟢 GUI 样式编辑器
+
+- Latin/CJK 各自由文本输入 + 字重下拉 + 系统字体复选框控制
+- GUI 默认字重调整为 `Medium`
+
+### 🐛 修复
+
+- `segoebk.ttf` 不存在时 Latin 回退失败（改指向 `segoeui.ttf`）
+- `_SYSTEM_CJK` 变量名错误（应为 `_SYSTEM_CJK_FILES`）
+- CJK 系统字体后缀 `.ttf` 应为 `.ttc`（TrueType Collection）
+- `style_manager.py` `_validate_config()` 默认补全旧格式导致无 `fonts` 样式的回退失效
+
 ## v1.9.0-dev (2026-05-19)
 
-> 内部开发版本，为公开 Release 做准备。本版本新增**原图四角独立圆角**功能并修复多行混排基线偏移 bug。
+> 本版本新增**原图四角独立圆角**功能并修复多行混排基线偏移 bug。
 
 ### 🔧 工程化调整
 
@@ -51,7 +93,7 @@ layout:
 - `layout_engine.md` 更新至 v1.9.0-dev，新增第 16 节「原图圆角裁切」，含抗锯齿算法说明
 - 样式编辑器 GUI 新增 `corner_radius` 配置界面
 
-## v1.8.0 (2026-05-19)
+## v1.8.0-dev (2026-05-19)
 
 > 本版本新增**原图圆角裁切**功能。在样式配置中通过 `corner_radius` 参数即可为原始照片的四角独立裁切圆角，半径系数基于参照边（短边）响应式计算，支持独立调节每个角的弧度。
 
@@ -93,7 +135,7 @@ layout:
 - README.md 版本号更新至 v1.8.0，新增 `corner_radius` 配置说明
 - `layout_engine.md` 更新至 v1.8.0，新增第 16 节「原图圆角裁切」
 
-## v1.7.0 (2026-05-18)
+## v1.7.0-dev (2026-05-18)
 
 > 本版本为重大功能更新，引入**预定义文本与自定义文本系统**、**独立格式化 EXIF 字段**、**依赖树组合定位**三大新能力。从根本上解决了"多个文本块组合后整体定位"这一长期需求。同时修复相对定位中基线偏移导致的对齐偏差积弊。
 
@@ -104,6 +146,7 @@ layout:
 `LayoutEngine.apply_tree_positioning()` 新增 **Phase 2.5** 定位阶段（Phase 2 独立注册之后，Phase 3 绘制之前），将每棵依赖树视作整体，按根元素的 `position` / `alignment` / `margin_*` 参数对整棵树进行一次绝对定位。
 
 **算法流程**（三步法，`src/utils/layout_engine.py`）：
+
 1. **收集树成员**：从 `positions` 注册表 + `_dependents` 依赖图递归获取根及所有子孙
 2. **计算视觉包围盒**：遍历树成员，使用注册的 `ascent` 校正基线偏移，得到 (tree_left, tree_top, tree_right, tree_bottom)
 3. **平移整棵树**：
@@ -125,6 +168,7 @@ defined_texts:
 ```
 
 **设计关键**：
+
 - `_resolve_tree_ref()` 完全对齐 `_get_anchor()` 的 14 种 position + alignment 组合行为
 - 单元素树自动跳过，不影响现有所有样式配置
 - 支持多条独立依赖树，互不干扰
@@ -146,17 +190,20 @@ defined_texts:
 ### 🟢 预定义文本 (defined_texts) 与自定义文本 (custom_text)
 
 **`defined_texts`**（`src/core/renderer.py`）：
+
 - 样式配置中写死文本内容，适合固定标签（如 "FL"、"Aperture" 等）
 - Key 采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 避免与 `info_position` 的保留 key 冲突
 - 定位参数与 `info_position` 完全相同（绝对/相对定位均可），`relative_to` 可跨区域引用
 
 **`custom_text`**：
+
 - `layout.custom_text.enabled: true` 时，GUI 显示多行文本输入框（`st.text_area`）
 - 默认内容 "Always believe that something wonderful\nis about to happen."
 - 完整透传链：GUI → `ImageProcessor.process()` → `FrameRenderer.render_frame()` → `RenderContext.get_text('custom_text')`
 - CLI 通过 `--custom-text` 参数传入
 
 **三源文本统一管线**（`_add_text_and_icons_flexible`）：
+
 - 三种文本来源使用同一 `all_positions` 注册表和 `text_elements` 列表
 - 共用 Phase 1 测量 → Phase 2 拓扑排序 → Phase 2.5 树定位 → Phase 3 绘制
 - 字体大小复用 `fonts.sizes.{key}`，颜色复用 `colors.custom_{key}_light/dark_color`
@@ -165,12 +212,12 @@ defined_texts:
 
 新增 4 个 `RenderContext.get_text()` key，将原本仅以组合字符串 `exif` 输出的焦距/光圈/快门/ISO 拆分为独立字段：
 
-| Key | 格式 | 数据来源 |
-|-----|------|---------|
-| `focal_length_formatted` | `"35mm"` | `exif_data['focal_length_35mm']` → 回退 `raw_focal_length` |
-| `aperture_formatted` | `"f/2.8"` | `raw_aperture` |
-| `shutter_speed_formatted` | `"1/125s"` | `raw_shutter_speed`（已由 `_format_shutter_speed` 格式化） |
-| `iso_formatted` | `"ISO200"` | `raw_iso` |
+| Key                         | 格式         | 数据来源                                                        |
+| --------------------------- | ------------ | --------------------------------------------------------------- |
+| `focal_length_formatted`  | `"35mm"`   | `exif_data['focal_length_35mm']` → 回退 `raw_focal_length` |
+| `aperture_formatted`      | `"f/2.8"`  | `raw_aperture`                                                |
+| `shutter_speed_formatted` | `"1/125s"` | `raw_shutter_speed`（已由 `_format_shutter_speed` 格式化）  |
+| `iso_formatted`           | `"ISO200"` | `raw_iso`                                                     |
 
 - `exif_helper.py:373` 的 raw keys 循环补充 `'focal_length_35mm'` 字段
 - 焦距优先使用 35mm 等效值，缺失时回退到物理焦距
@@ -185,28 +232,29 @@ defined_texts:
 ### 🔴 演示样式配置
 
 新增 `扩展宝丽来风格 Polaroid Motto.yaml`，是首个展示全部 v1.7.0 新功能的示例样式：
+
 - 用 `defined_text_01-04` + `focal_length_formatted` / `aperture_formatted` / `shutter_speed_formatted` / `iso_formatted` 组成 8 元素水平链
 - 整链通过 `apply_tree_positioning()` 居中，替换原有 4 行独立 EXIF 显示
 - `custom_text` 展示多行自定义文本
 
 ### 已修改文件清单
 
-| 文件 | 改动内容 |
-|------|---------|
-| `src/utils/render_context.py` | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key |
-| `src/core/renderer.py` | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用 |
-| `src/core/image_processor.py` | `process()` 透传 `custom_text` |
-| `src/core/batch_processor.py` | `batch_process()` 透传 `custom_text` |
-| `src/utils/layout_engine.py` | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
-| `src/utils/exif_helper.py` | raw keys 补充 `focal_length_35mm` |
-| `src/gui/image_processing_page.py` | 条件显示 `custom_text` 输入框 |
-| `src/gui/batch_processing_page.py` | 同上 |
-| `src/main.py` | 添加 `--custom-text` CLI 参数 |
-| `src/frame_styles/style_manager.py` | `fonts.line_spacing_ratio` 默认值 |
-| `src/frame_styles/configs/_STYLE_TEMPLATE.txt` | 模板新增 defined_texts / custom_text / line_spacing_ratio |
-| `src/frame_styles/configs/扩展宝丽来风格 Polaroid Motto.yaml` | 新建：v1.7.0 演示样式 |
-| `README.md` | 文档补充 |
-| `CHANGELOG.md` | 更新记录 |
+| 文件                                                            | 改动内容                                                                                                                                                |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/utils/render_context.py`                                 | 新增 `custom_text` 参数 + 4 个独立格式化 EXIF key                                                                                                     |
+| `src/core/renderer.py`                                        | 三源文本收集 + 多行测量绘制 + Phase 2 移除 desc 偏移 + Phase 3 绘制时转基线 + Phase 2.5 调用                                                            |
+| `src/core/image_processor.py`                                 | `process()` 透传 `custom_text`                                                                                                                      |
+| `src/core/batch_processor.py`                                 | `batch_process()` 透传 `custom_text`                                                                                                                |
+| `src/utils/layout_engine.py`                                  | `_calculate_relative` 回归原始公式 + `_compute_visual_bounds` 简化 + `_collect_tree_members` + `_resolve_tree_ref` + `apply_tree_positioning` |
+| `src/utils/exif_helper.py`                                    | raw keys 补充 `focal_length_35mm`                                                                                                                     |
+| `src/gui/image_processing_page.py`                            | 条件显示 `custom_text` 输入框                                                                                                                         |
+| `src/gui/batch_processing_page.py`                            | 同上                                                                                                                                                    |
+| `src/main.py`                                                 | 添加 `--custom-text` CLI 参数                                                                                                                         |
+| `src/frame_styles/style_manager.py`                           | `fonts.line_spacing_ratio` 默认值                                                                                                                     |
+| `src/frame_styles/configs/_STYLE_TEMPLATE.txt`                | 模板新增 defined_texts / custom_text / line_spacing_ratio                                                                                               |
+| `src/frame_styles/configs/扩展宝丽来风格 Polaroid Motto.yaml` | 新建：v1.7.0 演示样式                                                                                                                                   |
+| `README.md`                                                   | 文档补充                                                                                                                                                |
+| `CHANGELOG.md`                                                | 更新记录                                                                                                                                                |
 
 ### 样式配置规范更新
 
@@ -259,7 +307,7 @@ layout:
 - 通过文件行数实时统计校准计数器，支持多行消息（如 traceback）计数偏差的自动修正
 - 异常静默降级：滚动失败时重新统计文件行数确保计数器不漂移
 
-## v1.6.2 (2026-05-16)
+## v1.6.2-dev (2026-05-16)
 
 > 本版本修复 float32 模糊管线中 zero-padding 边界导致的画布四周发黑问题。
 
@@ -267,7 +315,7 @@ layout:
 
 - `src/utils/gaussian_blur.py` 中 `_box_blur_numpy()` 初始实现使用了 `np.convolve(mode='same')`，其 zero-padding 边界策略导致画布边缘像素与黑色 0 平均 → 发暗。修正为 edge-padding（`np.pad(mode='edge')` + `mode='valid'`），边界行为与 PIL `BoxBlur` 一致
 
-## v1.6.1 (2026-05-16)
+## v1.6.1-dev (2026-05-16)
 
 > 本版本统一软件名称为 MiLecFrame，新增版权信息；将高斯模糊与饱和度增强管线迁移至 float32 域运算，消除 uint8 量化误差在饱和度倍增（2×）时被放大导致的色彩断层；修复 CSV 编码异常导致设备映射失效的问题。
 
@@ -296,7 +344,7 @@ layout:
 
 - `image_processing_page.py` 侧边栏文件信息行补充 `| {width}×{height} px`，恢复原 GUI 文件信息区域中的像素尺寸显示
 
-## v1.6.0 (2026-05-10)
+## v1.6.0-dev (2026-05-10)
 
 > 本版本完全重写批量处理系统，新增 GUI 批处理页面，支持多文件上传、完整参数配置、实时进度条和结果汇总。批处理核心参数与单张处理管线完全对齐。
 
@@ -355,7 +403,7 @@ layout:
 - 批处理页面的手动文件夹路径输入模式：完全由 `file_uploader` 替代
 - `main.py` CLI 旧的传参方式（仅传位置参数，如 `args.recursive`）：改为显式关键字参数
 
-## v1.5.2 (2026-05-10)
+## v1.5.2-dev (2026-05-10)
 
 > 本版本修复等效35mm焦距错误换算的严重bug：删除不可靠的裁切系数推算逻辑，改为优先读取EXIF直接提供的 `FocalLengthIn35mmFilm` 字段，无该字段时直接使用物理焦距。
 
@@ -384,7 +432,7 @@ layout:
 
 ---
 
-## v1.5.1 (2026-05-09)
+## v1.5.1-dev (2026-05-09)
 
 > 本版本重构 v1.5.0 的短版镜头名与竖幅自适应为 GUI 可选控制：支持镜头显示模式选择（相机+镜头 / 只显示相机 / 只显示镜头），短版镜头名开关改为全局可选（竖幅默认勾选）。
 
@@ -448,7 +496,7 @@ layout:
 
 ---
 
-## v1.5.0 (2026-05-07)
+## v1.5.0-dev (2026-05-07)
 
 > 本版本全面重构色彩渲染管线：ICC 转换前置保留原始位深、TIFF 保存路径修复、GUI 原始预览色彩校正、输出嵌入 sRGB ICC、下载文件名匹配、水印展平安全化、GUI 文件信息统一数据出口。响应式基准由原图长边切换为参照边（短边）。
 
@@ -541,7 +589,7 @@ layout:
 
 ---
 
-## v1.4.1 (2026-05-06)
+## v1.4.1-dev (2026-05-06)
 
 > 本版本修复布局引擎 margin 积弊、扩展 alignment 组合格式支持、新增 GPS 坐标提取与 GUI 替换选项。
 
@@ -611,7 +659,7 @@ layout:
 
 ---
 
-## v1.4.0 (2026-05-04)
+## v1.4.0-dev (2026-05-04)
 
 > 本版本进行大规模架构重构：引入**背景填充管理器**实现填充类型集中注册与渲染解耦；**布局引擎 placement/position 拆分**消除定位语义混淆；**Logo 尺寸逻辑重构**支持非正方形 Logo 并加入长边保护；**FontManager 集成**消除字体加载代码重复；大量死代码清理。**GUI 性能优化**：EXIF 读取零落盘、预览缩略图生成、临时文件生命周期管理。
 
@@ -702,7 +750,7 @@ layout:
 
 ---
 
-## v1.3.0 (2026-04-30)
+## v1.3.0-dev (2026-04-30)
 
 > 本版本引入**样式变体系统**，支持根据数据可用性动态切换布局，无需修改渲染器代码。
 
@@ -763,7 +811,7 @@ layout:
 
 ---
 
-## v1.2.0 (2026-04-29)
+## v1.2.0-dev (2026-04-29)
 
 > 本版本引入相对定位系统、Padding 安全区域和三阶段渲染管线，大幅提升布局灵活性和元素溢出保护能力。
 
@@ -940,7 +988,7 @@ layout:
 
 ---
 
-## v1.1.0 (2026-04-29)
+## v1.1.0-dev (2026-04-29)
 
 > 本版本使用 **DeepSeek V4 Pro** 模型进行了大规模的核心组件重构。
 
@@ -1002,7 +1050,7 @@ layout:
 
 ---
 
-## v1.0.1 (2026-04-10)
+## v1.0.1-dev (2026-04-10)
 
 ### EXIF 处理
 
@@ -1040,7 +1088,7 @@ layout:
 
 ---
 
-## v1.0.0 (早期开发)
+## v1.0.0-dev (早期开发)
 
 - 项目初始化和目录结构搭建
 - EXIF 处理模块、图像处理核心、相框样式管理

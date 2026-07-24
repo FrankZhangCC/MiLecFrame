@@ -154,7 +154,6 @@ class ImageProcessor:
             
             # 8. 如果指定了字体字重，则更新样式配置
             if font_weight:
-                # 设置字重
                 style_config['fonts']['weight'] = font_weight
 
             # 9. 渲染图像

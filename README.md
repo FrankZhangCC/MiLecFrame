@@ -1,7 +1,23 @@
-# MiLecFrame - Python照片相框程序 ![Version](https://img.shields.io/badge/version-1.9.0--dev-orange)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-1.10.0--dev-orange)
 
-> ©FrankZCC 2026
-> 使用 DeepSeek V4 系列模型开发。
+> ©FrankZhangCC 2026
+> 使用DeepSeek V4系列模型开发。
+
+MiLecFrame 是一款为专业摄影师和摄影爱好者设计的照片相框水印工具，参考小米徕卡专属水印样式及后续各大品牌的水印风格开发。
+
+本程序基于 Python 和 Streamlit 框架，采用 Vibe Coding 方式开发（初期使用 Qwen3-Coder，中后期使用 DeepSeek V4）。
+
+相较其他开源方案或在线水印工具，MiLecFrame 除了基础的 EXIF 信息展示、拍摄地点标记等功能外，还针对使用相机创作的群体加入了相机与镜头型号映射、多样化预设样式和可自定义的样式编辑器等特色功能，满足高质量创作传播需求。
+
+### 使用方式
+
+直接运行 `src\main.py` 即可启动程序，默认以 GUI 模式（Streamlit Web 界面）运行：
+
+```bash
+python src/main.py
+```
+
+程序会自动打开浏览器访问 `http://localhost:8501`。也可通过命令行参数进行单张/批量处理（详见下方 [命令行选项](#命令行选项)）。
 
 ## 快速开始
 
@@ -17,6 +33,35 @@
 3. 激活虚拟环境：
    - Windows: `venv\Scripts\activate`
    - Linux/Mac: `source venv/bin/activate`
+
+#### 字体安装
+
+程序需要字体文件来渲染相框文字。**无自定义字体时自动使用系统预装字体**（Windows Segoe UI / Microsoft JhengHei UI），可直接跳过此步骤。
+
+如需使用自定义字体（如预设样式默认的 Gotham + GlowSansSC），请放入 `assets/fonts/` 目录：
+
+**Gotham（拉丁字体）**
+- 下载：https://www.dfonts.org/fonts/gotham-font-family/
+- 放入文件：`Gotham-Light.otf`、`Gotham-Book.otf`、`Gotham-Medium.otf`
+
+**GlowSansSC 未来荧黑（CJK 字体）**
+- 下载：https://github.com/welai/glow-sans
+- 放入文件：`GlowSansSC-Normal-Light.otf`、`GlowSansSC-Normal-Regular.otf`、`GlowSansSC-Normal-Medium.otf`
+
+放置完成后结构：
+
+```
+assets/fonts/
+├── .gitkeep
+├── Gotham-Light.otf
+├── Gotham-Book.otf
+├── Gotham-Medium.otf
+├── GlowSansSC-Normal-Light.otf
+├── GlowSansSC-Normal-Regular.otf
+└── GlowSansSC-Normal-Medium.otf
+```
+
+> Gotham 为商业字体，请遵守其授权协议。GlowSansSC 基于 SIL Open Font License 发布。
 
 #### 使用方法
 
@@ -101,6 +146,10 @@ streamlit run src/gui/app.py
 - **Streamlit GUI**：Web 界面上传、预览、参数配置、结果下载；批量处理页面支持多文件上传、逐张实时进度和结果汇总
 - **批量处理**：GUI 多文件上传（Ctrl+A 全选文件夹）、完整参数配置、逐张独立 Logo 匹配和 GPS 替换、实时进度条、跳过已存在文件、失败详情回溯；CLI 支持文件夹递归扫描
 
+---
+
+> 以下内容供专业开发者和贡献者参考。
+
 ## 技术栈
 
 - 核心图像处理：Pillow、NumPy
@@ -169,9 +218,9 @@ MiLeica_Frame/
 
 ## 样式配置规范
 
-样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/)目录下。
+样式配置文件支持JSON、YAML和TOML三种格式，存放在[src/frame_styles/configs/](./src/frame_styles/configs/)目录下。
 
-> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](file:///d:/Coding/MiLeica_Frame/src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
+> **快速新建样式**：该目录下的 [`_STYLE_TEMPLATE.txt`](./src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是规格化填空模板，覆盖所有配置项（画布扩展、padding、字体、元素定位、颜色、背景、Logo、变体等），填写后交给 AI 即可生成对应 YAML 配置文件。
 
 ### 文件夹变体样式 (v1.3.0)
 
@@ -238,13 +287,16 @@ name: "样式名称"         # 必需字段，用于标识样式
 ### 布局配置 (layout)
 
 - `expand_canvas`: 扩展画布配置
+
   - `enabled`: 是否启用扩展画布
   - `top`, `bottom`, `left`, `right`: 四边扩展比例（相对于原图尺寸的百分比）
 - `padding`: 叠加元素安全区域配置（v1.2.0 新增，**推荐优先使用 padding 控制全局边距**）
+
   - `top`, `bottom`, `left`, `right`: 从画布四边向内收缩的比例（相对于参照边（短边）），默认值为 0（= 画布边界）
   - 不影响原始图像位置，仅限制文字、Logo 等叠加元素的绘制范围
   - padding 对所有元素具有最终截断权：无论绝对/相对定位计算出的坐标如何，最终结果均被 clamp 在 padding 边界内，即 **padding 优先级高于 margin**
 - `corner_radius`: 原图四角圆角配置 (v1.8.0)
+
   - `enabled`: 布尔值，设为 `true` 时启用在原始图像上裁切圆角；缺省或值为 `false` 时完全跳过此步骤
   - `top_left`, `top_right`, `bottom_left`, `bottom_right`: 四角独立半径系数（相对于参照边（短边）的比例），如 `0.01` = 短边的 1%
   - 所有半径系数为 0 时等同于禁用，不会执行蒙版创建和粘贴操作
@@ -259,24 +311,27 @@ name: "样式名称"         # 必需字段，用于标识样式
   ```
 
   **实现原理**：在将原图粘贴到画布前，创建一个灰度蒙版，在每个角用 `rectangle + pieslice` 组合绘制四分圆切除区域，再通过 `putalpha` 写入 RGBA 通道后粘贴。
-
 - `info_position`: 信息位置配置
+
   - **配置驱动原则**：仅 `info_position` 中声明的元素会被渲染，未声明自动跳过
   - 支持的元素类型：`exif`, `timestamp`, `timestamp_author`, `camera`, `camera_make`, `lens`, `camera_lens`, `author`, `location`, `gps`
   - `camera_lens` 输出格式由 GUI 中"镜头显示"选项控制（相机+镜头 / 只显示相机 / 只显示镜头），搭配"使用短版镜头名"开关可全局切换为短版镜头名；`camera` + `lens` 则分开两行
   - `timestamp_author` 输出格式 "时间 by 作者"；`timestamp` 则仅显示时间
   - 元素的定位参数见下方 [定位方式](#定位方式)
 - `defined_texts`: 预定义文本配置 (v1.7.0)
+
   - 内容在配置文件中写死，采用**补零编号命名**：`defined_text_01`, `defined_text_02`, ... 以此类推
   - 此命名惯例确保 key 不与 `info_position` 的保留名（如 `exif`、`author` 等）冲突，且补零保证字典自然排序
   - 每个条目包含 `content`（文本内容）和标准布局参数，与 `info_position` 共用定位系统
   - `tree_align: true`（可选，用于根元素）：将整棵依赖树按根元素的 position/alignment/margin 做整体绝对定位，适合水平链式排版居中。未声明时不影响已有垂直链
   - 示例：`defined_text_01: { content: "FL", position: "bottom", alignment: "center", tree_align: true, margin_bottom: 0.07 }`
 - `custom_text`: 自定义文本配置 (v1.7.0)
+
   - `enabled`: 布尔值，设为 `true` 时 GUI 显示多行文本输入框，CLI 通过 `--custom-text` 参数传入
   - 布局参数与 `info_position` 相同，`relative_to` 可跨区域引用（包括 `defined_texts` 和 `info_position` 中的元素）
   - 默认输入内容：`"Always believe that something wonderful\nis about to happen."`
 - 多行文本行间距 (v1.7.0)
+
   - `fonts.line_spacing_ratio`：全局行间距系数（相对于参照边，默认 `0.005`），仅多行文本生效
   - 可在 `defined_texts` 或 `custom_text` 条目中通过 `line_spacing_ratio` 覆盖全局值
   - 行间距 = `reference_side * line_spacing_ratio` 像素
@@ -385,7 +440,7 @@ text = context.get_text('camera_lens')  # 一行调用获取显示文本
 | `author`           | `"Frank"`                                      | 用户输入                      |
 | `location`         | `"Shanghai"`                                   | 用户输入                      |
 | `gps`              | `"40°26'46.1\"N 79°56'56.1\"W"`              | EXIF GPS（DMS）               |
-| `custom_text`      | 用户在 GUI 中输入的文本内容                    | 用户输入（v1.7.0）             |
+| `custom_text`      | 用户在 GUI 中输入的文本内容                      | 用户输入（v1.7.0）            |
 
 #### 镜头显示模式 & 短版镜头名
 
@@ -439,14 +494,50 @@ v1.7.0 引入了两类新文本源，与 `info_position` 共享三阶段渲染�
 
 ### 字体配置 (fonts)
 
-- `family`: 字体族名（默认 `"Gotham"`，对应 `assets/fonts/` 下的 Gotham 系列）
-- `weight`: 字重，可选 `"light"`、`"regular"`、`"medium"`（默认 `"medium"`）
-  - 可通过命令行 `--font-weight` 参数运行时覆盖
-- `size_ratio`: 默认字体大小比例（相对于参照边（短边）像素数）
-- `sizes`: 各类信息的独立字体大小比例（相对于参照边（短边））
-  - `exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
-  - 未设置的字段默认使用 `size_ratio`
-- `line_spacing_ratio`: 行间距系数（v1.7.0，默认 `0.005`），相对于参照边，仅多行文本生效。可在 `fonts` 级别设全局值，也可在 `defined_texts` 或 `custom_text` 条目中覆盖
+系统支持拉丁和 CJK（中文/日文）字体独立配置，并自动回退到系统预装字体。
+
+```yaml
+fonts:
+  latin:
+    family: Gotham              # 拉丁字体名，从 assets/fonts/ 加载 {family}-{weight}.otf
+    weight: medium              # 当前使用的字重（对应 weights 中的 key）
+    weights:                    # 三档字重映射表
+      light: Light
+      regular: Book
+      medium: Medium
+    # 或使用系统字体 Segoe UI（与 family 二选一，留空时自动回退）
+    # system: "Segoe UI"
+  cjk:
+    family: GlowSansSC-Normal   # CJK 字体名，从 assets/fonts/ 加载
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+    # 或使用系统字体 Microsoft JhengHei UI（与 family 二选一，留空时自动回退）
+    # system: "Microsoft JhengHei UI"
+  size_ratio: 0.015
+  sizes:
+    camera_lens: 0.022
+  line_spacing_ratio: 0.005
+```
+
+**字重解析：** `weight` 字段使用抽象值（`light`/`regular`/`medium`），通过 `weights` 映射表解析为具体字重字符串。CLI 参数 `--font-weight` 也遵循此映射。若 `weights` 未声明，`weight` 的值直接作为字重字符串使用。
+
+**系统字体参考表：**
+
+| weight 值 | Latin 自定义文件名 | Latin 系统字体 | CJK 系统字体 |
+|-----------|-------------------|---------------|-------------|
+| `Light` | `{family}-Light.otf` | Segoe UI Light | Microsoft JhengHei UI Light |
+| `Book` | `{family}-Book.otf` | Segoe UI Book | —（回退 Regular） |
+| `Regular` | `{family}-Regular.otf` | Segoe UI Regular | Microsoft JhengHei UI |
+| `Medium` | `{family}-Medium.otf` | Segoe UI **Semibold** | Microsoft JhengHei UI **Bold** |
+| `Semibold` | `{family}-Semibold.otf` | Segoe UI Semibold | —（回退 Bold） |
+| `Bold` | `{family}-Bold.otf` | Segoe UI Bold | Microsoft JhengHei UI Bold |
+
+**Fallback 优先级：** `自定义字体文件 → 系统字体 → PIL 默认字体`。Latin/CJK 任一段落缺失，该类别自动走系统字体。
+
+**CLI `--font-weight` 映射：** `light → Light`、`regular → Book`、`medium → Medium`
 
 ### 水印配置 (decorations)
 
@@ -706,7 +797,7 @@ EXIF 缺失时记录警告，不中断处理流程；`_safe_decode()` 对不可�
   - 每种填充类型同时声明 `text_scheme`（`dark`/`light`），渲染器通过 `BackgroundFillManager.is_dark_bg()` 自动适配文字颜色
   - 支持运行时覆盖 `color`、`opacity`、`blur_radius` 参数，预留自定义背景注册接口 `register()`
 - **文字颜色**：根据背景类型自动选择深/浅色方案，支持按文本类型独立覆盖（`custom_{type}_{dark/light}_color`），兜底白色/黑色
-- **字体系统**：Gotham（拉丁）+ GlowSansSC（CJK/日文）双字体引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(系列, 字重, 字号, 是否 CJK)` 键值缓存
+- **字体系统**：拉丁 + CJK 双字体独立引擎，支持 light / regular / medium 三种字重；每种信息类型可独立设置字体大小比例；字体按 `(来源, 字重, 字号, 是否 CJK)` 键值缓存；无自定义配置时自动回退系统字体（Segoe UI / Microsoft JhengHei UI）
 - **文字渲染顺序**：配置驱动——仅 `info_position` 中声明的元素被渲染，由拓扑排序保证依赖正确
 
 ##### Logo 渲染子系统
