@@ -64,6 +64,39 @@ src/
 - **样式变体系统**：样式可组织为文件夹（文件夹名 = 样式名），内含 `default.yaml`、`no_location.yaml` 等变体。`StyleManager._resolve_style_variant()` 自动根据数据可用性选择最佳变体。
 - **`_STYLE_TEMPLATE.txt`**（`src/frame_styles/configs/`）覆盖全部配置项，填写后交给 AI 即可生成 YAML 配置文件。
 
+### ExpandGroupSettingCard 开发铁律
+
+在往 `ExpandGroupSettingCard` 内添加自定义内容时，必须逐条检查：
+
+1. **必须通过 `addGroupWidget()` 或 `addGroup()` 添加子控件。**
+   禁止直接操作 `self.viewLayout.addWidget()`。
+   否则 `_adjustViewSize()` 中的 `self.widgets` 列表为空，卡片无法正常展开/收回。
+
+2. **子控件的 `sizeHint().height()` 必须能反映其真实视觉高度。**
+   - `QScrollArea` / `SmoothScrollArea` 的 `sizeHint()` **不反映** `setFixedHeight()`。
+   - `FlowLayout` 的 `sizeHint()` 仅取最大子控件尺寸，非网格总高度。
+   - 若子控件用了 `setFixedHeight()` 或非标准布局，必须覆盖 `_adjustViewSize()`。
+
+3. **覆盖 `_adjustViewSize()` 时，使用子控件的实际高度来源：**
+   - QScrollArea → `maximumHeight()`（而非 `sizeHint().height()`）。
+   - FlowLayout → `heightForWidth(w)`（而非 `sizeHint().height()`）。
+
+4. **覆盖模板（必须带注释说明为何覆盖）：**
+   ```python
+   def _adjustViewSize(self):
+       # QScrollArea.sizeHint() 不反映 setFixedHeight()，手动指定
+       h = self._my_widget.maximumHeight() + 3
+       self.spaceWidget.setFixedHeight(h)
+       if self.isExpand:
+           self.setFixedHeight(self.card.height() + h)
+   ```
+
+5. **动态添加/删除子控件后调用 `QTimer.singleShot(0, self._adjustViewSize)`。**
+
+6. **开发完成后调用 `layout_debug.dump_expand_card(self)` 验证：**
+   - 收起时 `card.height() == card.card.height()`（无底部间隙）。
+   - 展开时 `spaceWidget.h >= view.h`（滚动范围充足）。
+
 ### 配置与数据
 
 - `config.json`：保存用户偏好（作者名自动记忆）。

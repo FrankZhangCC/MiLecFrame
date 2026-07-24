@@ -2,6 +2,83 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.2.0-dev (2026-06-19)
+
+> 样式选择器从文字下拉列表重构为**横向缩略图滚动选择**。所有样式配置文件迁移至独立文件夹，支持在每个样式目录下放置 `thumbnail.png` 作为预览图。新增 `StyleManager.get_style_thumbnail()`、`layout_debug` 调试工具、`ExpandGroupSettingCard` 开发铁律。
+
+### 🟢 样式选择器重构（文字列表 → 缩略图滚动）
+
+**`src/gui_pyside/widgets/style_selector_card.py`** — 完全重写：
+
+- 移除 `FlowContainer` + `FlowLayout` 实现，改用 `SmoothScrollArea` + `QHBoxLayout` 横向滚动条模式（与底部胶片栏同架构）
+- 新增 `HorizontalWheelFilter`：将垂直滚轮事件转为水平平滑滚动，复用 `SmoothScrollDelegate.hScrollBar.scrollValue()`
+- 固定高度 `SCROLL_AREA_HEIGHT = CARD_HEIGHT + 22`，`_adjustViewSize()` 使用 `maximumHeight()` 而非 `sizeHint().height()` 计算 spaceWidget 高度
+- 图片加载时通过 `QPixmap.scaled(THUMBNAIL_SIZE, THUMBNAIL_SIZE, KeepAspectRatio, SmoothTransformation)` 将 512×512 原图缩放到 120×120
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- 配置面板新增独立 Tab 2「样式选择」`StyleSelectorCard`，原「相框配置」Tab 中的样式 `ComboBox` 已移除
+- 所有 `self.combo_style` 引用替换为 `self.style_selector_card.current_style`
+
+### 🟢 样式缩略图系统
+
+**`src/frame_styles/style_manager.py`**：
+
+- 新增 `get_style_thumbnail(style_name)` 方法：在样式文件夹中查找 `thumbnail.png/jpg/jpeg`，返回绝对路径或 `None`
+- `get_available_styles()` 返回 `sorted(styles)` 字母序排列
+
+**`src/gui_pyside/widgets/style_thumbnail_card.py`**：
+
+- 选中态从 `setCustomStyleSheet`（QSS 渲染）改为 `paintEvent` 中 `QPainter.drawRoundedRect` 直接绘制 2px 主题色圆角边框，解决 `CardWidget` 基类 paintEvent 不执行 QFrame 默认绘制导致 QSS 边框无效的问题
+- 缩略图尺寸调整：`CARD_WIDTH=156`、`CARD_HEIGHT=185`、`THUMBNAIL_SIZE=140` → `CARD_WIDTH=136`、`CARD_HEIGHT=160`、`THUMBNAIL_SIZE=120`
+- 样式名称从 `BodyLabel` 改为 `CaptionLabel`（更小字号适配窄卡）
+- 图片加载后绘制 2px `rgba(0,0,0,38)` 圆角描边
+
+### 🟢 新增文件
+
+- `src/gui_pyside/utils/layout_debug.py`：`dump_expand_card(card)` 调试工具，打印卡片各层尺寸并自动检测收起间隙、滚动范围不足等异常
+
+### 🟢 configs 存储结构重构
+
+所有单文件样式迁移为独立文件夹（文件夹名 = 样式名）：
+
+| 之前 | 之后 |
+|------|------|
+| `configs/裁剪胶片 FilmCut.yaml` | `configs/裁剪胶片 FilmCut/default.yaml` |
+| `configs/简洁信息 SimpleInfo.yaml` | `configs/简洁信息 SimpleInfo/default.yaml` |
+| `configs/宝丽来风格 Polaroid.yaml` | `configs/宝丽来风格 Polaroid/default.yaml` |
+| `configs/底部信息条 Bottom Bars/`（已是文件夹） | 不变，新增 `thumbnail.png` 目录 |
+| `configs/胶片夹风格 FilmClip/`（已是文件夹） | 不变，新增 `thumbnail.png` 目录 |
+
+`StyleManager.get_style_config()` 保留单文件 fallback 逻辑以向后兼容。
+
+### 🟢 文档与工具
+
+- `README.md`：版本徽标更新至 v2.2.0-dev；样式配置规范新增"文件夹组织"要求；新增「样式缩略图」配置说明（512×512 PNG/JPG 预置）
+- `AGENTS.md`：新增「ExpandGroupSettingCard 开发铁律」6 条规则 + layout_debug 调试验证流程
+
+### 🐛 修复
+
+- **StyleSelectorCard 展开后大片灰色区域**：`FlowLayout.sizeHint()` 仅返回 max 子控件尺寸，被 `_adjustViewSize()` 取用后 spaceWidget 高度不足，改为 `smoothScrollArea.maximumHeight() + 3`
+- **StyleSelectorCard 收起时底部间隙**：`QScrollArea.sizeHint()` 不反映 `setFixedHeight()`（始终 ~8px），spaceWidget 仅 ~11px 滚动范围不足，改为 `_adjustViewSize()` 覆盖
+- **缩略图超出卡片右边界**：`CARD_WIDTH` 从 140 增加到 `THUMBNAIL_SIZE + 左/右边距 = 136`，ImageLabel 嵌入卡片内容区内
+- **512×512 缩略图未缩放**：`QPixmap` 加载后未调用 `.scaled()`，直接以原生分辨率设置导致溢出。加载后等比缩放至 `THUMBNAIL_SIZE × THUMBNAIL_SIZE`
+
+### 🟢 拖放支持
+
+**`src/gui_pyside/pages/image_processing_page.py`**：
+
+- 页面级 `setAcceptDrops(True)` + `dragEnterEvent` / `dragMoveEvent` / `dragLeaveEvent` / `dropEvent` 完整拖放事件链
+- 图片扩展名白名单 `_ALLOWED_EXT` 过滤（与文件对话框一致），非图片文件自动跳过并 `InfoBar.warning` 提示
+- 拖入文件时显示半透明蒙层覆盖全页面，中央显示"松开左键以添加图片"（`BodyLabel`，32px 浅色文字），`dragLeaveEvent` / `dropEvent` 后自动隐藏
+- `WA_TransparentForMouseEvents` 确保蒙层不拦截拖放事件传递
+- 拖放文件路径直接复现有 `_load_files()` 方法，零改动
+
+### 🟢 Delete 键移除图片
+
+- 新增 `QShortcut(QKeySequence.Delete, self)` 全局快捷键，`_on_delete_key()` 回调
+- 回调中检测焦点控件类型：若焦点在 `QLineEdit` 时跳过（保留文字删除原生行为），否则调用 `_remove_filmstrip_item(self.current_index)`
+
 ## v2.1.1-dev (2026-06-13)
 
 > 新增 **GUI 色彩管理（QColorSpace）** 与 **深色模式适配**。修复在广色域显示器（如 Display P3）上 sRGB 图片显示过饱和的问题；所有硬编码的 `setStyleSheet` 浅色背景色替换为 QFluentWidgets 的 `setCustomStyleSheet(lightQss, darkQss)` 双主题方案，自动跟随系统深色/浅色主题切换，无需手动监听信号。

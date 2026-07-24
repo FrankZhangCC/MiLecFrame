@@ -19,10 +19,10 @@ from typing import Optional
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QSplitter,
-    QFileDialog, QApplication, QSizePolicy,
+    QFileDialog, QApplication, QSizePolicy, QLineEdit,
 )
 from PySide6.QtCore import Qt, Signal, QSize, QTimer, QEvent, QObject
-from PySide6.QtGui import QImage, QPixmap, QWheelEvent, QColorSpace
+from PySide6.QtGui import QImage, QPixmap, QWheelEvent, QColorSpace, QDragEnterEvent, QDropEvent, QColor, QKeySequence, QShortcut
 
 from qfluentwidgets import (
     PrimaryPushButton, PushButton, TransparentPushButton,
@@ -41,6 +41,7 @@ from qfluentwidgets.common.style_sheet import (
 from ..models.file_item import FileItem
 from ..models.processing_config import ProcessingConfig
 from ..utils.temp_manager import TempManager
+from ..widgets.style_selector_card import StyleSelectorCard
 from src.utils.exif_helper import ExifHelper
 from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
@@ -51,6 +52,9 @@ from PIL import ImageCms
 import io
 
 logger = logging.getLogger(__name__)
+
+# 图片文件扩展名白名单（与 _on_add_files 文件对话框过滤器一致）
+_ALLOWED_EXT = ('.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.webp')
 
 
 class FilmStripWheelFilter(QObject):
@@ -145,6 +149,28 @@ class ImageProcessingPage(QWidget):
         # 加载已保存的作者名和配置
         self._load_saved_config()
 
+        # ── 拖放支持 ──
+        self.setAcceptDrops(True)
+        self._drag_overlay = QWidget(self)
+        self._drag_overlay.hide()
+        self._drag_overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._apply_custom_style(self._drag_overlay,
+            lightQss="background: rgba(255,255,255,0.7);",
+            darkQss="background: rgba(0,0,0,0.5);")
+        overlay_layout = QVBoxLayout(self._drag_overlay)
+        overlay_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._drag_hint_label = BodyLabel("松开左键以添加图片", self._drag_overlay)
+        self._drag_hint_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = self._drag_hint_label.font()
+        font.setPixelSize(32)
+        self._drag_hint_label.setFont(font)
+        self._drag_hint_label.setTextColor(QColor(120, 120, 120), QColor(180, 180, 180))
+        overlay_layout.addWidget(self._drag_hint_label)
+
+        # ── Delete 键移除图片 ──
+        self._delete_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Delete), self)
+        self._delete_shortcut.activated.connect(self._on_delete_key)
+
         logger.info("图像处理页面初始化完成")
 
     def _setup_ui(self):
@@ -213,6 +239,50 @@ class ImageProcessingPage(QWidget):
 
         # 初始化样式依赖控件的显示状态
         self._update_style_dependent_controls()
+
+    # ════════════════════════════════════════════════════════
+    #  文件拖放支持
+    # ════════════════════════════════════════════════════════
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        """拖入文件：显示蒙层，仅接受图片文件"""
+        if event.mimeData().hasUrls():
+            paths = [url.toLocalFile() for url in event.mimeData().urls()]
+            if any(p.lower().endswith(_ALLOWED_EXT) for p in paths if p):
+                self._drag_overlay.setGeometry(self.rect())
+                self._drag_overlay.show()
+                self._drag_overlay.raise_()
+                event.acceptProposedAction()
+                return
+        event.ignore()
+
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+
+    def dragLeaveEvent(self, event):
+        self._drag_overlay.hide()
+
+    def dropEvent(self, event: QDropEvent):
+        self._drag_overlay.hide()
+        file_paths = [url.toLocalFile() for url in event.mimeData().urls()]
+        valid_paths = [p for p in file_paths if p and os.path.isfile(p) and p.lower().endswith(_ALLOWED_EXT)]
+        skipped = len(file_paths) - len(valid_paths)
+        if valid_paths:
+            self._load_files(valid_paths)
+        if skipped > 0:
+            InfoBar.warning(
+                title="部分文件未添加",
+                content=f"已跳过 {skipped} 个不支持的格式",
+                duration=3000,
+                parent=self)
+
+    def _on_delete_key(self):
+        """Delete 键移除当前选中图片（文本输入时保留原生行为）"""
+        focused = QApplication.focusWidget()
+        if isinstance(focused, QLineEdit):
+            return
+        if self.current_index >= 0:
+            self._remove_filmstrip_item(self.current_index)
 
     def _create_preview_panel(self) -> QWidget:
         """创建左侧预览面板（预览窗口 + EXIF 信息 + 操作按钮）"""
@@ -334,7 +404,12 @@ class ImageProcessingPage(QWidget):
         self.output_settings_card.setParent(config_container)
         card_layout.addWidget(self.output_settings_card)
 
-        # ── Tab 2: 相框配置 ──
+        # ── Tab 2: 样式选择（缩略图网格） ──
+        self.style_selector_card = self._create_style_selection_card()
+        self.style_selector_card.setParent(config_container)
+        card_layout.addWidget(self.style_selector_card)
+
+        # ── Tab 3: 相框配置 ──
         self.frame_config_card = self._create_frame_config_card()
         self.frame_config_card.setParent(config_container)
         card_layout.addWidget(self.frame_config_card)
@@ -429,24 +504,24 @@ class ImageProcessingPage(QWidget):
 
         return card
 
-    def _create_frame_config_card(self) -> ExpandSettingCard:
-        """Tab 2: 相框配置"""
-        card = ExpandGroupSettingCard(FluentIcon.PHOTO, "相框配置", "选择相框样式、背景和字体")
-
-        # 相框样式
+    def _create_style_selection_card(self) -> ExpandSettingCard:
+        """Tab 2: 样式选择（缩略图网格）"""
         from frame_styles.style_manager import StyleManager
         self.style_manager = StyleManager()
         available_styles = self.style_manager.get_available_styles()
         if not available_styles:
             self.style_manager.create_sample_styles()
             available_styles = self.style_manager.get_available_styles()
-        self.combo_style = ComboBox()
-        self.combo_style.addItems(available_styles)
-        if "底部信息条 Bottom Bars" in available_styles:
-            self.combo_style.setCurrentText("底部信息条 Bottom Bars")
-        self.combo_style.currentTextChanged.connect(self._on_style_changed)
-        self.combo_style.setMinimumWidth(200)
-        card.addGroup(FluentIcon.CHECKBOX, "相框样式", "选择预设的相框样式", self.combo_style, 2)
+
+        card = StyleSelectorCard()
+        card.refresh_styles(available_styles, self.style_manager)
+        card.style_selected.connect(self._on_style_changed)
+
+        return card
+
+    def _create_frame_config_card(self) -> ExpandSettingCard:
+        """Tab 3: 相框配置（背景、字体等，样式选择已独立为 Tab 2）"""
+        card = ExpandGroupSettingCard(FluentIcon.PHOTO, "相框配置", "背景填充、字体字重等设置")
 
         # 背景填充
         bg_choices = BackgroundFillManager.get_choices()
@@ -567,7 +642,7 @@ class ImageProcessingPage(QWidget):
 
     def _update_style_dependent_controls(self):
         """根据当前选中的样式配置，更新自定义文本和LOGO的启用状态"""
-        style_name = self.combo_style.currentText()
+        style_name = self.style_selector_card.current_style
         if not style_name:
             return
 
@@ -1121,7 +1196,7 @@ class ImageProcessingPage(QWidget):
                 output_path=output_path,
                 author=self.edit_author.text() or None,
                 location=location or None,
-                style_name=self.combo_style.currentText(),
+                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
                 bg_fill_type=bg_key,
                 decorations=decorations or None,
                 font_weight=fw_key,
@@ -1281,7 +1356,7 @@ class ImageProcessingPage(QWidget):
             default_config_manager.save_user_author(self.edit_author.text())
         # 最近使用配置
         default_config_manager.save_last_used_settings({
-            'style_name': self.combo_style.currentText(),
+            'style_name': self.style_selector_card.current_style or "底部信息条 Bottom Bars",
             'output_format': self.combo_output_format.currentText(),
             'bg_fill': self.combo_bg_fill.currentText(),
             'enhance_background': self.chk_enhance.isChecked(),
@@ -1301,9 +1376,7 @@ class ImageProcessingPage(QWidget):
             return
         # 先恢复样式（可能触发 _on_style_changed 更新自定义文本/LOGO 启用状态）
         if 'style_name' in saved:
-            items = [self.combo_style.itemText(i) for i in range(self.combo_style.count())]
-            if saved['style_name'] in items:
-                self.combo_style.setCurrentText(saved['style_name'])
+            self.style_selector_card.set_current_style(saved['style_name'])
         if 'output_format' in saved:
             idx = self.combo_output_format.findText(saved['output_format'])
             if idx >= 0:
@@ -1320,17 +1393,9 @@ class ImageProcessingPage(QWidget):
                 self.combo_font_weight.setCurrentIndex(idx)
 
     def refresh_style_list(self):
-        """刷新样式下拉列表（样式编辑器中新建/保存样式后调用）"""
-        current = self.combo_style.currentText()
+        """刷新样式网格（样式编辑器中新建/保存样式后调用）"""
         styles = self.style_manager.get_available_styles()
-        self.combo_style.blockSignals(True)
-        self.combo_style.clear()
-        self.combo_style.addItems(styles)
-        if current in styles:
-            self.combo_style.setCurrentText(current)
-        elif "底部信息条 Bottom Bars" in styles:
-            self.combo_style.setCurrentText("底部信息条 Bottom Bars")
-        self.combo_style.blockSignals(False)
+        self.style_selector_card.refresh_styles(styles, self.style_manager)
 
     def showEvent(self, event):
         """页面显示时刷新样式列表"""
