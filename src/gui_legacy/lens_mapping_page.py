@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 镜头映射管理页面模块
 """
@@ -32,11 +35,12 @@ def render_lens_mapping_page():
     # 根据搜索条件过滤数据
     filtered_lens_df = st.session_state.lens_df.copy()
     if search_term:
-        filtered_lens_df = st.session_state.lens_df[
-            st.session_state.lens_df['original_lens'].str.contains(search_term, case=False, na=False) |
-            st.session_state.lens_df['mapped_lens'].str.contains(search_term, case=False, na=False) |
-            st.session_state.lens_df['short_lens'].str.contains(search_term, case=False, na=False)
-        ]
+        cols = ['original_lens', 'mapped_lens', 'short_lens', 'brand', 'mount']
+        mask = pd.Series(False, index=filtered_lens_df.index)
+        for col in cols:
+            if col in filtered_lens_df.columns:
+                mask |= filtered_lens_df[col].astype(str).str.contains(search_term, case=False, na=False)
+        filtered_lens_df = filtered_lens_df[mask]
     
     # 显示可编辑的镜头映射表格
     edited_lens_df = st.data_editor(
@@ -49,6 +53,9 @@ def render_lens_mapping_page():
             "original_lens": st.column_config.TextColumn("原始镜头", width="medium"),
             "mapped_lens": st.column_config.TextColumn("映射镜头", width="medium"),
             "short_lens": st.column_config.TextColumn("短版名称", width="medium"),
+            "brand": st.column_config.TextColumn("品牌", width="medium"),
+            "mount": st.column_config.TextColumn("卡口", width="medium"),
+            "timestamp": st.column_config.TextColumn("时间戳", width="small"),
         },
     )
     

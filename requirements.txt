@@ -6,10 +6,9 @@ numpy>=1.21.0
 # HDR support
 pillow-heif>=0.13.0  # HEIF/AVIF loading with ICC profile preservation
 
-# GUI options (install one as needed)
-streamlit>=1.20.0  # Recommended for web GUI
-# gradio>=3.20.0  # Alternative GUI option
-# flask>=2.2.0    # Alternative GUI option
+# PySide6 Desktop GUI (required for the default GUI mode)
+PySide6>=6.5.0
+PySide6-Fluent-Widgets[full]>=1.11.0
 
 # Data handling
 pandas>=1.4.0
@@ -18,3 +17,6 @@ toml>=0.10.0
 
 # Utility
 requests>=2.28.0
+
+# Build
+pyinstaller>=6.0

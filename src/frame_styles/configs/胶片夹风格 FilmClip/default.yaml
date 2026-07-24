@@ -1,10 +1,8 @@
 # ============================================================
-# 扩展宝丽来风格 Polaroid Motto (v1.7.0)
-# 基于"宝丽来风格 Polaroid"扩展，包含：
-#   - 独立格式化 EXIF 字段（焦距/光圈/快门/ISO）
-#   - 预定义文本标签（FL/Aperture/Shutter/ISO）
-#   - 依赖树组合定位（整链居中）
-#   - 自定义文本
+# 扩展宝丽来风格 Polaroid Motto
+# 基于 no_custom_text.yaml，将 Logo 替换为自定义文本
+# - Logo 关闭
+# - 自定义文本使用原 Logo 的顶部居中定位
 # ============================================================
 
 name: 扩展宝丽来风格 Polaroid Motto
@@ -15,7 +13,6 @@ colors:
   custom_timestamp_author_dark_color: [204, 204, 204]
   custom_location_light_color: [51, 51, 51]
   custom_location_dark_color: [204, 204, 204]
-  # defined_texts 元素颜色
   custom_defined_text_01_light_color: [51, 51, 51]
   custom_defined_text_01_dark_color: [204, 204, 204]
   custom_defined_text_02_light_color: [51, 51, 51]
@@ -57,30 +54,29 @@ fonts:
 layout:
   expand_canvas:
     enabled: true
-    top: 0.155
-    bottom: 0.245
-    left: 0.05
-    right: 0.05
+    top: 0.175
+    bottom: 0.225
+    left: 0.04
+    right: 0.04
   padding:
     top: 0.025
     bottom: 0.025
-    left: 0.05
-    right: 0.05
+    left: 0.04
+    right: 0.04
 
   corner_radius:
     enabled: true
-    top_left: 0.02
-    top_right: 0.02
-    bottom_left: 0.02
-    bottom_right: 0.02
+    top_left: 0.04
+    top_right: 0.04
+    bottom_left: 0.04
+    bottom_right: 0.04
 
-  # ── 独立格式化 EXIF 字段（组件，不独立出现）──
   info_position:
     camera_lens:
       position: "bottom-center"
       alignment: "center"
       margin_top: 0
-      margin_bottom: 0.13
+      margin_bottom: 0.075
       margin_left: 0
       margin_right: 0
     focal_length_formatted:
@@ -104,14 +100,13 @@ layout:
       alignment: "left"
       relative_margin: 0.01
 
-  # ── 预定义文本标签（构成链的骨架）──
   defined_texts:
     defined_text_01:
       content: "FL"
       position: "bottom"
       alignment: "center"
       tree_align: true
-      margin_bottom: 0.17
+      margin_bottom: 0.12
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
@@ -131,17 +126,13 @@ layout:
       alignment: "left"
       relative_margin: 0.04
 
-  # ── 自定义文本 ──
+  # ── 自定义文本（替换原 Logo 的顶部居中定位） ──
   custom_text:
     enabled: true
-    position: "top-center"
-    alignment: "center"
+    position: "top"
+    alignment: "both-center"
+    margin_top: 0.083
     line_spacing_ratio: 0.006
-    margin_top: 0.055
 
 logo:
-  enabled: true
-  alignment: "both-center"
-  margin_bottom: 0.07
-  size_ratio: 0.06
-  diagonal_limit_ratio: 2.2
+  enabled: false

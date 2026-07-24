@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 HDR图像处理模块
 负责HEIF/AVIF格式的HDR图像加载与SDR色调映射

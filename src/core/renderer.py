@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 图像渲染引擎模块
 负责相框的图层合成、背景填充、高斯模糊等功能
@@ -219,12 +222,19 @@ class FrameRenderer:
         target_short_side = int(reference_side * size_ratio)
         scale = target_short_side / logo_short_side
 
-        # Logo 对角线上限保护：防止细长条 Logo 失控
-        diagonal_limit = logo_config.get('diagonal_limit_ratio', 2.0)
-        max_diagonal = int(reference_side * diagonal_limit * size_ratio)
-        logo_diagonal = math.hypot(logo_width, logo_height)
-        if logo_diagonal * scale > max_diagonal:
-            scale = max_diagonal / logo_diagonal
+        # Logo 长边长度限制：防止细长条 Logo 失控
+        # 优先读取 max_dim_limit_ratio，兼容旧字段 diagonal_limit_ratio
+        limit_ratio = logo_config.get('max_dim_limit_ratio',
+                        logo_config.get('diagonal_limit_ratio', 2.5))
+        max_dim_limit = int(reference_side * limit_ratio * size_ratio)
+        logo_max_dim = max(logo_width, logo_height)
+        if logo_max_dim * scale > max_dim_limit:
+            scale = max_dim_limit / logo_max_dim
+
+        # 品牌独立缩放系数（在长度限制之后叠加）
+        logo_selector = self._get_logo_selector()
+        brand_scale = logo_selector.get_brand_scale_factor(logo_filename)
+        scale *= brand_scale
 
         new_logo_width = int(logo_width * scale)
         new_logo_height = int(logo_height * scale)

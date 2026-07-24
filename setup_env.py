@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 import os
 import sys
 import subprocess
@@ -36,7 +39,7 @@ def create_virtual_environment():
     except subprocess.CalledProcessError:
         print("通过信任主机方式安装失败，尝试逐个安装依赖...")
         # 如果批量安装失败，尝试逐个安装关键依赖
-        packages = ['Pillow>=9.0.0', 'piexif>=1.1.3', 'numpy>=1.21.0', 'streamlit>=1.20.0']
+        packages = ['Pillow>=9.0.0', 'piexif>=1.1.3', 'numpy>=1.21.0', 'PySide6>=6.5.0']
         for package in packages:
             try:
                 subprocess.check_call([

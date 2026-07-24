@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 高斯模糊工具模块
 """

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 背景填充管理器模块
 负责背景填充类型的注册、渲染和查询，是背景填充相关功能的唯一入口。

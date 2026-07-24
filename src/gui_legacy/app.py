@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 GUI应用程序模块
 使用Streamlit构建网页版GUI界面

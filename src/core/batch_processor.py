@@ -1,3 +1,6 @@
+# Copyright (c) 2026 FrankZhangCC
+# MIT License - see LICENSE file for details
+
 """
 批量处理器模块（重写版）
 负责批量处理图像，添加相框和EXIF信息
