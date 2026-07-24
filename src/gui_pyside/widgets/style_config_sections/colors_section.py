@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, Signal
 
 from qfluentwidgets import (
     ExpandGroupSettingCard,
-    LineEdit, FluentIcon, BodyLabel,
+    LineEdit, ComboBox, FluentIcon, BodyLabel,
 )
 
 from ...models.style_config_form import COLOR_ELEMENT_KEYS
@@ -59,6 +59,33 @@ class ColorsSection(ExpandGroupSettingCard):
         row2.addWidget(self.color_dark, stretch=1)
         layout.addLayout(row2)
 
+        # ── 自定义背景填充色 ──
+        layout.addSpacing(8)
+        sep = BodyLabel('─── 自定义背景填充 ───', container)
+        sep.setStyleSheet('color: #888; font-weight: bold;')
+        layout.addWidget(sep)
+        bg_hint = BodyLabel(
+            '若指定，GUI 背景样式不可选。支持 "#FF6B6B" 或 [255,107,107]，留空则使用 GUI 背景样式',
+            container)
+        bg_hint.setStyleSheet('color: #888;')
+        layout.addWidget(bg_hint)
+
+        row_bg = QHBoxLayout()
+        row_bg.addWidget(BodyLabel('custom_bg_color:', container))
+        self.bg_color = LineEdit(container)
+        self.bg_color.setPlaceholderText('"#FF6B6B" 或 [255,107,107]')
+        self.bg_color.textChanged.connect(self._on_changed)
+        row_bg.addWidget(self.bg_color, stretch=1)
+        layout.addLayout(row_bg)
+
+        row_bg_scheme = QHBoxLayout()
+        row_bg_scheme.addWidget(BodyLabel('custom_bg_text_scheme:', container))
+        self.bg_text_scheme = ComboBox(container)
+        self.bg_text_scheme.addItems(['（自动检测）', 'dark', 'light'])
+        self.bg_text_scheme.currentTextChanged.connect(self._on_changed)
+        row_bg_scheme.addWidget(self.bg_text_scheme, stretch=1)
+        layout.addLayout(row_bg_scheme)
+
         # ── 按元素类型独立覆盖 ──
         layout.addWidget(BodyLabel(
             '按元素类型独立覆盖（留空跳过）', container))
@@ -97,6 +124,10 @@ class ColorsSection(ExpandGroupSettingCard):
     def load_from_model(self, data):
         self.color_light.setText(data.color_light)
         self.color_dark.setText(data.color_dark)
+        self.bg_color.setText(data.custom_bg_color)
+        scheme_text = data.custom_bg_text_scheme
+        self.bg_text_scheme.setCurrentText(
+            scheme_text if scheme_text in ('dark', 'light') else '（自动检测）')
         for k, (lt_edit, dk_edit) in \
                 self._per_element_inputs.items():
             pe = data.color_per_element.get(k, {})
@@ -108,6 +139,9 @@ class ColorsSection(ExpandGroupSettingCard):
     def save_to_model(self, data):
         data.color_light = self.color_light.text().strip()
         data.color_dark = self.color_dark.text().strip()
+        data.custom_bg_color = self.bg_color.text().strip()
+        scheme_text = self.bg_text_scheme.currentText()
+        data.custom_bg_text_scheme = scheme_text if scheme_text in ('dark', 'light') else ''
         data.color_per_element = {}
         for k, (lt_edit, dk_edit) in \
                 self._per_element_inputs.items():
