@@ -20,11 +20,27 @@
 - `ExifHelper.get_display_data()` 新增 `camera_lens_combined_short` 字段，数据组装逻辑在 exif_helper 闭环
 - `add_lens_mapping()` / `_record_device_info()` 同步写入 `short_lens` 列
 
+### 三栏式 GUI 布局重构 🟡 功能增强
+
+- **布局重组**：顶部四列配置栏 → 右侧独立配置栏（`st.columns([7, 3])`），主栏独占左侧 70% 空间用于预览和操作
+- **图片信息移至侧边栏**：文件/相机/镜头/焦距/光圈/快门/ISO/拍摄时间在侧边栏 `📋 图片信息` 区域展示，字体 0.9rem + 行高 2，四项参数独立逐行列出，移除旧版冗余的"相框显示"预览区
+- **EXIF 预提取**：利用 Streamlit `session_state` 在 widget 渲染前即可访问的特性，上传后侧边栏信息即时刷新，无需额外点击
+- **右侧配置栏**：灰色底色（`#f0f2f6`）+ 圆角 + 白色输入框控件
+  - `⚙️ 配置`：相框样式、输出格式（2 列），背景样式、字重（全宽）
+  - `🎨 装饰`：作者姓名（全宽），GPS 替换 + 拍摄地点（同行 `[2,1]`），镜头显示 + 短版镜头名（同行 `[2,1]`）
+  - `🏷️ Logo`：全宽选择
+  - `💧 水印`：折叠 expander（默认收起）
+- **控件布局优化**：GPS 替换选框移至拍摄地点输入框右侧、短版镜头名选框移至镜头显示下拉框右侧，CSS `margin-top: 1.5rem` 保证选框与输入框/下拉框纵向基线对齐
+- **`st.rerun()` 修复预览时序**：处理成功后调用 `st.rerun()`，确保效果预览图即时显示（原问题：预览在按钮 handler 之前渲染，需下次交互才更新）
+- **图片移除自动清理**：`uploaded_file` 为空时主动清除 `exif_data`、`file_info`、`display_data`、`processing_result` 等 session state，避免残留数据
+- **所有 widget key 保留**，session state 向前兼容
+
 ### README 更新
 
 - 版本号 1.5.0 → 1.5.1
 - "竖向/方形图片自动适配"重写为"镜头显示模式 & 短版镜头名"，补充完整行为矩阵表
 - 相机信息字段从三级扩展为五级（新增 `camera_lens_combined_short`）
+- GUI 界面描述更新为三栏式布局
 
 ---
 

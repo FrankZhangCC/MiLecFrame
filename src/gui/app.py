@@ -23,7 +23,24 @@ def run_app():
         page_icon="📷",
         layout="wide"
     )
-    
+
+    # 全局 CSS：压缩顶栏、隐藏 Deploy、减少顶部留白
+    st.markdown("""
+<style>
+header[data-testid="stHeader"] {
+    height: auto !important;
+    min-height: 1.5rem !important;
+    padding: 0.2rem 1rem !important;
+}
+button[kind="header"] {
+    display: none !important;
+}
+div.block-container {
+    padding-top: 0.5rem !important;
+}
+</style>
+    """, unsafe_allow_html=True)
+
     # 初始化当前页面状态
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "🖼️ 图像处理"
