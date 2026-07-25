@@ -50,6 +50,64 @@ src/
 - 内部开发版：标记为 `v1.x.x-dev`（如 `v1.9.0-dev`）。
 - 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`。
 
+### Git 分支工作流
+
+采用三线分支模型：
+
+```
+mainline ─── v1.0.1-dev ─── v1.1.0-dev ─── ... ─── v2.3.0-dev ──→  (干净版本线)
+                ↑ squash                        ↑ squash
+dev ─────── A---B---C---D---E---F---G---H---I── ... ──────────────→  (日常开发)
+                                                                      ↓ 稳定后 cherry-pick
+release ─── v0.1.0 ─── v1.0.0 ─── v1.1.0-release ──→               (公开发行)
+```
+
+| 分支 | 用途 | 规则 |
+|------|------|------|
+| `dev` | **日常小功能开发** | 提交可松散。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
+| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。推送到 `origin`，历史不可改写（force push 需谨慎）。 |
+| `release` | **稳定公开发行** | GitHub 默认分支，受保护。推送到 `origin`，仅接收 cherry-pick 来的稳定版本。 |
+
+#### 日常操作流程
+
+```bash
+# 1. 日常在 dev 上工作
+git checkout dev
+# ...多次提交 A, B, C, D ...
+
+# 2. 凑够一个版本后 → squash 到 mainline 并打 tag
+git checkout mainline
+git merge --squash dev
+VERSION="v2.4.0-dev"  # 根据 src/_version.py 决定
+git commit -m "$VERSION: <功能简述>"
+git tag $VERSION
+git checkout dev
+
+# 3. 推送到 GitHub
+git push origin mainline --follow-tags    # 推送分支 + 新 tag
+# 若 --follow-tags 未推送轻量 tag，补推：
+git push origin --tags
+
+# 4. mainline 上某版本准备公开发布 → 给 release
+git checkout release
+git cherry-pick <mainline上对应版本的commit-hash>
+git tag v2.4.0
+git push origin release --tags
+```
+
+#### 推送规则
+
+| 分支 | 推送到 origin | 方式 |
+|------|--------------|------|
+| `dev` | ❌ 否（仅本地） | - |
+| `mainline` | ✅ 是 | `git push origin mainline --follow-tags` |
+| `release` | ✅ 是（默认分支） | `git push origin release` |
+
+- **`release` 是 GitHub 默认分支**，受保护，禁止 force push。
+- `mainline` 的 `*-dev` tag 在推送时会被 `--follow-tags` 自动带到远端。
+- 推送 tag 时如遇 `--follow-tags` 未生效（轻量 tag），补 `git push origin --tags`。
+- 历史管理注意事项
+
 ### Git 忽略规则
 
 - `data/` 目录下除 `camera_map.csv` 和 `lens_map.csv` 外均被 gitignore。
