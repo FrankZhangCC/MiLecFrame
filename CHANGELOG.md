@@ -27,6 +27,16 @@
 
 - README 拆分，新增样式配置指南与开发参考文档
 
+### 🔴 修复：批量导入相同设备时映射库重复写入 (fix)
+
+- 批量导入多张相同相机/镜头的新图片时，设备管理列表末尾出现多条相同设备记录
+- 根因：`_record_device_info` 仅依赖初始化时加载的内存映射做去重，写入 CSV 后未回写内存；
+  且 BatchProcessor 与 ImageProcessor 各持一个 ExifHelper 实例，内存映射彼此独立
+- 修复：去重检查改为「内存 dict + CSV 文件」双重校验（新增 `_camera_exists_in_csv` /
+  `_lens_exists_in_csv` 兜底检查），写入 CSV 成功后同步更新内存映射
+  （camera_map / lens_map / short_lens_map）
+- 数据清理：`data/camera_map.csv`、`data/lens_map.csv` 中已有的重复记录已去除
+
 ## v2.3.0-dev (2026-07-18)
 
 > 新增拍摄时间显示模式控制，EXIF 焦距改用 35mm 等效值，LOGO 品牌尺寸补偿系数独立为外部 YAML 文件。
