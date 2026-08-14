@@ -104,11 +104,8 @@ def seed_writable_data() -> None:
         else:
             print(f'      跳过（不存在）: {name}')
 
-    # config.json 若已存在则一并带入（首次运行无 config 时程序会自动创建）
-    config_src = PROJECT_ROOT / 'config.json'
-    if config_src.exists():
-        shutil.copy2(config_src, APP_DIR / 'config.json')
-        print('      已复制: config.json')
+    # 注意：不复制 config.json —— 其中可能含有开发者个人偏好数据
+    # （作者名等）。程序首次运行时会自动在 exe 同目录创建干净的 config.json。
 
 
 def make_zip_package(version: str) -> Path:
