@@ -2,6 +2,31 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.4.0-dev (2026-08-14)
+
+> 便携版打包发行支持，统一资源路径定位，新增矩形装饰元素，文档重构。
+
+### 🟢 便携版打包发行支持 (feat)
+
+- 新增 `MiLecFrame.spec`（PyInstaller onedir 配置）与 `build_release.py` 一键打包脚本
+- 新增 `src/utils/app_paths.py` 统一路径定位：可写数据（config.json、设备映射 CSV、日志、用户样式）位于 exe 同目录，只读资源（字体、Logo、内置样式）随包打包，整个文件夹拷贝即用
+- 支持从 PNG 一键生成多尺寸 ICO 应用图标（`--icon` 参数）
+- 发行版字体精简打包：仅打包样式配置实际引用的 6 个字重文件（原 391MB → 约 30MB）
+- 无控制台窗口模式：`main.py` 增加标准输出保护，windowed 模式下 print 输出重定向至 `MiLecFrame_console.log`
+
+### 🔴 修复：CLI 模式导入崩溃 (fix)
+
+- 修复 `python src/main.py -i ... -o ...` 单张/批量处理模式的 `attempted relative import beyond top-level package` 错误
+- 统一入口导入为 `src.` 前缀，`main.py` 顶部插入项目根目录到 sys.path
+
+### 🟢 新增自定义矩形（rectangles）装饰功能 (feat, fdd4d92)
+
+- 样式配置支持半透明装饰色块，可用于画面装饰与文字底衬
+
+### 🟢 文档重构 (docs, 7d8059a)
+
+- README 拆分，新增样式配置指南与开发参考文档
+
 ## v2.3.0-dev (2026-07-18)
 
 > 新增拍摄时间显示模式控制，EXIF 焦距改用 35mm 等效值，LOGO 品牌尺寸补偿系数独立为外部 YAML 文件。

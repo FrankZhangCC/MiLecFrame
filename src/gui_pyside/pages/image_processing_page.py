@@ -506,7 +506,7 @@ class ImageProcessingPage(QWidget):
 
     def _create_style_selection_card(self) -> ExpandSettingCard:
         """Tab 2: 样式选择（缩略图网格）"""
-        from frame_styles.style_manager import StyleManager
+        from src.frame_styles.style_manager import StyleManager
         self.style_manager = StyleManager()
         available_styles = self.style_manager.get_available_styles()
         if not available_styles:

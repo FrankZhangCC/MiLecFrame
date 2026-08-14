@@ -65,10 +65,21 @@ from ..widgets.style_config_sections.elements_section import (
 logger = logging.getLogger(__name__)
 
 
-# ── 项目根目录常量 ──
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-CONFIGS_DIR = _PROJECT_ROOT / 'src' / 'frame_styles' / 'configs'
-ASSETS_PREVIEW_DIR = _PROJECT_ROOT / 'src' / 'gui_pyside' / 'assets' / 'preview'
+# ── 路径常量（统一的路径定位，兼容开发/打包环境） ──
+# 内置样式目录：只读资源，随程序打包（_MEIPASS/src/frame_styles/configs）
+# CONFIGS_DIR：样式保存/导出的可写目录。开发环境即内置目录；
+#              打包环境为 exe 同目录 styles/（用户样式持久化，升级不丢失）
+from src.utils.app_paths import get_resource_root, get_app_dir, is_frozen
+
+_RESOURCE_ROOT = get_resource_root()
+ASSETS_PREVIEW_DIR = _RESOURCE_ROOT / 'src' / 'gui_pyside' / 'assets' / 'preview'
+
+if is_frozen():
+    CONFIGS_DIR = get_app_dir() / 'styles'
+    _BUILTIN_CONFIGS_DIR = _RESOURCE_ROOT / 'src' / 'frame_styles' / 'configs'
+else:
+    CONFIGS_DIR = _RESOURCE_ROOT / 'src' / 'frame_styles' / 'configs'
+    _BUILTIN_CONFIGS_DIR = None
 
 # ── Pivot 导航项定义 ──
 _PIVOT_ITEMS = [
@@ -375,23 +386,55 @@ class StyleCreatorPage(QWidget):
     # ── 样式列表管理 ───────────────────────────────────────
 
     def _get_existing_styles(self) -> list[str]:
-        """获取已有样式文件列表（含子目录变体）"""
+        """获取已有样式文件列表（含子目录变体），合并用户目录与内置目录"""
         styles = []
-        if not CONFIGS_DIR.exists():
-            return styles
-        for entry in sorted(os.listdir(str(CONFIGS_DIR))):
-            if entry.startswith('_'):
+        seen = set()
+        # 目录顺序：用户目录（CONFIGS_DIR）在前，内置目录在后；
+        # 同名样式（文件夹/文件级）用户目录优先，内置同名自动隐藏
+        base_dirs = [CONFIGS_DIR]
+        if _BUILTIN_CONFIGS_DIR is not None:
+            base_dirs.append(_BUILTIN_CONFIGS_DIR)
+
+        for base in base_dirs:
+            if not base.exists():
                 continue
-            full = CONFIGS_DIR / entry
-            if full.is_dir():
-                for variant in sorted(os.listdir(str(full))):
-                    if variant.lower().endswith('.yaml') \
-                            and not variant.startswith('_'):
-                        styles.append(
-                            f'{entry}/{variant}')
-            elif entry.lower().endswith('.yaml'):
-                styles.append(entry)
+            for entry in sorted(os.listdir(str(base))):
+                if entry.startswith('_'):
+                    continue
+                full = base / entry
+                if full.is_dir():
+                    if entry in seen:
+                        continue
+                    seen.add(entry)
+                    for variant in sorted(os.listdir(str(full))):
+                        if variant.lower().endswith('.yaml') \
+                                and not variant.startswith('_'):
+                            styles.append(f'{entry}/{variant}')
+                elif entry.lower().endswith('.yaml'):
+                    if entry in seen:
+                        continue
+                    seen.add(entry)
+                    styles.append(entry)
         return styles
+
+    def _resolve_style_filepath(self, rel_text: str) -> str:
+        """
+        根据下拉框中的相对路径文本解析实际文件路径
+
+        优先在用户目录（CONFIGS_DIR）查找，再回退到内置目录，
+        兼容打包环境下加载内置只读样式。
+
+        Args:
+            rel_text: 样式相对路径（如 'FilmClip/default.yaml'）
+
+        Returns:
+            实际文件绝对路径，不存在则返回 CONFIGS_DIR 下的拼接结果
+        """
+        for base in [CONFIGS_DIR] + ([_BUILTIN_CONFIGS_DIR] if _BUILTIN_CONFIGS_DIR else []):
+            candidate = base / rel_text
+            if candidate.exists():
+                return str(candidate)
+        return str(CONFIGS_DIR / rel_text)
 
     def _refresh_style_list(self):
         """刷新样式选择下拉列表"""
@@ -413,7 +456,7 @@ class StyleCreatorPage(QWidget):
             self._render_preview()
             return
 
-        filepath = str(CONFIGS_DIR / text)
+        filepath = self._resolve_style_filepath(text)
         if not os.path.exists(filepath):
             return
 
@@ -475,9 +518,20 @@ class StyleCreatorPage(QWidget):
         if not filename.lower().endswith('.yaml'):
             filename += '.yaml'
 
-        # 如果当前有加载的文件，使用其路径；否则用默认路径
+        # 如果当前有加载的文件，使用其路径；否则用默认路径。
+        # 打包环境下若当前文件来自内置只读目录，则「另存」到用户样式目录，
+        # 保持与原目录相同的相对结构（如 FilmClip/default.yaml）。
         if self._current_filepath:
             filepath = self._current_filepath
+            if _BUILTIN_CONFIGS_DIR is not None:
+                try:
+                    cur_abs = Path(self._current_filepath).resolve()
+                    builtin_abs = _BUILTIN_CONFIGS_DIR.resolve()
+                    rel = cur_abs.relative_to(builtin_abs)
+                    if rel.parts:
+                        filepath = str(CONFIGS_DIR / rel)
+                except ValueError:
+                    pass  # 不在内置目录内，保持原路径
         else:
             filepath = str(CONFIGS_DIR / filename)
 

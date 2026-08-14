@@ -129,9 +129,15 @@ raw EXIF bytes          映射后字段               组合显示字段        
 
 统一数据出口为 `exif_helper.get_display_data()`。`raw_*` 字段供 GUI 设备信息区展示，映射后字段供渲染使用。
 
-### 3.3 渲染管线（四阶段）
+### 3.3 渲染管线（五阶段）
 
 ```
+Phase 0 ── 矩形绘制（背景层之上） ──────────────────────────────────
+  从 layout.rectangles 读取矩形列表 → 颜色自适应（is_dark_bg）
+  → 尺寸计算（reference_side × ratio）
+  → 定位（calculate_position + defer_padding，跳过 padding 约束）
+  → RGBA 合成（_draw_single_rectangle → alpha_composite）
+
 Phase 1 ── 测量 ─────────────────────────────────────────────────
   遍历 info_position / defined_texts / custom_text 三种来源的所有元素
   → 获取文本 → 确定字体 → 测量尺寸（font.getbbox + font.getmetrics）
@@ -208,8 +214,8 @@ self._dependents = {
 | `__init__(size, layout_config)` | 构造 | 计算 canvas_size、original_bounds、padding_bounds |
 | `register_element(name, x, y, w, h, relative_to)` | 注册 | 存入 positions + 维护 _dependents |
 | `get_element_bounds(name)` | 查询 | 从 positions 读取（支持模糊匹配） |
-| `calculate_position(w, h, config, defer_padding)` | 分发 | 根据有无 relative_to 分支到绝对/相对 |
-| `_calculate_absolute(w, h, config)` | 绝对定位 | 按 position/alignment/placement/margin 计算 |
+| `calculate_position(w, h, config, defer_padding)` | 分发 | 根据有无 relative_to 分支到绝对/相对；defer_padding=True 跳过 padding 约束 |
+| `_calculate_absolute(w, h, config, defer_padding)` | 绝对定位 | 按 position/alignment/placement/margin 计算；defer_padding=True 时跳过 padding 夹持 |
 | `_get_anchor(...)` | 绝对定位 | 14 种 position 的具体公式实现 |
 | `_align_x(alignment, ox, ow, ew, m)` | 辅助 | 水平对齐函数 |
 | `_align_y(alignment, oy, oh, eh, m)` | 辅助 | 垂直对齐函数 |
@@ -243,7 +249,7 @@ Pillow 的 `draw.text((x, y), text, font=font)` 将 `(x, y)` 解释为**基线�
 
 #### 4.1.6 绝对定位算法
 
-`_calculate_absolute(ew, eh, config)` 流程：
+`_calculate_absolute(ew, eh, config, defer_padding=False)` 流程：
 ```python
 margins = _resolve_margins(config)           # 步骤 1：解析 margin
 placement = config.get('placement', 'outside')
@@ -251,9 +257,14 @@ position  = config.get('position', 'bottom')
 alignment = config.get('alignment', 'center')
 x, y = _get_anchor(placement, position, alignment,  # 步骤 2：计算锚点
                    ox, oy, ow, oh, ew, eh, margins)
-x = clamp(x, pad_left, pad_right - ew)      # 步骤 3：padding 约束
-y = clamp(y, pad_top, pad_bottom - eh)
+if not defer_padding:                        # 步骤 3：padding 约束（可跳过）
+    x = clamp(x, pad_left, pad_right - ew)
+    y = clamp(y, pad_top, pad_bottom - eh)
 ```
+
+`defer_padding=True` 时跳过步骤 3 的 padding 夹持，用于需要突破安全区域的场景。当前使用方：
+- `tree_align` 依赖树内的元素（Phase 2 以 defer 模式定位，Phase 2.5 统一约束）
+- **自定义矩形（rectangles）**——矩形不受 padding 安全区域限制，可直接绘制到画布边界
 
 _align_x / _align_y 的核心逻辑：
 ```python
@@ -355,7 +366,22 @@ mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
 
 `src/core/renderer.py`
 
-图层合成顺序：背景填充 → 原图圆角裁切 → 装饰（水印） → 文字（委托 TextRenderer） → Logo。
+图层合成顺序：背景填充 → **自定义矩形（rectangles）** → 原图圆角裁切 → 装饰（水印） → 文字（委托 TextRenderer） → Logo。
+
+**`_draw_rectangles()` 矩形绘制管线**：
+
+1. 从 `layout.rectangles` 读取矩形字典，按键名排序遍历
+2. 颜色自适应：根据 `BackgroundFillManager.is_dark_bg()` 从 `colors` 中读取 `custom_{rect_name}_{dark/light}_color`
+3. 尺寸计算：`rect_w = reference_side × width_ratio`，`rect_h = reference_side × height_ratio`
+4. 定位计算：调用 `layout_engine.calculate_position(w, h, config, defer_padding=True)`，**跳过 padding 约束**
+5. 圆角处理：复用 `_rounded_corner_mask()` 生成抗锯齿圆角蒙版，蒙版值乘以 opacity 保留透明度
+6. 图层合成：创建 RGBA 矩形层 → `Image.alpha_composite()` 叠加到背景
+
+**`_draw_single_rectangle()` 模块级函数**：创建 RGBA 矩形图像，处理圆角蒙版（通过 `putalpha`），通过 `alpha_composite` 叠加到背景层返回 RGB 图像。透明度由 `opacity` 参数控制（0.0-1.0），圆角蒙版的值也乘以 opacity 因子以保持透明度语义一致。
+
+**矩形定位的特殊处理**：矩形调用 `calculate_position(..., defer_padding=True)` 跳过 padding 约束，因此矩形可以超出 `padding` 安全区域绘制到画布边界。详见 [§4.1.6 绝对定位算法](#416-绝对定位算法)。
+
+注意：`_draw_single_rectangle` 中 `rect_layer.paste(rect_img, position)` **不传 mask 参数**——RGBA 的 alpha 通道本身就作为遮罩，再传自身作 mask 会导致 alpha 被平方（透明度 0.5 → 0.25）。
 
 **`_add_logo()` Logo 尺寸约束链**：
 
@@ -408,7 +434,7 @@ FILL_TYPES = {
 关键 API：
 - `get_choices()` → `{label: key}` 供 GUI 下拉框
 - `get_keys()` → key 列表供 CLI argparse
-- `is_dark_bg(key)` → 根据 `text_scheme` 判断，供渲染器自动适配文字颜色
+- `is_dark_bg(key)` → 根据 `text_scheme` 判断，供渲染器自动适配文字颜色和矩形颜色
 - `register_custom_solid(color, text_scheme)` → 动态注册自定义纯色并返回 key（v2.1.0 预留接口）
 
 新增背景类型只需在 `FILL_TYPES` 中注册，GUI 下拉和 CLI 自动同步。

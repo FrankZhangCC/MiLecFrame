@@ -13,6 +13,11 @@ from typing import List, Optional
 import yaml
 from PIL import Image
 
+# 统一的路径定位工具：
+# - logos 图片为只读资源，随程序打包（_MEIPASS/assets/logos）
+# - logo_scale.yaml 为可写数据，打包后位于 exe 同目录 data/
+from src.utils.app_paths import get_resource_root, get_app_dir
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +44,7 @@ fujifilm_logo: 0.7
             logos_dir: logos目录路径，默认为assets/logos/
             scale_config_path: 品牌缩放系数配置文件路径，默认为data/logo_scale.yaml
         """
-        project_root = Path(__file__).resolve().parent.parent.parent
+        project_root = get_resource_root()
 
         if logos_dir is None:
             self.logos_dir = project_root / 'assets' / 'logos'
@@ -49,7 +54,7 @@ fujifilm_logo: 0.7
 
         # 品牌缩放系数配置文件
         if scale_config_path is None:
-            self.scale_config_path = project_root / 'data' / 'logo_scale.yaml'
+            self.scale_config_path = get_app_dir() / 'data' / 'logo_scale.yaml'
         else:
             self.scale_config_path = Path(scale_config_path)
         self._ensure_scale_file_exists()
