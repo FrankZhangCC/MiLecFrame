@@ -5,8 +5,10 @@
 EXIF信息处理辅助模块
 负责提取、解析和格式化照片的EXIF信息
 """
+import csv
 import logging
 import io
+import os
 import piexif
 from PIL import Image, ImageCms
 from datetime import datetime
@@ -182,9 +184,11 @@ class ExifHelper:
         import os
         from datetime import datetime
         
-        # 确定记录文件路径
-        camera_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'camera_map.csv')
-        lens_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'lens_map.csv')
+        # 确定记录文件路径（打包后位于 exe 同目录 data/，保持可写）
+        from src.utils.app_paths import get_app_dir
+        _app_data_dir = get_app_dir() / 'data'
+        camera_map_path = str(_app_data_dir / 'camera_map.csv')
+        lens_map_path = str(_app_data_dir / 'lens_map.csv')
         
         # 添加时间戳
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -193,9 +197,13 @@ class ExifHelper:
         if 'camera_make' in exif_data and 'camera_model' in exif_data:
             original_brand = exif_data['camera_make']
             original_model = exif_data['camera_model']
-            
-            # 通过 DeviceMapper 已加载的 dict 检查是否已存在（避免冗余 CSV 读取）
-            if (original_brand, original_model) not in self.device_mapper.camera_map:
+
+            # 双重去重检查：
+            #   1) 优先查 DeviceMapper 内存 dict（快，避免每张图读 CSV）
+            #   2) 内存未命中时再读 CSV 兜底（进程内可能存在多个 ExifHelper 实例，
+            #      各自内存 dict 独立，仅靠内存检查会导致同一设备被重复追加写入）
+            if (original_brand, original_model) not in self.device_mapper.camera_map and \
+                    not self._camera_exists_in_csv(camera_map_path, original_brand, original_model):
                 camera_map_file = Path(camera_map_path)
                 header_exists = camera_map_file.exists()
                 with open(camera_map_path, 'a', newline='', encoding='utf-8') as csvfile:
@@ -213,13 +221,20 @@ class ExifHelper:
                         original_model,  # 默认映射机型等于原始机型
                         timestamp
                     ])
+
+                # 写盘成功后同步更新内存 dict，避免同一实例处理后续图片时重复检查通过
+                self.device_mapper.camera_map[(original_brand, original_model)] = {
+                    'mapped_brand': original_brand,
+                    'mapped_model': original_model,
+                }
         
         # 处理镜头信息
         if 'lens_model' in exif_data:
             original_lens = exif_data['lens_model']
 
-            # 通过 DeviceMapper 已加载的 dict 检查是否已存在（避免冗余 CSV 读取）
-            if original_lens not in self.device_mapper.lens_map:
+            # 双重去重检查（同相机信息，内存 dict + CSV 兜底）
+            if original_lens not in self.device_mapper.lens_map and \
+                    not self._lens_exists_in_csv(lens_map_path, original_lens):
                 lens_map_file = Path(lens_map_path)
                 header_exists = lens_map_file.exists()
                 with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
@@ -231,6 +246,65 @@ class ExifHelper:
 
                     # 默认情况下，映射值等于原始值
                     writer.writerow([original_lens, original_lens, original_lens, '', '', timestamp])
+
+                # 写盘成功后同步更新内存 dict（含短版映射）
+                self.device_mapper.lens_map[original_lens] = original_lens
+                self.device_mapper.short_lens_map[original_lens] = original_lens
+
+    @staticmethod
+    def _camera_exists_in_csv(camera_map_path: str, original_brand: str, original_model: str) -> bool:
+        """
+        读取相机映射 CSV，检查 (原始品牌, 原始机型) 是否已存在
+
+        用于跨 ExifHelper 实例的去重兜底：内存 dict 只在各实例初始化时加载一次，
+        其他实例写入 CSV 后不会同步到本实例，因此必须直接检查 CSV 文件本身。
+
+        Args:
+            camera_map_path: 相机映射 CSV 文件路径
+            original_brand: 原始品牌名
+            original_model: 原始机型名
+
+        Returns:
+            CSV 中是否已存在该相机记录
+        """
+        try:
+            if not os.path.exists(camera_map_path):
+                return False
+            with open(camera_map_path, 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if row.get('original_brand', '').strip() == original_brand and \
+                            row.get('original_model', '').strip() == original_model:
+                        return True
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"读取相机映射 CSV 失败: {e}")
+        return False
+
+    @staticmethod
+    def _lens_exists_in_csv(lens_map_path: str, original_lens: str) -> bool:
+        """
+        读取镜头映射 CSV，检查原始镜头名是否已存在
+
+        用途同 _camera_exists_in_csv：跨 ExifHelper 实例的去重兜底。
+
+        Args:
+            lens_map_path: 镜头映射 CSV 文件路径
+            original_lens: 原始镜头名
+
+        Returns:
+            CSV 中是否已存在该镜头记录
+        """
+        try:
+            if not os.path.exists(lens_map_path):
+                return False
+            with open(lens_map_path, 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if row.get('original_lens', '').strip() == original_lens:
+                        return True
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"读取镜头映射 CSV 失败: {e}")
+        return False
     
     def get_formatted_exif_for_display(self, exif_data: Dict[str, str]) -> Dict[str, str]:
         """

@@ -12,21 +12,44 @@ from pathlib import Path
 
 # 将项目根目录加入 sys.path，使 src 包可导入，
 # 从而 from src.core.xxx 和 core/__init__.py 的 from .._version 能正确工作。
-_project_root = Path(__file__).resolve().parent.parent.parent
+# 使用统一的路径定位工具：开发环境为项目根，打包环境为 _MEIPASS 资源目录。
+from src.utils.app_paths import get_resource_root
+_project_root = get_resource_root()
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QIcon
 
 from qfluentwidgets import setTheme, Theme
 
-from utils.logging_config import setup_logging
+from src.utils.logging_config import setup_logging
 from .main_window import MainWindow
 
 
 logger = logging.getLogger(__name__)
+
+
+def _set_app_user_model_id():
+    """
+    为进程设置 Windows AppUserModelID
+
+    PyInstaller 打包的 windowed exe 默认没有 AppUserModelID，
+    导致 Windows 任务栏无法正确关联窗口与 exe 图标，任务栏会显示
+    通用可执行文件图标。设置后任务栏将使用 exe 内嵌图标分组显示。
+
+    必须在 QApplication 创建之前调用。
+    """
+    if sys.platform != 'win32':
+        return
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            'FrankZhangCC.MiLecFrame'
+        )
+    except Exception as e:
+        logger.warning(f'设置 AppUserModelID 失败: {e}')
 
 
 def run_pyside_app():
@@ -34,14 +57,18 @@ def run_pyside_app():
 
     完整的启动流程：
     1. 初始化日志
-    2. 创建 QApplication
-    3. 配置高 DPI 缩放
-    4. 设置 Fluent 主题
-    5. 创建并显示主窗口
-    6. 进入事件循环
+    2. 设置 Windows AppUserModelID（任务栏图标关联）
+    3. 创建 QApplication
+    4. 配置高 DPI 缩放
+    5. 设置 Fluent 主题
+    6. 创建并显示主窗口
+    7. 进入事件循环
     """
     setup_logging()
     logger.info("正在启动 PySide6 桌面 GUI...")
+
+    # ── 设置 Windows AppUserModelID（必须在 QApplication 创建前） ──
+    _set_app_user_model_id()
 
     # ── 创建 QApplication ──
     # 高 DPI 缩放必须在 QApplication 创建前设置
@@ -51,6 +78,17 @@ def run_pyside_app():
     app.setApplicationName("MiLecFrame")
     app.setApplicationDisplayName("MiLecFrame - 照片相框水印工具")
     app.setOrganizationName("FrankZhangCC")
+
+    # ── 设置应用图标 ──
+    # 未显式设置时 Qt 会使用内置默认图标，导致任务栏/标题栏
+    # 不显示 exe 嵌入的 ico。此处从资源目录加载（打包后位于 _internal/assets/）。
+    _icon_path = get_resource_root() / 'assets' / 'app_icon.ico'
+    if _icon_path.exists():
+        _icon = QIcon(str(_icon_path))
+        if _icon.isNull():
+            logger.warning(f"应用图标加载失败: {_icon_path}")
+        else:
+            app.setWindowIcon(_icon)
 
     # ── 设置全局字体 ──
     font = QFont("Segoe UI", 10)

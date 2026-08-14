@@ -48,7 +48,173 @@ src/
 - `src/_version.py` 是版本号**单点入口**。
 - 公开 Release 版：标记为 `v0.x.x`（如 `v0.1.0`）。
 - 内部开发版：标记为 `v1.x.x-dev`（如 `v1.9.0-dev`）。
-- 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`。
+- 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`；公开发行还需更新 `CHANGELOG_RELEASE.md`（**注意三个分支都要同步**，v1.2.0 时曾因只在 release 分支改 CHANGELOG_RELEASE 导致 dev/mainline 缺条目）。
+- 内部线（dev/mainline）与公开发行线（release）版本号**独立递增**：内部用 `vX.Y.Z-dev`，公开发行用 `v0.x.x`/`v1.x.x` 序列（历史：v0.1.0 → v1.0.0 → v1.1.0 → v1.2.0）。
+
+### Git 分支工作流
+
+采用三线分支模型：
+
+```
+mainline ─── v1.0.1-dev ─── v1.1.0-dev ─── ... ─── v2.3.0-dev ──→  (干净版本线)
+                ↑ squash                        ↑ squash
+dev ─────── A---B---C---D---E---F---G---H---I── ... ──────────────→  (日常开发)
+                                                                      ↓ 稳定后 cherry-pick
+release ─── v0.1.0 ─── v1.0.0 ─── v1.1.0-release ──→               (公开发行)
+```
+
+| 分支 | 用途 | 规则 |
+|------|------|------|
+| `dev` | **日常小功能开发** | 提交可松散。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
+| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。推送到 `origin`，历史不可改写（force push 需谨慎）。 |
+| `release` | **稳定公开发行** | GitHub 默认分支，受保护。推送到 `origin`，仅接收 cherry-pick 来的稳定版本。 |
+
+> ⚠️ **快照式提交（实际操作铁律）**：mainline/release 与 dev **没有共同祖先**
+> （mainline 从 `git checkout --orphan` 起步），`git merge --squash dev` 会产生海量冲突。
+> 实际做法是「树快照」：
+> ```bash
+> git checkout mainline
+> git read-tree -u --reset dev   # 索引+工作树整体同步为 dev 的树
+> git commit -m "vX.Y.Z-dev: ..."
+> ```
+> 个别文件的增补提交用 `git checkout <来源分支> -- <文件>` 后单独 commit。
+
+#### 日常操作流程
+
+```bash
+# 1. 日常在 dev 上工作
+git checkout dev
+# ...多次提交 A, B, C, D ...
+
+# 2. 凑够一个版本后 → 快照到 mainline 并打 tag
+git checkout mainline
+git read-tree -u --reset dev
+VERSION="v2.4.0-dev"  # 根据 src/_version.py 决定
+git commit -m "$VERSION: <功能简述>"
+git tag $VERSION
+git checkout dev
+
+# 3. 推送到 GitHub
+git push origin mainline --follow-tags    # 推送分支 + 新 tag
+# --follow-tags 不推送轻量 tag，必须补推（本项目 tag 均为轻量 tag）：
+git push origin --tags
+
+# 4. mainline 上某版本准备公开发布 → 快照给 release
+git checkout release
+git read-tree -u --reset mainline
+# 修改 src/_version.py → 公开发行版号（如 1.2.0）
+# 更新 README.md 徽标、CHANGELOG_RELEASE.md（加发行条目）
+git commit -m "v1.2.0-release: <功能简述>"
+git tag v1.2.0
+git push origin release
+git push origin --tags
+```
+
+#### 推送规则
+
+| 分支 | 推送到 origin | 方式 |
+|------|--------------|------|
+| `dev` | ❌ 否（仅本地） | - |
+| `mainline` | ✅ 是 | `git push origin mainline --follow-tags` |
+| `release` | ✅ 是（默认分支） | `git push origin release` |
+
+- **`release` 是 GitHub 默认分支**，受保护，禁止 force push。
+- 推送 tag 时如遇 `--follow-tags` 未生效（轻量 tag），补 `git push origin --tags`。
+- 历史管理注意事项
+
+### 便携版打包与发行（PyInstaller）
+
+**工具链**：`MiLecFrame.spec`（打包配置）+ `build_release.py`（一键脚本）。
+
+```bash
+python build_release.py                  # 构建 onedir 便携版 → dist/MiLecFrame/
+python build_release.py --zip            # 额外生成 zip 发行包
+python build_release.py --icon <png>     # 从 PNG 生成多尺寸 ICO 后打包
+python build_release.py --no-clean       # 不清 build 缓存（增量调试）
+```
+
+- **build/ 目录是构建缓存**，里面的 exe 是中间产物，单独运行必然报
+  "failed to load python dll"——**发行的是 `dist/MiLecFrame/` 整个文件夹**。
+- `warn-MiLecFrame.txt` 是正常构建副产品：大部分 warning 无害（Unix 模块、
+  numpy C 别名、可选依赖），只需确认没有项目自身模块缺失。
+- 发行包（zip）在 **release 分支状态下**打包，文件名自动带公开发行版号
+  （如 `MiLecFrame_v1.2.0_win64_portable.zip`）。
+
+#### 路径架构（src/utils/app_paths.py 统一约定）
+
+| 类型 | 开发环境 | 打包环境 | 内容 |
+|------|----------|----------|------|
+| 只读资源 `get_resource_root()` | 项目根 | `_internal/`（_MEIPASS） | `assets/logos`、`assets/fonts`（精简清单）、`assets/app_icon.ico`、`src/frame_styles/configs`（内置样式）、`src/gui_pyside/assets`（样本图） |
+| 可写数据 `get_app_dir()` | 项目根 | **exe 同目录** | `config.json`、`data/*.csv`、`data/logo_scale.yaml`、`debug_log.txt`、`MiLecFrame_console.log`、`styles/`（用户自建样式，StyleManager 合并加载） |
+
+**新增代码引用任何资源/数据路径时，必须走 app_paths.py，禁止再用 `__file__` 相对定位。**
+
+#### PyInstaller 踩坑记录（血泪教训）
+
+1. **datas 的目标参数是「目录」，不是文件路径！**
+   `('.../app_icon.ico', 'assets/app_icon.ico')` 会把文件复制成
+   `assets/app_icon.ico/app_icon.ico`（同名目录）→ QIcon 加载 null →
+   任务栏图标丢失。正确写法：`('.../app_icon.ico', 'assets')`。
+2. **不要用 `collect_all('qfluentwidgets')`**：它会把全部子模块作为 hidden
+   import，其中 multimedia 连带拖入 scipy/QtMultimedia 约 200MB。
+   正确做法：`collect_data_files()` + `collect_dynamic_libs()` 只收资源；
+   `pillow_heif` 必须显式 `hiddenimports=['pillow_heif.HeifImagePlugin']`
+   （PIL 插件机制动态加载，否则 HEIC/AVIF 不可读）。
+3. **console=False（无黑窗）时 `sys.stdout/stderr` 为 None**，print 会崩。
+   `main.py` 的 `_ensure_console_output()` 已处理：重定向到 exe 同目录
+   `MiLecFrame_console.log`，必须在 `setup_logging()` 之前调用。
+4. **任务栏图标三件套缺一不可**：
+   - EXE 嵌入图标（spec 的 `icon=` 参数，exe 文件图标用）
+   - `app.setWindowIcon(QIcon(...))`（窗口图标，运行时加载 `_internal/assets/app_icon.ico`）
+   - `SetCurrentProcessExplicitAppUserModelID()`（PyInstaller windowed exe 默认
+     没有 AppUserModelID，任务栏无法关联 exe 图标；必须在 QApplication 创建前调用）
+   验证方法：SendMessage(hwnd, WM_GETICON) 句柄非零即生效。
+5. **Windows 任务栏图标有缓存**：修改图标后需重启 explorer
+   （`Stop-Process -Name explorer; explorer.exe`）才能看到新图标。
+6. **发行包不得携带 config.json**（含开发者作者名等个人数据），程序首启自动创建。
+   data/*.csv 种子文件由 build_release.py 复制到 exe 同目录。
+7. **字体精简清单**在 spec 的 `RELEASE_FONT_FILES` 中：新增样式引用新字重时，
+   把对应字体文件加进清单，否则打包后字体静默回退系统字体。
+8. **打包后必验**：dist exe 双击启动 GUI、CLI 处理一张照片、`_internal` 内
+   资源文件是真文件（`Get-Item` 看 Attributes 不是 Directory）。
+
+#### 公开发行完整流程（v1.2.0 实战记录）
+
+```bash
+# 1. dev：升内部版本号 + 文档同步，提交
+git checkout dev
+# 改 src/_version.py → 2.4.0-dev；README.md 徽标；CHANGELOG.md 加条目
+git add -A && git commit -m "feat: ..."
+
+# 2. mainline：快照 + tag + 推送
+git checkout mainline
+git read-tree -u --reset dev
+git commit -m "v2.4.0-dev: <功能简述>"
+git tag v2.4.0-dev
+git push origin mainline --follow-tags
+git push origin --tags          # 轻量 tag 必补推
+
+# 3. release：快照 + 改公开发行版号 + tag + 推送
+git checkout release
+git read-tree -u --reset mainline
+# 改 src/_version.py → 1.2.0；README.md 徽标；CHANGELOG_RELEASE.md 加 v1.2.0 条目
+git add -A && git commit -m "v1.2.0-release: <功能简述>"
+git tag v1.2.0
+git push origin release
+git push origin --tags
+
+# 4. 在 release 状态下打包发行
+python build_release.py --zip   # → dist/MiLecFrame_v1.2.0_win64_portable.zip
+
+# 5. GitHub 网页创建 Release：选 tag v1.2.0，上传 zip 资产
+# 6. 切回 dev 继续开发
+git checkout dev
+```
+
+- 发行版内容调整（如增补修复）在 dev 提交后，用
+  `git checkout dev -- <文件>` 的方式同步到 mainline 与 release 并分别提交，
+  **不移动已推送的 tag**。
+- 文档类改动（CHANGELOG_RELEASE 等）**三线都要同步**，勿只改一个分支。
 
 ### Git 忽略规则
 

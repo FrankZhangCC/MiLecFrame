@@ -2,6 +2,41 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.4.0-dev (2026-08-14)
+
+> 便携版打包发行支持，统一资源路径定位，新增矩形装饰元素，文档重构。
+
+### 🟢 便携版打包发行支持 (feat)
+
+- 新增 `MiLecFrame.spec`（PyInstaller onedir 配置）与 `build_release.py` 一键打包脚本
+- 新增 `src/utils/app_paths.py` 统一路径定位：可写数据（config.json、设备映射 CSV、日志、用户样式）位于 exe 同目录，只读资源（字体、Logo、内置样式）随包打包，整个文件夹拷贝即用
+- 支持从 PNG 一键生成多尺寸 ICO 应用图标（`--icon` 参数）
+- 发行版字体精简打包：仅打包样式配置实际引用的 6 个字重文件（原 391MB → 约 30MB）
+- 无控制台窗口模式：`main.py` 增加标准输出保护，windowed 模式下 print 输出重定向至 `MiLecFrame_console.log`
+
+### 🔴 修复：CLI 模式导入崩溃 (fix)
+
+- 修复 `python src/main.py -i ... -o ...` 单张/批量处理模式的 `attempted relative import beyond top-level package` 错误
+- 统一入口导入为 `src.` 前缀，`main.py` 顶部插入项目根目录到 sys.path
+
+### 🟢 新增自定义矩形（rectangles）装饰功能 (feat, fdd4d92)
+
+- 样式配置支持半透明装饰色块，可用于画面装饰与文字底衬
+
+### 🟢 文档重构 (docs, 7d8059a)
+
+- README 拆分，新增样式配置指南与开发参考文档
+
+### 🔴 修复：批量导入相同设备时映射库重复写入 (fix)
+
+- 批量导入多张相同相机/镜头的新图片时，设备管理列表末尾出现多条相同设备记录
+- 根因：`_record_device_info` 仅依赖初始化时加载的内存映射做去重，写入 CSV 后未回写内存；
+  且 BatchProcessor 与 ImageProcessor 各持一个 ExifHelper 实例，内存映射彼此独立
+- 修复：去重检查改为「内存 dict + CSV 文件」双重校验（新增 `_camera_exists_in_csv` /
+  `_lens_exists_in_csv` 兜底检查），写入 CSV 成功后同步更新内存映射
+  （camera_map / lens_map / short_lens_map）
+- 数据清理：`data/camera_map.csv`、`data/lens_map.csv` 中已有的重复记录已去除
+
 ## v2.3.0-dev (2026-07-18)
 
 > 新增拍摄时间显示模式控制，EXIF 焦距改用 35mm 等效值，LOGO 品牌尺寸补偿系数独立为外部 YAML 文件。

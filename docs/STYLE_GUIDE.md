@@ -7,6 +7,7 @@
 1. [快速入门](#1-快速入门)
 2. [文件组织规范](#2-文件组织规范)
 3. [布局配置](#3-布局配置)
+   - [3.5 自定义矩形（rectangles）](#35-自定义矩形-rectangles)
 4. [元素定位系统](#4-元素定位系统)
 5. [文本内容配置](#5-文本内容配置)
 6. [颜色配置](#6-颜色配置)
@@ -214,6 +215,70 @@ layout:
 - 四个角的半径独立控制，设为 `0` 表示该角保持直角
 - 与画布扩展和 padding 完全兼容，圆角仅作用于原图，不影响扩出区域
 
+### 3.5 自定义矩形（rectangles）
+
+在背景层之上、原图层之下绘制装饰性矩形色块，可用于添加底部渐变条、背景分隔线等视觉元素。
+
+```yaml
+layout:
+  rectangles:
+    rect_01:
+      width_ratio: 0.85          # 宽度 = 参照边 × 比例
+      height_ratio: 0.04         # 高度 = 参照边 × 比例
+      opacity: 0.8               # 透明度 0.0-1.0
+      position: "top"            # 标准锚点
+      alignment: "both-center"   # 对齐方式
+      margin_top: 0.01           # 边距（可选）
+      corner_radius:             # 圆角（可选）
+        top_left: 0.005
+        top_right: 0.005
+        bottom_left: 0
+        bottom_right: 0
+    rect_02:
+      width_ratio: 1.1
+      height_ratio: 0.15
+      opacity: 0.5
+      position: "bottom"
+      alignment: "both-center"
+      margin_bottom: 0.05
+```
+
+#### 命名规则
+
+- key 采用**补零编号**：`rect_01`、`rect_02`、`rect_03`…… 以此类推
+- 矩形按键名排序绘制（`rect_01` 最先，位于最底层）
+- 颜色在 `colors` 区域中定义（见 [§6 颜色配置](#6-颜色配置)）
+
+#### 矩形专用参数
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `width_ratio` | `float` | **必填** | 宽度比例，相对于原图参照边（短边） |
+| `height_ratio` | `float` | **必填** | 高度比例，相对于原图参照边（短边） |
+| `opacity` | `float` | `1.0` | 透明度 0.0-1.0 |
+| `corner_radius` | `dict` | — | 四角独立圆角（省略则直角，缩放基准 = 参照边） |
+
+#### 定位参数
+
+矩形复用 [§4.2 绝对定位系统](#42-绝对定位) 的全部锚点和对齐规则，支持 `position`、`alignment`、`margin_*` 等所有参数。**与文字元素不同，矩形不受 `padding` 安全区域约束**，可超出安全区域绘制到画布边界。
+
+#### 图层位置
+
+```
+┌────────────────────────┐
+│     背景填充层          │
+│  ┌──────────────────┐  │
+│  │   ★ 矩形层 ★     │  │  ← rectangles 在此
+│  └──────────────────┘  │
+│  ┌──────────────────┐  │
+│  │     原图          │  │
+│  └──────────────────┘  │
+│      文字 / Logo 层    │
+└────────────────────────┘
+```
+
+矩形在背景之上、原图之下，文字和 Logo 仍然覆盖在矩形上方。
+
 ---
 
 ## 4. 元素定位系统
@@ -225,6 +290,7 @@ layout:
 - **`info_position` 中声明的 text_type**：如 `camera_lens`、`exif`、`timestamp_author` 等（文本来源于 EXIF 数据或用户输入）
 - **`defined_texts`**：配置文件中写死的固定文字
 - **`custom_text`**：用户在 GUI 中输入的个性文字
+- **`rectangles`**：装饰性矩形色块（不受 padding 约束）
 - **Logo**：品牌标识图片
 
 所有元素的定位方式分为两种，互斥（`relative_to` 有值时使用相对定位）。
@@ -238,14 +304,14 @@ layout:
 | 参数 | 可选值 | 默认值 | 含义 |
 |------|--------|--------|------|
 | `placement` | `inside` / `outside` | `outside` | 元素放在原图矩形内部还是外部 |
-| `position` | 见下表 14 种锚点 | `bottom` | 元素挂载到原图的哪个位置 |
+| `position` | 见下表 11 种锚点 | `bottom` | 元素挂载到原图的哪个位置 |
 | `alignment` | `left` / `center` / `right` / `both-center` / 组合格式 | `center` | 元素自身相对于锚点的对齐方式 |
 
 - `inside`：元素在原图内部，margin 从边界向内偏移
 - `outside`：元素在原图外部，margin 从边界向外偏移
 - `both-center`：元素中心点与锚点完全重合（水平和垂直同时居中），margin 作为该偏移量
 
-#### 14 种 position 锚点
+#### 11 种 position 锚点
 
 | position | 含义 | alignment 控制 |
 |----------|------|---------------|
@@ -270,6 +336,8 @@ layout:
 | `top` / `top-left` / `top-right` | — | 元素顶边对锚点 |
 | `bottom` / `bottom-left` / `bottom-right` | — | 元素底边对锚点 |
 | `center`（默认） | 元素水平居中于锚点 | 元素垂直居中于锚点 |
+| `top-center` | 元素水平居中于锚点 | — |
+| `bottom-center` | 元素水平居中于锚点 | — |
 | `both-center` | 元素水平居中于锚点 | 元素垂直居中于锚点 |
 
 #### margin 边距体系
@@ -365,8 +433,8 @@ defined_texts:
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `placement` | `"inside"` / `"outside"` | `"outside"` | 元素在原图内侧还是外侧 |
-| `position` | 14 种锚点 | `"bottom"` | 参见 [§4.2 锚点表](#14-种-position-锚点) |
-| `alignment` | `"left"` / `"center"` / `"right"` / `"both-center"` | `"center"` | 元素自对齐 |
+| `position` | 11 种锚点 | `"bottom"` | 参见 [§4.2 锚点表](#11-种-position-锚点) |
+| `alignment` | `"left"` / `"center"` / `"right"` / `"both-center"` / `"top"` / `"bottom"` / 组合格式 | `"center"` | 元素自对齐 |
 | `margin` | `float` / `int` | `0` | 统一边距 |
 | `margin_top` / `_bottom` / `_left` / `_right` | `float` / `int` | `0` | 各方向独立边距 |
 | `tree_align` | `bool` | `false` | 启用树级组合定位 |
@@ -455,7 +523,7 @@ fonts:
 ```
 
 - 仅对包含换行符 `\n` 的文本生效
-- 可在 `defined_texts` 或 `custom_text` 条目中用 `line_spacing_ratio` 覆盖全局值
+- 可在 `info_position`、`defined_texts` 或 `custom_text` 条目中用 `line_spacing_ratio` 覆盖全局值
 
 ---
 
@@ -476,11 +544,23 @@ fonts:
 ```yaml
 colors:
   custom_bg_color: "#28180B"         # 支持 #RRGGBB 或 [R,G,B]
-  custom_bg_text_scheme: "dark"      # 可选：dark / light，不写则自动检测亮度
+  custom_bg_text_scheme: "dark"      # dark / light，不写则自动检测亮度
 ```
 
 - 指定后，渲染器使用纯色填充扩展画布，GUI 中背景样式下拉框自动禁用
-- `custom_bg_text_scheme` 未声明时，自动根据颜色亮度判定明暗
+
+#### text_scheme 背景明暗声明
+
+`custom_bg_text_scheme` 告诉系统该背景色属于**深色系还是浅色系**，直接影响所有叠加元素的颜色自动适配：
+
+| 受影响元素 | dark 背景下的行为 | light 背景下的行为 |
+|---|---|---|
+| 文字 | 选用 `_dark_color` 系列键 → 亮色 | 选用 `_light_color` 系列键 → 暗色 |
+| 矩形 | 选用 `custom_rect_NN_dark_color` | 选用 `custom_rect_NN_light_color` |
+| Logo | 优先选用 `_white` 后缀的亮色变体 | 优先选用深色变体 |
+
+- 若未声明，系统自动计算颜色亮度判定：`亮度 = 0.299×R + 0.587×G + 0.114×B`，低于 128 判为 dark，否则为 light
+- **手动指定时机**：自动检测偶尔会误判——例如暗黄 `#A09030`（亮度≈142，自动判 light 但与淡色文字对比较弱），此时可手动声明 `"dark"` 强制使用亮色文字和 Logo
 
 ### 通用文字颜色覆盖
 
@@ -500,9 +580,29 @@ colors:
   custom_exif_light_color: [51, 51, 51]
   custom_camera_lens_dark_color: "#FFFFFF"
   custom_timestamp_dark_color: "#CCCCCC"
+  custom_defined_text_01_dark_color: "#AAAAAA"
 ```
 
-- 支持的元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`
+- 支持的 info_position 元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`、`focal_length_formatted`、`aperture_formatted`、`shutter_speed_formatted`、`iso_formatted`
+- `defined_texts` 中的条目同样支持按 key 独立覆盖：如 `custom_defined_text_01_dark_color`
+- `custom_text` 条目对应 key 为 `custom_custom_text_dark_color` / `custom_custom_text_light_color`
+- 每种元素类型只需要配置实际使用的亮侧和暗侧之一，无需成对
+
+### 矩形颜色
+
+矩形的颜色遵循同样的明暗自适应规则，命名格式为 `custom_{矩形名}_{dark/light}_color`：
+
+```yaml
+colors:
+  custom_rect_01_dark_color: "#FF6B6B"      # 深色背景时使用
+  custom_rect_01_light_color: "#E05555"     # 浅色背景时使用
+  custom_rect_02_dark_color: [50, 150, 255]
+  custom_rect_02_light_color: [30, 100, 200]
+```
+
+- 每个矩形需分别配置 `dark` 和 `light` 颜色
+- 若仅配了一种，则无论背景明暗都使用该颜色
+- 未配置颜色的矩形会被跳过（warning）
 
 ---
 
@@ -542,6 +642,16 @@ fonts:
 - **独立字号**：`sizes` 下的 key 对应 `info_position` 中的元素名；未配置则使用 `size_ratio`
 - **回退链**：自定义字体文件 → 系统字体 → PIL 默认字体
 
+### 全局字重覆盖
+
+```yaml
+fonts:
+  weight: medium        # 同时覆盖 latin.weight 和 cjk.weight
+```
+
+- 设置在 `fonts` 顶层（非 `latin` / `cjk` 内部），优先级高于各自的 `weight` 字段
+- 常用于 GUI 中统一调整字重而不改动 `latin.weight` 和 `cjk.weight`
+
 ---
 
 ## 8. Logo 配置
@@ -564,6 +674,8 @@ logo:
   # relative_to: "camera_lens"
   # relative_position: "below"
   # relative_margin: 0.01
+  # offset_x_ratio: 0.0           # 微调偏移（仅相对定位时生效）
+  # offset_y_ratio: 0.0
 ```
 
 ### 尺寸计算
@@ -573,6 +685,8 @@ logo:
 3. 品牌补偿系数叠加：从 `data/logo_scale.yaml` 读取该 Logo 文件对应的系数，与上述缩放结果相乘
 
 默认值：`size_ratio = 0.04`，`max_dim_limit_ratio = 2.5`。
+
+> `diagonal_limit_ratio` 是旧字段名，已由 `max_dim_limit_ratio` 替代。旧字段仍兼容，但新样式请使用 `max_dim_limit_ratio`。
 
 ### Logo 来源
 
@@ -688,6 +802,16 @@ layout:
     bottom_left: 0.01
     bottom_right: 0.01
 
+  # 自定义矩形（可选）
+  rectangles:
+    rect_01:
+      width_ratio: 1.1
+      height_ratio: 0.15
+      opacity: 0.5
+      position: "bottom"
+      alignment: "both-center"
+      margin_bottom: 0.05
+
   # 信息位置：声明哪些文字显示 + 定位方式
   info_position:
     camera_lens:
@@ -738,6 +862,8 @@ logo:
 colors:
   custom_text_light_color: "#333333"
   custom_text_dark_color: "#CCCCCC"
+  custom_rect_01_light_color: [255, 255, 255]
+  custom_rect_01_dark_color: [0, 0, 0]
 
 # 【字体配置】（可选，不配置则使用系统字体）
 fonts:

@@ -124,13 +124,14 @@ class LayoutEngine:
         """
         if config.get('relative_to'):
             return self._calculate_relative(element_width, element_height, config, defer_padding)
-        return self._calculate_absolute(element_width, element_height, config)
+        return self._calculate_absolute(element_width, element_height, config, defer_padding)
 
     def _calculate_absolute(
         self,
         element_width: int,
         element_height: int,
-        config: Dict
+        config: Dict,
+        defer_padding: bool = False,
     ) -> Tuple[int, int]:
         orig_x, orig_y, orig_w, orig_h = self.original_bounds
 
@@ -147,9 +148,11 @@ class LayoutEngine:
         )
 
         # padding 约束：确保最终坐标不超出安全区域（优先级高于 margin）
-        pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
-        x = max(pad_left, min(x, pad_right - element_width))
-        y = max(pad_top, min(y, pad_bottom - element_height))
+        # 矩形等特殊元素通过 defer_padding=True 跳过此约束
+        if not defer_padding:
+            pad_left, pad_top, pad_right, pad_bottom = self.padding_bounds
+            x = max(pad_left, min(x, pad_right - element_width))
+            y = max(pad_top, min(y, pad_bottom - element_height))
 
         return x, y
 
