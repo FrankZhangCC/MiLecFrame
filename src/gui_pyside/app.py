@@ -20,7 +20,7 @@ if str(_project_root) not in sys.path:
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QIcon
 
 from qfluentwidgets import setTheme, Theme
 
@@ -53,6 +53,13 @@ def run_pyside_app():
     app.setApplicationName("MiLecFrame")
     app.setApplicationDisplayName("MiLecFrame - 照片相框水印工具")
     app.setOrganizationName("FrankZhangCC")
+
+    # ── 设置应用图标 ──
+    # 未显式设置时 Qt 会使用内置默认图标，导致任务栏/标题栏
+    # 不显示 exe 嵌入的 ico。此处从资源目录加载（打包后位于 _internal/assets/）。
+    _icon_path = get_resource_root() / 'assets' / 'app_icon.ico'
+    if _icon_path.exists():
+        app.setWindowIcon(QIcon(str(_icon_path)))
 
     # ── 设置全局字体 ──
     font = QFont("Segoe UI", 10)

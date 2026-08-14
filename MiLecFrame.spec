@@ -69,6 +69,8 @@ RELEASE_FONT_FILES = [
 datas += [
     # Logo 图片（只读，按品牌自动匹配）
     (str(PROJECT_ROOT / 'assets' / 'logos'), 'assets/logos'),
+    # 应用图标（GUI 运行时加载，用于任务栏/标题栏图标）
+    (str(PROJECT_ROOT / 'assets' / 'app_icon.ico'), 'assets/app_icon.ico'),
     # 内置相框样式配置
     (str(PROJECT_ROOT / 'src' / 'frame_styles' / 'configs'),
      'src/frame_styles/configs'),
