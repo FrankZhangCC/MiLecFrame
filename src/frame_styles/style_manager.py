@@ -13,6 +13,11 @@ from pathlib import Path
 from typing import Dict, Optional, List
 import logging
 
+# 统一的路径定位工具：
+# - 内置样式目录为只读资源，随程序打包（_MEIPASS/src/frame_styles/configs）
+# - 打包环境下用户新建样式保存在 exe 同目录 styles/（可写，升级不丢失）
+from src.utils.app_paths import get_resource_root, get_app_dir, is_frozen
+
 
 class StyleManager:
     """相框样式管理器"""
@@ -25,39 +30,71 @@ class StyleManager:
             config_dir: 样式配置文件目录
         """
         if config_dir:
+            # 显式指定目录时保持原有行为（不附加额外目录）
             self.config_dir = config_dir
+            self.extra_dirs: List[str] = []
         else:
-            # 默认配置目录为当前目录下的configs子目录
-            self.config_dir = os.path.join(os.path.dirname(__file__), 'configs')
+            # 内置样式目录：开发环境与打包环境统一指向资源目录
+            self.config_dir = str(get_resource_root() / 'src' / 'frame_styles' / 'configs')
+            # 打包环境下附加用户样式目录（exe 同目录 styles/），用户自建样式可持久保存
+            self.extra_dirs = []
+            if is_frozen():
+                self.extra_dirs.append(str(get_app_dir() / 'styles'))
         
         self.logger = logging.getLogger(__name__)
-    
+
+    def _iter_style_dirs(self, style_name: str):
+        """
+        按优先级依次产出可能存在指定样式的目录（用户目录优先于内置目录）
+
+        Args:
+            style_name: 样式名称
+
+        Yields:
+            样式目录路径（仅产出实际存在的目录）
+        """
+        for base in self.extra_dirs + [self.config_dir]:
+            d = os.path.join(base, style_name)
+            if os.path.isdir(d):
+                yield d
+
     def get_available_styles(self) -> List[str]:
         """
         获取所有可用的样式名称
         
-        同时扫描单文件样式和文件夹样式（文件夹内包含变体配置）
+        同时扫描单文件样式和文件夹样式（文件夹内包含变体配置），
+        并合并内置目录与用户目录（用户目录同名样式优先，内置同名自动隐藏）
         
         Returns:
             样式名称列表
         """
         styles = []
+        hidden = set()  # 用户目录已提供的内置同名样式
         
-        if not os.path.exists(self.config_dir):
-            return styles
-        
-        for entry_name in os.listdir(self.config_dir):
-            entry_path = os.path.join(self.config_dir, entry_name)
+        for base in [*self.extra_dirs, self.config_dir]:
+            if not os.path.exists(base):
+                continue
             
-            if os.path.isdir(entry_path):
-                # 文件夹样式：文件夹名即为样式名
-                styles.append(entry_name)
-            elif entry_name.endswith(('.json', '.yaml', '.yml', '.toml')):
-                # 单文件样式：文件名（去扩展名）即为样式名
-                style_name = os.path.splitext(entry_name)[0]
-                # 避免与同名文件夹冲突，文件夹优先
-                if style_name not in styles:
-                    styles.append(style_name)
+            for entry_name in os.listdir(base):
+                entry_path = os.path.join(base, entry_name)
+                
+                if os.path.isdir(entry_path):
+                    # 文件夹样式：文件夹名即为样式名
+                    if entry_name in hidden:
+                        continue
+                    if base != self.config_dir:
+                        hidden.add(entry_name)  # 用户目录样式屏蔽内置同名
+                    if entry_name not in styles:
+                        styles.append(entry_name)
+                elif entry_name.endswith(('.json', '.yaml', '.yml', '.toml')):
+                    # 单文件样式：文件名（去扩展名）即为样式名
+                    style_name = os.path.splitext(entry_name)[0]
+                    if style_name in hidden:
+                        continue
+                    if base != self.config_dir:
+                        hidden.add(style_name)
+                    if style_name not in styles:
+                        styles.append(style_name)
         
         return sorted(styles)
     
@@ -186,20 +223,20 @@ class StyleManager:
         Returns:
             样式配置字典，如果不存在则返回None
         """
-        # 1. 尝试作为文件夹样式加载（文件夹优先）
-        style_dir = os.path.join(self.config_dir, style_name)
-        if os.path.isdir(style_dir):
+        # 1. 尝试作为文件夹样式加载（文件夹优先，用户目录优先于内置目录）
+        for style_dir in self._iter_style_dirs(style_name):
             config_path = self._resolve_style_variant(style_dir, context)
             if config_path:
                 return self._load_config_file(config_path)
             self.logger.error(f"样式文件夹内无有效配置文件: {style_name}")
             return None
         
-        # 2. 尝试作为单文件样式加载（向后兼容）
-        for ext in ['.json', '.yaml', '.yml', '.toml']:
-            config_path = os.path.join(self.config_dir, f"{style_name}{ext}")
-            if os.path.exists(config_path):
-                return self._load_config_file(config_path)
+        # 2. 尝试作为单文件样式加载（向后兼容，用户目录优先）
+        for base in [*self.extra_dirs, self.config_dir]:
+            for ext in ['.json', '.yaml', '.yml', '.toml']:
+                config_path = os.path.join(base, f"{style_name}{ext}")
+                if os.path.exists(config_path):
+                    return self._load_config_file(config_path)
         
         self.logger.error(f"样式配置文件不存在: {style_name}")
         return None
@@ -281,14 +318,15 @@ class StyleManager:
         Returns:
             缩略图文件绝对路径，不存在则返回 None
         """
-        style_dir = os.path.join(self.config_dir, style_name)
-        if not os.path.isdir(style_dir):
+        style_dirs = list(self._iter_style_dirs(style_name))
+        if not style_dirs:
             return None
         
-        for ext in ('.png', '.jpg', '.jpeg'):
-            thumb_path = os.path.join(style_dir, f'thumbnail{ext}')
-            if os.path.isfile(thumb_path):
-                return thumb_path
+        for style_dir in style_dirs:
+            for ext in ('.png', '.jpg', '.jpeg'):
+                thumb_path = os.path.join(style_dir, f'thumbnail{ext}')
+                if os.path.isfile(thumb_path):
+                    return thumb_path
         
         return None
 

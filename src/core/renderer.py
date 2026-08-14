@@ -10,8 +10,9 @@ import math
 import logging
 from pathlib import Path
 
-# 添加项目根目录到sys.path
-project_root = Path(__file__).resolve().parent.parent.parent
+# 添加项目根目录到sys.path（使用统一的路径定位，保证开发/打包环境一致）
+from src.utils.app_paths import get_resource_root
+project_root = get_resource_root()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
