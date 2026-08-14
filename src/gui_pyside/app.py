@@ -84,7 +84,11 @@ def run_pyside_app():
     # 不显示 exe 嵌入的 ico。此处从资源目录加载（打包后位于 _internal/assets/）。
     _icon_path = get_resource_root() / 'assets' / 'app_icon.ico'
     if _icon_path.exists():
-        app.setWindowIcon(QIcon(str(_icon_path)))
+        _icon = QIcon(str(_icon_path))
+        if _icon.isNull():
+            logger.warning(f"应用图标加载失败: {_icon_path}")
+        else:
+            app.setWindowIcon(_icon)
 
     # ── 设置全局字体 ──
     font = QFont("Segoe UI", 10)
