@@ -31,19 +31,44 @@ from .main_window import MainWindow
 logger = logging.getLogger(__name__)
 
 
+def _set_app_user_model_id():
+    """
+    为进程设置 Windows AppUserModelID
+
+    PyInstaller 打包的 windowed exe 默认没有 AppUserModelID，
+    导致 Windows 任务栏无法正确关联窗口与 exe 图标，任务栏会显示
+    通用可执行文件图标。设置后任务栏将使用 exe 内嵌图标分组显示。
+
+    必须在 QApplication 创建之前调用。
+    """
+    if sys.platform != 'win32':
+        return
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            'FrankZhangCC.MiLecFrame'
+        )
+    except Exception as e:
+        logger.warning(f'设置 AppUserModelID 失败: {e}')
+
+
 def run_pyside_app():
     """启动 PySide6 桌面 GUI 应用
 
     完整的启动流程：
     1. 初始化日志
-    2. 创建 QApplication
-    3. 配置高 DPI 缩放
-    4. 设置 Fluent 主题
-    5. 创建并显示主窗口
-    6. 进入事件循环
+    2. 设置 Windows AppUserModelID（任务栏图标关联）
+    3. 创建 QApplication
+    4. 配置高 DPI 缩放
+    5. 设置 Fluent 主题
+    6. 创建并显示主窗口
+    7. 进入事件循环
     """
     setup_logging()
     logger.info("正在启动 PySide6 桌面 GUI...")
+
+    # ── 设置 Windows AppUserModelID（必须在 QApplication 创建前） ──
+    _set_app_user_model_id()
 
     # ── 创建 QApplication ──
     # 高 DPI 缩放必须在 QApplication 创建前设置
