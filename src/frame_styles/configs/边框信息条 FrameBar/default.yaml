@@ -1,0 +1,81 @@
+# ============================================================
+# 宝丽来 + 底部半透明横条
+# 基于宝丽来风格，在底部增加一条半透明矩形横条
+# ============================================================
+name: 宝丽来底部横条
+colors:
+  text: '#000000'
+  custom_timestamp_author_light_color: [51, 51, 51]
+  custom_timestamp_author_dark_color: [204, 204, 204]
+  custom_location_light_color: [51, 51, 51]
+  custom_location_dark_color: [204, 204, 204]
+  custom_rect_01_light_color: [230, 230, 230]
+  custom_rect_01_dark_color: [25, 25, 25]
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  size_ratio: 0.01
+  sizes:
+    exif: 0.018
+    timestamp_author: 0.018
+    camera_lens: 0.018
+    location: 0.018
+layout:
+  expand_canvas:
+    enabled: true
+    top: 0.03
+    bottom: 0.15
+    left: 0.03
+    right: 0.03
+  padding:
+    top: 0.025
+    bottom: 0.025
+    left: 0.05
+    right: 0.05
+  rectangles:
+    rect_01:
+      width_ratio: 5
+      height_ratio: 0.17
+      opacity: 0.65
+      position: "bottom"
+      alignment: "top-center"
+      margin_bottom: 0.03
+  info_position:
+    exif:
+      position: "bottom-left"
+      alignment: "left"
+      margin_top: 0
+      margin_bottom: 0.065
+      margin_left: 0
+      margin_right: 0
+    timestamp_author:
+      relative_to: "exif"
+      relative_position: "below"
+      alignment: "left"
+      relative_margin: 0.011
+    camera_lens:
+      position: "bottom-right"
+      alignment: "right"
+      margin_top: 0
+      margin_bottom: 0.065
+      margin_left: 0
+      margin_right: 0
+    location:
+      relative_to: "camera_lens"
+      relative_position: "below"
+      alignment: "right"
+      relative_margin: 0.011
+logo:
+  enabled: false

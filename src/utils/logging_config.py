@@ -9,6 +9,9 @@ import logging
 import sys
 from pathlib import Path
 
+# 统一的路径定位工具：打包后 debug_log.txt 写入 exe 同目录（便携版可持久化）
+from src.utils.app_paths import get_app_dir
+
 _initialized = False
 
 
@@ -115,11 +118,18 @@ def setup_logging(log_dir: str = None) -> None:
     if _initialized:
         return
 
+    # 幂等守卫（跨模块身份版）：
+    # 打包环境中本模块会以 utils.logging_config 与 src.utils.logging_config
+    # 两种身份各加载一份，各自的 _initialized 标志互不共享。
+    # 此处再检查 root logger 上是否已挂载本类的 handler，避免日志重复写入。
     root_logger = logging.getLogger()
+    if any(isinstance(h, LineCountRotatingFileHandler) for h in root_logger.handlers):
+        return
+
     root_logger.setLevel(logging.DEBUG)
 
     if log_dir is None:
-        log_dir = str(Path(__file__).resolve().parent.parent.parent)
+        log_dir = str(get_app_dir())
     log_path = Path(log_dir) / "debug_log.txt"
 
     # 使用按行数滚动的文件处理器替代普通 FileHandler

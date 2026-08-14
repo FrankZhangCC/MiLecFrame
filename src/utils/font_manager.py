@@ -13,6 +13,9 @@ from typing import Dict, List, Tuple, Optional
 
 from PIL import ImageFont
 
+# 统一的路径定位工具：字体文件为只读资源，随程序打包（_MEIPASS/assets/fonts）
+from src.utils.app_paths import get_resource_root
+
 logger = logging.getLogger(__name__)
 
 _CJK_CHAR_RE = re.compile(
@@ -45,8 +48,8 @@ class FontManager:
         if fonts_base_path:
             self.fonts_base_path = fonts_base_path
         else:
-            project_root = Path(__file__).resolve().parent.parent.parent
-            self.fonts_base_path = os.path.join(project_root, 'assets', 'fonts')
+            # 字体目录为只读资源，打包后位于 _MEIPASS/assets/fonts
+            self.fonts_base_path = str(get_resource_root() / 'assets' / 'fonts')
 
         self.font_cache: Dict[tuple, ImageFont.FreeTypeFont] = {}
         self._windows_font_dir = os.path.join(

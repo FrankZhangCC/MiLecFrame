@@ -19,13 +19,44 @@ import sys
 import os
 from pathlib import Path
 
+# ── 统一导入路径 ──
+# 项目内模块统一使用「src. 前缀导入」（from src.core.xxx）。
+# 本文件可能以 src/main.py（开发环境）或被 PyInstaller 冻结（打包环境）
+# 两种方式加载，此处将项目根目录加入 sys.path，保证 src 包始终可导入。
+# 打包环境下 PyInstaller 的 FrozenImporter 会优先接管导入，此处无副作用。
+_project_root = Path(__file__).resolve().parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+
+def _ensure_console_output():
+    """
+    保证标准输出可用
+
+    无控制台打包模式（console=False）下双击运行时 sys.stdout / sys.stderr 为 None，
+    任何 print() / 日志控制台输出都会抛异常。此处将其重定向到 exe 同目录的
+    控制台日志文件，兼顾 GUI 的无黑窗体验与 CLI 模式的输出留存。
+
+    必须在 setup_logging() 之前调用（其 console handler 依赖 sys.stderr）。
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return  # 开发环境或控制台版，无需处理
+
+    from src.utils.app_paths import get_app_dir
+    _log_path = get_app_dir() / 'MiLecFrame_console.log'
+    _file = open(_log_path, 'a', encoding='utf-8')
+    sys.stdout = _file
+    sys.stderr = _file
+
 
 def main():
     """程序主入口点"""
-    from utils.logging_config import setup_logging
+    _ensure_console_output()
+
+    from src.utils.logging_config import setup_logging
     setup_logging()
     
-    from utils.background_fill import BackgroundFillManager
+    from src.utils.background_fill import BackgroundFillManager
 
     parser = argparse.ArgumentParser(description="MiLeica Frame - 照片相框程序")
     parser.add_argument("-i", "--input", help="输入图片路径")
@@ -44,6 +75,8 @@ def main():
     parser.add_argument("--lens-display", choices=['combined', 'camera_only', 'lens_only'],
                         default='combined', help="镜头显示模式")
     parser.add_argument("--use-short-lens", action="store_true", help="使用短版镜头名")
+    parser.add_argument("--timestamp-display", choices=['full', 'date_only', 'hide'],
+                        default='full', help="拍摄时间显示模式：full=日期与时刻, date_only=仅日期, hide=不显示")
     parser.add_argument("--no-enhance", action="store_true", help="关闭背景增强")
     parser.add_argument("--skip-existing", action="store_true", default=True,
                         help="跳过已存在的输出文件（默认启用）")
@@ -91,6 +124,7 @@ def main():
                 logo=args.logo,
                 lens_display=args.lens_display,
                 use_short_lens=args.use_short_lens,
+                timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 skip_existing=args.skip_existing,
                 use_gps_location=args.use_gps_location,
@@ -119,6 +153,7 @@ def main():
                 logo=args.logo,
                 lens_display=args.lens_display,
                 use_short_lens=args.use_short_lens,
+                timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 output_format=args.output_format,
                 skip_existing=args.skip_existing,
@@ -143,12 +178,12 @@ def launch_pyside_gui():
     print("正在启动 PySide6 桌面 GUI...")
     print("按 Ctrl+C 可随时停止")
 
-    from gui_pyside.app import run_pyside_app
+    from src.gui_pyside.app import run_pyside_app
     run_pyside_app()
 
 def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill=None,
                   font_weight='medium', logo="auto", lens_display='combined',
-                  use_short_lens=False, no_enhance=False, output_format="JPEG",
+                  use_short_lens=False, timestamp_display='full', no_enhance=False, output_format="JPEG",
                   skip_existing=True, watermark_text=None, watermark_position='bottom-right',
                   watermark_opacity=50, watermark_color='white', custom_text=None):
     """
@@ -180,10 +215,10 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
 
     print(f"处理图片: {input_path} -> {output_path}")
 
-    from core.image_processor import ImageProcessor
+    from src.core.image_processor import ImageProcessor
 
     if bg_fill is None:
-        from utils.background_fill import BackgroundFillManager
+        from src.utils.background_fill import BackgroundFillManager
         bg_fill = BackgroundFillManager.DEFAULT_FILL
 
     # ===== 组装水印装饰参数 =====
@@ -230,7 +265,8 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
                                 lens_display_mode=lens_display,
                                 use_short_lens=use_short_lens,
                                 saturation_override=saturation_override,
-                                custom_text=custom_text)
+                                custom_text=custom_text,
+                                timestamp_display_mode=timestamp_display)
 
     if not success:
         print("图片处理失败")
@@ -250,6 +286,7 @@ def batch_process_images(
     logo="auto",
     lens_display='combined',
     use_short_lens=False,
+    timestamp_display='full',
     no_enhance=False,
     skip_existing=True,
     use_gps_location=False,
@@ -285,11 +322,11 @@ def batch_process_images(
     """
     print(f"批量处理图片: {input_folder} -> {output_folder}")
 
-    from core.batch_processor import BatchProcessor
+    from src.core.batch_processor import BatchProcessor
 
     # 使用默认背景填充类型
     if bg_fill is None:
-        from utils.background_fill import BackgroundFillManager
+        from src.utils.background_fill import BackgroundFillManager
         bg_fill = BackgroundFillManager.DEFAULT_FILL
 
     # 发现输入文件
@@ -340,6 +377,7 @@ def batch_process_images(
         use_gps_location=use_gps_location,
         decorations=decorations,
         custom_text=custom_text,
+        timestamp_display_mode=timestamp_display,
     )
 
     # 输出结果汇总

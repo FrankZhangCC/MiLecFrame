@@ -2,6 +2,75 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.4.0-dev (2026-08-14)
+
+> 便携版打包发行支持，统一资源路径定位，新增矩形装饰元素，文档重构。
+
+### 🟢 便携版打包发行支持 (feat)
+
+- 新增 `MiLecFrame.spec`（PyInstaller onedir 配置）与 `build_release.py` 一键打包脚本
+- 新增 `src/utils/app_paths.py` 统一路径定位：可写数据（config.json、设备映射 CSV、日志、用户样式）位于 exe 同目录，只读资源（字体、Logo、内置样式）随包打包，整个文件夹拷贝即用
+- 支持从 PNG 一键生成多尺寸 ICO 应用图标（`--icon` 参数）
+- 发行版字体精简打包：仅打包样式配置实际引用的 6 个字重文件（原 391MB → 约 30MB）
+- 无控制台窗口模式：`main.py` 增加标准输出保护，windowed 模式下 print 输出重定向至 `MiLecFrame_console.log`
+
+### 🔴 修复：CLI 模式导入崩溃 (fix)
+
+- 修复 `python src/main.py -i ... -o ...` 单张/批量处理模式的 `attempted relative import beyond top-level package` 错误
+- 统一入口导入为 `src.` 前缀，`main.py` 顶部插入项目根目录到 sys.path
+
+### 🟢 新增自定义矩形（rectangles）装饰功能 (feat, fdd4d92)
+
+- 样式配置支持半透明装饰色块，可用于画面装饰与文字底衬
+
+### 🟢 文档重构 (docs, 7d8059a)
+
+- README 拆分，新增样式配置指南与开发参考文档
+
+## v2.3.0-dev (2026-07-18)
+
+> 新增拍摄时间显示模式控制，EXIF 焦距改用 35mm 等效值，LOGO 品牌尺寸补偿系数独立为外部 YAML 文件。
+
+### 🟢 拍摄时间显示模式控制 (feat, 8f7e2cf)
+
+用户可通过 GUI「拍摄信息配置」折叠栏内的 ComboBox 或 CLI `--timestamp-display` 参数控制拍摄时间的显示方式：
+
+- `'full'`（默认）：显示完整日期与时刻（yyyy.mm.dd hh:mm:ss）
+- `'date_only'`：仅显示日期（yyyy.mm.dd），通过 `[:10]` 切片实现
+- `'hide'`：不显示拍摄时间，自动注入 `context['timestamp'] = None` 使 `StyleManager` 匹配 `no_timestamp.yaml` 变体
+
+`timestamp_author` 组合文本三段 fallback 逻辑：
+1. 时间 + 作者 → `'ts by author'`
+2. 仅时间 → `'ts'`
+3. 仅作者（时间隐藏）→ `'Shot by author'`
+4. 两者皆无 → `None`（不渲染）
+
+### 🔴 修复：EXIF 信息栏焦距改用 35mm 等效焦距 (fix, c5ef21a)
+
+- `image_processing_page.py`：`_update_exif_info` 中焦距显示从 `raw_focal_length`（物理焦距）改为 `raw_focal_length_35mm`（35mm 等效焦距），无 35mm 数据时回退到物理焦距，与 `RenderContext.get_text()` 行为一致
+- `胶片夹风格 FilmClip`：`default.yaml` 和 `no_custom_text.yaml` 的 `corner_radius` 圆角从 `0.04` 调小至 `0.025`
+
+### 🟢 Logo 品牌尺寸补偿系数独立为外部 YAML (refactor, c907006)
+
+**背景**：此前品牌补偿系数硬编码在 `LogoSelector.BRAND_SCALE_FACTORS` 类字典中，程序编译后系数不便更改，也不便添加新 LOGO 支持。
+
+**设计要点**：
+- 所有系数迁移至 `data/logo_scale.yaml` 外部配置文件，支持注释，用户可直接编辑增删
+- YAML 格式（避免 CSV 编码问题），与项目已有的样式 YAML 配置体系一致
+- `LogoSelector.__init__` 新增可选参数 `scale_config_path`，默认指向 `data/logo_scale.yaml`
+- 新增 `_ensure_scale_file_exists()` 方法：文件不存在时自动创建带注释的默认版本
+- 新增 `_load_scale_factors()` 方法：安全加载 YAML，含类型校验 + 错误 fallback 为空字典
+- `.gitignore` 新增 `!data/logo_scale.yaml` 允许 Git 追踪
+
+**向后兼容**：
+- `LogoSelector()` 无参调用完全不变，原有 import 和调用代码零改动
+- `get_brand_scale_factor()` 签名不变，返回行为完全一致
+- YAML 损坏时静默 fallback 为空字典（均返回 1.0），不影响渲染流程
+
+### 📝 文档
+
+- `CHANGELOG.md`：本页更新
+
 ## v2.2.0-dev (2026-06-19)
 
 > 样式选择器从文字下拉列表重构为**横向缩略图滚动选择**。所有样式配置文件迁移至独立文件夹，支持在每个样式目录下放置 `thumbnail.png` 作为预览图。新增 `StyleManager.get_style_thumbnail()`、`layout_debug` 调试工具、`ExpandGroupSettingCard` 开发铁律。

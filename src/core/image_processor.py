@@ -60,7 +60,8 @@ class ImageProcessor:
                 lens_display_mode: str = 'combined',
                 use_short_lens: bool = False,
                 saturation_override: Optional[float] = None,
-                custom_text: Optional[str] = None) -> bool:
+                custom_text: Optional[str] = None,
+                timestamp_display_mode: str = 'full') -> bool:
         """
         处理图像并添加相框
         
@@ -79,6 +80,7 @@ class ImageProcessor:
             use_short_lens: 是否使用短版镜头名
             saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值，1.0=不做增强）
             custom_text: 自定义文本内容（GUI 输入，仅当样式配置 custom_text.enabled=True 时生效）
+            timestamp_display_mode: 拍摄时间显示模式（'full'=日期与时刻, 'date_only'=仅日期, 'hide'=不显示）
             
         Returns:
             是否处理成功
@@ -147,6 +149,9 @@ class ImageProcessor:
                 context = {'location': location, 'author': author}
                 if not custom_text:
                     context['custom_text'] = None
+                if timestamp_display_mode == 'hide':
+                    # 通知变体系统拍摄时间不可用，自动匹配 no_timestamp.yaml 变体
+                    context['timestamp'] = None
                 style_config = self.style_manager.get_style_config(style_name, context)
             else:
                 style_config = self.style_manager.get_default_style()
@@ -175,6 +180,7 @@ class ImageProcessor:
                 use_short_lens=use_short_lens,
                 saturation_override=saturation_override,
                 custom_text=custom_text,
+                timestamp_display_mode=timestamp_display_mode,
             )
             
             # 10. 保存图像

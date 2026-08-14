@@ -38,36 +38,34 @@ fonts:
   size_ratio: 0.01
   line_spacing_ratio: 0.008
   sizes:
-    defined_text_01: 0.022
-    defined_text_02: 0.022
-    defined_text_03: 0.022
-    defined_text_04: 0.022
-    camera_lens: 0.022
-    focal_length_formatted: 0.022
-    aperture_formatted: 0.022
-    shutter_speed_formatted: 0.022
-    iso_formatted: 0.022
+    defined_text_01: 0.027
+    defined_text_02: 0.027
+    defined_text_03: 0.027
+    defined_text_04: 0.027
+    camera_lens: 0.027
+    focal_length_formatted: 0.027
+    aperture_formatted: 0.027
+    shutter_speed_formatted: 0.027
+    iso_formatted: 0.027
 
 layout:
   expand_canvas:
     enabled: true
-    top: 0.175
-    bottom: 0.225
-    left: 0.04
-    right: 0.04
+    top: 0.25
+    bottom: 0.25
+    left: 0.07
+    right: 0.07
   padding:
     top: 0.025
     bottom: 0.025
-    left: 0.04
-    right: 0.04
-
+    left: 0.07
+    right: 0.07
   corner_radius:
     enabled: true
-    top_left: 0.04
-    top_right: 0.04
-    bottom_left: 0.04
-    bottom_right: 0.04
-
+    top_left: 0.02
+    top_right: 0.02
+    bottom_left: 0.02
+    bottom_right: 0.02
   info_position:
     camera_lens:
       position: "bottom-center"
@@ -103,7 +101,7 @@ layout:
       position: "bottom"
       alignment: "center"
       tree_align: true
-      margin_bottom: 0.12
+      margin_bottom: 0.13
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
@@ -127,6 +125,6 @@ logo:
   enabled: true
   position: "top"
   alignment: "both-center"
-  margin_top: 0.083
-  size_ratio: 0.075
+  margin_top: 0.12
+  size_ratio: 0.1
   max_dim_limit_ratio: 2.5

@@ -182,9 +182,11 @@ class ExifHelper:
         import os
         from datetime import datetime
         
-        # 确定记录文件路径
-        camera_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'camera_map.csv')
-        lens_map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'lens_map.csv')
+        # 确定记录文件路径（打包后位于 exe 同目录 data/，保持可写）
+        from src.utils.app_paths import get_app_dir
+        _app_data_dir = get_app_dir() / 'data'
+        camera_map_path = str(_app_data_dir / 'camera_map.csv')
+        lens_map_path = str(_app_data_dir / 'lens_map.csv')
         
         # 添加时间戳
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

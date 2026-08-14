@@ -10,6 +10,9 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+# 统一的路径定位工具：打包后 config.json 写入 exe 同目录（便携版可持久化）
+from src.utils.app_paths import get_app_dir
+
 
 class ConfigManager:
     """配置管理器"""
@@ -21,9 +24,7 @@ class ConfigManager:
         Args:
             config_file: 配置文件路径
         """
-        self.config_file = config_file or os.path.join(
-            os.path.dirname(__file__), '..', '..', 'config.json'
-        )
+        self.config_file = config_file or str(get_app_dir() / 'config.json')
         
         # 确保配置文件存在
         self.config = self._load_config()

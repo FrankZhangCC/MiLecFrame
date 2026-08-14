@@ -506,7 +506,7 @@ class ImageProcessingPage(QWidget):
 
     def _create_style_selection_card(self) -> ExpandSettingCard:
         """Tab 2: 样式选择（缩略图网格）"""
-        from frame_styles.style_manager import StyleManager
+        from src.frame_styles.style_manager import StyleManager
         self.style_manager = StyleManager()
         available_styles = self.style_manager.get_available_styles()
         if not available_styles:
@@ -575,7 +575,13 @@ class ImageProcessingPage(QWidget):
 
     def _create_shot_info_card(self) -> ExpandSettingCard:
         """Tab 4: 拍摄信息配置"""
-        card = ExpandGroupSettingCard(FluentIcon.CAMERA, "拍摄信息配置", "镜头显示和 LOGO 设置")
+        card = ExpandGroupSettingCard(FluentIcon.CAMERA, "拍摄信息配置", "拍摄时间、镜头和 LOGO 设置")
+
+        # 拍摄时间
+        self.combo_timestamp = ComboBox()
+        self.combo_timestamp.addItems(["显示日期与时刻", "只显示日期", "不显示时间"])
+        self.combo_timestamp.setCurrentIndex(0)
+        card.addGroup(FluentIcon.DATE_TIME, "拍摄时间", "控制相框中显示的拍摄时间信息", self.combo_timestamp, 1)
 
         # 镜头显示
         self.combo_lens_display = ComboBox()
@@ -1062,7 +1068,7 @@ class ImageProcessingPage(QWidget):
         self.exif_lens.setText(f"镜头: <b>{lens}</b>" if lens else "镜头: <b>—</b>")
 
         # 第二行
-        fl = dd.get('raw_focal_length', '')
+        fl = dd.get('raw_focal_length_35mm', '') or dd.get('raw_focal_length', '')
         self.exif_focal.setText(f"焦距: <b>{fl}mm</b>" if fl else "焦距: <b>—</b>")
 
         ap = dd.get('raw_aperture', '')
@@ -1143,6 +1149,8 @@ class ImageProcessingPage(QWidget):
             fw_key = fw_map.get(self.combo_font_weight.currentText(), "medium")
             lens_map = {"相机+镜头": "combined", "只显示相机": "camera_only", "只显示镜头": "lens_only"}
             lens_key = lens_map.get(self.combo_lens_display.currentText(), "combined")
+            ts_map = {"显示日期与时刻": "full", "只显示日期": "date_only", "不显示时间": "hide"}
+            ts_mode = ts_map.get(self.combo_timestamp.currentText(), "full")
 
             # GPS 替换逻辑
             gps_on = self.chk_use_gps.isChecked()
@@ -1205,6 +1213,7 @@ class ImageProcessingPage(QWidget):
                 use_short_lens=self.chk_short_lens.isChecked(),
                 saturation_override=None if self.chk_enhance.isChecked() else 1.0,
                 custom_text=self.edit_custom_text.text() or None,
+                timestamp_display_mode=ts_mode,
             )
 
             # 清理输入临时文件
@@ -1361,6 +1370,7 @@ class ImageProcessingPage(QWidget):
             'bg_fill': self.combo_bg_fill.currentText(),
             'enhance_background': self.chk_enhance.isChecked(),
             'font_weight': self.combo_font_weight.currentText(),
+            'timestamp_display': self.combo_timestamp.currentText(),
         })
         logger.debug("配置已保存")
 
@@ -1391,6 +1401,10 @@ class ImageProcessingPage(QWidget):
             idx = self.combo_font_weight.findText(saved['font_weight'])
             if idx >= 0:
                 self.combo_font_weight.setCurrentIndex(idx)
+        if 'timestamp_display' in saved:
+            idx = self.combo_timestamp.findText(saved['timestamp_display'])
+            if idx >= 0:
+                self.combo_timestamp.setCurrentIndex(idx)
 
     def refresh_style_list(self):
         """刷新样式网格（样式编辑器中新建/保存样式后调用）"""

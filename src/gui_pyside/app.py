@@ -12,7 +12,9 @@ from pathlib import Path
 
 # 将项目根目录加入 sys.path，使 src 包可导入，
 # 从而 from src.core.xxx 和 core/__init__.py 的 from .._version 能正确工作。
-_project_root = Path(__file__).resolve().parent.parent.parent
+# 使用统一的路径定位工具：开发环境为项目根，打包环境为 _MEIPASS 资源目录。
+from src.utils.app_paths import get_resource_root
+_project_root = get_resource_root()
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
@@ -22,7 +24,7 @@ from PySide6.QtGui import QFont
 
 from qfluentwidgets import setTheme, Theme
 
-from utils.logging_config import setup_logging
+from src.utils.logging_config import setup_logging
 from .main_window import MainWindow
 
 

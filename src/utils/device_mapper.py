@@ -12,6 +12,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+# 统一的路径定位工具：打包后设备映射 CSV 位于 exe 同目录 data/（GUI 中可编辑，需可写）
+from src.utils.app_paths import get_app_dir
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,9 +28,7 @@ class DeviceMapper:
         Args:
             db_path: 设备映射数据库文件路径
         """
-        self.db_base_path = db_path or os.path.join(
-            os.path.dirname(__file__), '..', '..', 'data'
-        )
+        self.db_base_path = db_path or str(get_app_dir() / 'data')
         
         # 构建各个映射文件路径
         self.camera_db_path = os.path.join(self.db_base_path, 'camera_map.csv')
