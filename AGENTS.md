@@ -46,68 +46,67 @@ src/
 ### 版本标记规范
 
 - `src/_version.py` 是版本号**单点入口**。
-- 公开 Release 版：标记为 `v0.x.x`（如 `v0.1.0`）。
-- 内部开发版：标记为 `v1.x.x-dev`（如 `v1.9.0-dev`）。
-- 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和 `CHANGELOG.md`；公开发行还需更新 `CHANGELOG_RELEASE.md`（**注意三个分支都要同步**，v1.2.0 时曾因只在 release 分支改 CHANGELOG_RELEASE 导致 dev/mainline 缺条目）。
-- 内部线（dev/mainline）与公开发行线（release）版本号**独立递增**：内部用 `vX.Y.Z-dev`，公开发行用 `v0.x.x`/`v1.x.x` 序列（历史：v0.1.0 → v1.0.0 → v1.1.0 → v1.2.0）。
+- **版本同源**：mainline 用 `vX.Y.Z-dev`（内部开发版），release 用 `vX.Y.Z`
+  （公开发行版，**同号去掉 `-dev` 后缀**）。不再有独立的 release 编号序列。
+  - 例：mainline `v2.4.0-dev` 公开发行 → release `v2.4.0`。
+- **一个版本 = 一个 commit + 一个 tag**。禁止"增补"commit 堆积：
+  修复走 **patch 号递增**（`v2.4.0-dev` → `v2.4.1-dev`；`v2.4.0` → `v2.4.1`）。
+- 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和
+  `CHANGELOG.md`；公开发行还需更新 `CHANGELOG_RELEASE.md`（**注意三个分支
+  都要同步**，v1.2.0 时曾因只在 release 分支改 CHANGELOG_RELEASE 导致
+  dev/mainline 缺条目）。
+- 历史遗留 tag（`v0.1.0`、`v1.0.0`、`v1.1.0-release`、`v1.2.0`）是旧编号
+  体系（2026-08 重建历史前），不再沿用；下一个公开发行从 mainline 当前
+  版本对齐（即 `v2.4.0` 起）。
 
 ### Git 分支工作流
 
-采用三线分支模型：
+采用三线分支模型，**三线共享共同祖先**（dev 的 Initial commit），
+支持 `cherry-pick` 跨线搬运修复：
 
 ```
-mainline ─── v1.0.1-dev ─── v1.1.0-dev ─── ... ─── v2.3.0-dev ──→  (干净版本线)
-                ↑ squash                        ↑ squash
-dev ─────── A---B---C---D---E---F---G---H---I── ... ──────────────→  (日常开发)
-                                                                      ↓ 稳定后 cherry-pick
-release ─── v0.1.0 ─── v1.0.0 ─── v1.1.0-release ──→               (公开发行)
+              v1.0.1-dev ─ v1.1.0-dev ─ ... ─ v2.4.0-dev ─→  (mainline 版本链)
+             /
+Initial ──────────────────────────────────────────────────→  (dev 完整开发历史)
+             \
+              v0.1.0 ─ v1.0.0 ─ v1.1.0-release ─ v1.2.0 ─→  (release 发行链)
 ```
 
 | 分支 | 用途 | 规则 |
 |------|------|------|
-| `dev` | **日常小功能开发** | 提交可松散。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
-| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。推送到 `origin`，历史不可改写（force push 需谨慎）。 |
-| `release` | **稳定公开发行** | GitHub 默认分支，受保护。推送到 `origin`，仅接收 cherry-pick 来的稳定版本。 |
+| `dev` | **日常开发** | Conventional Commits（feat/fix/docs/chore/refactor）。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
+| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。推送到 `origin`。 |
+| `release` | **稳定公开发行** | GitHub 默认分支，受保护。每 commit = 一发行，带 `v*.*.*` tag。推送到 `origin`。 |
 
-> ⚠️ **快照式提交（实际操作铁律）**：mainline/release 与 dev **没有共同祖先**
-> （mainline 从 `git checkout --orphan` 起步），`git merge --squash dev` 会产生海量冲突。
-> 实际做法是「树快照」：
-> ```bash
-> git checkout mainline
-> git read-tree -u --reset dev   # 索引+工作树整体同步为 dev 的树
-> git commit -m "vX.Y.Z-dev: ..."
-> ```
-> 个别文件的增补提交用 `git checkout <来源分支> -- <文件>` 后单独 commit。
+> ⚠️ **历史重建说明（2026-08）**：mainline/release 原为 orphan 起步、
+> 与 dev 无共同祖先，通过 commit-tree 重建父链后共享 dev 的 Initial commit
+> 作为共同祖先。版本快照（read-tree）仍是版本里程碑的标准操作，但**单个
+> 修复现在可以用 `cherry-pick` 直接跨线搬运**，不再手工复制。
+> 全部同步操作由 `tools/release_sync.py` 脚本完成，禁止手工执行 read-tree。
 
-#### 日常操作流程
+#### 日常操作流程（脚本化）
 
 ```bash
-# 1. 日常在 dev 上工作
+# 1. 日常在 dev 上工作（Conventional Commits）
 git checkout dev
-# ...多次提交 A, B, C, D ...
+# ...多次提交 feat:/fix:/docs: ...
 
-# 2. 凑够一个版本后 → 快照到 mainline 并打 tag
-git checkout mainline
-git read-tree -u --reset dev
-VERSION="v2.4.0-dev"  # 根据 src/_version.py 决定
-git commit -m "$VERSION: <功能简述>"
-git tag $VERSION
-git checkout dev
+# 2. 攒够一个版本 → 快照到 mainline 并打 tag
+python tools/release_sync.py new-version 2.5.0-dev --msg "功能简述"
+python tools/release_sync.py new-version 2.5.0-dev --push   # 直接推送 origin
 
-# 3. 推送到 GitHub
-git push origin mainline --follow-tags    # 推送分支 + 新 tag
-# --follow-tags 不推送轻量 tag，必须补推（本项目 tag 均为轻量 tag）：
-git push origin --tags
+# 3. 单点修复（bug fix）→ cherry-pick 到 mainline，patch 号递增
+#    （dev 上已提交 fix commit 后执行）
+python tools/release_sync.py cherry <fix-commit> 2.4.1-dev
+#    若 v2.4.0 已公开发行，修复还需同步到 release：
+python tools/release_sync.py cherry <fix-commit> 2.4.1 --also-release
 
-# 4. mainline 上某版本准备公开发布 → 快照给 release
-git checkout release
-git read-tree -u --reset mainline
-# 修改 src/_version.py → 公开发行版号（如 1.2.0）
-# 更新 README.md 徽标、CHANGELOG_RELEASE.md（加发行条目）
-git commit -m "v1.2.0-release: <功能简述>"
-git tag v1.2.0
-git push origin release
-git push origin --tags
+# 4. 公开发行 → mainline 快照到 release，版本号去 -dev
+python tools/release_sync.py release 2.4.0 --msg "发行说明"
+python tools/release_sync.py release 2.4.0 --push
+
+# 5. 三线体检（随时可跑）
+python tools/release_sync.py check
 ```
 
 #### 推送规则
@@ -178,42 +177,32 @@ python build_release.py --no-clean       # 不清 build 缓存（增量调试）
 8. **打包后必验**：dist exe 双击启动 GUI、CLI 处理一张照片、`_internal` 内
    资源文件是真文件（`Get-Item` 看 Attributes 不是 Directory）。
 
-#### 公开发行完整流程（v1.2.0 实战记录）
+#### 公开发行完整流程（脚本化）
 
 ```bash
-# 1. dev：升内部版本号 + 文档同步，提交
+# 1. dev：升内部版本号 + 文档同步，提交（Conventional Commits）
 git checkout dev
 # 改 src/_version.py → 2.4.0-dev；README.md 徽标；CHANGELOG.md 加条目
 git add -A && git commit -m "feat: ..."
 
-# 2. mainline：快照 + tag + 推送
-git checkout mainline
-git read-tree -u --reset dev
-git commit -m "v2.4.0-dev: <功能简述>"
-git tag v2.4.0-dev
-git push origin mainline --follow-tags
-git push origin --tags          # 轻量 tag 必补推
+# 2. mainline：快照 + tag + 推送（脚本自动执行 read-tree/commit/tag）
+python tools/release_sync.py new-version 2.4.0-dev --msg "功能简述" --push
 
-# 3. release：快照 + 改公开发行版号 + tag + 推送
-git checkout release
-git read-tree -u --reset mainline
-# 改 src/_version.py → 1.2.0；README.md 徽标；CHANGELOG_RELEASE.md 加 v1.2.0 条目
-git add -A && git commit -m "v1.2.0-release: <功能简述>"
-git tag v1.2.0
-git push origin release
-git push origin --tags
+# 3. release：快照 + 去 -dev 后缀 + tag + 推送（脚本自动改 _version.py）
+python tools/release_sync.py release 2.4.0 --msg "发行说明" --push
 
 # 4. 在 release 状态下打包发行
-python build_release.py --zip   # → dist/MiLecFrame_v1.2.0_win64_portable.zip
+git checkout release
+python build_release.py --zip   # → dist/MiLecFrame_v2.4.0_win64_portable.zip
 
-# 5. GitHub 网页创建 Release：选 tag v1.2.0，上传 zip 资产
+# 5. GitHub 网页创建 Release：选 tag v2.4.0，上传 zip 资产
 # 6. 切回 dev 继续开发
 git checkout dev
 ```
 
-- 发行版内容调整（如增补修复）在 dev 提交后，用
-  `git checkout dev -- <文件>` 的方式同步到 mainline 与 release 并分别提交，
-  **不移动已推送的 tag**。
+- 已发行版本的修复：dev 提交 fix 后
+  `python tools/release_sync.py cherry <commit> 2.4.1 --also-release`，
+  脚本自动 cherry-pick + 升 patch 号 + tag（**不移动已推送的 tag**）。
 - 文档类改动（CHANGELOG_RELEASE 等）**三线都要同步**，勿只改一个分支。
 
 ### Git 忽略规则

@@ -4,9 +4,10 @@
 """
 MiLeica Frame - 版本号单点入口
 
-版本标记规范：
-  - 公开 Release 版：v0.x.x（如 v0.1.0）
-  - 内部开发版：    v1.x.x-dev（如 v1.9.0-dev）
+版本标记规范（版本同源，2026-08 历史重建后）：
+  - 内部开发版（mainline）：vX.Y.Z-dev（如 v2.4.0-dev）
+  - 公开发行版（release）：  vX.Y.Z（同号去 -dev 后缀，如 v2.4.0）
+  - 增补修复提升 patch 号：  v2.4.0-dev → v2.4.1-dev；v2.4.0 → v2.4.1
 """
 __version__ = "2.4.0-dev"
 __version_info__ = (2, 4, 0, 'dev')
