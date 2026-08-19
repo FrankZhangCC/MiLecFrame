@@ -2,6 +2,21 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.5.0-dev (2026-08-19)
+
+> 版本管理规则重构：三线历史重建（共同祖先）、版本同源、脚本化同步；dev 历史清理。
+
+### 🟢 版本管理规则重构 (feat)
+
+- 三线（dev/mainline/release）历史重建，共享 dev 的 Initial commit 作为共同祖先
+- 版本号规则更新为「版本同源」：mainline 用 `vX.Y.Z-dev`，release 用同号去 `-dev` 后缀；增补修复提升 patch 号，一个版本 = 一个 commit + 一个 tag
+- 新增 `tools/release_sync.py` 三线同步脚本：`check`（体检）、`new-version`（dev → mainline 版本快照）、`cherry`（修复跨线搬运）、`release`（公开发行）
+- dev 历史清理：旧 dev 松散提交归档至 `archive-dev-history-2026-08` tag，dev 重置为 mainline 对齐，后续里程碑采用 merge --squash 更新
+
+### 🔧 其他 (chore)
+
+- 相机映射库微调：Canon EOS R6 短名称
+
 ## v2.4.0-dev (2026-08-14)
 
 > 便携版打包发行支持，统一资源路径定位，新增矩形装饰元素，文档重构。
