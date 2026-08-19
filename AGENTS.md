@@ -83,6 +83,12 @@ Initial ────────────────────────
 > 作为共同祖先。版本快照（read-tree）仍是版本里程碑的标准操作，但**单个
 > 修复现在可以用 `cherry-pick` 直接跨线搬运**，不再手工复制。
 > 全部同步操作由 `tools/release_sync.py` 脚本完成，禁止手工执行 read-tree。
+>
+> 📌 **dev 归档机制（2026-08-19 起）**：每次里程碑快照后，dev 自动
+> `reset --hard mainline`，两线 merge-base 恒为最近版本 commit。因此
+> `new-version` 使用 **`git merge --squash dev`**（diff 只含本版本新开发，
+> 不会冲突），不再用 read-tree 全树快照。旧 dev 松散历史已归档至
+> `archive-dev-history-2026-08` tag（本地 `dev-backup` 分支另有备份）。
 
 #### 日常操作流程（脚本化）
 
@@ -91,7 +97,7 @@ Initial ────────────────────────
 git checkout dev
 # ...多次提交 feat:/fix:/docs: ...
 
-# 2. 攒够一个版本 → 快照到 mainline 并打 tag
+# 2. 攒够一个版本 → merge --squash 到 mainline 并打 tag（dev 自动归档）
 python tools/release_sync.py new-version 2.5.0-dev --msg "功能简述"
 python tools/release_sync.py new-version 2.5.0-dev --push   # 直接推送 origin
 
@@ -185,7 +191,7 @@ git checkout dev
 # 改 src/_version.py → 2.4.0-dev；README.md 徽标；CHANGELOG.md 加条目
 git add -A && git commit -m "feat: ..."
 
-# 2. mainline：快照 + tag + 推送（脚本自动执行 read-tree/commit/tag）
+# 2. mainline：squash 合并 + tag + 推送（脚本自动 merge --squash/commit/tag/dev 归档）
 python tools/release_sync.py new-version 2.4.0-dev --msg "功能简述" --push
 
 # 3. release：快照 + 去 -dev 后缀 + tag + 推送（脚本自动改 _version.py）

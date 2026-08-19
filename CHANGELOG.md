@@ -2,6 +2,16 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.5.1-dev (2026-08-19)
+
+> 版本同步脚本优化：new-version 改用 merge --squash 更新 + dev 自动归档。
+
+### 🟢 同步流程优化 (feat)
+
+- `release_sync.py new-version` 改用 `git merge --squash dev` 替代 read-tree 全树快照：dev 归档机制保证 merge-base 恒为最近版本 commit，squash diff 只含本版本新开发
+- 快照完成后 dev 自动 `reset --hard mainline` 归档，两线保持对齐
+- `check` 体检适配 dev 归档机制（共同祖先校验放宽为"位于 mainline 链"）
+
 ## v2.5.0-dev (2026-08-19)
 
 > 版本管理规则重构：三线历史重建（共同祖先）、版本同源、脚本化同步；dev 历史清理。

@@ -11,8 +11,8 @@
         # 三线体检：共同祖先 / tag 完整性 / 版本号与 CHANGELOG 一致性
 
     python tools/release_sync.py new-version <ver> --msg "功能简述" [--push]
-        # 把 dev 快照为 mainline 新版本（ver 形如 2.5.0-dev），
-        # 自动执行 read-tree 快照 + 写 _version.py + commit + tag
+        # 把 dev 的新开发 merge --squash 为 mainline 新版本（ver 形如 2.5.0-dev），
+        # 自动执行 squash + 写 _version.py + commit + tag + dev 归档（reset 对齐）
 
     python tools/release_sync.py cherry <commit> <ver> [--also-release] [--push]
         # 把 dev 上的单个修复 commit cherry-pick 到 mainline 并升 patch 号
@@ -235,24 +235,25 @@ def cmd_check(_args):
     """三线体检：共同祖先、tag 完整性、版本号与文档一致性。"""
     problems = []
 
-    # 1. 共同祖先：三线 merge-base 应回到 dev 的根 commit（无父的 Initial commit）
-    initial = git("rev-list", "--max-parents=0", BRANCH_DEV)
+    # 1. 共同祖先：mainline/release 与 dev 的 merge-base 必须在 mainline 版本链上
+    #    （dev 归档机制下 merge-base 恒为最近版本 commit；release 自 mainline 分叉）
     base_mainline = git("merge-base", BRANCH_DEV, BRANCH_MAINLINE, check=False)
     base_release = git("merge-base", BRANCH_DEV, BRANCH_RELEASE, check=False)
     for name, base in ((BRANCH_MAINLINE, base_mainline), (BRANCH_RELEASE, base_release)):
         if not base:
             problems.append(f"{name} 与 dev 无共同祖先")
-        elif base != initial:
-            problems.append(f"{name} 与 dev 的共同祖先不是 Initial commit: {base[:12]}")
+        elif not is_ancestor(base, BRANCH_MAINLINE):
+            problems.append(f"{name} 与 dev 的共同祖先不在 mainline 链上: {base[:12]}")
 
     # 2. mainline：每个版本 commit 恰好一个 tag，commit 首行以版本号开头
     #    沿第一父遍历版本链，Initial commit（无版本前缀）为链尾
+    root = git("rev-list", "--max-parents=0", BRANCH_MAINLINE)
     commits = git("log", "--first-parent", "--format=%H %s", BRANCH_MAINLINE).splitlines()
     for line in commits:
         h, subject = line.split(" ", 1)
         m = re.match(r"^(v\d+\.\d+\.\d+(?:-dev)?):", subject)
         if not m:
-            if h == initial:
+            if h == root:
                 break  # 到达 Initial commit，mainline 链结束
             problems.append(f"mainline commit {h[:12]} 首行无版本号前缀: {subject[:50]}")
             continue
@@ -318,9 +319,18 @@ def cmd_check(_args):
 
 
 def cmd_new_version(args):
-    """dev → mainline：树快照 + 写版本号 + commit + tag。"""
+    """dev → mainline：merge --squash + 写版本号 + commit + tag + dev 归档。
+
+    机制说明：dev 在每次里程碑后都会 reset --hard mainline，两线
+    merge-base 恒为最近版本 commit，因此 squash 计算的 diff 只包含
+    本版本的新开发内容，三方合并不会产生冲突（read-tree 快照仅用于
+    历史重建等一次性场景，日常版本更新一律走 merge --squash）。
+    """
     ensure_branch(BRANCH_DEV)
     ensure_clean_worktree()
+    # 前置检查：dev 必须有相对 mainline 的新提交（否则 squash 为空）
+    if not git("rev-list", f"{BRANCH_MAINLINE}..{BRANCH_DEV}", check=False):
+        raise SyncError("dev 相对 mainline 无新提交，无需创建新版本。")
     ver = parse_version(args.ver)
     if ver[3] != "dev":
         raise SyncError("mainline 版本号必须带 -dev 后缀，如 2.5.0-dev。")
@@ -331,26 +341,42 @@ def cmd_new_version(args):
     if not args.msg:
         raise SyncError("必须提供 --msg 版本描述。")
 
-    print(f"[1/4] 树快照: dev → mainline")
+    print("[1/5] merge --squash: dev → mainline")
     git("checkout", BRANCH_MAINLINE)
-    git("read-tree", "-u", "--reset", BRANCH_DEV)
+    git("merge", "--squash", BRANCH_DEV, check=False)
+    # 冲突检测：unmerged 条目形如 "UU file"（正常情况下不会发生）
+    status_out = git("status", "--porcelain", check=False) or ""
+    if any(line[:2] in ("UU", "AA", "AU", "UA", "DD", "DU", "UD") for line in status_out.splitlines()):
+        git("merge", "--abort", check=False)
+        git("checkout", BRANCH_DEV, check=False)
+        raise SyncError(
+            "merge --squash 冲突。可能原因: dev 与 mainline 的 merge-base 未对齐"
+            "（dev 未归档）或 cherry 修复与后续开发在同一处改动。\n"
+            "请检查两线状态后重试。"
+        )
+    # 无变更检测：dev 相对 mainline 没有新提交时 squash 为空
+    if not git("diff", "--cached", "--name-only", check=False):
+        git("checkout", BRANCH_DEV, check=False)
+        raise SyncError("dev 相对 mainline 无新变更，无需创建新版本。")
 
-    print(f"[2/4] 写入 _version.py = {format_version(ver)}")
+    print(f"[2/5] 写入 _version.py = {format_version(ver)}")
     write_version_py(ver)
 
-    print(f"[3/4] commit + tag {tag}")
+    print(f"[3/5] commit + tag {tag}")
     git("add", "-A")
     git("commit", "-m", f"{tag}: {args.msg}")
     git("tag", tag)
 
-    print(f"[4/4] 回到 dev")
+    print("[4/5] dev 归档: reset --hard mainline")
     git("checkout", BRANCH_DEV)
+    git("reset", "--hard", BRANCH_MAINLINE)
 
     if args.push:
         print("推送到 origin ...")
         do_push([BRANCH_MAINLINE])
 
     print(f"✓ mainline 新版本 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
+    print("  dev 已归档至该版本，两线 merge-base 对齐，可继续开发。")
 
 
 def cmd_cherry(args):

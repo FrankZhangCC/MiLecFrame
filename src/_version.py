@@ -9,5 +9,5 @@ MiLeica Frame - 版本号单点入口
   - 公开发行版（release）：  vX.Y.Z（同号去 -dev 后缀，如 v2.4.0）
   - 增补修复提升 patch 号：  v2.4.0-dev → v2.4.1-dev；v2.4.0 → v2.4.1
 """
-__version__ = "2.5.0-dev"
-__version_info__ = (2, 5, 0, 'dev')
+__version__ = "2.5.1-dev"
+__version_info__ = (2, 5, 1, 'dev')
