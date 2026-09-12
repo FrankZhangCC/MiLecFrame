@@ -289,7 +289,10 @@ def cmd_check(_args):
     for t in git("tag", "-l", check=False).splitlines():
         if not t or t.startswith("pre-rebuild") or not release_tag_re.match(t):
             continue
-        h = git("rev-parse", t, check=False)
+        # 注解 tag 的 rev-parse 返回 tag 对象本身，须解引用到 commit，
+        # 否则 git show 取到的是 tag 对象头（"tag vX.Y.Z / Tagger: ..."），
+        # 发行前缀校验将永远误报（轻量 tag 无此问题）
+        h = git("rev-parse", f"{t}^{{commit}}", check=False)
         subject = git("show", "-s", "--format=%s", h, check=False)
         if not re.match(r"^v\d+\.\d+\.\d+(?:-release)?:", subject):
             problems.append(f"发行 tag {t} 指向的 commit {h[:12]} 首行无发行前缀: {subject[:50]}")
