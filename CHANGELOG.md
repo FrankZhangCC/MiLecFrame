@@ -2,6 +2,26 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.5.2-dev (2026-09-12)
+
+> 竖拍照片方向修复：EXIF Orientation 全链路转正 + 竖图自动启用短版镜头名。
+
+### 🔴 修复：竖拍照片 EXIF Orientation 全链路转正 (fix, e0e5f61)
+
+- 核心处理链路（含 HDR/HEIF/AVIF）加载图像后按 EXIF Orientation(274) 标签转置像素，修复佳能等竖拍照片以"横向像素 + 旋转标记"存储导致导入后变横向的问题
+- 输出文件同步重置 Orientation 标签为 1，避免查看器按旧标记二次旋转；机型等其他 EXIF 信息完整保留
+- GUI 导入缩略图、宽高信息与大图预览同样按转正后方向显示
+- 验证：多品牌真实竖拍样张（Canon R6 / Fujifilm X-E5 / Nikon Zf / Sony A7 IV）全链路输出竖版且标签重置，横图与无 EXIF 图不受影响
+
+### 🔴 修复：竖图自动启用短版镜头名 (fix, e0e5f61)
+
+- 移植旧版 Streamlit GUI 设计（PySide6 重构时遗漏）：导入新图按 h >= w 自动开启"短版镜头名"，仅导入时设置一次，尊重用户手动修改
+
+### 🔧 其他 (chore)
+
+- `ImageProcessor.process` 的 bg_fill_type 默认参数由非法键 "white" 改为 `BackgroundFillManager.DEFAULT_FILL` 注册表常量
+- README 版本徽标补同步（v2.5.1-dev 时漏更）
+
 ## v2.5.1-dev (2026-08-19)
 
 > 版本同步脚本优化：new-version 改用 merge --squash 更新 + dev 自动归档。

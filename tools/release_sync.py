@@ -19,8 +19,9 @@
         # （ver 形如 2.4.1-dev 或 2.4.1；带 --also-release 时同步到 release）
 
     python tools/release_sync.py release <ver> --msg "发行说明" [--push]
-        # 把 mainline 快照为 release 公开发行（ver 形如 2.4.0，无 -dev 后缀），
-        # 自动改 _version.py 去 -dev + commit + tag
+        # mainline → release 公开发行（ver 形如 2.4.0，无 -dev 后缀）：
+        # release 锚定 mainline 对应 -dev 版本签出，改 _version.py 去 -dev，
+        # 发行 commit + 注解 tag
 
 约定：
     - 所有命令必须在 dev 分支、工作区干净的状态下执行（read-tree 会覆盖工作树）。
@@ -266,10 +267,11 @@ def cmd_check(_args):
             problems.append(f"mainline commit {h[:12]} tag 数异常: {tags}")
 
     # 3. release：沿第一父遍历发行链，遇到 mainline 链上的 commit 即止
+    #    （发行 commit 的父直接锚定 mainline 对应版本）
     commits = git("log", "--first-parent", "--format=%H %s", BRANCH_RELEASE).splitlines()
     for line in commits:
         h, subject = line.split(" ", 1)
-        # release 首 commit 的父是 mainline 链，此处即发行链终点
+        # 发行 commit 的父是 mainline 链，此处即发行链终点
         if is_ancestor(h, BRANCH_MAINLINE):
             break
         m = re.match(r"^(v\d+\.\d+\.\d+(?:-release)?):", subject)
@@ -280,6 +282,17 @@ def cmd_check(_args):
         tags = [t for t in tags if t and not t.startswith("pre-rebuild")]
         if len(tags) != 1:
             problems.append(f"release commit {h[:12]} tag 数异常: {tags}")
+
+    # 3b. 全部公开发行 tag（含历史上从 mainline 分叉的发行）指向的
+    #     commit 首行应为发行版本前缀
+    release_tag_re = re.compile(r"^v\d+\.\d+\.\d+(?:-release)?$")
+    for t in git("tag", "-l", check=False).splitlines():
+        if not t or t.startswith("pre-rebuild") or not release_tag_re.match(t):
+            continue
+        h = git("rev-parse", t, check=False)
+        subject = git("show", "-s", "--format=%s", h, check=False)
+        if not re.match(r"^v\d+\.\d+\.\d+(?:-release)?:", subject):
+            problems.append(f"发行 tag {t} 指向的 commit {h[:12]} 首行无发行前缀: {subject[:50]}")
 
     # 4. _version.py 与分支最新 tag 一致
     for branch in (BRANCH_MAINLINE, BRANCH_RELEASE):
@@ -435,7 +448,12 @@ def cmd_cherry(args):
 
 
 def cmd_release(args):
-    """mainline → release：树快照 + 去 -dev 后缀 + commit + tag。"""
+    """mainline → release：锚定对应版本签出 + 发行准备 + 注解 tag。
+
+    行业规范（Git Flow 简化）：发行 commit 的父直接锚定 mainline 的
+    对应版本 commit（reset --hard <vX.Y.Z-dev>），发行差异（_version.py
+    去 -dev 等）作为发行准备提交，公开发行打注解 tag。
+    """
     ensure_branch(BRANCH_DEV)
     ensure_clean_worktree()
     ver = parse_version(args.ver)
@@ -453,17 +471,17 @@ def cmd_release(args):
     if not args.msg:
         raise SyncError("必须提供 --msg 发行说明。")
 
-    print(f"[1/4] 树快照: mainline → release")
+    print(f"[1/4] release 锚定 mainline 版本 {src_tag}")
     git("checkout", BRANCH_RELEASE)
-    git("read-tree", "-u", "--reset", BRANCH_MAINLINE)
+    git("reset", "--hard", src_tag)
 
-    print(f"[2/4] 写入 _version.py = {format_version(ver)} (release)")
+    print(f"[2/4] 发行准备: 写入 _version.py = {format_version(ver)}")
     write_version_py(ver)
 
-    print(f"[3/4] commit + tag {tag}")
+    print(f"[3/4] commit + 注解 tag {tag}")
     git("add", "-A")
     git("commit", "-m", f"{tag}-release: {args.msg}")
-    git("tag", tag)
+    git("tag", "-a", tag, "-m", f"{tag}: {args.msg}")
 
     print(f"[4/4] 回到 dev")
     git("checkout", BRANCH_DEV)
@@ -473,6 +491,7 @@ def cmd_release(args):
         do_push([BRANCH_RELEASE])
 
     print(f"✓ release 新版本 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
+    print("  发行 commit 已锚定 mainline 对应版本，可在 release 分支上打包发行。")
 
 
 def build_parser():

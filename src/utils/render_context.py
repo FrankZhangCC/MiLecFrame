@@ -94,18 +94,16 @@ class RenderContext:
             if self.exif_data and 'gps' in self.exif_data:
                 return self.exif_data['gps']
         elif key == 'focal_length_formatted':
-            fl = self._display_data.get('raw_focal_length_35mm') or \
-                 self._display_data.get('raw_focal_length')
-            return f"{fl}mm" if fl else None
+            # 四个曝光元素键全部转发 ExifHelper 的共享格式化方法，
+            # 与 exif 组合文本同源（唯一格式化点，禁止在此另行实现）
+            return ExifHelper.format_focal_length(self.exif_data)
         elif key == 'aperture_formatted':
-            ap = self._display_data.get('raw_aperture')
-            return f"f/{ap}" if ap else None
+            return ExifHelper.format_aperture(self.exif_data)
         elif key == 'shutter_speed_formatted':
-            ss = self._display_data.get('raw_shutter_speed')
-            return f"{ss}s" if ss else None
+            return ExifHelper.format_shutter_speed_text(self.exif_data)
         elif key == 'iso_formatted':
-            iso_val = self._display_data.get('raw_iso')
-            return iso_val if iso_val else None
+            # 裸值：'ISO' 前缀由样式标签（如 FilmClip defined_text）或组合文本承担
+            return ExifHelper.get_iso_value(self.exif_data)
         elif key == 'custom_text':
             return self.custom_text or None
         return None

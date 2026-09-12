@@ -206,6 +206,8 @@ class ExifHelper:
                     not self._camera_exists_in_csv(camera_map_path, original_brand, original_model):
                 camera_map_file = Path(camera_map_path)
                 header_exists = camera_map_file.exists()
+                # ⚠️ 追加模式必须用 utf-8（utf-8-sig 在追加时会重复写出 BOM）；
+                # BOM 由 DeviceMapper._ensure_dbs_exist 创建文件时写入
                 with open(camera_map_path, 'a', newline='', encoding='utf-8') as csvfile:
                     fieldnames = ['original_brand', 'original_model', 'mapped_brand', 'mapped_model', 'timestamp']
                     writer = csv.writer(csvfile)
@@ -237,6 +239,7 @@ class ExifHelper:
                     not self._lens_exists_in_csv(lens_map_path, original_lens):
                 lens_map_file = Path(lens_map_path)
                 header_exists = lens_map_file.exists()
+                # ⚠️ 追加模式必须用 utf-8，理由同上 camera_map 追加点
                 with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
                     fieldnames = ['original_lens', 'mapped_lens', 'short_lens', 'brand', 'mount', 'timestamp']
                     writer = csv.writer(csvfile)
@@ -270,7 +273,8 @@ class ExifHelper:
         try:
             if not os.path.exists(camera_map_path):
                 return False
-            with open(camera_map_path, 'r', encoding='utf-8') as csvfile:
+            # utf-8-sig 读：自动剥离 BOM，兼容有/无 BOM 两种历史文件
+            with open(camera_map_path, 'r', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     if row.get('original_brand', '').strip() == original_brand and \
@@ -297,7 +301,7 @@ class ExifHelper:
         try:
             if not os.path.exists(lens_map_path):
                 return False
-            with open(lens_map_path, 'r', encoding='utf-8') as csvfile:
+            with open(lens_map_path, 'r', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     if row.get('original_lens', '').strip() == original_lens:
@@ -566,41 +570,137 @@ class ExifHelper:
         
         return f"{int(deg)}°{int(min_val)}'{sec:.1f}\"{ref_str}"
     
+    # ------------------------------------------------------------------
+    # 渲染链路共享格式化方法（唯一数据源）
+    #
+    # exif 组合文本（format_exif_for_display）与 RenderContext 的四个
+    # *_formatted 单独元素键共用以下方法，保证同一种数据在所有渲染
+    # 元素中的取值与格式完全一致；新增显示格式时只改这里。
+    # 显示格式约定（与现有样式消费方式对齐）：
+    #   焦距 '70mm'（含单位）、光圈 'f/5.6'（含前缀）、快门 '1/800s'（含单位）、
+    #   ISO 返回裸值 '250' —— ISO 前缀由样式标签元素（如 FilmClip 的
+    #   defined_text 'ISO'）或 exif 组合文本自行承担。
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def format_focal_length(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        焦距显示文本（唯一格式化点）。
+
+        取值优先级：35mm 等效焦距（'focal_length_35mm'）→ 物理焦距
+        （'focal_length'），统一保留个位数整数（'70.0'/'70' → '70mm'）。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '70mm'；无焦距数据返回 None；非数值脏数据原样拼接（不抛异常）
+        """
+        if not exif_data:
+            return None
+        fl = exif_data.get('focal_length_35mm') or exif_data.get('focal_length')
+        if not fl:
+            return None
+        try:
+            return f"{round(float(fl))}mm"
+        except (TypeError, ValueError):
+            return f"{fl}mm"
+
+    @staticmethod
+    def format_aperture(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        光圈显示文本（唯一格式化点），如 'f/5.6'。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 'f/5.6'；无光圈数据返回 None
+        """
+        if not exif_data:
+            return None
+        aperture = exif_data.get('aperture')
+        return f"f/{aperture}" if aperture else None
+
+    @staticmethod
+    def format_shutter_speed_text(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        快门显示文本（唯一格式化点），如 '1/800s'。
+
+        与 _format_shutter_speed(秒值) 的区别：本方法面向渲染显示，
+        输入 exif_data，在提取层已格式化的字符串上附加单位。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '1/800s'；无快门数据返回 None
+        """
+        if not exif_data:
+            return None
+        shutter = exif_data.get('shutter_speed')
+        return f"{shutter}s" if shutter else None
+
+    @staticmethod
+    def get_iso_value(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        ISO 显示值（唯一取值点），返回裸数值字符串如 '250'。
+
+        不带 'ISO' 前缀：前缀由样式标签元素（如 FilmClip 的 defined_text
+        'ISO'）或 exif 组合文本承担——各消费点前缀语义不同，数值必须同源。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '250'；无 ISO 数据返回 None
+        """
+        if not exif_data:
+            return None
+        iso = exif_data.get('iso')
+        return str(iso) if iso else None
+
     @staticmethod
     def format_exif_for_display(exif_data: Dict[str, str]) -> str:
         """
         将EXIF数据格式化为相框显示文本
-        
+
+        组合文本由四个共享格式化方法的结果组装而成，与 RenderContext
+        的单独元素键同源（唯一差异：ISO 段在此处带 'ISO' 前缀，因组合
+        文本没有样式标签承担前缀职责）。
+
         Args:
             exif_data: EXIF数据字典
-            
+
         Returns:
             格式化的EXIF显示文本
         """
         if not exif_data:
             return ""
-        
-        # 组装相框显示文本
+
+        # 组装相框显示文本（各段与单独元素键同源）
         parts = []
-        
-        # 焦距 - 优先使用EXIF提供的35mm等效焦距，否则直接用物理焦距
-        if 'focal_length_35mm' in exif_data:
-            parts.append(f"{exif_data['focal_length_35mm']}mm")
-        elif 'focal_length' in exif_data:
-            parts.append(f"{exif_data['focal_length']}mm")
-        
-        # 光圈
-        if 'aperture' in exif_data:
-            parts.append(f"f/{exif_data['aperture']}")
-        
-        # 快门
-        if 'shutter_speed' in exif_data:
-            parts.append(f"{exif_data['shutter_speed']}s")
-        
-        # ISO
-        if 'iso' in exif_data:
-            parts.append(f"ISO{exif_data['iso']}")
-        
+
+        # 焦距（'70mm'，含单位）
+        fl_text = ExifHelper.format_focal_length(exif_data)
+        if fl_text:
+            parts.append(fl_text)
+
+        # 光圈（'f/5.6'，含前缀）
+        aperture_text = ExifHelper.format_aperture(exif_data)
+        if aperture_text:
+            parts.append(aperture_text)
+
+        # 快门（'1/800s'，含单位）
+        shutter_text = ExifHelper.format_shutter_speed_text(exif_data)
+        if shutter_text:
+            parts.append(shutter_text)
+
+        # ISO（组合文本中带前缀；单独元素键返回裸值，见 get_iso_value）
+        iso_value = ExifHelper.get_iso_value(exif_data)
+        if iso_value:
+            parts.append(f"ISO{iso_value}")
+
         return ", ".join(parts)
     
     @staticmethod

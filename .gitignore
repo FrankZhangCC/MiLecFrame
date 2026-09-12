@@ -24,6 +24,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+tools/
+tests/
 
 # Virtual environments
 venv/
@@ -122,3 +124,5 @@ session-ses_1779.md
 docs/Features_Vertical_特性一图介绍竖版.ai
 docs/ScreenShot_2026-06-01_212104_518.png
 docs/frame_example.png
+docs/RUST_REWRITE_PLAN.md
+docs/EXIF_COMPATIBILITY_PLAN.md

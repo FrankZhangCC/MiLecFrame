@@ -51,6 +51,13 @@ src/
   - 例：mainline `v2.4.0-dev` 公开发行 → release `v2.4.0`。
 - **一个版本 = 一个 commit + 一个 tag**。禁止"增补"commit 堆积：
   修复走 **patch 号递增**（`v2.4.0-dev` → `v2.4.1-dev`；`v2.4.0` → `v2.4.1`）。
+- **版本号语义遵循 SemVer**：新增功能走 minor 递增（`v2.4.0` → `v2.5.0`）；
+  破坏性变更（Conventional Commits 的 `feat!`/`BREAKING CHANGE:` 脚注）走
+  **major 递增**（`v2.5.0` → `v3.0.0`）。
+- **tag 规范**：内部版本 tag（`vX.Y.Z-dev`）为轻量 tag；公开发行 tag
+  （`vX.Y.Z`）为**注解 tag**（`git tag -a`，消息 = 发行说明，GitHub
+  Release 自动引用）。发行 commit 的父**锚定 mainline 对应版本 commit**
+  （v1.2.0 发行 commit 的父 = mainline v2.4.0-dev commit）。
 - 版本号变更时，修改 `src/_version.py` 并同步更新 `README.md` 徽标和
   `CHANGELOG.md`；公开发行还需更新 `CHANGELOG_RELEASE.md`（**注意三个分支
   都要同步**，v1.2.0 时曾因只在 release 分支改 CHANGELOG_RELEASE 导致
@@ -65,11 +72,12 @@ src/
 支持 `cherry-pick` 跨线搬运修复：
 
 ```
-              v1.0.1-dev ─ v1.1.0-dev ─ ... ─ v2.4.0-dev ─→  (mainline 版本链)
-             /
-Initial ──────────────────────────────────────────────────→  (dev 完整开发历史)
-             \
-              v0.1.0 ─ v1.0.0 ─ v1.1.0-release ─ v1.2.0 ─→  (release 发行链)
+              v1.0.1-dev ─ v1.1.0-dev ─ ... ─ v2.5.1-dev ─→  (mainline 版本链)
+             /              |                    |
+Initial ────────────────────┼────────────────────┼────────  (dev 完整开发历史)
+             \              |                    |
+              v0.1.0(→v1.12.0)  v1.0.0(→v2.0.0)  v1.1.0(→v2.2.0)
+                                            v1.2.0(→v2.4.0)    (release 发行点)
 ```
 
 | 分支 | 用途 | 规则 |
@@ -80,8 +88,9 @@ Initial ────────────────────────
 
 > ⚠️ **历史重建说明（2026-08）**：mainline/release 原为 orphan 起步、
 > 与 dev 无共同祖先，通过 commit-tree 重建父链后共享 dev 的 Initial commit
-> 作为共同祖先。版本快照（read-tree）仍是版本里程碑的标准操作，但**单个
-> 修复现在可以用 `cherry-pick` 直接跨线搬运**，不再手工复制。
+> 作为共同祖先；release 各发行 commit 的父**锚定其来源的 mainline 版本**
+> （v0.1.0→v1.12.0-dev、v1.0.0→v2.0.0-dev、v1.1.0→v2.2.0-dev、
+> v1.2.0→v2.4.0-dev）。单个修复用 `cherry-pick` 跨线搬运，不再手工复制。
 > 全部同步操作由 `tools/release_sync.py` 脚本完成，禁止手工执行 read-tree。
 >
 > 📌 **dev 归档机制（2026-08-19 起）**：每次里程碑快照后，dev 自动
@@ -107,7 +116,7 @@ python tools/release_sync.py cherry <fix-commit> 2.4.1-dev
 #    若 v2.4.0 已公开发行，修复还需同步到 release：
 python tools/release_sync.py cherry <fix-commit> 2.4.1 --also-release
 
-# 4. 公开发行 → mainline 快照到 release，版本号去 -dev
+# 4. 公开发行 → release 锚定 mainline 对应版本签出（去 -dev + 注解 tag）
 python tools/release_sync.py release 2.4.0 --msg "发行说明"
 python tools/release_sync.py release 2.4.0 --push
 
@@ -194,7 +203,8 @@ git add -A && git commit -m "feat: ..."
 # 2. mainline：squash 合并 + tag + 推送（脚本自动 merge --squash/commit/tag/dev 归档）
 python tools/release_sync.py new-version 2.4.0-dev --msg "功能简述" --push
 
-# 3. release：快照 + 去 -dev 后缀 + tag + 推送（脚本自动改 _version.py）
+# 3. release：锚定 mainline 对应版本 + 去 -dev 后缀 + 注解 tag + 推送
+#    （脚本自动 reset --hard <对应 -dev tag>、改 _version.py、打注解 tag）
 python tools/release_sync.py release 2.4.0 --msg "发行说明" --push
 
 # 4. 在 release 状态下打包发行

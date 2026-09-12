@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import Tuple, Optional, Dict, List
 
-from PIL import Image, ImageCms, ImageDraw, ImageFont
+from PIL import Image, ImageOps, ImageCms, ImageDraw, ImageFont
 # 设置PIL最大图像像素限制，解决解压炸弹警告
 Image.MAX_IMAGE_PIXELS = 200000000  # 2亿像素，可根据需要调整
 
@@ -20,6 +20,7 @@ import piexif
 
 from src.utils.exif_helper import ExifHelper
 from src.utils.device_mapper import DeviceMapper
+from src.utils.background_fill import BackgroundFillManager
 from src.frame_styles.style_manager import StyleManager
 from src.core.renderer import FrameRenderer
 from src.core.hdr_handler import HDRHandler
@@ -53,7 +54,9 @@ class ImageProcessor:
                 author: Optional[str] = None, 
                 location: Optional[str] = None,
                 style_name: Optional[str] = None,
-                bg_fill_type: str = "white",
+                # 背景填充默认值必须取注册表常量（历史默认 "white" 是非法键，
+                # 不传该参数的调用会触发 BackgroundFillManager 的 ValueError）
+                bg_fill_type: str = BackgroundFillManager.DEFAULT_FILL,
                 decorations: Optional[List[Dict]] = None,
                 font_weight: Optional[str] = None,
                 logo_filename: Optional[str] = None,
@@ -112,15 +115,34 @@ class ImageProcessor:
                     return False
             else:
                 image = Image.open(input_path)
-            
+
+            # 3a. 应用 EXIF Orientation 转置（竖拍照片方向修正）
+            # 佳能等相机的竖拍照片以"横向像素数据 + EXIF Orientation(274) 旋转
+            # 标记"存储，PIL 的 Image.open() 不解析该标记，直接渲染会得到横图。
+            # 此处统一按 Orientation 标签将像素转正（HDR/HEIF/AVIF 路径同样覆盖）。
+            image, orientation_transposed = self._apply_exif_orientation(image)
+
             # 4. 检查EXIF信息
             exif_data = self.exif_helper.extract_exif_data(input_path)
             if not exif_data:
                 warn_msg = f"警告: 未找到EXIF信息 - {input_path}"
                 self.logger.warning(warn_msg)
                 print(warn_msg)
-            
+
             raw_exif = self.exif_helper.extract_raw_exif(input_path)
+
+            # 3b. 像素转正后同步修正 raw_exif 中的 Orientation 标签
+            # 输出文件嵌入的 raw_exif 从原文件提取；若像素已按旧标签旋转到位，
+            # 必须把标签重置为 1（正常方向），否则查看器会按旧标签再旋转一次，
+            # 造成"输出竖图仍带旋转标记"的二次旋转问题。
+            if orientation_transposed and raw_exif:
+                try:
+                    # piexif 字典的 0th IFD 承载图像级标签，Orientation 固定在此
+                    if "0th" not in raw_exif:
+                        raw_exif["0th"] = {}
+                    raw_exif["0th"][piexif.ImageIFD.Orientation] = 1
+                except Exception as e:
+                    self.logger.warning(f"重置输出 EXIF Orientation 标签失败: {e}")
             
             # 获取格式化的EXIF数据用于显示（如果需要传递给renderer或后续处理）
             # 注意：如果renderer仍然需要原始exif_data，我们保留它。
@@ -200,6 +222,40 @@ class ImageProcessor:
             self.logger.error(traceback.format_exc())
             return False
     
+    def _apply_exif_orientation(self, image: Image.Image) -> Tuple[Image.Image, bool]:
+        """
+        按 EXIF Orientation 标签转置图像像素（方向修正的唯一入口）
+
+        佳能等相机的竖拍照片在文件中通常以"横向像素数据 + EXIF Orientation(274)
+        旋转标记"存储，PIL 的 Image.open() 不解析该标记，直接渲染会得到横图。
+        本方法使用 Pillow 的 ImageOps.exif_transpose() 将像素旋转到位：
+        - 标签缺失或为 1 时图像内容保持不变（exif_transpose 为无操作）；
+        - 标签为 2-8 时按标记旋转/翻转像素。
+
+        Args:
+            image: 原始打开的图像
+
+        Returns:
+            (转正后的图像, 是否发生了旋转/翻转) 二元组。
+            "是否转置"依据原始 Orientation 标签值判断——实测 Pillow 对
+            无标签图像也返回副本，不能以对象同一性判断。
+        """
+        try:
+            # 读取原始 Orientation 标签（274 = 0x0112），2-8 表示需要旋转/翻转
+            orientation = image.getexif().get(0x0112)
+            transposed = ImageOps.exif_transpose(image)
+            was_transposed = orientation not in (None, 1)
+            if was_transposed:
+                self.logger.info(
+                    f"检测到 EXIF Orientation={orientation}，已将图像像素转正 "
+                    f"({image.size} -> {transposed.size})"
+                )
+            return transposed, was_transposed
+        except Exception as e:
+            # 转置失败时回退为原始图像，不阻断主流程
+            self.logger.warning(f"EXIF Orientation 转置失败，使用原始方向: {e}")
+            return image, False
+
     def _check_image_format(self, image_path: str) -> Optional[str]:
         """
         检查图像格式是否支持

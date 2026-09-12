@@ -81,7 +81,10 @@ MiLecFrame/
 ├── docs/
 │   ├── STYLE_GUIDE.md           # 样式配置指南
 │   └── DEVELOPMENT.md           # 本文件
-└── build_pyside.py              # PyInstaller 编译脚本
+├── tools/
+│   └── release_sync.py          # 版本同步脚本（new-version / cherry / release / check）
+├── MiLecFrame.spec              # PyInstaller 打包配置（onedir 便携版）
+└── build_release.py             # 一键打包脚本（构建 / --zip 发行包 / 图标生成）
 ```
 
 ---
@@ -98,36 +101,37 @@ MiLecFrame/
   5. 色彩空间检测 → 非 sRGB ICC 数学转换至 sRGB
   6. HDR 色调映射 → Reinhard 全局算子压缩动态范围（仅 HEIF/AVIF）
   7. 加载样式配置（StyleManager，含变体上下文匹配）
-  8. 渲染相框（FrameRenderer，三阶段管线）
+  8. 渲染相框（FrameRenderer，五阶段管线，见 §3.3）
   9. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
 ```
 
 ### 3.2 EXIF 数据流（四层架构）
 
-```
-EXIF Helper              Device Mapper             display_data           RenderContext
-│                        │                         │                      │
-├─ 解析原始二进制        │                         │                      │
-├─ _safe_decode()        │                         │                      │
-│  多编码容错            │                         │                      │
-│                        ├─ 品牌/机型/镜头名映射   │                      │
-│                        │                        ├─ 字段拼接组合        │
-│                        │                        ├─ camera_combined     │
-│                        │                        ├─ camera_lens_combined│
-│                        │                        ├─ short_lens          │
-│                        │                        ├─ raw_* 原始值        │
-│                        │                        │                      ├─ 条件路由
-│                        │                        │                      ├─ 镜头显示模式
-│                        │                        │                      ├─ 短版开关
-│                        │                        │                      ├─ 时间隐藏模式
-│                        │                        │                      ├─ 时间+作者拼接
-│                        │                        │                      ├─ 竖向自适应
-│                        │                        │                      │
-▼                        ▼                        ▼                      ▼
-raw EXIF bytes          映射后字段               组合显示字段            最终文本
-```
+数据自上而下流经四层，每层只依赖上一层的输出：
 
-统一数据出口为 `exif_helper.get_display_data()`。`raw_*` 字段供 GUI 设备信息区展示，映射后字段供渲染使用。
+**① 提取层 —— `ExifHelper.extract_exif_data()`**
+
+- piexif 解析原始 EXIF 二进制；`_safe_decode()` 多编码容错（utf-8 / latin-1 / gbk 等）
+- 产出 `exif_data` 字典：`camera_make`、`camera_model`、`lens_model`、`focal_length`、`focal_length_35mm`、`aperture`、`shutter_speed`、`iso`、`datetime_original`、`gps` 等字符串字段
+- 旁路：`_record_device_info()` 将未见过的设备自动追加到 `camera_map.csv` / `lens_map.csv`（独立 try/except，失败不影响提取结果）
+
+**② 映射层 —— `DeviceMapper`**
+
+- 以 `(original_brand, original_model)`、`original_lens` 为键查询映射库
+- 输出 `mapped_brand` / `mapped_model` / `mapped_lens` / `short_lens`；无映射时回退原始值
+
+**③ 组合层 —— `ExifHelper.get_display_data()`（统一数据出口）**
+
+- `camera_combined`：映射后品牌 + 型号
+- `camera_lens_combined`：相机 | 镜头 单行组合；`camera_lens_combined_short` 为竖幅/方形用的短版镜头变体
+- `exif_formatted`：曝光组合文本（焦距/光圈/快门/ISO，由共享格式化方法组装，见 §7.7）
+- `raw_*`：原始值透传，仅供 GUI 设备信息区展示
+
+**④ 路由层 —— `RenderContext.get_text(key)`**
+
+- 按样式 YAML `info_position` 声明的 key 分发最终显示文本，渲染器零改动
+- 条件逻辑全部在此闭环：`lens_display_mode`（镜头显示模式）、`use_short_lens`（短版开关）、`timestamp_display_mode`（时间显示模式）、`timestamp_author`（时间+作者拼接）
+- 曝光四元素键（`*_formatted`）直接转发 `ExifHelper` 共享格式化方法（同源约定见 [§7.7 渲染文本同源模式](#77-渲染文本同源模式)）
 
 ### 3.3 渲染管线（五阶段）
 
@@ -400,7 +404,7 @@ mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
 - `defined_texts` → 配置中写死的 `content`
 - `custom_text` → `context.get_text('custom_text')`（GUI 输入）
 
-**三阶段处理**（详情见 [3.3 渲染管线](#33-渲染管线四阶段)）：
+**三阶段处理**（TextRenderer 参与 Phase 1/2/3，整体管线见 [3.3 渲染管线（五阶段）](#33-渲染管线五阶段)）：
 
 1. Phase 1 测量：逐元素检测混排（CJK 检测正则 `_CJK_CHAR_RE`），单字体用 `font.getbbox`，混排用分段测量合并包围盒
 2. Phase 2 拓扑排序 + 定位：Kahn 算法 → 逐个 `calculate_position()` → `register_element()`
@@ -447,19 +451,19 @@ FILL_TYPES = {
 
 | key | 内部字段来源 | 条件路由 |
 |-----|------------|---------|
-| `exif` | `display_data['exif_formatted']` | — |
+| `exif` | `display_data['exif_formatted']`（由共享格式化方法组装） | — |
 | `timestamp` | `exif_data['datetime_original']` | `timestamp_display_mode`: `full` → 完整时间，`date_only` → `[:10]` 切片，`hide` → `None` |
 | `timestamp_author` | datetime + author | 三段 fallback：时间+作者 / 仅时间 / 仅作者 / None |
 | `camera_lens` | `camera_lens_combined` / `camera_lens_combined_short` / `camera_combined` | 由 lens_display_mode + use_short_lens 控制 |
 | `camera` | `display_data['camera_combined']` | — |
 | `camera_make` | `display_data['camera_make']` | — |
 | `lens` | `lens_model` / `short_lens` | use_short_lens 控制 |
-| `focal_length_formatted` | `raw_focal_length_35mm` → 回退 `raw_focal_length` | — |
-| `aperture_formatted` | `raw_aperture` | — |
-| `shutter_speed_formatted` | `raw_shutter_speed` + "s" | — |
-| `iso_formatted` | `raw_iso` | 不含 "ISO" 前缀 |
+| `focal_length_formatted` | `ExifHelper.format_focal_length()`：35mm 等效优先 → 物理焦距取整个位数（`'70.0'`→`'70mm'`） | — |
+| `aperture_formatted` | `ExifHelper.format_aperture()` → `f/5.6` | — |
+| `shutter_speed_formatted` | `ExifHelper.format_shutter_speed_text()` → `1/800s` | — |
+| `iso_formatted` | `ExifHelper.get_iso_value()` → 裸值 `250` | 不含 "ISO" 前缀（前缀由样式标签元素或组合文本承担） |
 
-**新增显示字段指南**：在 `get_text()` 中添加 `elif key == 'xxx':` 分支 → 在 YAML 的 `info_position` 中声明配置。渲染器零改动。
+**新增显示字段指南**：在 `get_text()` 中添加 `elif key == 'xxx':` 分支 → 在 YAML 的 `info_position` 中声明配置。渲染器零改动。曝光类数值（焦距/光圈/快门/ISO）的格式化必须复用 `ExifHelper` 共享方法（见 [§7.7](#77-渲染文本同源模式)），禁止在分支内另行拼接。
 
 ### 4.6 LogoSelector（Logo 选择器）
 
@@ -490,10 +494,17 @@ FILL_TYPES = {
 
 `src/utils/device_mapper.py`
 
-- `_ensure_dbs_exist()` → 文件不存在时自动创建带表头的 CSV
+- `_ensure_dbs_exist()` → 文件不存在时自动创建带表头的 CSV（UTF-8 with BOM）
 - `_load_camera_map()` → 读取 `(original_brand, original_model) → {mapped_brand, mapped_model}`
-- `_load_lens_map()` → 读取 `original_lens → {mapped_lens, short_lens, brand, mount}`
+- `_load_lens_map()` → 读取 `original_lens → mapped_lens`
+- `_load_short_lens_map()` → 读取 `original_lens → short_lens`（缺省回退 mapped_lens）
 - GUI 中通过 `TableView` 可编辑表格，实时保存回 CSV
+
+**CSV 编码约定**：`camera_map.csv` / `lens_map.csv` 统一为 **UTF-8 with BOM（`utf-8-sig`）**，保证中文 Windows 的 Excel 双击打开时按 UTF-8 解码（否则 `α` 等非 ASCII 字符会被 GBK 误解为乱码，如 `α` → `伪`）：
+
+- 读点一律用 `utf-8-sig`（自动剥离 BOM，兼容无 BOM 的历史文件）
+- 整文件重写（GUI 保存、新建数据库）用 `utf-8-sig` 写出 BOM
+- ⚠️ 追加（`'a'`）模式必须保持 `utf-8`：`utf-8-sig` 编码器在追加时会再次写出 BOM，破坏文件结构（`ExifHelper._record_device_info` 的设备自动记录即此场景）
 
 ---
 
@@ -585,7 +596,7 @@ for seg_text, font, width, ascent, descent in seg_info:
 
 ### 7.4 外部数据文件模式
 
-设备映射（`camera_map.csv`、`lens_map.csv`）和 Logo 补偿系数（`logo_scale.yaml`）均存储为可编辑的外部文件，程序自动创建默认值。用户修改即生效，无需重新编译。
+设备映射（`camera_map.csv`、`lens_map.csv`，UTF-8 with BOM，编码约定见 [§4.8](#48-devicemapper设备映射)）和 Logo 补偿系数（`logo_scale.yaml`）均存储为可编辑的外部文件，程序自动创建默认值。用户修改即生效，无需重新编译。
 
 ### 7.5 配置持久化
 
@@ -601,6 +612,21 @@ for seg_text, font, width, ascent, descent in seg_info:
 4. 动态添加/删除子控件后调用 `QTimer.singleShot(0, self._adjustViewSize)`
 5. 开发完成后调用 `layout_debug.dump_expand_card(self)` 验证
 
+### 7.7 渲染文本同源模式
+
+exif 组合文本（`ExifHelper.format_exif_for_display()`）与 RenderContext 的四个
+`*_formatted` 单独元素键共用 `ExifHelper` 的共享格式化方法（`format_focal_length`
+/ `format_aperture` / `format_shutter_speed_text` / `get_iso_value`），同一数据在
+所有渲染元素中的取值与格式完全一致，任何格式调整只需修改对应的一个方法。
+
+组合文本与单独键的唯一差异是 ISO 前缀：单独键返回裸值（前缀由样式标签元素
+承担，如 FilmClip 的 `defined_text: "ISO"`），组合文本带 `ISO` 前缀（组合文本
+没有样式标签承担该职责）。
+
+新增曝光类显示需求时必须复用共享方法，禁止在 `get_text()` 或组合文本中另行
+实现格式化，否则各渲染元素的数值输出会漂移（曾因两处独立拼接导致同一焦距
+一处显示 `70mm`、另一处显示 `70.0mm`）。
+
 ---
 
 ## 8. 开发约定
@@ -614,19 +640,27 @@ for seg_text, font, width, ascent, descent in seg_info:
 ### 8.2 版本管理
 
 - `src/_version.py` 是版本号**单点入口**
-- 公开 Release 版：`v0.x.x` / `v1.x.x`
-- 内部开发版：`v2.x.x-dev`
-- 版本号变更时，同步更新 `README.md` 徽标和 `CHANGELOG.md`
+- **版本同源**：mainline 用 `vX.Y.Z-dev`（内部开发版），release 用 `vX.Y.Z`
+  （公开发行版，同号去掉 `-dev` 后缀；自 v2.4.0 起对齐，不再有独立 release 编号序列）
+- **一个版本 = 一个 commit + 一个 tag**：修复走 patch 号递增（`v2.4.0-dev`→`v2.4.1-dev`），禁止"增补" commit 堆积
+- 版本语义遵循 SemVer：新增功能递增 minor（`v2.4.0`→`v2.5.0`），破坏性变更（`feat!`/`BREAKING CHANGE:`）递增 major（`v2.5.0`→`v3.0.0`）
+- tag 规范：内部版本 tag（`vX.Y.Z-dev`）为轻量 tag；公开发行 tag（`vX.Y.Z`）为注解 tag（消息 = 发行说明），发行 commit 的父**锚定 mainline 对应版本 commit**
+- 版本号变更时同步更新 `README.md` 徽标与 `CHANGELOG.md`；公开发行还需更新 `CHANGELOG_RELEASE.md`（**三个分支都要同步**）
+- 全部同步操作由 `tools/release_sync.py` 完成（`new-version` / `cherry` / `release` / `check`），禁止手工 read-tree、禁止移动已推送的 tag
 
-### 8.3 Git 分支规范
+### 8.3 Git 分支规范（三线模型）
 
 | 分支 | 用途 | 推送 |
 |------|------|------|
-| `dev` | 日常开发 | ❌ 不推送 |
-| `release` | 公开发布快照 | ✅ `origin/release` |
+| `dev` | 日常开发（Conventional Commits），不在此分支打 tag | ❌ 仅本地 |
+| `mainline` | 版本里程碑线，每 commit = 一版本，带 `vX.Y.Z-dev` tag | ✅ `push origin mainline --follow-tags` |
+| `release` | 稳定公开发行，GitHub 默认分支，受保护（禁止 force push） | ✅ `push origin release` |
 
-- 仅推送 `release` 标签，**绝不推送** `v*-dev` 标签
-- release 分支仅含纯净快照 commit，无开发中间历史
+- 三线共享共同祖先（dev 的 Initial commit）；release 各发行 commit 的父锚定其来源的 mainline 版本
+- dev 在每次里程碑快照后 `reset --hard mainline` 自动归档（`new-version` 内置 `merge --squash dev`）
+- 单点修复用 `release_sync.py cherry <commit> <目标版本>` 跨线搬运；已发行版本的修复加 `--also-release` 同步 release
+- 公开发行完整流程：dev 提交 → `new-version`（squash 合并 + tag + dev 归档 + 推送）→ `release`（锚定签出 + 去 `-dev` + 注解 tag + 推送）→ release 状态下 `build_release.py --zip` 打包
+- 轻量 tag 若 `--follow-tags` 未生效，补 `git push origin --tags`
 
 ### 8.4 新增功能检查清单
 
@@ -634,5 +668,6 @@ for seg_text, font, width, ascent, descent in seg_info:
 - [ ] 新参数是否需要沿透传链传递（CLI → ImageProcessor → FrameRenderer → RenderContext）？
 - [ ] 新背景类型是否在 `FILL_TYPES` 注册？（而非在 renderer.py 中硬编码）
 - [ ] 新显示字段是否在 `RenderContext.get_text()` 中添加了分支？
+- [ ] 曝光类显示格式化是否复用 `ExifHelper` 共享方法？（禁止在消费点另行实现，见 §7.7）
 - [ ] 外部数据文件是否在 `.gitignore` 中放了追踪规则？
 - [ ] README / STYLE_GUIDE / DEVELOPMENT 是否需要同步更新？

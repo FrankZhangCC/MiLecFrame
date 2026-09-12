@@ -49,6 +49,7 @@ from src.utils.config_manager import default_config_manager
 from src.core.image_processor import ImageProcessor
 from PIL import Image as PILImage
 from PIL import ImageCms
+from PIL import ImageOps as PILImageOps
 import io
 
 logger = logging.getLogger(__name__)
@@ -704,6 +705,8 @@ class ImageProcessingPage(QWidget):
         tip = self._show_progress('加载中', f'正在加载第 1/{n} 张图片...')
 
         try:
+            # 记录本次导入前已有的文件数，用于定位本次新导入的第一张图
+            first_new_index = len(self.file_items)
             for i, path in enumerate(file_paths):
                 tip.setContent(f'正在加载第 {i+1}/{n} 张图片...')
                 QApplication.processEvents()
@@ -717,6 +720,9 @@ class ImageProcessingPage(QWidget):
                     item.file_name = os.path.basename(path)
 
                     pil_img = PILImage.open(io.BytesIO(item.file_bytes))
+                    # 应用 EXIF Orientation 转置：佳能等相机竖拍照片以"横向像素
+                    # + 旋转标记"存储，不转置会导致缩略图与宽高信息横竖颠倒
+                    pil_img = PILImageOps.exif_transpose(pil_img)
                     item.width, item.height = pil_img.size
 
                     item.thumbnail = self._create_thumbnail(pil_img)
@@ -739,6 +745,20 @@ class ImageProcessingPage(QWidget):
                         content=f"无法加载文件: {os.path.basename(path)}",
                         parent=self,
                     )
+
+            # 竖图自动启用"短版镜头名"（移植自旧版 Streamlit GUI 的原设计：
+            # 新图片导入时按 h >= w 判定，竖图与方形图均自动勾选；仅在导入
+            # 新图时设置一次，之后尊重用户手动修改，切换胶片栏选中图时不
+            # 重复覆盖。item.width/height 为 EXIF 转正后的真实方向，佳能等
+            # 竖拍照片（横向存储+旋转标记）的判断因此可靠。）
+            if first_new_index < len(self.file_items):
+                first_item = self.file_items[first_new_index]
+                auto_short_lens = first_item.height >= first_item.width
+                self.chk_short_lens.setChecked(auto_short_lens)
+                logger.info(
+                    f"按首图方向自动设置短版镜头名: {first_item.file_name} "
+                    f"({first_item.width}x{first_item.height}) -> {auto_short_lens}"
+                )
 
             self._update_button_states()
             if self.file_items and self.current_index == -1:
@@ -982,6 +1002,9 @@ class ImageProcessingPage(QWidget):
                 pixmap = QPixmap.fromImage(q_img)
             elif item.file_bytes:
                 pil_img = PILImage.open(io.BytesIO(item.file_bytes))
+                # 原图预览同样需按 EXIF Orientation 转正（与导入缩略图保持一致；
+                # 结果图分支无需处理，输出文件在保存时已将 Orientation 重置为 1）
+                pil_img = PILImageOps.exif_transpose(pil_img)
                 pil_img = self._convert_to_srgb(pil_img)
                 if pil_img.mode != 'RGB':
                     pil_img = pil_img.convert('RGB')

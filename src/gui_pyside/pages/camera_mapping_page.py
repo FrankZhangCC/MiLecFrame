@@ -96,7 +96,8 @@ class CameraMappingPage(QWidget):
         path = dm.camera_db_path
         self._all_data.clear()
         if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
+            # utf-8-sig 读：自动剥离 BOM，兼容有/无 BOM 两种历史文件
+            with open(path, 'r', encoding='utf-8-sig') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     clean = {k.strip(): v.strip() for k, v in row.items() if k}
@@ -350,7 +351,8 @@ class CameraMappingPage(QWidget):
                 for col in fieldnames:
                     row.setdefault(col, '')
 
-            with open(path, 'w', newline='', encoding='utf-8') as f:
+            # utf-8-sig 写：写出 BOM，保证 Excel 直接打开不乱码（α 等非 ASCII 字符）
+            with open(path, 'w', newline='', encoding='utf-8-sig') as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(self._all_data)

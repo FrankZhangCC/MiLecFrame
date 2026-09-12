@@ -4,6 +4,13 @@
 """
 设备映射数据库模块
 用于管理和维护相机品牌、机型及镜头的映射关系
+
+CSV 编码约定（2026-09-12 起）：
+    camera_map.csv / lens_map.csv 统一为 UTF-8 with BOM（utf-8-sig），
+    保证中文 Windows 的 Excel 双击打开时按 UTF-8 解码（否则 α 等字符
+    会被 GBK 误解）。读点一律用 'utf-8-sig'（自动剥离 BOM，兼容无 BOM
+    旧文件）；整文件重写点用 'utf-8-sig' 写出 BOM；⚠️ 追加（'a'）模式
+    必须保持 'utf-8'——utf-8-sig 编码器在追加时会再次写出 BOM 破坏文件。
 """
 import csv
 import logging
@@ -52,7 +59,8 @@ class DeviceMapper:
             
             if not file_path.exists():
                 # 创建默认设备映射数据库
-                with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+                # 创建文件用 utf-8-sig 写出 BOM，保证 Excel 直接打开不乱码
+                with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
                     writer = csv.writer(csvfile)
                     
                     if 'camera' in str(file_path):
@@ -70,7 +78,8 @@ class DeviceMapper:
         camera_map = {}
         
         try:
-            with open(self.camera_db_path, 'r', encoding='utf-8') as csvfile:
+            # utf-8-sig 读：自动剥离 BOM，兼容有/无 BOM 两种历史文件
+            with open(self.camera_db_path, 'r', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     original_brand = row['original_brand'].strip()
@@ -100,7 +109,7 @@ class DeviceMapper:
         lens_map = {}
         
         try:
-            with open(self.lens_db_path, 'r', encoding='utf-8') as csvfile:
+            with open(self.lens_db_path, 'r', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     original_lens = row['original_lens'].strip()
@@ -126,7 +135,7 @@ class DeviceMapper:
         short_lens_map = {}
         
         try:
-            with open(self.lens_db_path, 'r', encoding='utf-8') as csvfile:
+            with open(self.lens_db_path, 'r', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 has_short_column = 'short_lens' in (reader.fieldnames or [])
                 for row in reader:
@@ -246,7 +255,8 @@ class DeviceMapper:
                 'mapped_model': mapped_model
             }
             
-            # 追加到CSV文件
+            # 追加到CSV文件（⚠️ 追加模式必须用 utf-8：utf-8-sig 在追加时会
+            # 再次写出 BOM，破坏已有文件；BOM 由创建/整写路径负责）
             with open(self.camera_db_path, 'a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow([original_brand, original_model, mapped_brand, mapped_model, timestamp])
@@ -290,7 +300,7 @@ class DeviceMapper:
             self.lens_map[original_lens] = mapped_lens
             self.short_lens_map[original_lens] = short_lens
             
-            # 追加到CSV文件
+            # 追加到CSV文件（⚠️ 追加模式必须用 utf-8，理由同 add_camera_mapping）
             with open(self.lens_db_path, 'a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow([original_lens, mapped_lens, short_lens, brand or '', mount or '', timestamp])
