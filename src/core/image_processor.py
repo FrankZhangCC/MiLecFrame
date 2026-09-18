@@ -243,7 +243,12 @@ class ImageProcessor:
         try:
             # 读取原始 Orientation 标签（274 = 0x0112），2-8 表示需要旋转/翻转
             orientation = image.getexif().get(0x0112)
+            # exif_transpose 无论是否发生转置都返回新 Image 对象，且新对象
+            # 不继承 format 属性（PIL 的 _new() 不拷贝该字段），先记录原图
+            # 格式并在转正后回填，避免下游 get_file_info 读取到 None
+            img_format = image.format
             transposed = ImageOps.exif_transpose(image)
+            transposed.format = img_format
             was_transposed = orientation not in (None, 1)
             if was_transposed:
                 self.logger.info(

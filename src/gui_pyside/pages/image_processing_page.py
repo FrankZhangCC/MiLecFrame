@@ -722,7 +722,12 @@ class ImageProcessingPage(QWidget):
                     pil_img = PILImage.open(io.BytesIO(item.file_bytes))
                     # 应用 EXIF Orientation 转置：佳能等相机竖拍照片以"横向像素
                     # + 旋转标记"存储，不转置会导致缩略图与宽高信息横竖颠倒
+                    # 注意：exif_transpose 无论是否发生转置都返回新 Image 对象，
+                    # 且新对象不继承 format 属性（PIL 的 _new() 不拷贝该字段），
+                    # 转正后需从原图回填，否则信息栏"格式"会兜底显示"未知"
+                    img_format = pil_img.format
                     pil_img = PILImageOps.exif_transpose(pil_img)
+                    pil_img.format = img_format
                     item.width, item.height = pil_img.size
 
                     item.thumbnail = self._create_thumbnail(pil_img)
