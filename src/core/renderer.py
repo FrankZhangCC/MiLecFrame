@@ -28,6 +28,14 @@ from src.utils.render_context import RenderContext
 from src.core.blur_cache import RenderBlurCache, PreparedBlurLRU
 from src.core.decorator import Decorator
 from src.core.text_renderer import TextRenderer
+# 竖图方向适配（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §5）：
+# 解析/旋转/还原/缓存键派生全部收敛到统一工具模块，渲染器不自带规则
+from src.utils.orientation_adaptation import (
+    resolve_effective_adaptation,
+    rotate_image_for_render,
+    restore_rendered_orientation,
+    build_adapted_source_cache_key,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +97,11 @@ class RenderOptions:
     # 页面级 LRU（PreparedBlurLRU）：与 source_cache_key 同时提供才生效；
     # 批量处理路径不传，仅用一级缓存
     prepared_blur_cache: Optional[PreparedBlurLRU] = None
+    # ── 竖图方向适配用户选项（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §3.1）──
+    # default=跟随样式 default_portrait_adaptation；none/clockwise/counterclockwise=
+    # 显式覆盖样式。渲染器内解析为局部有效方向并做整帧前置旋转，
+    # 绝不回写本字段（本对象可被 GUI/批处理跨多次渲染复用）
+    portrait_adaptation: str = 'default'
 
 
 # ── 矩形效果栈（设计文档 §3 / §5.1） ──────────────────────────
@@ -736,6 +749,28 @@ class FrameRenderer:
         metadata = metadata or RenderMetadata()
         options = options or RenderOptions()
 
+        # ── 方向适配·前置（方案 §5.1） ─────────────────────────────
+        # 解析最终方向（用户显式选择优先、样式默认兜底）并按来源决定
+        # 图片方向适用范围：用户显式选择对所有图片（横/竖/方形）整帧
+        # 前置旋转；样式预设仅对竖图生效。旋转后的整帧全部阶段按旋转
+        # 后尺寸处理，函数末尾统一还原。旋转放在函数最前，
+        # LayoutEngine / RenderContext 自然按旋转后 image.size 计算，
+        # 后续阶段零改动。解析失败（非法样式默认值/非法用户值）→
+        # ValueError 沿现有异常链抛出，由调用方既有 try/except 兜底。
+        effective_adaptation, adaptation_from_user = resolve_effective_adaptation(
+            style_config, options.portrait_adaptation)
+        image, adaptation_applied = rotate_image_for_render(
+            image, effective_adaptation, adaptation_from_user)
+        # 派生局部高斯二级缓存键：真实旋转时附加方向后缀隔离 CW/CCW
+        # 卷积结果；只构造局部键，绝不回写 options.source_cache_key
+        # （本对象可被 GUI/批处理跨多次渲染复用）
+        effective_source_cache_key = build_adapted_source_cache_key(
+            options.source_cache_key, effective_adaptation, adaptation_applied)
+        if adaptation_applied:
+            logger.info("方向适配生效: %s（来源=%s，渲染期转置，输出前还原）",
+                        effective_adaptation,
+                        "用户显式" if adaptation_from_user else "样式预设")
+
         # 获取样式配置
         layout = style_config.get('layout', {})
         colors = style_config.get('colors', {})
@@ -791,10 +826,12 @@ class FrameRenderer:
         blur_cache = None
         if gaussian_required:
             # 需要高斯：创建每帧一级缓存，背景与矩形共享原图卷积；
-            # LRU + 稳定源键齐备时同步接入二级跨帧缓存
+            # LRU + 稳定源键齐备时同步接入二级跨帧缓存。
+            # 传入方向适配派生的局部键（真实旋转时含方向后缀），
+            # 防止 CW/CCW 两方向尺寸相同导致二级缓存错误复用
             blur_cache = RenderBlurCache(
                 image, prepared_lru=options.prepared_blur_cache,
-                source_cache_key=options.source_cache_key)
+                source_cache_key=effective_source_cache_key)
             background = BackgroundFillManager.render(
                 image, canvas_width, canvas_height, effective_bg_type,
                 saturation=options.saturation_override, blur_cache=blur_cache)
@@ -881,8 +918,12 @@ class FrameRenderer:
 
             if options.logo_filename:
                 image_with_text = self._add_logo(image_with_text, options.logo_filename, logo_config, layout_engine)
-        
-        return image_with_text
+
+        # ── 方向适配·还原（方案 §5.1） ─────────────────────────────
+        # 整帧渲染完成后执行反向转置；仅在前置旋转真实应用过时生效，
+        # 未旋转路径原引用返回（零复制）。render_frame 唯一返回点。
+        return restore_rendered_orientation(
+            image_with_text, effective_adaptation, adaptation_applied)
 
     def _add_logo(
         self, 

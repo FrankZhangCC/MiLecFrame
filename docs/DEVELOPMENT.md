@@ -102,6 +102,8 @@ MiLecFrame/
   6. HDR 色调映射 → Reinhard 全局算子压缩动态范围（仅 HEIF/AVIF）
   7. 加载样式配置（StyleManager，含变体上下文匹配）
   8. 渲染相框（FrameRenderer，五阶段管线，见 §3.3）
+     8a. 旋转适配前置：解析用户选项 + 样式默认值（预设仅限严格竖图
+         整帧顺/逆时针 90° 转置（横图化渲染），见 §4.2.0
   9. 保存输出（JPEG/PNG，quality=95，optimize=True，嵌入原始 EXIF + sRGB ICC profile）
 ```
 
@@ -372,6 +374,28 @@ mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
 
 `src/core/renderer.py`
 
+#### 4.2.0 旋转适配（整帧前置旋转 / 输出还原）
+
+规则解析与旋转实现收敛在 `src/utils/orientation_adaptation.py`（渲染器不自带规则）：
+
+```text
+用户选项 RenderOptions.portrait_adaptation（default/none/clockwise/counterclockwise）
+  × 样式默认值 style_config.default_portrait_adaptation（clockwise/counterclockwise/none，缺失=none）
+  → (有效方向, 来源) = 用户显式值优先，default 时取样式默认值
+  → 旋转的图片方向适用范围按来源区分：
+     用户显式选择 → 所有图片（横图/竖图/方形图）整帧旋转
+     样式预设     → 仅转正后 height > width 的竖图旋转
+  → 有效方向非 none 且适用范围命中：
+     前置 transpose(ROTATE_270 顺时针 / ROTATE_90 逆时针)
+     → LayoutEngine/RenderContext/全部渲染阶段按旋转后尺寸执行
+     → 唯一返回点 restore_rendered_orientation() 反向转置还原
+```
+
+- 旋转是离散转置（无插值损失）；未适配路径零复制（原图引用直通）。
+- 判断发生在 `ImageProcessor._apply_exif_orientation()` 转正之后，Orientation=6/8 竖拍图不会误判。
+- 高斯二级缓存键按有效方向派生局部后缀（`:portrait-adapt-cw` / `:portrait-adapt-ccw`，见 §4.2.2），不回写共享 `RenderOptions`。
+- 样式编辑器预览构造的 `RenderOptions` 不覆盖该字段（默认 `default`），预览自动展示样式声明的默认适配效果。
+
 图层合成顺序（v2.6 起）：
 
 ```text
@@ -413,7 +437,7 @@ PreparedBlurLRU（二级，跨帧）  页面级持有；按 nbytes 预算（默�
  preprocessing_version, blur_radius, gaussian_algorithm_version)
 ```
 
-- `source_cache_key`：FileItem 导入时对 `file_bytes` 一次性 sha256 前 16 hex；样式编辑器样本图为 `preview:{orientation}`（横/竖不同键）。禁止临时路径或 PIL 对象身份。
+- `source_cache_key`：FileItem 导入时对 `file_bytes` 一次性 sha256 前 16 hex；样式编辑器样本图为 `preview:{orientation}`（横/竖不同键）。禁止临时路径或 PIL 对象身份。方向适配真实生效时，`render_frame()` 内以局部派生键 `原键:portrait-adapt-cw / :portrait-adapt-ccw` 查询/写入（CW/CCW 旋转后尺寸相同，仅靠后缀隔离；不回写调用方持有的 `RenderOptions.source_cache_key`）。
 - `preprocessing_version`（常量 "1"）覆盖 EXIF 转正 / ICC / 超尺寸缩放规则，预处理逻辑变更时递增；`gaussian_algorithm_version` 同理。
 - 背景类型/叠色/透明度/饱和度/画布尺寸/矩形位置**不进键**（发生在卷积之后，切换应命中并仅重新派生）。
 - 接入位置：主处理页（`ImageProcessingPage._blur_lru`，页面级复用 `ImageProcessor`）与样式编辑器页（`StyleCreatorPage._blur_lru`）；页面 `cleanup()` 清空。

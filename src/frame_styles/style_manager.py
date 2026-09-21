@@ -17,6 +17,8 @@ import logging
 # - 内置样式目录为只读资源，随程序打包（_MEIPASS/src/frame_styles/configs）
 # - 打包环境下用户新建样式保存在 exe 同目录 styles/（可写，升级不丢失）
 from src.utils.app_paths import get_resource_root, get_app_dir, is_frozen
+# 竖图旋转适配样式默认值校验（可选顶层字段，方案 §5.5 双层校验的第 1 层）
+from src.utils.orientation_adaptation import validate_style_default
 
 
 class StyleManager:
@@ -303,7 +305,15 @@ class StyleManager:
             # 确保行间距配置存在
             if 'line_spacing_ratio' not in config['fonts']:
                 config['fonts']['line_spacing_ratio'] = 0.005
-        
+
+        # 竖图旋转适配默认值校验（可选顶层字段；缺失=none，非法值
+        # 如布尔/null/大小写变体/未知字符串时拒绝加载该样式）
+        try:
+            validate_style_default(config)
+        except ValueError as e:
+            self.logger.error(f"配置字段非法: {e}")
+            return False
+
         return True
     
     def get_style_thumbnail(self, style_name: str) -> Optional[str]:

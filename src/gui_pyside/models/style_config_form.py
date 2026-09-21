@@ -14,6 +14,11 @@ import yaml
 from dataclasses import dataclass, field
 from typing import Optional
 
+# 竖图方向适配默认值（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §7.1）
+from src.utils.orientation_adaptation import (
+    ADAPT_NONE, validate_style_default,
+)
+
 
 # ── 常量 ────────────────────────────────────────────────────
 
@@ -177,6 +182,10 @@ class StyleConfigFormData:
     # ── 基本信息 ──
     name: str = ''
     filename: str = ''
+    # 竖图方向适配样式默认值（none/clockwise/counterclockwise）：
+    # 样式设计者声明的建议方向，用户运行时选项 default 时生效。
+    # 本控件本身定义样式默认值，故无 'default' 递归值（方案 §7.2）
+    default_portrait_adaptation: str = ADAPT_NONE
 
     # ── 画布扩展 ──
     canvas_enabled: bool = True
@@ -276,6 +285,12 @@ class StyleConfigFormData:
         # name
         name_val = self.name.strip()
         data['name'] = name_val or 'Unnamed Style'
+
+        # 竖图方向适配默认值（顶层可选字段，方案 §7.1）：
+        # none 时显式省略字段保证旧样式输出简洁——不能依赖 _clean_dict()
+        # 完成省略（'none' 是非空字符串不会被清理），必须是显式分支
+        if self.default_portrait_adaptation != ADAPT_NONE:
+            data['default_portrait_adaptation'] = self.default_portrait_adaptation
 
         # colors
         colors = {}
@@ -516,6 +531,11 @@ class StyleConfigFormData:
 
         # name
         form.name = str(data.get('name', ''))
+
+        # 竖图方向适配默认值（方案 §7.1）：字段缺失加载为 none；存在但
+        # 非法时 raise ValueError——StyleCreatorPage._on_style_selected()
+        # 的既有 try/except 会以 InfoBar"加载失败"呈现，无需在此回退
+        form.default_portrait_adaptation = validate_style_default(data)
 
         # colors
         colors = data.get('colors', {})
