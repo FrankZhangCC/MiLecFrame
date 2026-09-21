@@ -143,6 +143,11 @@ class StyleCreatorPage(QWidget):
         self._renderer = None
         self._style_manager = None
 
+        # ── 二级模糊缓存（页面级 LRU）：样式编辑中切换背景/透明度/
+        #    饱和度/文字等参数时复用样本图卷积；横/竖样本用不同稳定键 ──
+        from src.core.blur_cache import PreparedBlurLRU
+        self._blur_lru = PreparedBlurLRU()
+
         # ── 配置区块字典 ──
         self.sections: dict[str, ExpandGroupSettingCard] = {}
 
@@ -647,21 +652,23 @@ class StyleCreatorPage(QWidget):
             # 获取预览背景类型
             bg_fill_type = self.preview.get_current_bg_fill_type()
 
-            # 渲染
+            # 渲染（dataclass 随 FrameRenderer 一并延迟导入，保持本页启动轻量）
+            from src.core.renderer import RenderMetadata, RenderOptions
             renderer = self._get_renderer()
-            result = renderer.render_frame(
-                image=sample_img,
+            metadata = RenderMetadata(
                 exif_data=PREVIEW_EXIF_DATA,
                 author=PREVIEW_AUTHOR,
                 location=PREVIEW_LOCATION,
-                style_config=style_config,
+                custom_text=PREVIEW_CUSTOM_TEXT)
+            options = RenderOptions(
                 bg_fill_type=bg_fill_type,
-                logo_filename=None,
-                lens_display_mode='combined',
-                use_short_lens=False,
                 saturation_override=1.0,
-                custom_text=PREVIEW_CUSTOM_TEXT,
-            )
+                # 样本图稳定键：(preview_asset, orientation)——横/竖是
+                # 不同样本图，必须用不同键；同方向样本图内容恒定
+                source_cache_key=f'preview:{self.preview.get_current_orientation()}',
+                prepared_blur_cache=self._blur_lru)
+            result = renderer.render_frame(
+                sample_img, style_config, metadata, options)
 
             # 显示
             self.preview.set_preview_image(result)
@@ -678,6 +685,8 @@ class StyleCreatorPage(QWidget):
         self._sample_landscape = None
         self._sample_portrait = None
         self._renderer = None
+        # 页面关闭时清空页面级二级缓存（设计文档 §5.3 失效规则）
+        self._blur_lru.clear()
 
     def showEvent(self, event):
         """页面首次显示时触发首渲（等 layout 稳定后再执行）"""

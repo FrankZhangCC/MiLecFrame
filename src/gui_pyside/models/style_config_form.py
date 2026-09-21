@@ -238,6 +238,14 @@ class StyleConfigFormData:
     custom_bg_text_scheme: str = ''
     color_per_element: dict = field(default_factory=dict)
 
+    # ── 透传容器（字段保留，本期不支持 GUI 编辑） ──
+    # from_yaml_dict() 时保留未识别的 layout 键（如 rectangles），
+    # to_yaml_dict() 原样回写。保证"加载→保存"不丢矩形等新特性配置。
+    _passthrough_layout: dict = field(default_factory=dict)
+    # colors 下不在 COLOR_ELEMENT_KEYS 白名单的键（如 custom_rect_01_*），
+    # 同样加载后原样回写
+    _passthrough_colors: dict = field(default_factory=dict)
+
     # ── 元素布局 ──
     elements: list = field(default_factory=lambda: [_make_default_element()])
 
@@ -291,6 +299,10 @@ class StyleConfigFormData:
                 colors[f'custom_{k}_light_color'] = _parse_color(cl)
             if cd:
                 colors[f'custom_{k}_dark_color'] = _parse_color(cd)
+
+        # 合并透传容器（colors 白名单外键原样回写；表单生成的键放在
+        # 后面，正常情况下两集合不相交，此处仅防御同名冲突）
+        colors = {**self._passthrough_colors, **colors}
         data['colors'] = colors
 
         # fonts
@@ -445,6 +457,9 @@ class StyleConfigFormData:
                 ct['line_spacing_ratio'] = self.custom_text_line_spacing
             layout['custom_text'] = ct
 
+        # 合并透传容器（layout 未识别子字典如 rectangles 原样回写；
+        # 表单生成的键放在后面，正常情况下两集合不相交）
+        layout = {**self._passthrough_layout, **layout}
         data['layout'] = layout
 
         # logo
@@ -504,6 +519,23 @@ class StyleConfigFormData:
 
         # colors
         colors = data.get('colors', {})
+
+        # 收集 colors 白名单外键（如 custom_rect_01_light_color 等
+        # 自定义矩形颜色），to_yaml_dict() 时原样回写。
+        # deepcopy 避免与外部传入的 config dict 共享可变引用。
+        consumed_color_keys = {
+            'text',
+            'custom_text_light_color', 'custom_text_dark_color',
+            'custom_bg_color', 'custom_bg_text_scheme',
+        }
+        for k in COLOR_ELEMENT_KEYS:
+            consumed_color_keys.add(f'custom_{k}_light_color')
+            consumed_color_keys.add(f'custom_{k}_dark_color')
+        form._passthrough_colors = {
+            k: copy.deepcopy(v) for k, v in colors.items()
+            if k not in consumed_color_keys
+        }
+
         form.color_light = _color_to_text(
             colors.get('custom_text_light_color', ''))
         form.color_dark = _color_to_text(
@@ -558,6 +590,18 @@ class StyleConfigFormData:
 
         # layout
         layout = data.get('layout', {})
+
+        # 收集表单未识别的 layout 子字典（如 rectangles——矩形配置本期
+        # 不支持 GUI 编辑），to_yaml_dict() 时原样回写，保证"加载→保存"
+        # 不丢配置。deepcopy 避免与外部传入的 config dict 共享可变引用。
+        consumed_layout_keys = {
+            'expand_canvas', 'padding', 'corner_radius',
+            'info_position', 'defined_texts', 'custom_text',
+        }
+        form._passthrough_layout = {
+            k: copy.deepcopy(v) for k, v in layout.items()
+            if k not in consumed_layout_keys
+        }
 
         # expand_canvas
         ec = layout.get('expand_canvas', {})

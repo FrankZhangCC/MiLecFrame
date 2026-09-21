@@ -136,11 +136,13 @@ MiLecFrame/
 ### 3.3 渲染管线（五阶段）
 
 ```
-Phase 0 ── 矩形绘制（背景层之上） ──────────────────────────────────
+Phase 0 ── 旧式矩形绘制（背景层之上，原图层之下） ─────────────────
+  仅处理未使用效果字段的 rectangles（legacy 分流见 §4.2.1）
   从 layout.rectangles 读取矩形列表 → 颜色自适应（is_dark_bg）
   → 尺寸计算（reference_side × ratio）
   → 定位（calculate_position + defer_padding，跳过 padding 约束）
   → RGBA 合成（_draw_single_rectangle → alpha_composite）
+  效果栈矩形不在此绘制（原图上方，见 §4.2.1 / §4.2.2 / §4.2.3）
 
 Phase 1 ── 测量 ─────────────────────────────────────────────────
   遍历 info_position / defined_texts / custom_text 三种来源的所有元素
@@ -370,9 +372,95 @@ mask[:r_tl, :r_tl] = np.clip(r_tl - dist + 0.5, 0, 1) * 255
 
 `src/core/renderer.py`
 
-图层合成顺序：背景填充 → **自定义矩形（rectangles）** → 原图圆角裁切 → 装饰（水印） → 文字（委托 TextRenderer） → Logo。
+图层合成顺序（v2.6 起）：
 
-**`_draw_rectangles()` 矩形绘制管线**：
+```text
+背景填充（可短路为纯色替代，见 §4.2.3）
+  → 旧式纯色矩形（未用效果字段的 rectangles，原图下方，兼容旧样式）
+  → 原图/原图圆角（base_scene 形成）
+  → 效果栈矩形（模糊 → 填充 → 内描边；原图上方，按 key 排序后画覆盖先画）
+  → 装饰（水印） → 文字（委托 TextRenderer） → Logo
+```
+
+渲染参数经 `RenderMetadata`（拍摄信息）+ `RenderOptions`（行为选项）两个
+dataclass 打包传入；`RenderOptions` 是后续新增渲染参数的唯一定居点。
+
+#### 4.2.1 矩形分流（legacy vs 效果栈）
+
+```text
+legacy_mode       = fill 字段缺失 and stroke.enabled != true and gaussian_blur.enabled != true
+effect_stack_mode = not legacy_mode
+```
+
+- legacy 矩形走 `_draw_rectangles()`（原图下方），历史输出像素不变。
+- 效果栈矩形走 `_analyze_rectangles()`（需求分析）+ `_draw_rectangle_effect_stack()`（三层合成）。
+- `_analyze_rectangles()` 在背景渲染前执行：几何分类（`source_kind`：photo=矩形 ⊆ original_bounds / canvas=跨界或照片外）、画布交集裁切、三层参数独立校验与降级、描边色四级回退链、模糊需求登记。
+- 三层合成要点：局部 patch 内混合、仅经 `outer_mask` 一次组裁切（alpha 只写一次，防透明度平方）；填充 opacity 只乘填充层（防"25% 模糊 + 25% 着色"双重着色）；模糊源冻结取自原图卷积缓存，不含已绘制的效果栈矩形（顺序无关）。
+
+#### 4.2.2 两级模糊缓存
+
+```text
+gaussian_blur.py（纯算法）     prepare_gaussian_blur / render_prepared_blur / apply_color_overlay
+RenderBlurCache（一级，每帧）  帧内 (source_kind, radius) 懒卷积 + 派生缓存 + 命中统计
+PreparedBlurLRU（二级，跨帧）  页面级持有；按 nbytes 预算（默认 64 MiB）的 LRU；
+                               仅存 photo 源 PreparedBlur（工作分辨率 float32）
+```
+
+二级缓存完整键（`build_l2_key()`）：
+
+```text
+(source_cache_key, normalized_image_size, normalized_image_mode,
+ preprocessing_version, blur_radius, gaussian_algorithm_version)
+```
+
+- `source_cache_key`：FileItem 导入时对 `file_bytes` 一次性 sha256 前 16 hex；样式编辑器样本图为 `preview:{orientation}`（横/竖不同键）。禁止临时路径或 PIL 对象身份。
+- `preprocessing_version`（常量 "1"）覆盖 EXIF 转正 / ICC / 超尺寸缩放规则，预处理逻辑变更时递增；`gaussian_algorithm_version` 同理。
+- 背景类型/叠色/透明度/饱和度/画布尺寸/矩形位置**不进键**（发生在卷积之后，切换应命中并仅重新派生）。
+- 接入位置：主处理页（`ImageProcessingPage._blur_lru`，页面级复用 `ImageProcessor`）与样式编辑器页（`StyleCreatorPage._blur_lru`）；页面 `cleanup()` 清空。
+- 批量处理（`batch_processor.py`）不传 LRU，仅一级缓存——连续处理不同照片时避免无效内存驻留。
+- `source_kind='base_scene'`（精确型/方案 B）为接口预留位，传入 `get_prepared()` 抛 `NotImplementedError`；精确型未来也只允许一级缓存。
+
+#### 4.2.3 全图高斯需求统一短路
+
+`_compute_gaussian_required()` 在渲染前汇总整张输出图的高斯消费者：
+
+```text
+gaussian_required = background_blur or 存在有效模糊矩形
+
+background_blur   = 背景类型为 gaussian and 背景可见
+背景可见          = original_bounds != 全画布 or 原图圆角(任一半径>0) or image.mode == 'RGBA'（保守）
+```
+
+- `gaussian_required == False` 且背景为高斯类型：背景被原图完全覆盖，用与 `text_scheme` 匹配的黑/白纯色替代（输出像素不变），整帧零卷积。顺带修复"高斯背景 + 无画布扩展仍全量模糊"的既有浪费（33MP 样片 2.64s → 0.095s）。
+- 矩形模糊需求已在分析阶段过滤：画布外矩形、被 `opacity>=1` 有效填充完全覆盖的模糊层不登记。
+
+#### 4.2.4 性能基准（v2.6.0-dev，Phase 6 总验收记录）
+
+测量环境：开发机（Windows x64），`FrameRenderer.render_frame()` 单帧计时
+（`perf_counter`），完整高斯路径 = 高斯背景 + 真实画布扩展；短路路径 =
+高斯背景 + 四边零扩展 + 无圆角（`gaussian_required=False`，纯色替代）。
+峰值内存为进程工作集峰值增量（`GetProcessMemoryInfo.PeakWorkingSetSize`）。
+
+| 样片档 | 完整高斯路径 | 短路路径 | 峰值内存增量 |
+|---|---:|---:|---:|
+| 1200×800（预览档） | 0.67 s | 0.011 s | +79 MiB |
+| 6000×4000（样片档） | 1.44 s | 0.075 s | +1696 MiB |
+| 7008×4672（33MP 基准档） | 1.71 s | 0.100 s | +771 MiB（进程累计峰值 2.6 GiB） |
+
+对照：33MP 高斯背景端到端历史观测值约 **2.64 s**（设计文档 §1，含旧版
+全量模糊路径）；当前完整路径 1.71 s，短路路径 0.10 s（约 17-27 倍提升）。
+
+**`blur plan` DEBUG 日志**（单帧计划，`debug_log.txt`）：
+
+```text
+blur plan: gaussian_required=True, background_blur=True, photo_radii=[200], scene_radii=[]
+blur cache hit: level=L2, source_key=preview:landscape, source=photo, radius=200
+blur cache miss: level=L2, source_key=file:9f2a..., source=photo, radius=200 (convolutions=1)
+blur cache: prepared hit/miss=2/1 (L2 hit/miss=1/1), derived hit/miss=0/3, convolutions=1
+rectangle rect_01: source=photo, box=(x, y, w, h), blur_radius=200, fill=True/0.65, stroke=True/5px/0.60
+```
+
+**`_draw_rectangles()` 矩形绘制管线**（legacy 路径）：
 
 1. 从 `layout.rectangles` 读取矩形字典，按键名排序遍历
 2. 颜色自适应：根据 `BackgroundFillManager.is_dark_bg()` 从 `colors` 中读取 `custom_{rect_name}_{dark/light}_color`

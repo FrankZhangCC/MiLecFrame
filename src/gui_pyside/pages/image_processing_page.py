@@ -38,7 +38,7 @@ from qfluentwidgets.common.style_sheet import (
     addStyleSheet, CustomStyleSheet,
 )
 
-from ..models.file_item import FileItem
+from ..models.file_item import FileItem, compute_cache_key
 from ..models.processing_config import ProcessingConfig
 from ..utils.temp_manager import TempManager
 from ..widgets.style_selector_card import StyleSelectorCard
@@ -47,6 +47,8 @@ from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
 from src.utils.config_manager import default_config_manager
 from src.core.image_processor import ImageProcessor
+from src.core.blur_cache import PreparedBlurLRU
+from src.core.renderer import RenderMetadata, RenderOptions
 from PIL import Image as PILImage
 from PIL import ImageCms
 from PIL import ImageOps as PILImageOps
@@ -136,6 +138,13 @@ class ImageProcessingPage(QWidget):
         self.exif_helper = ExifHelper()
         self.logo_selector = LogoSelector()
         self.temp_manager = TempManager()
+
+        # ── 二级模糊缓存生命周期（页面级持有，跨生成复用卷积） ──
+        # 页面级可复用处理器：替代每次点击新建（否则二级缓存随处理器
+        # 一起被丢弃，跨生成复用无从谈起）
+        self._processor: ImageProcessor = None
+        # 页面级 LRU：按 nbytes 预算（默认 64 MiB）缓存工作分辨率卷积
+        self._blur_lru = PreparedBlurLRU()
 
         # ── 数据 ──
         self.file_items: list[FileItem] = []  # 胶片栏中的所有文件
@@ -717,6 +726,10 @@ class ImageProcessingPage(QWidget):
                     with open(path, 'rb') as f:
                         item.file_bytes = f.read()
 
+                    # 导入时一次性计算内容摘要，作为二级模糊缓存的
+                    # 稳定 source_cache_key（后续生成直接复用）
+                    item.cache_key = compute_cache_key(item.file_bytes)
+
                     item.file_name = os.path.basename(path)
 
                     pil_img = PILImage.open(io.BytesIO(item.file_bytes))
@@ -1225,23 +1238,33 @@ class ImageProcessingPage(QWidget):
             with open(input_path, 'wb') as f:
                 f.write(item.file_bytes)
 
-            # 调用处理器
-            processor = ImageProcessor()
-            success = processor.process(
-                input_path=input_path,
-                output_path=output_path,
+            # 调用处理器（本调用点是二级模糊缓存的接入位置：
+            # source_cache_key 用 FileItem 导入摘要，LRU 页面级持有）
+            metadata = RenderMetadata(
                 author=self.edit_author.text() or None,
                 location=location or None,
-                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
-                bg_fill_type=bg_key,
-                decorations=decorations or None,
-                font_weight=fw_key,
-                logo_filename=logo_filename,
+                custom_text=self.edit_custom_text.text() or None,
                 lens_display_mode=lens_key,
                 use_short_lens=self.chk_short_lens.isChecked(),
-                saturation_override=None if self.chk_enhance.isChecked() else 1.0,
-                custom_text=self.edit_custom_text.text() or None,
                 timestamp_display_mode=ts_mode,
+            )
+            options = RenderOptions(
+                bg_fill_type=bg_key,
+                decorations=decorations or None,
+                logo_filename=logo_filename,
+                saturation_override=None if self.chk_enhance.isChecked() else 1.0,
+                source_cache_key=item.cache_key,
+                prepared_blur_cache=self._blur_lru,
+            )
+            if self._processor is None:
+                self._processor = ImageProcessor()
+            success = self._processor.process(
+                input_path=input_path,
+                output_path=output_path,
+                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
+                metadata=metadata,
+                options=options,
+                font_weight=fw_key,
             )
 
             # 清理输入临时文件
@@ -1383,6 +1406,9 @@ class ImageProcessingPage(QWidget):
         self.file_items.clear()
         self.filmstrip_labels.clear()
         self.current_index = -1
+        # 页面关闭时清空页面级二级缓存（设计文档 §5.3 失效规则）
+        self._blur_lru.clear()
+        self._processor = None
         self.temp_manager.cleanup()
         logger.debug("图像处理页面资源已清理")
 

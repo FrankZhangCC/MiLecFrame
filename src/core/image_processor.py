@@ -22,7 +22,7 @@ from src.utils.exif_helper import ExifHelper
 from src.utils.device_mapper import DeviceMapper
 from src.utils.background_fill import BackgroundFillManager
 from src.frame_styles.style_manager import StyleManager
-from src.core.renderer import FrameRenderer
+from src.core.renderer import FrameRenderer, RenderMetadata, RenderOptions
 from src.core.hdr_handler import HDRHandler
 
 
@@ -50,44 +50,30 @@ class ImageProcessor:
         
         self.logger = logging.getLogger(__name__)
     
-    def process(self, input_path: str, output_path: str, 
-                author: Optional[str] = None, 
-                location: Optional[str] = None,
+    def process(self, input_path: str, output_path: str,
                 style_name: Optional[str] = None,
-                # 背景填充默认值必须取注册表常量（历史默认 "white" 是非法键，
-                # 不传该参数的调用会触发 BackgroundFillManager 的 ValueError）
-                bg_fill_type: str = BackgroundFillManager.DEFAULT_FILL,
-                decorations: Optional[List[Dict]] = None,
-                font_weight: Optional[str] = None,
-                logo_filename: Optional[str] = None,
-                lens_display_mode: str = 'combined',
-                use_short_lens: bool = False,
-                saturation_override: Optional[float] = None,
-                custom_text: Optional[str] = None,
-                timestamp_display_mode: str = 'full') -> bool:
+                metadata: Optional[RenderMetadata] = None,
+                options: Optional[RenderOptions] = None,
+                font_weight: Optional[str] = None) -> bool:
         """
         处理图像并添加相框
-        
+
         Args:
             input_path: 输入图像路径
             output_path: 输出图像路径
-            author: 作者姓名
-            location: 拍摄地点
             style_name: 样式名称
-            bg_fill_type: 背景填充类型
-            decorations: 装饰元素列表。每个元素是一个字典，包含 'type' 和 'params'。
-                         例如水印: {'type': 'watermark', 'params': {'text': '...', 'position': '...', 'opacity': 0.5, 'color': '#FFFFFF'}}
-            font_weight: 字体字重 (light, regular, medium)
-            logo_filename: logo文件名
-            lens_display_mode: 镜头显示模式
-            use_short_lens: 是否使用短版镜头名
-            saturation_override: 覆盖饱和度增强系数（None=使用FILL_TYPES默认值，1.0=不做增强）
-            custom_text: 自定义文本内容（GUI 输入，仅当样式配置 custom_text.enabled=True 时生效）
-            timestamp_display_mode: 拍摄时间显示模式（'full'=日期与时刻, 'date_only'=仅日期, 'hide'=不显示）
-            
+            metadata: 渲染元数据（拍摄相关信息；exif_data 由本处理器从文件提取后覆盖）
+            options: 渲染行为选项（背景/装饰/Logo 等）
+            font_weight: 字体字重 (light, regular, medium)。
+                保持平铺：它在函数内改写 style_config['fonts']['weight']，
+                是样式改写而非渲染选项，不进 RenderOptions。
+
         Returns:
             是否处理成功
         """
+        # 哨兵解包：避免可变默认值陷阱，也兼容 None 直传
+        metadata = metadata or RenderMetadata()
+        options = options or RenderOptions()
         try:
             # 1. 验证输入文件
             if not os.path.exists(input_path):
@@ -129,6 +115,10 @@ class ImageProcessor:
                 self.logger.warning(warn_msg)
                 print(warn_msg)
 
+            # EXIF 由处理器从输入文件提取，覆盖 metadata 中可能存在的值
+            # （与旧签名行为一致：调用方原本没有传入 EXIF 的途径）
+            metadata.exif_data = exif_data
+
             raw_exif = self.exif_helper.extract_raw_exif(input_path)
 
             # 3b. 像素转正后同步修正 raw_exif 中的 Orientation 标签
@@ -168,41 +158,32 @@ class ImageProcessor:
             
             # 7. 获取样式配置（传入上下文以便文件夹样式自动选择变体）
             if style_name:
-                context = {'location': location, 'author': author}
-                if not custom_text:
+                context = {'location': metadata.location, 'author': metadata.author}
+                if not metadata.custom_text:
                     context['custom_text'] = None
-                if timestamp_display_mode == 'hide':
+                if metadata.timestamp_display_mode == 'hide':
                     # 通知变体系统拍摄时间不可用，自动匹配 no_timestamp.yaml 变体
                     context['timestamp'] = None
                 style_config = self.style_manager.get_style_config(style_name, context)
             else:
                 style_config = self.style_manager.get_default_style()
-            
+
             if not style_config:
                 error_msg = f"错误: 无法获取样式配置 - {style_name or 'default'}"
                 self.logger.error(error_msg)
                 print(error_msg)
                 return False
-            
+
             # 8. 如果指定了字体字重，则更新样式配置
             if font_weight:
                 style_config['fonts']['weight'] = font_weight
 
-            # 9. 渲染图像
+            # 9. 渲染图像（元数据与选项对象整体透传）
             rendered_image = self.renderer.render_frame(
                 image=image,
-                exif_data=exif_data,
-                author=author,
-                location=location,
                 style_config=style_config,
-                bg_fill_type=bg_fill_type,
-                decorations=decorations,
-                logo_filename=logo_filename,
-                lens_display_mode=lens_display_mode,
-                use_short_lens=use_short_lens,
-                saturation_override=saturation_override,
-                custom_text=custom_text,
-                timestamp_display_mode=timestamp_display_mode,
+                metadata=metadata,
+                options=options,
             )
             
             # 10. 保存图像

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 
-from .gaussian_blur import apply_gaussian_blur_overlay_expansion
+from .gaussian_blur import apply_gaussian_blur_overlay_expansion, apply_color_overlay
 
 
 class BackgroundFillManager:
@@ -112,6 +112,7 @@ class BackgroundFillManager:
         opacity: Optional[int] = None,
         blur_radius: Optional[int] = None,
         saturation: Optional[float] = None,
+        blur_cache=None,
     ) -> Image.Image:
         """
         创建背景层
@@ -125,6 +126,9 @@ class BackgroundFillManager:
             opacity: 覆盖默认透明度 (0-100)
             blur_radius: 覆盖默认模糊半径
             saturation: 覆盖默认饱和度增强系数（>1.0 增强，1.0 不变）
+            blur_cache: 可选一级缓存（RenderBlurCache）。高斯路径优先从
+                缓存取（同 blur_radius 键，与矩形共享卷积）；None 时回退
+                直算（CLI/批量兼容，行为不变）。注册表结构不受影响。
 
         Returns:
             RGB 模式的背景图像
@@ -141,6 +145,12 @@ class BackgroundFillManager:
             o = opacity if opacity is not None else cfg['opacity']
             r = blur_radius if blur_radius is not None else cfg.get('blur_radius', 200)
             s = saturation if saturation is not None else cfg.get('saturation', 1.0)
+            if blur_cache is not None:
+                # 缓存路径：派生（饱和度→缩放）与背景/矩形共享，
+                # 叠色轻量且仅背景需要，留在缓存外执行
+                blur_img = blur_cache.get_canvas_size_blur(
+                    r, s, (canvas_width, canvas_height))
+                return apply_color_overlay(blur_img, overlay, o)
             return apply_gaussian_blur_overlay_expansion(
                 image, canvas_width, canvas_height, overlay,
                 opacity=o,
