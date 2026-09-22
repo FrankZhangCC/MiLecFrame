@@ -38,13 +38,13 @@ layout:
   info_position:
     camera_lens:
       position: "bottom-left"
-      alignment: "left"
+      alignment: "top-left"
       margin_left: 0.03
       margin_bottom: 0.04
     timestamp_author:
       relative_to: "camera_lens"
       relative_position: "below"
-      alignment: "left"
+      cross_alignment: "left"
       relative_margin: 0.01
 fonts:
   size_ratio: 0.015
@@ -244,8 +244,8 @@ layout:
       width_ratio: 0.85          # 宽度 = 参照边 × 比例
       height_ratio: 0.04         # 高度 = 参照边 × 比例
       opacity: 0.8               # 透明度 0.0-1.0
-      position: "top"            # 标准锚点
-      alignment: "both-center"   # 对齐方式
+      position: "top-center"     # 九点 position（照片参考位）
+      alignment: "top-center"    # 九点 alignment（布局盒自对齐）
       margin_top: 0.01           # 边距（可选）
       corner_radius:             # 圆角（可选）
         top_left: 0.005
@@ -256,8 +256,8 @@ layout:
       width_ratio: 1.1
       height_ratio: 0.15
       opacity: 0.5
-      position: "bottom"
-      alignment: "both-center"
+      position: "bottom-center"
+      alignment: "bottom-center"
       margin_bottom: 0.05
 ```
 
@@ -278,7 +278,7 @@ layout:
 
 #### 定位参数
 
-矩形复用 [§4.2 绝对定位系统](#42-绝对定位) 的全部锚点和对齐规则，支持 `position`、`alignment`、`margin_*` 等所有参数。**与文字元素不同，矩形不受 `padding` 安全区域约束**，可超出安全区域绘制到画布边界。
+矩形复用 [§4.2 绝对定位系统](#42-绝对定位) 的全部九点 position/alignment 和 `margin_*` 参数（整矩形布局盒参与定位）。**与文字元素不同，矩形不受 `padding` 安全区域约束**，可超出安全区域绘制到画布边界。
 
 #### 图层位置
 
@@ -354,7 +354,7 @@ layout:
       width_ratio: 5
       height_ratio: 0.17
       opacity: 0.65             # 填充层透明度（原有字段，语义不变）
-      position: "bottom"
+      position: "bottom-center"
       alignment: "top-center"
       margin_bottom: 0.03
 
@@ -401,59 +401,81 @@ layout:
 
 ### 4.2 绝对定位
 
-以**原始照片边界**为参考系，通过"挂载点 + 边距"控制元素位置。
+以**原始照片边界**为参考系。定位分两步走，两个参数各司其职、互不越界：
 
-#### 三参数
+```text
+照片边界
+   │
+   ├─ position ──> 照片九点中选出的参考点 (px, py)
+   │
+   └─ margin / placement ──> 在参考点上得到元素锚点 (ax, ay)
+                                  │
+元素宽高 (ew, eh) + alignment ────┘
+                                  │
+                                  └─> 元素布局盒左上角 (x, y)
+```
+
+- **position 只选择照片九点参考位**，不读取元素宽高——元素锚点不因文字长短而变化；
+- **alignment 只决定元素布局盒的哪个点贴到元素锚点**，不读取照片位置或 margin；
+- **margin 只移动元素锚点**；`padding` 会在最终坐标上做安全区域夹持（不改变锚点定义）。
+
+#### 参数
 
 | 参数 | 可选值 | 默认值 | 含义 |
 |------|--------|--------|------|
-| `placement` | `inside` / `outside` | `outside` | 元素放在原图矩形内部还是外部 |
-| `position` | 见下表 11 种锚点 | `bottom` | 元素挂载到原图的哪个位置 |
-| `alignment` | `left` / `center` / `right` / `both-center` / 组合格式 | `center` | 元素自身相对于锚点的对齐方式 |
+| `placement` | `inside` / `outside` | `outside` | 元素放在原图边界主轴的内侧还是外侧（对 `center` 无意义） |
+| `position` | 九点值（见下表） | **必填** | 照片九点参考位 |
+| `alignment` | 九点值（同下表） | **必填** | 元素布局盒相对元素锚点的自对齐 |
+| `line_alignment` | `left` / `center` / `right` | `left` | 多行文本块**内部**行对齐（单行文字忽略；与 alignment 完全分离） |
 
-- `inside`：元素在原图内部，margin 从边界向内偏移
-- `outside`：元素在原图外部，margin 从边界向外偏移
-- `both-center`：元素中心点与锚点完全重合（水平和垂直同时居中），margin 作为该偏移量
+#### 九点 position 值与照片参考点
 
-#### 11 种 position 锚点
+| position | 照片参考点 |
+|----------|-----------|
+| `top-left` | 原图左上角 |
+| `top-center` | 原图顶边中点 |
+| `top-right` | 原图右上角 |
+| `center-left` | 原图左边中点 |
+| `center` | 原图中心（始终基于原照片，不受非对称画布扩展影响；placement 被忽略） |
+| `center-right` | 原图右边中点 |
+| `bottom-left` | 原图左下角 |
+| `bottom-center` | 原图底边中点 |
+| `bottom-right` | 原图右下角 |
 
-| position | 含义 | alignment 控制 |
-|----------|------|---------------|
-| `top-left` / `tl` | 原图左上角 | —（固定） |
-| `top-center` / `tc` | 原图顶部居中 | —（固定） |
-| `top-right` / `tr` | 原图右上角 | —（固定） |
-| `top` | 原图顶部 | 水平轴 |
-| `bottom-left` / `bl` | 原图左下角 | —（固定） |
-| `bottom-center` / `bc` | 原图底部居中 | —（固定） |
-| `bottom-right` / `br` | 原图右下角 | —（固定） |
-| `bottom` | 原图底部 | 水平轴 |
-| `left` | 原图左侧 | 垂直轴 |
-| `right` | 原图右侧 | 垂直轴 |
-| `center` | 画布中心（不受 margin 影响） | —（固定） |
+placement 只决定主轴方向：顶部三点沿上/下主轴内外平移，底部三点同理；`center-left`/`center-right` 沿水平主轴内外平移；`center` 无内外之分。
 
-#### alignment 对齐规则
+#### 九点 alignment 值与布局盒对齐点
 
-| alignment 值 | 横向表现 | 纵向表现 |
+alignment 决定**元素布局盒的哪个点**与元素锚点重合：
+
+| alignment | 与元素锚点重合的布局盒位置 | 效果 |
 |---|---|---|
-| `left` / `top-left` / `bottom-left` | 元素左边缘对锚点 | — |
-| `right` / `top-right` / `bottom-right` | 元素右边缘对锚点 | — |
-| `top` / `top-left` / `top-right` | — | 元素顶边对锚点 |
-| `bottom` / `bottom-left` / `bottom-right` | — | 元素底边对锚点 |
-| `center`（默认） | 元素水平居中于锚点 | 元素垂直居中于锚点 |
-| `top-center` | 元素水平居中于锚点 | — |
-| `bottom-center` | 元素水平居中于锚点 | — |
-| `both-center` | 元素水平居中于锚点 | 元素垂直居中于锚点 |
+| `top-left` | 左上角 | 元素位于锚点右下方 |
+| `top-center` | 顶边中点 | 元素顶边贴锚点、水平居中 |
+| `top-right` | 右上角 | 元素位于锚点左下方 |
+| `center-left` | 左边中点 | 垂直居中、位于锚点右侧 |
+| `center` | 中心点 | 元素中心与锚点重合 |
+| `center-right` | 右边中点 | 垂直居中、位于锚点左侧 |
+| `bottom-left` | 左下角 | 元素位于锚点右上方 |
+| `bottom-center` | 底边中点 | 元素底边贴锚点、水平居中 |
+| `bottom-right` | 右下角 | 元素位于锚点左上方 |
+
+**alignment 的核心价值**：同一列文字共享同一个元素锚点时，只要 alignment 相同，它们的对齐边必然严格一致。例如 `position: bottom-right + margin_right + alignment: bottom-left` 时，不同宽度的文字左边缘完全相同（真正的列左对齐）；换成 `alignment: bottom-right` 则右边缘完全相同。
+
+> ⚠ 旧值迁移：`top`/`bottom`/`left`/`right`/`tl`/`tr`/`bl`/`br`/`tc`/`bc`
+> 等单轴别名和 `both-center` 已删除，样式加载阶段直接拒绝并提示迁移候选。
+> 单轴旧值无法唯一决定九点目标，需结合元素实际位置人工选择完整九点值。
 
 #### margin 边距体系
 
-margin 是元素相对于原图边界的偏移量，四个方向独立：
+margin 是元素锚点相对于照片参考点的偏移量，四个方向独立：
 
 | 字段 | 说明 |
 |------|------|
 | `margin` | 统一边距，设置后覆盖四方向的初始值 |
 | `margin_top` / `margin_bottom` / `margin_left` / `margin_right` | 各方向独立边距，覆盖 `margin` 统一值 |
 
-- 浮点数 → 按参照边比例计算（如 `0.02` = 参照边的 2%）
+- 浮点数 → 按参照边（短边）比例计算（如 `0.02` = 参照边的 2%）
 - 整数 → 绝对像素值
 - 优先级：`margin_方向` > `margin` > 默认 `0`
 - 推荐使用浮点数比例以保持响应式
@@ -464,34 +486,35 @@ margin 是元素相对于原图边界的偏移量，四个方向独立：
 camera_lens:
   placement: outside
   position: "bottom-left"
-  alignment: "left"
+  alignment: "top-left"
   margin_bottom: 0.022
   margin_left: 0.02
 ```
 
-效果：相机和镜头信息放在原图左下角外侧下方 2.2% 处，左对齐原图左边缘向右 2% 处。
+效果：元素锚点在原图左下角外侧下方 2.2% 处（照片底边向下 margin_bottom），水平在左边内侧 margin_left；alignment `top-left` 使文字布局盒左上角贴到该锚点。
 
 ### 4.3 相对定位
 
-以**另一个已存在的元素**为参考，相对于它放置当前元素。
+以**另一个已存在的元素**为参考，相对于它放置当前元素。相对定位使用独立的**三值交叉轴对齐 `cross_alignment`**，与绝对定位的九点 `alignment` 互不混用——相对节点中出现 `alignment` 字段会在样式加载阶段被拒绝。
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `relative_to` | 文字 | 必填 | 参考元素名称（如 `"camera_lens"`、`"exif"`） |
-| `relative_position` | 文字 | `"after"` | 6 种方向：`after`/`below`（下方）、`before`/`above`（上方）、`right-of`（右侧）、`left-of`（左侧） |
+| `relative_position` | 文字 | 必填 | 4 种方向：`below`（下方）、`above`（上方）、`right-of`（右侧）、`left-of`（左侧） |
+| `cross_alignment` | 文字 | 必填 | 交叉轴三值对齐（见下表） |
 | `relative_margin` | 浮点数 | `0.01` | 与参考元素的间距 = 参照边 × 比例 |
-| `alignment` | 文字 | `"center"` | 在参考元素范围内的对齐方式 |
 | `offset_x_ratio` | 浮点数 | `0` | x 轴微调偏移 |
 | `offset_y_ratio` | 浮点数 | `0` | y 轴微调偏移 |
 
-#### alignment 在相对定位中的语义
+#### cross_alignment 与方向轴的对应
 
-| relative_position | alignment 控制的轴 | 对齐基准物 |
+| relative_position | cross_alignment 合法值 | 对齐基准物 |
 |---|---|---|
-| `after` / `below` | 水平轴（`left` 左对齐 / `right` 右对齐 / 其他居中） | 参考元素的宽度 |
-| `before` / `above` | 水平轴（同上） | 参考元素的宽度 |
-| `right-of` | 垂直轴（`top` 顶对齐 / `bottom` 底对齐 / 其他居中） | 参考元素的高度 |
-| `left-of` | 垂直轴（同上） | 参考元素的高度 |
+| `below` / `above` | `left` / `center` / `right` | 参考元素的宽度 |
+| `right-of` / `left-of` | `top` / `center` / `bottom` | 参考元素的高度 |
+
+> ⚠ 旧值迁移：`after` → `below`，`before` → `above`；相对节点旧 `alignment`
+> 字段改名为 `cross_alignment`。轴向不匹配的值（如 `right-of + left`）直接拒绝。
 
 #### 相对定位示例
 
@@ -499,15 +522,15 @@ camera_lens:
 timestamp_author:
   relative_to: "camera_lens"
   relative_position: "below"
-  alignment: "left"
+  cross_alignment: "left"
   relative_margin: 0.01
 ```
 
-效果：拍摄时间+作者放在 `camera_lens` 正下方，间距为参照边的 1%，左对齐 `camera_lens` 的左边缘。
+效果：拍摄时间+作者放在 `camera_lens` 正下方，间距为参照边的 1%，左缘对齐 `camera_lens` 的左缘。
 
 ### 4.4 树级组合定位（tree_align）
 
-将一组通过 `relative_to` 串联的元素（如 A → B → C → D）作为一个**整体**进行定位。
+将一组通过 `relative_to` 串联的元素（如 A → B → C → D）作为一个**整体**进行定位：整棵树的视觉包围盒被当作一个普通元素盒，用根节点的 `position` / `alignment` / `margin_*` 走与单元素完全相同的定位公式，然后整树平移（成员相对位置不变），最后做一次 padding 夹持。
 
 **适用场景**：多段文字组成一条水平链，希望整条链在照片上居中。
 
@@ -517,18 +540,20 @@ timestamp_author:
 defined_texts:
   defined_text_01:
     content: "FL"
-    position: "bottom"
-    alignment: "center"
+    position: "bottom-center"
+    alignment: "top-center"
     tree_align: true          # ← 把整条链当作一个整体来定位
     margin_bottom: 0.07
   defined_text_02:
     content: "35mm"
     relative_to: "defined_text_01"
     relative_position: "right-of"
+    cross_alignment: "top"
 ```
 
 - 未声明 `tree_align: true` 的依赖链不受影响
-- 单元素（没有子元素）自动跳过，不必刻意移除
+- `tree_align` 只属于绝对定位节点；相对节点上声明会拒绝加载
+- 整树包围盒与同尺寸矩形在相同配置下得到完全一致的坐标
 
 ### 4.5 定位参数速查表
 
@@ -536,20 +561,21 @@ defined_texts:
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `placement` | `"inside"` / `"outside"` | `"outside"` | 元素在原图内侧还是外侧 |
-| `position` | 11 种锚点 | `"bottom"` | 参见 [§4.2 锚点表](#11-种-position-锚点) |
-| `alignment` | `"left"` / `"center"` / `"right"` / `"both-center"` / `"top"` / `"bottom"` / 组合格式 | `"center"` | 元素自对齐 |
+| `placement` | `"inside"` / `"outside"` | `"outside"` | 元素在照片边界主轴内侧还是外侧 |
+| `position` | 九点值 | 必填 | 照片九点参考位，参见 [§4.2](#42-绝对定位) |
+| `alignment` | 九点值 | 必填 | 元素布局盒自对齐 |
+| `line_alignment` | `left` / `center` / `right` | `left` | 多行文本块内部行对齐 |
 | `margin` | `float` / `int` | `0` | 统一边距 |
 | `margin_top` / `_bottom` / `_left` / `_right` | `float` / `int` | `0` | 各方向独立边距 |
-| `tree_align` | `bool` | `false` | 启用树级组合定位 |
+| `tree_align` | `bool` | `false` | 启用树级组合定位（仅绝对节点） |
 
 #### 相对定位参数（`relative_to` 元素）
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `relative_to` | 文字 | 必填 | 参考元素名称 |
-| `relative_position` | 6 种方向 | `"after"` | 参见 [§4.3](#43-相对定位) |
-| `alignment` | `"left"` / `"center"` / `"right"` | `"center"` | 在参考元素范围内的对齐 |
+| `relative_position` | 4 种方向 | 必填 | 参见 [§4.3](#43-相对定位) |
+| `cross_alignment` | 三值 | 必填 | 交叉轴对齐（方向决定合法值） |
 | `relative_margin` | `float` | `0.01` | 间距比例 |
 | `offset_x_ratio` / `offset_y_ratio` | `float` | `0` | 微调偏移 |
 
@@ -592,14 +618,15 @@ defined_texts:
 defined_texts:
   defined_text_01:
     content: "FL"
-    position: "bottom"
-    alignment: "center"
+    position: "bottom-center"
+    alignment: "top-center"
     tree_align: true
     margin_bottom: 0.07
   defined_text_02:
     content: "35mm"
     relative_to: "defined_text_01"
     relative_position: "right-of"
+    cross_alignment: "top"
     relative_margin: 0.005
 ```
 
@@ -611,15 +638,18 @@ defined_texts:
 custom_text:
   enabled: true
   position: "bottom-center"
-  alignment: "center"
+  alignment: "top-center"     # 布局盒顶边贴照片下方外侧锚点
+  line_alignment: "left"      # 多行块内部行对齐（可选，默认 left）
   margin_bottom: 0.03
 ```
 
 - `enabled: true` 时，GUI 显示文本输入框
 - 默认内容：`"Always believe that something wonderful\nis about to happen."`
 - 支持多行，用户可用换行分隔
+- `line_alignment` 只影响多行文本块**内部**各行的左右对齐，与元素
+  `alignment`（整个文本块相对元素锚点的方位）完全分离
 
-### 5.4 多行文本行间距
+### 5.4 多行文本行间距与行内对齐
 
 ```yaml
 fonts:
@@ -628,6 +658,9 @@ fonts:
 
 - 仅对包含换行符 `\n` 的文本生效
 - 可在 `info_position`、`defined_texts` 或 `custom_text` 条目中用 `line_spacing_ratio` 覆盖全局值
+- 多行块内部行对齐用 `line_alignment`（`left` / `center` / `right`，缺省
+  `left`）：改变它只移动块内各行 x，不改变文本块整体位置；改变元素
+  `alignment` 只移动整个文本块，不改变块内各行相对位置
 
 ---
 
@@ -771,12 +804,13 @@ logo:
   max_dim_limit_ratio: 2.5      # 长边上限倍数（防止细长 Logo 失控）
   placement: outside
   position: "bottom-right"
-  alignment: "center"
+  alignment: "bottom-right"     # 九点自对齐：Logo 右下角贴元素锚点
   margin_bottom: 0.01
   margin_right: 0.01
-  # 相对定位（与绝对定位互斥）
+  # 相对定位（与绝对定位互斥；使用交叉轴三值 cross_alignment）
   # relative_to: "camera_lens"
   # relative_position: "below"
+  # cross_alignment: "left"      # below/above → left/center/right
   # relative_margin: 0.01
   # offset_x_ratio: 0.0           # 微调偏移（仅相对定位时生效）
   # offset_y_ratio: 0.0
@@ -841,13 +875,13 @@ fujifilm_logo: 0.7
 ```yaml
 defined_text_01:
   content: "FL"
-  position: "bottom"
-  alignment: "center"
+  position: "bottom-center"
+  alignment: "top-center"
   tree_align: true
   margin_bottom: 0.07
 ```
 
-需要双轴居中时，使用 `alignment: "both-center"`。
+需要整链元素中心与锚点重合时，使用九点值 `alignment: "center"`。
 
 ### Q: Logo 太大或太小怎么办？
 
@@ -867,7 +901,7 @@ padding 仅约束叠加元素（文字、Logo 等），不移动原始照片。�
 
 ### Q: tree_align: true 对单元素有影响吗？
 
-没有。当根元素没有通过 `relative_to` 引用的子元素时，自动跳过树级定位。
+没有影响。单成员树与普通元素走同一套盒定位公式，在相同配置下坐标完全一致。
 
 ---
 
@@ -912,8 +946,8 @@ layout:
       width_ratio: 1.1
       height_ratio: 0.15
       opacity: 0.5
-      position: "bottom"
-      alignment: "both-center"
+      position: "bottom-center"
+      alignment: "bottom-center"
       margin_bottom: 0.05
 
   # 信息位置：声明哪些文字显示 + 定位方式
@@ -921,34 +955,36 @@ layout:
     camera_lens:
       placement: outside
       position: "bottom-left"
-      alignment: "left"
+      alignment: "top-left"
       margin_bottom: 0.022
       margin_left: 0.02
     timestamp_author:
       relative_to: "camera_lens"
       relative_position: "below"
-      alignment: "left"
+      cross_alignment: "left"
       relative_margin: 0.01
 
   # 预定义文字（可选）
   defined_texts:
     defined_text_01:
       content: "FL"
-      position: "bottom"
-      alignment: "center"
+      position: "bottom-center"
+      alignment: "top-center"
       tree_align: true
       margin_bottom: 0.07
     defined_text_02:
       content: "35mm"
       relative_to: "defined_text_01"
       relative_position: "right-of"
+      cross_alignment: "top"
       relative_margin: 0.005
 
   # 自定义文本（可选）
   custom_text:
     enabled: false
     position: "bottom-center"
-    alignment: "center"
+    alignment: "top-center"
+    line_alignment: "left"
     margin_bottom: 0.03
 
 # 【Logo 配置】（可选）
@@ -958,7 +994,7 @@ logo:
   max_dim_limit_ratio: 2.5
   placement: outside
   position: "bottom-right"
-  alignment: "center"
+  alignment: "bottom-right"
   margin_bottom: 0.01
   margin_right: 0.01
 
