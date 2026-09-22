@@ -15,6 +15,7 @@ from qfluentwidgets import (
 from ...models.style_config_form import (
     ELEMENT_KEYS, PLACEMENT_OPTIONS,
     ANCHOR_POSITION_OPTIONS, ALIGNMENT_OPTIONS,
+    HORIZONTAL_CROSS_OPTIONS, VERTICAL_CROSS_OPTIONS,
     RELATIVE_POSITION_OPTIONS,
 )
 
@@ -82,14 +83,6 @@ class LogoSection(ExpandGroupSettingCard):
         self.diag_limit_sb.valueChanged.connect(self._on_changed)
         gen_grid.addWidget(self.diag_limit_sb, 0, 3)
 
-        gen_grid.addWidget(BodyLabel('alignment:', container), 1, 0)
-        self.alignment_combo = ComboBox(container)
-        self.alignment_combo.addItems(ALIGNMENT_OPTIONS)
-        self.alignment_combo.setCurrentText('top-right')
-        self.alignment_combo.currentTextChanged.connect(
-            self._on_changed)
-        gen_grid.addWidget(self.alignment_combo, 1, 1, 1, 3)
-
         layout.addLayout(gen_grid)
 
         # ── 绝对定位控件 ──
@@ -111,6 +104,17 @@ class LogoSection(ExpandGroupSettingCard):
         self.abs_position.currentTextChanged.connect(
             self._on_changed)
         abs_grid.addWidget(self.abs_position, r, 3)
+
+        r += 1
+        # 绝对定位 alignment：九点自对齐（默认 bottom-right：
+        # Logo 底边贴照片上方外侧锚点，使 Logo 位于照片上方）
+        abs_grid.addWidget(BodyLabel('alignment:', container), r, 0)
+        self.abs_alignment_combo = ComboBox(self._abs_widget)
+        self.abs_alignment_combo.addItems(ALIGNMENT_OPTIONS)
+        self.abs_alignment_combo.setCurrentText('bottom-right')
+        self.abs_alignment_combo.currentTextChanged.connect(
+            self._on_changed)
+        abs_grid.addWidget(self.abs_alignment_combo, r, 1, 1, 3)
 
         r += 1
         self.abs_mt = self._make_spinbox(
@@ -139,8 +143,19 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(BodyLabel('relative_position:', container), r, 2)
         self.rel_pos = ComboBox(self._rel_widget)
         self.rel_pos.addItems(RELATIVE_POSITION_OPTIONS)
-        self.rel_pos.currentTextChanged.connect(self._on_changed)
+        self.rel_pos.currentTextChanged.connect(
+            self._on_relative_position_changed)
         rel_grid.addWidget(self.rel_pos, r, 3)
+
+        r += 1
+        # 相对定位 cross_alignment：按方向切换三值，与绝对 alignment 分离
+        rel_grid.addWidget(BodyLabel('cross_alignment:', container), r, 0)
+        self.rel_cross_combo = ComboBox(self._rel_widget)
+        self.rel_cross_combo.addItems(HORIZONTAL_CROSS_OPTIONS)
+        self.rel_cross_combo.setCurrentText('center')
+        self.rel_cross_combo.currentTextChanged.connect(
+            self._on_changed)
+        rel_grid.addWidget(self.rel_cross_combo, r, 1)
 
         r += 1
         rel_grid.addWidget(BodyLabel('relative_margin:', container), r, 0)
@@ -204,6 +219,27 @@ class LogoSection(ExpandGroupSettingCard):
             self._rel_widget.setEnabled(self.enabled_btn.isChecked() and not is_absolute)
         self._on_changed()
 
+    def _on_relative_position_changed(self, direction: str):
+        """
+        relative_position 切换时同步 cross_alignment 合法值：
+        above/below → left/center/right；left-of/right-of →
+        top/center/bottom；不合法的旧值重置为 center。
+        """
+        if direction in ('left-of', 'right-of'):
+            legal = VERTICAL_CROSS_OPTIONS
+        else:
+            legal = HORIZONTAL_CROSS_OPTIONS
+        current = self.rel_cross_combo.currentText()
+        self.rel_cross_combo.blockSignals(True)
+        self.rel_cross_combo.clear()
+        self.rel_cross_combo.addItems(legal)
+        if current in legal:
+            self.rel_cross_combo.setCurrentText(current)
+        else:
+            self.rel_cross_combo.setCurrentText('center')
+        self.rel_cross_combo.blockSignals(False)
+        self._on_changed()
+
     def _on_changed(self, *args):
         self.value_changed.emit()
 
@@ -212,13 +248,13 @@ class LogoSection(ExpandGroupSettingCard):
         self.mode_seg.setCurrentItem(data.logo_mode)
         self.size_ratio_sb.setValue(data.logo_size_ratio)
         self.diag_limit_sb.setValue(data.logo_diagonal_limit)
-        self.alignment_combo.setCurrentText(
-            data.logo_alignment)
         if data.logo_mode == 'absolute':
             self.abs_placement.setCurrentText(
                 data.logo_placement)
             self.abs_position.setCurrentText(
                 data.logo_position)
+            self.abs_alignment_combo.setCurrentText(
+                data.logo_absolute_alignment)
             self.abs_mt.setValue(data.logo_mt)
             self.abs_mb.setValue(data.logo_mb)
             self.abs_ml.setValue(data.logo_ml)
@@ -226,6 +262,9 @@ class LogoSection(ExpandGroupSettingCard):
         else:
             self.rel_to.setCurrentText(
                 data.logo_relative_to)
+            self._sync_cross_options(data.logo_relative_position)
+            self.rel_cross_combo.setCurrentText(
+                data.logo_cross_alignment)
             self.rel_pos.setCurrentText(
                 data.logo_relative_position)
             self.rel_margin_sb.setValue(
@@ -238,7 +277,10 @@ class LogoSection(ExpandGroupSettingCard):
         data.logo_mode = self._current_mode
         data.logo_size_ratio = self.size_ratio_sb.value()
         data.logo_diagonal_limit = self.diag_limit_sb.value()
-        data.logo_alignment = self.alignment_combo.currentText()
+        # 按当前模式只读取对应 alignment 控件，避免隐藏控件覆盖保存值
+        data.logo_absolute_alignment = \
+            self.abs_alignment_combo.currentText()
+        data.logo_cross_alignment = self.rel_cross_combo.currentText()
         if data.logo_mode == 'absolute':
             data.logo_placement = self.abs_placement.currentText()
             data.logo_position = self.abs_position.currentText()
@@ -253,3 +295,13 @@ class LogoSection(ExpandGroupSettingCard):
             data.logo_relative_margin = self.rel_margin_sb.value()
             data.logo_offset_x = self.offset_x_sb.value()
             data.logo_offset_y = self.offset_y_sb.value()
+
+    def _sync_cross_options(self, direction: str):
+        """按方向同步 cross_alignment 下拉选项（加载时使用，不发信号）"""
+        legal = (VERTICAL_CROSS_OPTIONS
+                 if direction in ('left-of', 'right-of')
+                 else HORIZONTAL_CROSS_OPTIONS)
+        self.rel_cross_combo.blockSignals(True)
+        self.rel_cross_combo.clear()
+        self.rel_cross_combo.addItems(legal)
+        self.rel_cross_combo.blockSignals(False)

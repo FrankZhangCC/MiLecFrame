@@ -32,16 +32,26 @@ ELEMENT_KEYS = [
 
 PLACEMENT_OPTIONS = ['outside', 'inside']
 
+# 绝对定位 position 九点规范值（照片九点参考位）
 ANCHOR_POSITION_OPTIONS = [
-    'bottom-left', 'bottom-center', 'bottom-right',
     'top-left', 'top-center', 'top-right',
-    'left', 'right', 'top', 'bottom', 'center',
+    'center-left', 'center', 'center-right',
+    'bottom-left', 'bottom-center', 'bottom-right',
 ]
 
+# 绝对定位 alignment 九点规范值（元素布局盒相对元素锚点的自对齐）
 ALIGNMENT_OPTIONS = [
-    'left', 'center', 'both-center', 'right',
-    'top-left', 'top-right', 'top', 'bottom',
+    'top-left', 'top-center', 'top-right',
+    'center-left', 'center', 'center-right',
+    'bottom-left', 'bottom-center', 'bottom-right',
 ]
+
+# 多行文本块内部行对齐（与元素 alignment 完全分离）
+LINE_ALIGNMENT_OPTIONS = ['left', 'center', 'right']
+
+# 相对定位交叉轴三值：above/below 用水平组，left-of/right-of 用垂直组
+HORIZONTAL_CROSS_OPTIONS = ['left', 'center', 'right']
+VERTICAL_CROSS_OPTIONS = ['top', 'center', 'bottom']
 
 RELATIVE_POSITION_OPTIONS = ['below', 'above', 'left-of', 'right-of']
 
@@ -67,7 +77,12 @@ class ElementConfig:
     mode: str = 'absolute'
     placement: str = 'outside'
     position: str = 'bottom-left'
-    alignment: str = 'left'
+    # 绝对定位时元素布局盒的九点自对齐；相对定位时不写此字段
+    absolute_alignment: str = 'top-left'
+    # 相对定位时参考元素对应轴上的三值交叉轴对齐；绝对定位时不写此字段
+    cross_alignment: str = 'left'
+    # 多行文本块内部行对齐（单行文字渲染时忽略；非默认时才序列化）
+    line_alignment: str = 'left'
     margin_top: float = 0.0
     margin_bottom: float = 0.02
     margin_left: float = 0.0
@@ -90,7 +105,11 @@ class DefinedTextConfig:
     tree_align: bool = False
     placement: str = 'outside'
     position: str = 'bottom-left'
-    alignment: str = 'left'
+    # 绝对定位九点自对齐 / 相对定位三值交叉轴对齐（按模式二选一序列化）
+    absolute_alignment: str = 'top-left'
+    cross_alignment: str = 'left'
+    # 多行文本块内部行对齐（单行忽略；非默认时才序列化）
+    line_alignment: str = 'left'
     margin_top: float = 0.0
     margin_bottom: float = 0.0
     margin_left: float = 0.0
@@ -227,7 +246,10 @@ class StyleConfigFormData:
     logo_mode: str = 'absolute'
     logo_placement: str = 'outside'
     logo_position: str = 'top-right'
-    logo_alignment: str = 'top-right'
+    # 绝对定位九点自对齐（默认 bottom-right：Logo 底边贴照片上方外侧锚点）
+    logo_absolute_alignment: str = 'bottom-right'
+    # 相对定位交叉轴对齐（left-of/right-of 默认 center）
+    logo_cross_alignment: str = 'center'
     logo_size_ratio: float = 0.04
     logo_diagonal_limit: float = 2.0
     logo_mt: float = 0.0
@@ -266,7 +288,12 @@ class StyleConfigFormData:
     custom_text_mode: str = 'absolute'
     custom_text_placement: str = 'outside'
     custom_text_position: str = 'bottom-center'
-    custom_text_alignment: str = 'center'
+    # 绝对定位九点自对齐（默认 top-center：文字顶边贴照片下方外侧锚点）
+    custom_text_absolute_alignment: str = 'top-center'
+    # 相对定位交叉轴对齐（above/below 默认 left）
+    custom_text_cross_alignment: str = 'left'
+    # 多行文本块内部行对齐（与元素 alignment 完全分离）
+    custom_text_line_alignment: str = 'left'
     custom_text_mt: float = 0.0
     custom_text_mb: float = 0.0
     custom_text_ml: float = 0.0
@@ -392,27 +419,33 @@ class StyleConfigFormData:
         for elem in self.elements:
             key = elem.key
             if elem.mode == 'absolute':
+                # 绝对定位只写九点 alignment，不写 cross_alignment
                 entry = {
                     'placement': elem.placement,
                     'position': elem.position,
-                    'alignment': elem.alignment,
+                    'alignment': elem.absolute_alignment,
                     'margin_top': elem.margin_top,
                     'margin_bottom': elem.margin_bottom,
                     'margin_left': elem.margin_left,
                     'margin_right': elem.margin_right,
                 }
+                if elem.line_alignment != 'left':
+                    # 行内对齐仅在非默认时写出（单行文字渲染时忽略）
+                    entry['line_alignment'] = elem.line_alignment
             else:
+                # 相对定位只写 cross_alignment，绝不通传 alignment
                 entry = {
                     'relative_to': elem.relative_to,
                     'relative_position': elem.relative_position,
-                    'alignment': elem.alignment,
+                    'cross_alignment': elem.cross_alignment,
                     'relative_margin': elem.relative_margin,
                 }
                 if elem.offset_x != 0.0:
                     entry['offset_x_ratio'] = elem.offset_x
                 if elem.offset_y != 0.0:
                     entry['offset_y_ratio'] = elem.offset_y
-            if elem.tree_align:
+            if elem.mode == 'absolute' and elem.tree_align:
+                # tree_align 只属于绝对定位节点
                 entry['tree_align'] = True
             info_pos[key] = entry
         layout['info_position'] = info_pos
@@ -428,17 +461,19 @@ class StyleConfigFormData:
                 if dt_item.mode == 'absolute':
                     dentry['placement'] = dt_item.placement
                     dentry['position'] = dt_item.position
-                    dentry['alignment'] = dt_item.alignment
+                    dentry['alignment'] = dt_item.absolute_alignment
                     dentry['margin_top'] = dt_item.margin_top
                     dentry['margin_bottom'] = dt_item.margin_bottom
                     dentry['margin_left'] = dt_item.margin_left
                     dentry['margin_right'] = dt_item.margin_right
+                    if dt_item.line_alignment != 'left':
+                        dentry['line_alignment'] = dt_item.line_alignment
                     if dt_item.tree_align:
                         dentry['tree_align'] = True
                 else:
                     dentry['relative_to'] = dt_item.relative_to
                     dentry['relative_position'] = dt_item.relative_position
-                    dentry['alignment'] = dt_item.alignment
+                    dentry['cross_alignment'] = dt_item.cross_alignment
                     dentry['relative_margin'] = dt_item.relative_margin
                     if dt_item.offset_x != 0.0:
                         dentry['offset_x_ratio'] = dt_item.offset_x
@@ -454,7 +489,7 @@ class StyleConfigFormData:
             if self.custom_text_mode == 'relative' and self.custom_text_relative_to.strip():
                 ct['relative_to'] = self.custom_text_relative_to.strip()
                 ct['relative_position'] = self.custom_text_relative_position
-                ct['alignment'] = self.custom_text_alignment
+                ct['cross_alignment'] = self.custom_text_cross_alignment
                 ct['relative_margin'] = self.custom_text_relative_margin
                 if self.custom_text_offset_x != 0.0:
                     ct['offset_x_ratio'] = self.custom_text_offset_x
@@ -463,11 +498,13 @@ class StyleConfigFormData:
             else:
                 ct['placement'] = self.custom_text_placement
                 ct['position'] = self.custom_text_position
-                ct['alignment'] = self.custom_text_alignment
+                ct['alignment'] = self.custom_text_absolute_alignment
                 ct['margin_top'] = self.custom_text_mt
                 ct['margin_bottom'] = self.custom_text_mb
                 ct['margin_left'] = self.custom_text_ml
                 ct['margin_right'] = self.custom_text_mr
+            if self.custom_text_line_alignment != 'left':
+                ct['line_alignment'] = self.custom_text_line_alignment
             if self.custom_text_line_spacing:
                 ct['line_spacing_ratio'] = self.custom_text_line_spacing
             layout['custom_text'] = ct
@@ -481,21 +518,24 @@ class StyleConfigFormData:
         if self.logo_enabled:
             logo = {
                 'enabled': True,
-                'alignment': self.logo_alignment,
                 'size_ratio': self.logo_size_ratio,
                 'diagonal_limit_ratio': self.logo_diagonal_limit,
             }
             if self.logo_mode == 'relative' and self.logo_relative_to:
+                # 相对定位只写 cross_alignment
                 logo['relative_to'] = self.logo_relative_to
                 logo['relative_position'] = self.logo_relative_position
+                logo['cross_alignment'] = self.logo_cross_alignment
                 logo['relative_margin'] = self.logo_relative_margin
                 if self.logo_offset_x != 0.0:
                     logo['offset_x_ratio'] = self.logo_offset_x
                 if self.logo_offset_y != 0.0:
                     logo['offset_y_ratio'] = self.logo_offset_y
             else:
+                # 绝对定位只写九点 alignment
                 logo['placement'] = self.logo_placement
                 logo['position'] = self.logo_position
+                logo['alignment'] = self.logo_absolute_alignment
                 logo['margin_top'] = self.logo_mt
                 logo['margin_bottom'] = self.logo_mb
                 logo['margin_left'] = self.logo_ml
@@ -660,6 +700,10 @@ class StyleConfigFormData:
             if not isinstance(entry, dict):
                 continue
             if 'relative_to' in entry:
+                # 相对定位只读 cross_alignment（旧 alignment 字段不透传，
+                # 含旧字段的样式应由 StyleManager 校验拒绝加载）
+                default_cross = 'center' if str(
+                    entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
                 elem = ElementConfig(
                     id=elem_id,
                     key=key,
@@ -668,12 +712,12 @@ class StyleConfigFormData:
                     relative_to=str(entry.get('relative_to', 'exif')),
                     relative_position=str(
                         entry.get('relative_position', 'below')),
-                    alignment=str(entry.get('alignment', 'left')),
+                    cross_alignment=str(
+                        entry.get('cross_alignment', default_cross)),
                     relative_margin=float(
                         entry.get('relative_margin', 0.01)),
                     offset_x=float(entry.get('offset_x_ratio', 0.0)),
                     offset_y=float(entry.get('offset_y_ratio', 0.0)),
-                    tree_align=bool(entry.get('tree_align', False)),
                 )
             else:
                 # 统一 margin 作为独立 margin 的兜底
@@ -684,7 +728,10 @@ class StyleConfigFormData:
                     mode='absolute',
                     placement=str(entry.get('placement', 'outside')),
                     position=str(entry.get('position', 'bottom-left')),
-                    alignment=str(entry.get('alignment', 'left')),
+                    absolute_alignment=str(
+                        entry.get('alignment', 'top-left')),
+                    line_alignment=str(
+                        entry.get('line_alignment', 'left')),
                     margin_top=float(
                         entry.get('margin_top', default_marg
                                   if default_marg is not None else 0.0)),
@@ -709,7 +756,13 @@ class StyleConfigFormData:
             form.logo_enabled = bool(logo.get('enabled', False))
             form.logo_placement = str(logo.get('placement', 'outside'))
             form.logo_position = str(logo.get('position', 'top-right'))
-            form.logo_alignment = str(logo.get('alignment', 'top-right'))
+            # 九点自对齐（绝对）与交叉轴对齐（相对）按模式分别读取
+            form.logo_absolute_alignment = str(
+                logo.get('alignment', 'bottom-right'))
+            _logo_default_cross = 'center' if str(
+                logo.get('relative_position')) in ('left-of', 'right-of') else 'left'
+            form.logo_cross_alignment = str(
+                logo.get('cross_alignment', _logo_default_cross))
             form.logo_size_ratio = float(logo.get('size_ratio', 0.04))
             form.logo_diagonal_limit = float(
                 logo.get('diagonal_limit_ratio', 2.0))
@@ -750,6 +803,9 @@ class StyleConfigFormData:
                 'relative_to')
             mode = 'absolute' if rooted else 'relative'
             _dt_marg = dt_entry.get('margin')
+            _dt_is_relative = not rooted
+            _dt_default_cross = 'center' if str(
+                dt_entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
             dt_item = DefinedTextConfig(
                 id=dt_id,
                 key=dt_key,
@@ -758,7 +814,14 @@ class StyleConfigFormData:
                 tree_align=bool(dt_entry.get('tree_align', False)),
                 placement=str(dt_entry.get('placement', 'outside')),
                 position=str(dt_entry.get('position', 'bottom-left')),
-                alignment=str(dt_entry.get('alignment', 'left')),
+                # 绝对定位读九点 alignment + line_alignment；
+                # 相对定位只读 cross_alignment
+                absolute_alignment=str(
+                    dt_entry.get('alignment', 'top-left')),
+                cross_alignment=str(
+                    dt_entry.get('cross_alignment', _dt_default_cross)),
+                line_alignment=str(
+                    dt_entry.get('line_alignment', 'left')),
                 margin_top=float(
                     dt_entry.get('margin_top', _dt_marg
                                  if _dt_marg is not None else 0.0)),
@@ -790,8 +853,15 @@ class StyleConfigFormData:
                 ct_cfg.get('placement', 'outside'))
             form.custom_text_position = str(
                 ct_cfg.get('position', 'bottom-center'))
-            form.custom_text_alignment = str(
-                ct_cfg.get('alignment', 'center'))
+            # 九点自对齐（绝对）与交叉轴对齐（相对）按模式分别读取
+            form.custom_text_absolute_alignment = str(
+                ct_cfg.get('alignment', 'top-center'))
+            _ct_default_cross = 'center' if str(
+                ct_cfg.get('relative_position')) in ('left-of', 'right-of') else 'left'
+            form.custom_text_cross_alignment = str(
+                ct_cfg.get('cross_alignment', _ct_default_cross))
+            form.custom_text_line_alignment = str(
+                ct_cfg.get('line_alignment', 'left'))
             _ct_marg = ct_cfg.get('margin')
             form.custom_text_mt = float(
                 ct_cfg.get('margin_top', _ct_marg

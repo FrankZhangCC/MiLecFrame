@@ -26,6 +26,8 @@ from ..models.style_config_form import (
     PLACEMENT_OPTIONS,
     ANCHOR_POSITION_OPTIONS,
     ALIGNMENT_OPTIONS,
+    HORIZONTAL_CROSS_OPTIONS,
+    VERTICAL_CROSS_OPTIONS,
     RELATIVE_POSITION_OPTIONS,
 )
 
@@ -129,9 +131,10 @@ class ElementEditor(QWidget):
         abs_grid.addWidget(self.abs_position, r, 1)
 
         r += 1
+        # 绝对定位 alignment：九点自对齐（元素布局盒相对元素锚点）
         self.abs_alignment = ComboBox(self.abs_widget)
         self.abs_alignment.addItems(ALIGNMENT_OPTIONS)
-        self.abs_alignment.setCurrentText('left')
+        self.abs_alignment.setCurrentText('top-left')
         self.abs_alignment.currentTextChanged.connect(
             self._on_changed)
         abs_grid.addWidget(
@@ -183,20 +186,28 @@ class ElementEditor(QWidget):
         self.rel_relative_position.addItems(
             RELATIVE_POSITION_OPTIONS)
         self.rel_relative_position.currentTextChanged.connect(
-            self._on_changed)
+            self._on_relative_position_changed)
         rel_grid.addWidget(
             BodyLabel("relative_position:", self.rel_widget), r, 0)
         rel_grid.addWidget(self.rel_relative_position, r, 1)
 
         r += 1
-        self.rel_alignment = ComboBox(self.rel_widget)
-        self.rel_alignment.addItems(ALIGNMENT_OPTIONS)
-        self.rel_alignment.setCurrentText('left')
-        self.rel_alignment.currentTextChanged.connect(
+        # 相对定位 cross_alignment：按方向切换三值（above/below →
+        # left/center/right；left-of/right-of → top/center/bottom），
+        # 与绝对定位的九点 alignment 完全分离，避免隐藏控件覆盖保存值
+        self.rel_cross_alignment = ComboBox(self.rel_widget)
+        self.rel_cross_alignment.addItems(HORIZONTAL_CROSS_OPTIONS)
+        self.rel_cross_alignment.setCurrentText('left')
+        self.rel_cross_alignment.currentTextChanged.connect(
             self._on_changed)
-        rel_grid.addWidget(
-            BodyLabel("alignment:", self.rel_widget), r, 0)
-        rel_grid.addWidget(self.rel_alignment, r, 1)
+        self.rel_cross_label = BodyLabel(
+            "cross_alignment:", self.rel_widget)
+        self.rel_cross_label.setToolTip(
+            "交叉轴对齐：above/below 时为 left/center/right，\n"
+            "left-of/right-of 时为 top/center/bottom；\n"
+            "切换方向后不合法的值会自动重置为 center")
+        rel_grid.addWidget(self.rel_cross_label, r, 0)
+        rel_grid.addWidget(self.rel_cross_alignment, r, 1)
 
         r += 1
         self.rel_margin = DoubleSpinBox(self.rel_widget)
@@ -243,6 +254,8 @@ class ElementEditor(QWidget):
         is_absolute = mode == 'absolute'
         self.abs_widget.setVisible(is_absolute)
         self.rel_widget.setVisible(not is_absolute)
+        # tree_align 只属于绝对定位的树根节点，相对模式下禁用
+        self.tree_align_btn.setEnabled(is_absolute)
 
         # 切换到相对定位时，避免自引用（relative_to == 元素自身 key）
         if not is_absolute and self._show_key_selector:
@@ -254,6 +267,35 @@ class ElementEditor(QWidget):
                         self.rel_relative_to.setCurrentIndex(i)
                         break
 
+        self._on_changed()
+
+    def _on_relative_position_changed(self, direction: str):
+        """
+        relative_position 切换时同步 cross_alignment 合法值：
+        above/below → left/center/right（默认 left）；
+        left-of/right-of → top/center/bottom（默认 center）。
+        当前值不合法时重置为 center（方向无关的中性值）。
+        """
+        if direction in ('left-of', 'right-of'):
+            legal = VERTICAL_CROSS_OPTIONS
+            default = 'center'
+        else:
+            legal = HORIZONTAL_CROSS_OPTIONS
+            default = 'left'
+        current = self.rel_cross_alignment.currentText()
+        self.rel_cross_alignment.blockSignals(True)
+        self.rel_cross_alignment.clear()
+        self.rel_cross_alignment.addItems(legal)
+        if current in legal:
+            self.rel_cross_alignment.setCurrentText(current)
+        else:
+            # 原值与新方向轴向不匹配，重置并提示
+            self.rel_cross_alignment.setCurrentText(default)
+            logger.info(
+                f"[ElementEditor] relative_position 切换为 {direction!r}，"
+                f"cross_alignment 原值 {current!r} 不合法，已重置为 "
+                f"{self.rel_cross_alignment.currentText()!r}")
+        self.rel_cross_alignment.blockSignals(False)
         self._on_changed()
 
     def _on_changed(self, *args):
@@ -279,16 +321,19 @@ class ElementEditor(QWidget):
         self.set_mode(elem.mode)
         self.abs_placement.setCurrentText(elem.placement)
         self.abs_position.setCurrentText(elem.position)
-        self.abs_alignment.setCurrentText(elem.alignment)
+        self.abs_alignment.setCurrentText(elem.absolute_alignment)
         self.abs_mt.setValue(elem.margin_top)
         self.abs_mb.setValue(elem.margin_bottom)
         self.abs_ml.setValue(elem.margin_left)
         self.abs_mr.setValue(elem.margin_right)
         self.tree_align_btn.setChecked(elem.tree_align)
+        self.tree_align_btn.setEnabled(elem.mode == 'absolute')
         self.rel_relative_to.setCurrentText(elem.relative_to)
+        # 先同步 cross_alignment 合法值集合，再设置当前值
+        self._sync_cross_options(elem.relative_position)
+        self.rel_cross_alignment.setCurrentText(elem.cross_alignment)
         self.rel_relative_position.setCurrentText(
             elem.relative_position)
-        self.rel_alignment.setCurrentText(elem.alignment)
         self.rel_margin.setValue(elem.relative_margin)
         self.rel_offset_x.setValue(elem.offset_x)
         self.rel_offset_y.setValue(elem.offset_y)
@@ -300,7 +345,10 @@ class ElementEditor(QWidget):
         target.mode = self._current_mode
         target.placement = self.abs_placement.currentText()
         target.position = self.abs_position.currentText()
-        target.alignment = self.abs_alignment.currentText()
+        # 按当前模式只读取当前可见的 alignment 控件，避免隐藏控件
+        # 覆盖用户选择（相对 cross_alignment 保存缺陷修复）
+        target.absolute_alignment = self.abs_alignment.currentText()
+        target.cross_alignment = self.rel_cross_alignment.currentText()
         target.margin_top = self.abs_mt.value()
         target.margin_bottom = self.abs_mb.value()
         target.margin_left = self.abs_ml.value()
@@ -318,16 +366,18 @@ class ElementEditor(QWidget):
         self.set_mode(item.mode)
         self.abs_placement.setCurrentText(item.placement)
         self.abs_position.setCurrentText(item.position)
-        self.abs_alignment.setCurrentText(item.alignment)
+        self.abs_alignment.setCurrentText(item.absolute_alignment)
         self.abs_mt.setValue(item.margin_top)
         self.abs_mb.setValue(item.margin_bottom)
         self.abs_ml.setValue(item.margin_left)
         self.abs_mr.setValue(item.margin_right)
         self.tree_align_btn.setChecked(item.tree_align)
+        self.tree_align_btn.setEnabled(item.mode == 'absolute')
         self.rel_relative_to.setCurrentText(item.relative_to)
+        self._sync_cross_options(item.relative_position)
+        self.rel_cross_alignment.setCurrentText(item.cross_alignment)
         self.rel_relative_position.setCurrentText(
             item.relative_position)
-        self.rel_alignment.setCurrentText(item.alignment)
         self.rel_margin.setValue(item.relative_margin)
         self.rel_offset_x.setValue(item.offset_x)
         self.rel_offset_y.setValue(item.offset_y)
@@ -337,7 +387,9 @@ class ElementEditor(QWidget):
         target.mode = self._current_mode
         target.placement = self.abs_placement.currentText()
         target.position = self.abs_position.currentText()
-        target.alignment = self.abs_alignment.currentText()
+        # 按当前模式只读取当前可见的 alignment 控件
+        target.absolute_alignment = self.abs_alignment.currentText()
+        target.cross_alignment = self.rel_cross_alignment.currentText()
         target.margin_top = self.abs_mt.value()
         target.margin_bottom = self.abs_mb.value()
         target.margin_left = self.abs_ml.value()
@@ -349,6 +401,16 @@ class ElementEditor(QWidget):
         target.relative_margin = self.rel_margin.value()
         target.offset_x = self.rel_offset_x.value()
         target.offset_y = self.rel_offset_y.value()
+
+    def _sync_cross_options(self, direction: str):
+        """按方向同步 cross_alignment 下拉选项（加载时使用，不发信号）"""
+        legal = (VERTICAL_CROSS_OPTIONS
+                 if direction in ('left-of', 'right-of')
+                 else HORIZONTAL_CROSS_OPTIONS)
+        self.rel_cross_alignment.blockSignals(True)
+        self.rel_cross_alignment.clear()
+        self.rel_cross_alignment.addItems(legal)
+        self.rel_cross_alignment.blockSignals(False)
 
     def update_relative_to_options(self, keys: list[str]):
         """更新 relative_to 下拉选项"""
