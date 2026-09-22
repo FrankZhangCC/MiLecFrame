@@ -26,6 +26,17 @@ class TextRenderer:
         self.font_manager = font_manager
         self.layout_engine = layout_engine
 
+    # ── 行内对齐解析 ────────────────────────────────────────
+
+    def _resolve_line_alignment(self, cfg: Dict) -> str:
+        """
+        多行文本块内部行对齐，与"布局盒相对元素锚点的 alignment"完全分离：
+        只读专用字段 line_alignment，缺省为 left，禁止从元素 alignment 推断。
+        单行文字不经过此方法，不受 line_alignment 影响。
+        """
+        return cfg.get('line_alignment', 'left')
+
+
     # ── 颜色解析 ────────────────────────────────────────────
 
     def _parse_color_value(self, custom_color) -> Optional[Tuple[int, int, int]]:
@@ -359,11 +370,26 @@ class TextRenderer:
             x, y = self.layout_engine.calculate_position(
                 item['width'], item['height'], cfg, defer_padding=defer_pad)
 
-            logger.debug(
-                f"[Pos] {name}: calc=({x}, {y}), bbox=({item['width']}x{item['height']}), "
-                f"config={cfg.get('position', '?')}/{cfg.get('alignment', '?')} "
-                f"marg={self.layout_engine._resolve_margins(cfg)}"
-            )
+            if cfg.get('relative_to'):
+                # 相对定位日志：参考元素、方向、交叉轴对齐与最终坐标
+                logger.debug(
+                    f"[Relative] name={name} relative_to={cfg.get('relative_to')} "
+                    f"direction={cfg.get('relative_position')} "
+                    f"cross={cfg.get('cross_alignment')} "
+                    f"box=({item['width']}x{item['height']}) final=({x},{y})")
+            else:
+                # 绝对定位日志：照片参考点 → 元素锚点 → alignment 偏移 →
+                # raw box → final box → clamp delta（完整几何链路各一值）
+                info = self.layout_engine.get_absolute_layout_info(
+                    item['width'], item['height'], cfg)
+                raw_x, raw_y = info['raw']
+                logger.debug(
+                    f"[Layout] name={name} position={info['position']} "
+                    f"placement={info['placement']} alignment={info['alignment']} "
+                    f"photo_ref={info['photo_ref']} anchor={info['anchor']} "
+                    f"self={info['offset']} "
+                    f"raw=({raw_x},{raw_y},{item['width']},{item['height']}) "
+                    f"final=({x},{y}) clamp=({x - raw_x},{y - raw_y})")
 
             self.layout_engine.register_element(
                 name, x, y, item['width'], item['height'], cfg.get('relative_to'))
@@ -384,12 +410,13 @@ class TextRenderer:
             cfg = all_positions.get(name, {})
 
             if item.get('type') == 'multiline':
-                # 多行文本：通过 LayoutEngine 计算每行位置
+                # 多行文本：行内对齐只读专用 line_alignment 字段，
+                # 与元素布局盒相对元素锚点的 alignment 完全分离
                 positions = self.layout_engine.layout_multiline_lines(
                     block_x=x, block_y=y, block_w=w, block_h=h,
                     lines=item['lines'],
                     line_spacing=item['line_spacing'],
-                    alignment=cfg.get('alignment', 'left'),
+                    line_alignment=self._resolve_line_alignment(cfg),
                 )
                 for line_info, (line_x, baseline_y) in zip(item['lines'], positions):
                     if 'seg_info' not in line_info:
