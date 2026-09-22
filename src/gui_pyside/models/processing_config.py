@@ -28,6 +28,11 @@ class ProcessingConfig:
     bg_fill_type: str = BackgroundFillManager.DEFAULT_FILL
     font_weight: str = "medium"
     enhance_background: bool = True
+    # 旋转适配用户选项（default / none / clockwise / counterclockwise；
+    # default=跟随样式 default_portrait_adaptation（仅竖图生效），
+    # 显式选择对所有图片生效。字段名 portrait_adaptation 与
+    # config.json 键为历史命名，保持兼容
+    portrait_adaptation: str = "default"
 
     # ── 个性化配置 ──
     author: str = ""

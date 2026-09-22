@@ -38,7 +38,7 @@ from qfluentwidgets.common.style_sheet import (
     addStyleSheet, CustomStyleSheet,
 )
 
-from ..models.file_item import FileItem
+from ..models.file_item import FileItem, compute_cache_key
 from ..models.processing_config import ProcessingConfig
 from ..utils.temp_manager import TempManager
 from ..widgets.style_selector_card import StyleSelectorCard
@@ -47,6 +47,14 @@ from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
 from src.utils.config_manager import default_config_manager
 from src.core.image_processor import ImageProcessor
+from src.core.blur_cache import PreparedBlurLRU
+from src.core.renderer import RenderMetadata, RenderOptions
+# 竖图方向适配（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §6）：
+# 枚举值单点来源于 utils 工具模块，GUI 不自定义第二份合法值集合
+from src.utils.orientation_adaptation import (
+    ADAPT_DEFAULT, ADAPT_NONE, ADAPT_CLOCKWISE, ADAPT_COUNTERCLOCKWISE,
+    USER_ADAPTATION_VALUES, validate_style_default,
+)
 from PIL import Image as PILImage
 from PIL import ImageCms
 from PIL import ImageOps as PILImageOps
@@ -56,6 +64,16 @@ logger = logging.getLogger(__name__)
 
 # 图片文件扩展名白名单（与 _on_add_files 文件对话框过滤器一致）
 _ALLOWED_EXT = ('.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.webp')
+
+# ── 旋转适配下拉框选项（显示文本, 稳定内部值） ──────────
+# userData 绑定稳定枚举值而非中文文本：未来调整文案不破坏已有
+# config.json 的恢复（方案 §6.3）；'默认'的动态语义在渲染时解析
+PORTRAIT_ADAPTATION_ITEMS = (
+    ('默认（跟随样式）', ADAPT_DEFAULT),
+    ('不旋转', ADAPT_NONE),
+    ('顺时针适配', ADAPT_CLOCKWISE),
+    ('逆时针适配', ADAPT_COUNTERCLOCKWISE),
+)
 
 
 class FilmStripWheelFilter(QObject):
@@ -136,6 +154,13 @@ class ImageProcessingPage(QWidget):
         self.exif_helper = ExifHelper()
         self.logo_selector = LogoSelector()
         self.temp_manager = TempManager()
+
+        # ── 二级模糊缓存生命周期（页面级持有，跨生成复用卷积） ──
+        # 页面级可复用处理器：替代每次点击新建（否则二级缓存随处理器
+        # 一起被丢弃，跨生成复用无从谈起）
+        self._processor: ImageProcessor = None
+        # 页面级 LRU：按 nbytes 预算（默认 64 MiB）缓存工作分辨率卷积
+        self._blur_lru = PreparedBlurLRU()
 
         # ── 数据 ──
         self.file_items: list[FileItem] = []  # 胶片栏中的所有文件
@@ -532,20 +557,70 @@ class ImageProcessingPage(QWidget):
         default_bg_label = BackgroundFillManager.get_label(BackgroundFillManager.DEFAULT_FILL)
         if default_bg_label in bg_choices:
             self.combo_bg_fill.setCurrentText(default_bg_label)
+        # 相框配置卡三个下拉框统一双端宽度约束（200–260）：上限容纳最长
+        # 选项"模糊背景 (深色 65%)"文本 182px + 箭头与内边距；下限保持原
+        # 可收缩性——窄侧边栏下收缩回原基线，避免硬性宽度过高时整组
+        # 最小需求超过侧边栏宽度造成水平溢出
         self.combo_bg_fill.setMinimumWidth(200)
-        card.addGroup(FluentIcon.CHECKBOX, "背景填充样式", "选择背景填充方式", self.combo_bg_fill, 2)
+        self.combo_bg_fill.setMaximumWidth(260)
+        bg_group = card.addGroup(FluentIcon.CHECKBOX, "背景填充样式", "选择背景填充方式", self.combo_bg_fill, 2)
 
         # 背景增强
         self.chk_enhance = SwitchButton()
         self.chk_enhance.setChecked(True)
         card.addGroup(FluentIcon.CHECKBOX, "背景增强", "仅高斯模糊背景有效", self.chk_enhance)
 
+        # 旋转适配（方案 §6.2/§6.3）：渲染期整帧方向适配。默认模式
+        # 跟随样式声明（预设仅对竖图生效）；显式选择顺/逆时针对所有
+        # 图片生效。addGroup 返回 GroupWidget 并存引用，供内容行动态
+        # 提示使用。历史命名 portrait_adaptation 与 config 键保持兼容
+        self.combo_portrait_adaptation = ComboBox()
+        for _text, _value in PORTRAIT_ADAPTATION_ITEMS:
+            self.combo_portrait_adaptation.addItem(_text, userData=_value)
+        self.combo_portrait_adaptation.setMinimumWidth(200)
+        self.combo_portrait_adaptation.setMaximumWidth(260)
+        self.combo_portrait_adaptation.setCurrentIndex(
+            self.combo_portrait_adaptation.findData(ADAPT_DEFAULT))
+        self.combo_portrait_adaptation.currentIndexChanged.connect(
+            self._on_portrait_adaptation_changed)
+        self.combo_portrait_adaptation.setAccessibleName('旋转适配')
+        self.portrait_adaptation_group = card.addGroup(
+            FluentIcon.ROTATE,
+            '旋转适配',
+            # content 行保持短文案（contentLabel 不换行，长文案会把
+            # GroupWidget 撑宽超出侧边栏）；完整语义放 tooltip
+            '默认跟随样式',
+            self.combo_portrait_adaptation,
+            2,
+        )
+        _adapt_tip = ('默认模式遵循当前样式的适配声明，仅对竖图生效；'
+                      '显式选择顺/逆时针适配时对所有图片生效，并覆盖样式声明')
+        self.combo_portrait_adaptation.setToolTip(_adapt_tip)
+        self.portrait_adaptation_group.setToolTip(_adapt_tip)
+
         # 字重
         self.combo_font_weight = ComboBox()
         self.combo_font_weight.addItems(["中等 (Medium)", "常规 (Regular)", "细体 (Light)"])
         self.combo_font_weight.setCurrentIndex(0)
         self.combo_font_weight.setMinimumWidth(200)
-        card.addGroup(FluentIcon.FONT, "字重", "选择文字粗细", self.combo_font_weight, 2)
+        self.combo_font_weight.setMaximumWidth(260)
+        fw_group = card.addGroup(FluentIcon.FONT, "字重", "选择文字粗细", self.combo_font_weight, 2)
+
+        # ── 三个带下拉框的组统一标签列宽 ─────────────────────────
+        # GroupWidget 按剩余空间拉伸 ComboBox，各标签列宽不同会导致
+        # 下拉框宽度/左缘参差（用户反馈"上下对齐"）。取三组标题与描述
+        # 理想宽度的最大值统一设为标签最小宽：三组标签列严格等宽后，
+        # 结构参数完全一致 → 任意容器宽度下三个下拉框宽度与边缘
+        # 必然对齐（分配规则无关性），且不抬高整组最小需求
+        combo_groups = (bg_group, self.portrait_adaptation_group, fw_group)
+        label_w = max(
+            label.sizeHint().width()
+            for group in combo_groups
+            for label in (group.titleLabel, group.contentLabel)
+        )
+        for group in combo_groups:
+            group.titleLabel.setMinimumWidth(label_w)
+            group.contentLabel.setMinimumWidth(label_w)
 
         return card
 
@@ -646,6 +721,9 @@ class ImageProcessingPage(QWidget):
     def _on_style_changed(self, style_name: str):
         """相框样式下拉框变化时，更新依赖样式的控件"""
         self._update_style_dependent_controls()
+        # 旋转适配提示跟随样式刷新；不修改菜单当前选项：
+        # default 在渲染时解析新样式默认值，显式覆盖值继续生效（方案 §6.5）
+        self._update_portrait_adaptation_hint()
 
     def _update_style_dependent_controls(self):
         """根据当前选中的样式配置，更新自定义文本和LOGO的启用状态"""
@@ -680,6 +758,58 @@ class ImageProcessingPage(QWidget):
             self.combo_bg_fill.setToolTip('')
 
         logger.debug(f"样式变更: {style_name}, 自定义文本: {ct_enabled}, LOGO: {logo_enabled}")
+
+    # ── 旋转适配（方案 §6.4/§6.5） ──────────────────────
+
+    def _get_portrait_adaptation(self) -> str:
+        """返回 GUI 当前旋转适配稳定值；异常状态安全回退 default
+
+        页面唯一读取出口：生成、保存共用，防止各自实现不同容错。
+        """
+        value = self.combo_portrait_adaptation.currentData()
+        if value in USER_ADAPTATION_VALUES:
+            return value
+        return ADAPT_DEFAULT
+
+    def _on_portrait_adaptation_changed(self, _index: int):
+        """旋转适配选项变化 → 刷新内容行提示（不弹 InfoBar）"""
+        self._update_portrait_adaptation_hint()
+
+    def _update_portrait_adaptation_hint(self):
+        """刷新旋转适配组的辅助文案（方案 §6.5）
+
+        提示是显示性参考：无 context 读取样式配置，可能与实际渲染选中的
+        变体不同（FilmClip 两变体声明相同默认值时无偏差）；真实优先级
+        解析只发生在 FrameRenderer 内。读取失败时回退通用文案，
+        不中断样式切换流程。
+        """
+        suffix_map = {
+            ADAPT_NONE: '不旋转',
+            ADAPT_CLOCKWISE: '顺时针适配',
+            ADAPT_COUNTERCLOCKWISE: '逆时针适配',
+        }
+        user_choice = self._get_portrait_adaptation()
+        style_default = None
+        try:
+            style_name = self.style_selector_card.current_style
+            if style_name:
+                style_config = self.style_manager.get_style_config(style_name)
+                if style_config:
+                    style_default = validate_style_default(style_config)
+        except Exception as e:
+            logger.debug(f"读取样式旋转适配默认值失败，使用通用提示: {e}")
+            style_default = None
+
+        if user_choice == ADAPT_DEFAULT:
+            if style_default is not None:
+                # 短文案：前缀"仅对竖图生效"固定在组描述中，此处只表达
+                # 动态语义，防止 contentLabel 撑宽侧边栏（用户反馈 2026-09-21）
+                content = f'样式默认：{suffix_map[style_default]}'
+            else:
+                content = '遵循当前样式'
+        else:
+            content = f'已覆盖：{suffix_map[user_choice]}'
+        self.portrait_adaptation_group.setContent(content)
 
     # ════════════════════════════════════════════════════════
     #  事件处理方法
@@ -717,12 +847,21 @@ class ImageProcessingPage(QWidget):
                     with open(path, 'rb') as f:
                         item.file_bytes = f.read()
 
+                    # 导入时一次性计算内容摘要，作为二级模糊缓存的
+                    # 稳定 source_cache_key（后续生成直接复用）
+                    item.cache_key = compute_cache_key(item.file_bytes)
+
                     item.file_name = os.path.basename(path)
 
                     pil_img = PILImage.open(io.BytesIO(item.file_bytes))
                     # 应用 EXIF Orientation 转置：佳能等相机竖拍照片以"横向像素
                     # + 旋转标记"存储，不转置会导致缩略图与宽高信息横竖颠倒
+                    # 注意：exif_transpose 无论是否发生转置都返回新 Image 对象，
+                    # 且新对象不继承 format 属性（PIL 的 _new() 不拷贝该字段），
+                    # 转正后需从原图回填，否则信息栏"格式"会兜底显示"未知"
+                    img_format = pil_img.format
                     pil_img = PILImageOps.exif_transpose(pil_img)
+                    pil_img.format = img_format
                     item.width, item.height = pil_img.size
 
                     item.thumbnail = self._create_thumbnail(pil_img)
@@ -1220,23 +1359,34 @@ class ImageProcessingPage(QWidget):
             with open(input_path, 'wb') as f:
                 f.write(item.file_bytes)
 
-            # 调用处理器
-            processor = ImageProcessor()
-            success = processor.process(
-                input_path=input_path,
-                output_path=output_path,
+            # 调用处理器（本调用点是二级模糊缓存的接入位置：
+            # source_cache_key 用 FileItem 导入摘要，LRU 页面级持有）
+            metadata = RenderMetadata(
                 author=self.edit_author.text() or None,
                 location=location or None,
-                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
-                bg_fill_type=bg_key,
-                decorations=decorations or None,
-                font_weight=fw_key,
-                logo_filename=logo_filename,
+                custom_text=self.edit_custom_text.text() or None,
                 lens_display_mode=lens_key,
                 use_short_lens=self.chk_short_lens.isChecked(),
-                saturation_override=None if self.chk_enhance.isChecked() else 1.0,
-                custom_text=self.edit_custom_text.text() or None,
                 timestamp_display_mode=ts_mode,
+            )
+            options = RenderOptions(
+                bg_fill_type=bg_key,
+                decorations=decorations or None,
+                logo_filename=logo_filename,
+                saturation_override=None if self.chk_enhance.isChecked() else 1.0,
+                source_cache_key=item.cache_key,
+                prepared_blur_cache=self._blur_lru,
+                portrait_adaptation=self._get_portrait_adaptation(),
+            )
+            if self._processor is None:
+                self._processor = ImageProcessor()
+            success = self._processor.process(
+                input_path=input_path,
+                output_path=output_path,
+                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
+                metadata=metadata,
+                options=options,
+                font_weight=fw_key,
             )
 
             # 清理输入临时文件
@@ -1378,6 +1528,9 @@ class ImageProcessingPage(QWidget):
         self.file_items.clear()
         self.filmstrip_labels.clear()
         self.current_index = -1
+        # 页面关闭时清空页面级二级缓存（设计文档 §5.3 失效规则）
+        self._blur_lru.clear()
+        self._processor = None
         self.temp_manager.cleanup()
         logger.debug("图像处理页面资源已清理")
 
@@ -1394,6 +1547,9 @@ class ImageProcessingPage(QWidget):
             'enhance_background': self.chk_enhance.isChecked(),
             'font_weight': self.combo_font_weight.currentText(),
             'timestamp_display': self.combo_timestamp.currentText(),
+            # 旋转适配：保存稳定内部值（非中文显示文本），
+            # 未来调整文案不影响已有 config.json 的恢复（方案 §6.6）
+            'portrait_adaptation': self._get_portrait_adaptation(),
         })
         logger.debug("配置已保存")
 
@@ -1428,6 +1584,18 @@ class ImageProcessingPage(QWidget):
             idx = self.combo_timestamp.findText(saved['timestamp_display'])
             if idx >= 0:
                 self.combo_timestamp.setCurrentIndex(idx)
+        # 旋转适配：按 userData 恢复稳定内部值（方案 §6.6）；
+        # 缺失/旧版本配置/非法值均经 findData<0 回退 default
+        if 'portrait_adaptation' in saved:
+            saved_value = saved['portrait_adaptation']
+            index = self.combo_portrait_adaptation.findData(saved_value)
+            if index < 0:
+                index = self.combo_portrait_adaptation.findData(ADAPT_DEFAULT)
+            self.combo_portrait_adaptation.blockSignals(True)
+            self.combo_portrait_adaptation.setCurrentIndex(index)
+            self.combo_portrait_adaptation.blockSignals(False)
+        # 内容行提示在恢复完成后统一刷新（含 saved 为空的首次加载路径）
+        self._update_portrait_adaptation_hint()
 
     def refresh_style_list(self):
         """刷新样式网格（样式编辑器中新建/保存样式后调用）"""

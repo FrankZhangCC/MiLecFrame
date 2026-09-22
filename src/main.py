@@ -216,6 +216,7 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
     print(f"处理图片: {input_path} -> {output_path}")
 
     from src.core.image_processor import ImageProcessor
+    from src.core.renderer import RenderMetadata, RenderOptions
 
     if bg_fill is None:
         from src.utils.background_fill import BackgroundFillManager
@@ -255,18 +256,19 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
         actual_output_path = output_path.rsplit('.', 1)[0] + '.jpg'
         print(f"  输出格式为 JPEG，输出路径调整为: {actual_output_path}")
 
+    metadata = RenderMetadata(
+        author=author, location=location, custom_text=custom_text,
+        lens_display_mode=lens_display, use_short_lens=use_short_lens,
+        timestamp_display_mode=timestamp_display)
+    options = RenderOptions(
+        bg_fill_type=bg_fill, decorations=decorations,
+        logo_filename=logo_filename,
+        saturation_override=saturation_override)
     processor = ImageProcessor(style_config=style)
     success = processor.process(input_path, actual_output_path,
-                                author=author, location=location,
-                                style_name=style, bg_fill_type=bg_fill,
-                                font_weight=font_weight,
-                                decorations=decorations,
-                                logo_filename=logo_filename,
-                                lens_display_mode=lens_display,
-                                use_short_lens=use_short_lens,
-                                saturation_override=saturation_override,
-                                custom_text=custom_text,
-                                timestamp_display_mode=timestamp_display)
+                                style_name=style,
+                                metadata=metadata, options=options,
+                                font_weight=font_weight)
 
     if not success:
         print("图片处理失败")

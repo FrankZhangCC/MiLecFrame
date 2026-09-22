@@ -4,6 +4,7 @@
 # ============================================================
 
 name: 扩展宝丽来风格 Polaroid Motto (Logo 版)
+default_portrait_adaptation: clockwise
 
 colors:
   text: '#000000'

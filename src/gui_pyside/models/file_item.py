@@ -13,6 +13,17 @@ from typing import Optional
 from PySide6.QtGui import QImage, QPixmap
 
 
+def compute_cache_key(file_bytes: bytes) -> str:
+    """对已在内存中的文件字节计算一次性内容摘要（sha256 前 16 hex）
+
+    导入时调用一次并保存为 FileItem.cache_key，后续生成直接复用，
+    作为二级模糊缓存的稳定 source_cache_key（禁止用临时路径或
+    PIL 对象身份做跨帧键）。
+    """
+    from src.core.blur_cache import compute_source_cache_key
+    return compute_source_cache_key(file_bytes)
+
+
 @dataclass
 class FileItem:
     """单个图片文件的数据模型
@@ -44,3 +55,6 @@ class FileItem:
     width: int = 0
     height: int = 0
     cached_pixmap: Optional[QPixmap] = None
+    # 源图稳定摘要键（导入时对 file_bytes 一次性计算），
+    # 用于二级模糊缓存跨生成复用；None=尚未计算
+    cache_key: Optional[str] = None

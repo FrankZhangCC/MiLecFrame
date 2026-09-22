@@ -11,8 +11,9 @@
         # 三线体检：共同祖先 / tag 完整性 / 版本号与 CHANGELOG 一致性
 
     python tools/release_sync.py new-version <ver> --msg "功能简述" [--push]
-        # 把 dev 的新开发 merge --squash 为 mainline 新版本（ver 形如 2.5.0-dev），
-        # 自动执行 squash + 写 _version.py + commit + tag + dev 归档（reset 对齐）
+        # 把 dev 的新开发以 merge --no-ff 并入 mainline 形成新版本
+        # （ver 形如 2.5.0-dev），自动执行 merge + 写 _version.py +
+        # 版本 commit（amend 进 merge commit）+ tag + dev 归档（reset 对齐）
 
     python tools/release_sync.py cherry <commit> <ver> [--also-release] [--push]
         # 把 dev 上的单个修复 commit cherry-pick 到 mainline 并升 patch 号
@@ -24,7 +25,7 @@
         # 发行 commit + 注解 tag
 
 约定：
-    - 所有命令必须在 dev 分支、工作区干净的状态下执行（read-tree 会覆盖工作树）。
+    - 所有命令必须在 dev 分支、工作区干净的状态下执行（merge/reset 直接作用于工作树）。
     - tag 均为轻量 tag，推送时用 --follow-tags + --tags 兜底。
     - 脚本不提供 force push；release 分支受保护，历史不可改写。
 """
@@ -289,7 +290,10 @@ def cmd_check(_args):
     for t in git("tag", "-l", check=False).splitlines():
         if not t or t.startswith("pre-rebuild") or not release_tag_re.match(t):
             continue
-        h = git("rev-parse", t, check=False)
+        # 注解 tag 的 rev-parse 返回 tag 对象本身，须解引用到 commit，
+        # 否则 git show 取到的是 tag 对象头（"tag vX.Y.Z / Tagger: ..."），
+        # 发行前缀校验将永远误报（轻量 tag 无此问题）
+        h = git("rev-parse", f"{t}^{{commit}}", check=False)
         subject = git("show", "-s", "--format=%s", h, check=False)
         if not re.match(r"^v\d+\.\d+\.\d+(?:-release)?:", subject):
             problems.append(f"发行 tag {t} 指向的 commit {h[:12]} 首行无发行前缀: {subject[:50]}")
@@ -332,12 +336,19 @@ def cmd_check(_args):
 
 
 def cmd_new_version(args):
-    """dev → mainline：merge --squash + 写版本号 + commit + tag + dev 归档。
+    """dev → mainline：merge --no-ff + 写版本号 + 版本 commit + tag + dev 归档。
 
-    机制说明：dev 在每次里程碑后都会 reset --hard mainline，两线
-    merge-base 恒为最近版本 commit，因此 squash 计算的 diff 只包含
-    本版本的新开发内容，三方合并不会产生冲突（read-tree 快照仅用于
-    历史重建等一次性场景，日常版本更新一律走 merge --squash）。
+    机制说明：dev 在每次里程碑后都会 reset --hard mainline（= 最近版本
+    merge commit），两线 merge-base 恒为最近版本 commit，因此 merge 的
+    三方合并只包含本版本的新开发内容，不会产生冲突（read-tree 快照仅
+    用于历史重建等一次性场景，日常版本更新一律走 merge --no-ff）。
+
+    版本 commit 即 merge commit：--no-ff 强制生成（防止 merge-base 对齐
+    时被 fast-forward 吞掉），第一父为 mainline 上一版本、第二父为 dev
+    本版本末端，dev 的任务级提交历史借此完整并入 mainline；版本号变更
+    与版本消息在 merge 后 amend 进该 merge commit（--amend 只替换
+    commit 对象、完整保留两个父指针），维持「一个版本 = 一个 commit
+    + 一个 tag」。
     """
     ensure_branch(BRANCH_DEV)
     ensure_clean_worktree()
@@ -354,30 +365,35 @@ def cmd_new_version(args):
     if not args.msg:
         raise SyncError("必须提供 --msg 版本描述。")
 
-    print("[1/5] merge --squash: dev → mainline")
+    print("[1/5] merge --no-ff: dev → mainline")
     git("checkout", BRANCH_MAINLINE)
-    git("merge", "--squash", BRANCH_DEV, check=False)
+    # 记录 merge 前 mainline HEAD，用于 "Already up to date"（无变更）检测
+    head_before = git("rev-parse", "HEAD")
+    # -m 占位消息防止非交互环境下 merge 意外弹出编辑器，最终消息在 [3/5] amend 时覆盖
+    git("merge", "--no-ff", "-m", f"Merge branch '{BRANCH_DEV}'", BRANCH_DEV, check=False)
     # 冲突检测：unmerged 条目形如 "UU file"（正常情况下不会发生）
     status_out = git("status", "--porcelain", check=False) or ""
     if any(line[:2] in ("UU", "AA", "AU", "UA", "DD", "DU", "UD") for line in status_out.splitlines()):
         git("merge", "--abort", check=False)
         git("checkout", BRANCH_DEV, check=False)
         raise SyncError(
-            "merge --squash 冲突。可能原因: dev 与 mainline 的 merge-base 未对齐"
+            "merge --no-ff 冲突。可能原因: dev 与 mainline 的 merge-base 未对齐"
             "（dev 未归档）或 cherry 修复与后续开发在同一处改动。\n"
             "请检查两线状态后重试。"
         )
-    # 无变更检测：dev 相对 mainline 没有新提交时 squash 为空
-    if not git("diff", "--cached", "--name-only", check=False):
+    # 无变更检测：dev 无有效差异时 merge 输出 "Already up to date"、HEAD 不动
+    if git("rev-parse", "HEAD") == head_before:
         git("checkout", BRANCH_DEV, check=False)
         raise SyncError("dev 相对 mainline 无新变更，无需创建新版本。")
 
     print(f"[2/5] 写入 _version.py = {format_version(ver)}")
     write_version_py(ver)
 
-    print(f"[3/5] commit + tag {tag}")
+    print(f"[3/5] 版本 commit（amend merge commit）+ tag {tag}")
     git("add", "-A")
-    git("commit", "-m", f"{tag}: {args.msg}")
+    # --amend 只替换 commit 对象、完整保留 merge commit 的两个父指针，
+    # 版本号变更（_version.py）随 amend 并入版本 commit
+    git("commit", "--amend", "-m", f"{tag}: {args.msg}")
     git("tag", tag)
 
     print("[4/5] dev 归档: reset --hard mainline")

@@ -51,6 +51,12 @@ src/
   - 例：mainline `v2.4.0-dev` 公开发行 → release `v2.4.0`。
 - **一个版本 = 一个 commit + 一个 tag**。禁止"增补"commit 堆积：
   修复走 **patch 号递增**（`v2.4.0-dev` → `v2.4.1-dev`；`v2.4.0` → `v2.4.1`）。
+  mainline 的版本 commit 是 `new-version` 生成的 **merge commit**（`--no-ff`：
+  第一父 = 上一版本 commit，第二父 = dev 本版本末端 commit），
+  沿第一父遍历即线性版本链。
+- **版本号赋予时机**：版本号只在任务**全部测试通过并合入 mainline**
+  （`new-version` / `cherry`，见「合入门禁」）时才赋予并打 tag；
+  dev 上的日常提交（feat/fix/chore/docs/refactor）不占用版本号、不打 tag。
 - **版本号语义遵循 SemVer**：新增功能走 minor 递增（`v2.4.0` → `v2.5.0`）；
   破坏性变更（Conventional Commits 的 `feat!`/`BREAKING CHANGE:` 脚注）走
   **major 递增**（`v2.5.0` → `v3.0.0`）。
@@ -82,9 +88,9 @@ Initial ────────────────────┼───
 
 | 分支 | 用途 | 规则 |
 |------|------|------|
-| `dev` | **日常开发** | Conventional Commits（feat/fix/docs/chore/refactor）。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
-| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。推送到 `origin`。 |
-| `release` | **稳定公开发行** | GitHub 默认分支，受保护。每 commit = 一发行，带 `v*.*.*` tag。推送到 `origin`。 |
+| `dev` | **日常开发** | Conventional Commits（feat/fix/docs/chore/refactor）。**所有日常任务（含 bug fix）一律先在本线提交**；任务**全部测试通过（合入门禁）之前禁止合入 mainline**。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
+| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。**只接收通过合入门禁的 dev 任务**（`new-version` merge 合并 / `cherry` 单点搬运），合入即赋予新版本号。推送到 `origin`。 |
+| `release` | **稳定公开发行** | 规则不变：GitHub 默认分支，受保护。每 commit = 一发行，带 `v*.*.*` tag。推送到 `origin`。 |
 
 > ⚠️ **历史重建说明（2026-08）**：mainline/release 原为 orphan 起步、
 > 与 dev 无共同祖先，通过 commit-tree 重建父链后共享 dev 的 Initial commit
@@ -93,24 +99,46 @@ Initial ────────────────────┼───
 > v1.2.0→v2.4.0-dev）。单个修复用 `cherry-pick` 跨线搬运，不再手工复制。
 > 全部同步操作由 `tools/release_sync.py` 脚本完成，禁止手工执行 read-tree。
 >
-> 📌 **dev 归档机制（2026-08-19 起）**：每次里程碑快照后，dev 自动
-> `reset --hard mainline`，两线 merge-base 恒为最近版本 commit。因此
-> `new-version` 使用 **`git merge --squash dev`**（diff 只含本版本新开发，
-> 不会冲突），不再用 read-tree 全树快照。旧 dev 松散历史已归档至
-> `archive-dev-history-2026-08` tag（本地 `dev-backup` 分支另有备份）。
+> 📌 **dev 归档机制（2026-08-19 起；2026-09-22 合入方式改为 merge）**：
+> 每次里程碑合入后，dev 自动 `reset --hard mainline`，两线 merge-base
+> 恒为最近版本 commit。因此 `new-version` 使用 **`git merge --no-ff dev`**
+> （merge-base = mainline HEAD，合并只含本版本新开发，不会冲突；
+> `--no-ff` 强制生成 merge commit 作为版本 commit，dev 的任务级提交
+> 经第二父完整并入 mainline 历史），不再使用 squash / read-tree 快照。
+> 更早的 dev 松散历史已归档至 `archive-dev-history-2026-08` tag
+> （本地 `dev-backup` 分支另有备份）。
+
+#### 合入门禁（dev → mainline 的先决条件）
+
+本项目**没有自动化测试框架**，"全部测试通过"以下列人工验证清单为准。
+dev 上的任务（feat/fix/chore/docs/refactor）必须**逐项通过**后，
+才允许经 `new-version` / `cherry` 合入 mainline 并赋予新版本号：
+
+1. **语法校验**：`python -m py_compile` 通过所有被修改的 `.py` 文件。
+2. **功能验证**：编写临时测试代码或实际运行，确认新增/修改逻辑真实起作用；
+   涉及 CLI 渲染管线时，单张 + 批量各实测一次。
+3. **GUI 验证**：涉及 GUI 窗口改动时，实际启动 GUI 操作验证
+   （卡片展开/收起、渲染预览、配置读写等）；涉及 `ExpandGroupSettingCard`
+   时用 `layout_debug.dump_expand_card()` 检查布局。
+4. **日志检查**：`debug_log.txt` 无新增 ERROR / TRACEBACK。
+5. **打包冒烟**（涉及打包路径 / 资源 / 依赖时）：`build_release.py` 后按
+   「打包后必验」清单验证 dist exe。
+
+任一项未通过 → 任务**留在 dev 修复后重验**，禁止带病合入 mainline；
+已公开发行版本的 bug 修复同样先在 dev 提交并通过门禁，再 cherry-pick 同步。
 
 #### 日常操作流程（脚本化）
 
 ```bash
-# 1. 日常在 dev 上工作（Conventional Commits）
+# 1. 所有日常任务（feat/fix/chore/docs）先在 dev 提交（Conventional Commits）
 git checkout dev
 # ...多次提交 feat:/fix:/docs: ...
 
-# 2. 攒够一个版本 → merge --squash 到 mainline 并打 tag（dev 自动归档）
+# 2. 全部任务通过「合入门禁」后 → merge --no-ff 到 mainline 生成版本 commit 并赋予新版本号（dev 自动归档）
 python tools/release_sync.py new-version 2.5.0-dev --msg "功能简述"
 python tools/release_sync.py new-version 2.5.0-dev --push   # 直接推送 origin
 
-# 3. 单点修复（bug fix）→ cherry-pick 到 mainline，patch 号递增
+# 3. 单点修复（bug fix）：同样先在 dev 提交 + 通过门禁 → cherry-pick 到 mainline，patch 号递增
 #    （dev 上已提交 fix commit 后执行）
 python tools/release_sync.py cherry <fix-commit> 2.4.1-dev
 #    若 v2.4.0 已公开发行，修复还需同步到 release：
@@ -200,7 +228,7 @@ git checkout dev
 # 改 src/_version.py → 2.4.0-dev；README.md 徽标；CHANGELOG.md 加条目
 git add -A && git commit -m "feat: ..."
 
-# 2. mainline：squash 合并 + tag + 推送（脚本自动 merge --squash/commit/tag/dev 归档）
+# 2. mainline：merge 合并 + tag + 推送（脚本自动 merge --no-ff/版本 commit/tag/dev 归档）
 python tools/release_sync.py new-version 2.4.0-dev --msg "功能简述" --push
 
 # 3. release：锚定 mainline 对应版本 + 去 -dev 后缀 + 注解 tag + 推送
@@ -271,7 +299,11 @@ git checkout dev
 ### 配置与数据
 
 - `config.json`：保存用户偏好（作者名自动记忆）。
-- `project_master_spec.json`：**最高优先级**的底层需求规范，所有开发必须严格遵循。
+- `project_master_spec.json`（**已移除**）：原底层需求规范，v2.0.0-dev
+  开源准备时删除（其中"网页版 GUI"等要求已被 PySide6 桌面重构取代，
+  不再具有约束力）；如需查阅历史版本：
+  `git show fb7f132^:project_master_spec.json`。当前有效的开发规范以
+  本文件与 `docs/GUI_REFACTORING_PLAN.md` 等文档为准。
 - `data/camera_map.csv` ⟷ `data/lens_map.csv`：设备映射数据库，CSV 格式，GUI 中可编辑。
 
 ### 日志

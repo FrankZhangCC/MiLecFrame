@@ -16,6 +16,7 @@ from src.utils.exif_helper import ExifHelper
 from src.utils.background_fill import BackgroundFillManager
 from src.utils.logo_selector import LogoSelector
 from src.core.image_processor import ImageProcessor
+from src.core.renderer import RenderMetadata, RenderOptions
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +153,19 @@ class BatchProcessor:
         # 创建可复用的 ImageProcessor
         processor = ImageProcessor()
 
+        # 循环外构造渲染参数对象：整批不变的参数一次性确定，
+        # 循环内只有逐张变化的字段（location / logo）就地更新
+        metadata = RenderMetadata(
+            author=author, location=location,
+            custom_text=custom_text,
+            lens_display_mode=lens_display_mode,
+            use_short_lens=use_short_lens,
+            timestamp_display_mode=timestamp_display_mode)
+        options = RenderOptions(
+            bg_fill_type=bg_fill_type,
+            decorations=decorations,
+            saturation_override=saturation_override)
+
         for i, input_path_str in enumerate(input_files):
             input_path = Path(input_path_str)
             current_index = i + 1
@@ -206,21 +220,18 @@ class BatchProcessor:
 
             # ===== 调用 ImageProcessor 处理 =====
             try:
+                # 逐张变化的字段就地更新（引用同一对象，无重建开销）
+                metadata.location = current_location
+                # 注意：current_logo 可能为 ""（空串=禁用 Logo 自动匹配的哨兵），
+                # 必须原样赋值，禁止做 `or None` 之类的转换——
+                # None 会触发 render_frame 内的品牌自动匹配，改变行为！
+                options.logo_filename = current_logo
                 success = processor.process(
                     input_path=str(input_path),
                     output_path=str(output_path),
-                    author=author,
-                    location=current_location,
                     style_name=style_name,
-                    bg_fill_type=bg_fill_type,
-                    decorations=decorations,
+                    metadata=metadata, options=options,
                     font_weight=font_weight,
-                    logo_filename=current_logo,
-                    lens_display_mode=lens_display_mode,
-                    use_short_lens=use_short_lens,
-                    saturation_override=saturation_override,
-                    custom_text=custom_text,
-                    timestamp_display_mode=timestamp_display_mode,
                 )
 
                 if success:
