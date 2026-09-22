@@ -51,6 +51,9 @@ src/
   - 例：mainline `v2.4.0-dev` 公开发行 → release `v2.4.0`。
 - **一个版本 = 一个 commit + 一个 tag**。禁止"增补"commit 堆积：
   修复走 **patch 号递增**（`v2.4.0-dev` → `v2.4.1-dev`；`v2.4.0` → `v2.4.1`）。
+  mainline 的版本 commit 是 `new-version` 生成的 **merge commit**（`--no-ff`：
+  第一父 = 上一版本 commit，第二父 = dev 本版本末端 commit），
+  沿第一父遍历即线性版本链。
 - **版本号赋予时机**：版本号只在任务**全部测试通过并合入 mainline**
   （`new-version` / `cherry`，见「合入门禁」）时才赋予并打 tag；
   dev 上的日常提交（feat/fix/chore/docs/refactor）不占用版本号、不打 tag。
@@ -86,7 +89,7 @@ Initial ────────────────────┼───
 | 分支 | 用途 | 规则 |
 |------|------|------|
 | `dev` | **日常开发** | Conventional Commits（feat/fix/docs/chore/refactor）。**所有日常任务（含 bug fix）一律先在本线提交**；任务**全部测试通过（合入门禁）之前禁止合入 mainline**。**不在此分支打 tag**。只在本机，不推送到 `origin`。 |
-| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。**只接收通过合入门禁的 dev 任务**（`new-version` squash 合并 / `cherry` 单点搬运），合入即赋予新版本号。推送到 `origin`。 |
+| `mainline` | **版本里程碑线** | 每 commit = 一版本，带 `v*.*.*-dev` tag。**只接收通过合入门禁的 dev 任务**（`new-version` merge 合并 / `cherry` 单点搬运），合入即赋予新版本号。推送到 `origin`。 |
 | `release` | **稳定公开发行** | 规则不变：GitHub 默认分支，受保护。每 commit = 一发行，带 `v*.*.*` tag。推送到 `origin`。 |
 
 > ⚠️ **历史重建说明（2026-08）**：mainline/release 原为 orphan 起步、
@@ -96,11 +99,14 @@ Initial ────────────────────┼───
 > v1.2.0→v2.4.0-dev）。单个修复用 `cherry-pick` 跨线搬运，不再手工复制。
 > 全部同步操作由 `tools/release_sync.py` 脚本完成，禁止手工执行 read-tree。
 >
-> 📌 **dev 归档机制（2026-08-19 起）**：每次里程碑快照后，dev 自动
-> `reset --hard mainline`，两线 merge-base 恒为最近版本 commit。因此
-> `new-version` 使用 **`git merge --squash dev`**（diff 只含本版本新开发，
-> 不会冲突），不再用 read-tree 全树快照。旧 dev 松散历史已归档至
-> `archive-dev-history-2026-08` tag（本地 `dev-backup` 分支另有备份）。
+> 📌 **dev 归档机制（2026-08-19 起；2026-09-22 合入方式改为 merge）**：
+> 每次里程碑合入后，dev 自动 `reset --hard mainline`，两线 merge-base
+> 恒为最近版本 commit。因此 `new-version` 使用 **`git merge --no-ff dev`**
+> （merge-base = mainline HEAD，合并只含本版本新开发，不会冲突；
+> `--no-ff` 强制生成 merge commit 作为版本 commit，dev 的任务级提交
+> 经第二父完整并入 mainline 历史），不再使用 squash / read-tree 快照。
+> 更早的 dev 松散历史已归档至 `archive-dev-history-2026-08` tag
+> （本地 `dev-backup` 分支另有备份）。
 
 #### 合入门禁（dev → mainline 的先决条件）
 
@@ -128,7 +134,7 @@ dev 上的任务（feat/fix/chore/docs/refactor）必须**逐项通过**后，
 git checkout dev
 # ...多次提交 feat:/fix:/docs: ...
 
-# 2. 全部任务通过「合入门禁」后 → merge --squash 到 mainline 并赋予新版本号（dev 自动归档）
+# 2. 全部任务通过「合入门禁」后 → merge --no-ff 到 mainline 生成版本 commit 并赋予新版本号（dev 自动归档）
 python tools/release_sync.py new-version 2.5.0-dev --msg "功能简述"
 python tools/release_sync.py new-version 2.5.0-dev --push   # 直接推送 origin
 
@@ -222,7 +228,7 @@ git checkout dev
 # 改 src/_version.py → 2.4.0-dev；README.md 徽标；CHANGELOG.md 加条目
 git add -A && git commit -m "feat: ..."
 
-# 2. mainline：squash 合并 + tag + 推送（脚本自动 merge --squash/commit/tag/dev 归档）
+# 2. mainline：merge 合并 + tag + 推送（脚本自动 merge --no-ff/版本 commit/tag/dev 归档）
 python tools/release_sync.py new-version 2.4.0-dev --msg "功能简述" --push
 
 # 3. release：锚定 mainline 对应版本 + 去 -dev 后缀 + 注解 tag + 推送

@@ -40,6 +40,7 @@
 
 ### 🔧 其他 (chore)
 
+- 合入方式变更：`new-version` 由 merge --squash 改为 **merge --no-ff**，版本 commit 即 merge commit（第一父 = 上一版本 commit，第二父 = dev 本版本末端 commit，沿第一父遍历仍为线性版本链），dev 的任务级提交经第二父完整并入 mainline 历史；`release_sync.py` 与 AGENTS.md 同步更新 (chore)
 - `release_sync.py check` 体检适配注解发行 tag：注解 tag 的 rev-parse 需追加 `^{commit}` 解引用后再校验发行前缀，修复 v2.5.2 首个注解 tag 引起的永久误报 (fix, 148a7a7)
 
 ## v2.5.2-dev (2026-09-12)
