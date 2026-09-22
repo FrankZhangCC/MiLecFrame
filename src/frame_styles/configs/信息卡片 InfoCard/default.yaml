@@ -1,0 +1,166 @@
+# ============================================================
+# 信息卡片 InfoCard
+# - 不扩展画布，卡片叠在照片内部右下角
+# - 卡片：2:1 圆角矩形，磨砂模糊（radius 100）+ 55% 黑/白覆盖
+# - 卡片内两列参数（标签列 / 值列），各自左缘精确对齐同一列锚点
+# - 全部使用绝对定位（无 relative_to）
+#
+# 布局基准：3:2 横图（如 6000×4000）。所有 margin 相对原图短边
+# （reference_side）。position=bottom-right 选择照片右下角参考点并
+# 结合 margin 得到元素锚点；alignment=bottom-left 表示文字布局盒的
+# 左下角贴到该锚点——即整列文字共享同一左边缘（列锚点），alignment
+# 描述布局盒相对锚点的方位，与文字内部排版对齐（line_alignment）无关。
+# 标签/值列的 margin_right 从照片右边缘起算，竖图（照片变窄）时需
+# 自行增大这两个值，否则列会漂出卡片。
+# ============================================================
+
+name: 信息卡片 InfoCard
+
+colors:
+  text: '#000000'
+  # 磨砂卡片覆盖色：深色背景方案叠黑、浅色背景方案叠白（55% 不透明度
+  # 由 rect_01 的 opacity 控制）
+  custom_rect_01_light_color: [255, 255, 255]
+  custom_rect_01_dark_color: [0, 0, 0]
+
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  size_ratio: 0.0225
+  line_spacing_ratio: 0.008
+
+layout:
+  # 不扩展画布
+  expand_canvas:
+    enabled: false
+  padding:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+  # ── 磨砂信息卡片（照片内部右下角） ──
+  rectangles:
+    rect_01:
+      width_ratio: 0.46            # 相对短边；高为宽的一半（2:1）
+      height_ratio: 0.23
+      opacity: 0.55                # 覆盖 55% 黑/白（只作用于填充层，
+                                   #   下层模糊保持 100% 不透明）
+      placement: inside
+      position: bottom-right
+      alignment: bottom-right
+      margin_right: 0.04
+      margin_bottom: 0.05
+      corner_radius:               # 大圆角（短边的 5%，约为卡片高的 22%）
+        top_left: 0.05
+        top_right: 0.05
+        bottom_left: 0.05
+        bottom_right: 0.05
+
+      fill:                        # 显式写出 → 效果栈（原图上方，照片内可见）
+        enabled: true
+      gaussian_blur:               # 卡片底层磨砂
+        enabled: true
+        radius: 100
+
+  # ── 值列（EXIF 数据，绝对定位，左对齐） ──
+  # margin_left：3:2 横图时卡片左缘位于照片左侧 1.0×短边处，
+  # 值列再向卡片内缩 0.20×短边（约卡片宽的 43%）
+  info_position:
+    camera:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.249
+    lens:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.213
+    focal_length_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.177
+    aperture_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.141
+    shutter_speed_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.105
+    iso_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.315
+      margin_bottom: 0.069
+
+  # ── 标签列（固定文案，绝对定位，左对齐） ──
+  # 与值列同行等高，列间距 0.155×短边
+  defined_texts:
+    defined_text_01:
+      placement: "inside"
+      content: "Camera"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.249
+    defined_text_02:
+      placement: "inside"
+      content: "Lens"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.213
+    defined_text_03:
+      placement: "inside"
+      content: "FL"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.177
+    defined_text_04:
+      placement: "inside"
+      content: "Aperture"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.141
+    defined_text_05:
+      placement: "inside"
+      content: "Shutter"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.105
+    defined_text_06:
+      placement: "inside"
+      content: "ISO"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.485
+      margin_bottom: 0.069
+
+logo:
+  enabled: false

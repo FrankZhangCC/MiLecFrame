@@ -19,6 +19,38 @@ import logging
 from src.utils.app_paths import get_resource_root, get_app_dir, is_frozen
 # 竖图旋转适配样式默认值校验（可选顶层字段，方案 §5.5 双层校验的第 1 层）
 from src.utils.orientation_adaptation import validate_style_default
+# 定位语义九点/交叉轴枚举（与 LayoutEngine 单一来源保持一致）
+from src.utils.layout_engine import (
+    ABSOLUTE_POSITIONS,
+    ABSOLUTE_ALIGNMENTS,
+    HORIZONTAL_CROSS_ALIGNMENTS,
+    VERTICAL_CROSS_ALIGNMENTS,
+    RELATIVE_POSITIONS,
+)
+
+# 旧 position 单轴别名 → 新九点迁移建议（唯一映射，直接给出目标值）
+_POSITION_OLD_ALIAS_HINT = {
+    'top': 'top-center',
+    'tc': 'top-center',
+    'bottom': 'bottom-center',
+    'bc': 'bottom-center',
+    'left': 'center-left',
+    'right': 'center-right',
+    'tl': 'top-left',
+    'tr': 'top-right',
+    'bl': 'bottom-left',
+    'br': 'bottom-right',
+}
+
+# 旧 alignment 单轴值 → 新九点候选（单轴值无法唯一决定迁移结果，
+# 只给候选集，由用户结合元素实际位置选择）
+_ALIGNMENT_OLD_ALIAS_HINT = {
+    'left': 'top-left / center-left / bottom-left',
+    'right': 'top-right / center-right / bottom-right',
+    'top': 'top-left / top-center / top-right',
+    'bottom': 'bottom-left / bottom-center / bottom-right',
+    'both-center': 'center',
+}
 
 
 class StyleManager:
@@ -118,7 +150,7 @@ class StyleManager:
                 self.logger.error(f"配置文件格式错误，应为字典类型: {config_path}")
                 return None
             
-            if self._validate_config(config):
+            if self._validate_config(config, config_path):
                 return config
             else:
                 self.logger.error(f"样式配置无效: {config_path}")
@@ -243,7 +275,157 @@ class StyleManager:
         self.logger.error(f"样式配置文件不存在: {style_name}")
         return None
     
-    def _validate_config(self, config: Dict) -> bool:
+    # ── 定位语义校验（position / alignment / cross_alignment） ──
+
+    def _iter_positioned_elements(self, config: Dict):
+        """
+        统一遍历五类定位元素，产出 (字段路径, 定位配置) 元组。
+
+        覆盖：layout.info_position.* / layout.defined_texts.* /
+        layout.custom_text / layout.rectangles.* / 顶层 logo。
+        未启用的 custom_text / logo（enabled: false）不参与渲染，跳过校验。
+        """
+        layout = config.get('layout', {})
+        if not isinstance(layout, dict):
+            return
+
+        info_positions = layout.get('info_position', {})
+        if isinstance(info_positions, dict):
+            for key, cfg in info_positions.items():
+                if isinstance(cfg, dict):
+                    yield f"layout.info_position.{key}", cfg
+
+        defined_texts = layout.get('defined_texts', {})
+        if isinstance(defined_texts, dict):
+            for key, cfg in defined_texts.items():
+                if isinstance(cfg, dict):
+                    yield f"layout.defined_texts.{key}", cfg
+
+        custom_text = layout.get('custom_text', {})
+        if isinstance(custom_text, dict) and custom_text.get('enabled', False):
+            yield 'layout.custom_text', custom_text
+
+        rectangles = layout.get('rectangles', {})
+        if isinstance(rectangles, dict):
+            for key, cfg in rectangles.items():
+                if isinstance(cfg, dict):
+                    yield f"layout.rectangles.{key}", cfg
+
+        logo = config.get('logo', {})
+        if isinstance(logo, dict) and logo.get('enabled', False):
+            yield 'logo', logo
+
+    def _validate_absolute_position_config(self, path: str, cfg: Dict) -> list:
+        """
+        绝对定位节点校验：必须显式提供九点 position 与九点 alignment，
+        拒绝一切旧单轴别名 / both-center（返回错误信息列表）。
+        """
+        errors = []
+
+        position = cfg.get('position', None)
+        if position is None:
+            errors.append(
+                f"{path}.position 缺失：绝对定位节点必须显式提供九点 position"
+                f"（{sorted(ABSOLUTE_POSITIONS)}）")
+        elif position not in ABSOLUTE_POSITIONS:
+            hint = _POSITION_OLD_ALIAS_HINT.get(str(position))
+            extra = f"；建议迁移为 {hint}" if hint else ""
+            errors.append(
+                f"{path}.position 值非法: {position!r}{extra}。"
+                f"合法九点值为 {sorted(ABSOLUTE_POSITIONS)}")
+
+        alignment = cfg.get('alignment', None)
+        if alignment is None:
+            errors.append(
+                f"{path}.alignment 缺失：绝对定位节点必须显式提供九点 alignment"
+                f"（{sorted(ABSOLUTE_ALIGNMENTS)}）")
+        elif alignment not in ABSOLUTE_ALIGNMENTS:
+            hint = _ALIGNMENT_OLD_ALIAS_HINT.get(str(alignment))
+            extra = f"；单轴旧值无法唯一迁移，请结合元素实际位置选择：{hint}" if hint else ""
+            errors.append(
+                f"{path}.alignment 值非法: {alignment!r}{extra}。"
+                f"合法九点值为 {sorted(ABSOLUTE_ALIGNMENTS)}")
+
+        return errors
+
+    def _validate_relative_position_config(self, path: str, cfg: Dict) -> list:
+        """
+        相对定位节点校验：只接受 relative_to + relative_position +
+        cross_alignment；出现旧 alignment 字段直接报错并提示改名为
+        cross_alignment；cross_alignment 与方向轴必须匹配。
+        """
+        errors = []
+
+        if 'alignment' in cfg:
+            errors.append(
+                f"{path}.alignment: 相对定位节点不允许使用 alignment 字段"
+                f"（当前值: {cfg['alignment']!r}），请将该字段改名为 "
+                f"cross_alignment（三值交叉轴对齐）")
+
+        relative_position = cfg.get('relative_position', None)
+        if relative_position is None:
+            errors.append(
+                f"{path}.relative_position 缺失：相对定位节点必须显式提供"
+                f"（{sorted(RELATIVE_POSITIONS)}）")
+        elif relative_position not in RELATIVE_POSITIONS:
+            hint = {'after': 'below', 'before': 'above'}.get(
+                str(relative_position))
+            extra = f"；建议迁移为 {hint}" if hint else ""
+            errors.append(
+                f"{path}.relative_position 值非法: {relative_position!r}{extra}。"
+                f"合法值为 {sorted(RELATIVE_POSITIONS)}")
+
+        cross_alignment = cfg.get('cross_alignment', None)
+        if cross_alignment is None:
+            errors.append(
+                f"{path}.cross_alignment 缺失：相对定位节点必须显式提供交叉轴"
+                f"对齐（above/below → left/center/right；"
+                f"left-of/right-of → top/center/bottom）")
+        elif relative_position in ('above', 'below'):
+            if cross_alignment not in HORIZONTAL_CROSS_ALIGNMENTS:
+                errors.append(
+                    f"{path}.cross_alignment 值非法: {cross_alignment!r} 与 "
+                    f"relative_position={relative_position!r} 轴向不匹配；"
+                    f"合法值为 {sorted(HORIZONTAL_CROSS_ALIGNMENTS)}")
+        elif relative_position in ('left-of', 'right-of'):
+            if cross_alignment not in VERTICAL_CROSS_ALIGNMENTS:
+                errors.append(
+                    f"{path}.cross_alignment 值非法: {cross_alignment!r} 与 "
+                    f"relative_position={relative_position!r} 轴向不匹配；"
+                    f"合法值为 {sorted(VERTICAL_CROSS_ALIGNMENTS)}")
+
+        if cfg.get('tree_align', False):
+            errors.append(
+                f"{path}.tree_align: 相对定位节点不允许声明 tree_align"
+                f"（tree_align 只属于绝对定位的树根节点）")
+
+        return errors
+
+    def _validate_positioning(self, config: Dict, source: str = '') -> bool:
+        """
+        遍历五类定位元素执行新语义校验。
+
+        错误策略：任何旧别名、未知枚举、绝对/相对字段混用、轴向不匹配
+        均视为样式加载失败；错误信息包含样式源文件、字段路径、错误值和
+        人工迁移建议。返回 True 表示全部通过。
+        """
+        all_errors = []
+
+        for path, cfg in self._iter_positioned_elements(config):
+            if cfg.get('relative_to'):
+                all_errors.extend(
+                    self._validate_relative_position_config(path, cfg))
+            else:
+                all_errors.extend(
+                    self._validate_absolute_position_config(path, cfg))
+
+        for err in all_errors:
+            src = f"[{source}] " if source else ""
+            self.logger.error(f"[StyleValidation] {src}{err}")
+
+        return not all_errors
+
+    def _validate_config(self, config: Dict, source: str = '') -> bool:
         """
         验证配置是否有效
         
@@ -279,10 +461,11 @@ class StyleManager:
         
         # 检查信息位置配置
         if 'info_position' not in layout or not isinstance(layout['info_position'], dict):
+            # 代码内默认配置直接使用唯一新 schema（九点 position + 九点 alignment）
             layout['info_position'] = {
-                'exif': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10},
-                'author': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10},
-                'location': {'placement': 'outside', 'position': 'bottom', 'alignment': 'center', 'margin': 10}
+                'exif': {'placement': 'outside', 'position': 'bottom-center', 'alignment': 'top-center', 'margin': 10},
+                'author': {'placement': 'outside', 'position': 'bottom-center', 'alignment': 'top-center', 'margin': 10},
+                'location': {'placement': 'outside', 'position': 'bottom-center', 'alignment': 'top-center', 'margin': 10}
             }
         else:
             # info_position 已有配置，不再注入默认条目
@@ -312,6 +495,22 @@ class StyleManager:
             validate_style_default(config)
         except ValueError as e:
             self.logger.error(f"配置字段非法: {e}")
+            return False
+
+        # 语义版本开关检查：positioning_semantics 已随旧算法一并删除，
+        # 出现即拒绝（不启用任何旧路径，提示直接删除该字段并迁移到新语义）
+        if 'positioning_semantics' in config:
+            self.logger.error(
+                f"[StyleValidation] positioning_semantics="
+                f"{config.get('positioning_semantics')!r}: "
+                f"该语义版本开关字段已删除，运行时只有唯一一套定位算法；"
+                f"请删除此字段并按新 schema 迁移 position/alignment"
+                f"（参见 docs/plans/POSITION_ALIGNMENT_REPAIR_EXECUTION_PLAN.md §2）")
+            return False
+
+        # 定位语义校验：五类定位元素的 position/alignment/cross_alignment
+        # 枚举与组合；旧别名不归一化、不猜测，直接拒绝并给迁移建议
+        if not self._validate_positioning(config, source):
             return False
 
         return True
@@ -375,20 +574,20 @@ class StyleManager:
                 "info_position": {
                     "exif": {
                         "placement": "outside",
-                        "position": "bottom",
-                        "alignment": "center",
+                        "position": "bottom-center",
+                        "alignment": "top-center",
                         "margin": 10
                     },
                     "author": {
                         "placement": "outside",
-                        "position": "left",
-                        "alignment": "center",
+                        "position": "center-left",
+                        "alignment": "center-right",
                         "margin": 10
                     },
                     "location": {
                         "placement": "outside",
-                        "position": "right", 
-                        "alignment": "center",
+                        "position": "center-right",
+                        "alignment": "center-left",
                         "margin": 10
                     }
                 }
