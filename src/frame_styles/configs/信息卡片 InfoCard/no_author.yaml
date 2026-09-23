@@ -5,9 +5,9 @@
 # - 卡片内曝光参数采用两行排版：上行为标签，下行为对应数值
 # - 标签列（表头小标题）金黄色，明暗背景自适应
 # - 全部使用绝对定位（无 relative_to）
-# - 本配置布局：Camera/Lens/Location 上移两行（0.171/0.151/0.131），
-#   lens 下方依次为 Location、Author（0.111），
-#   卡片高度同步扩张 0.13→0.17 以保持与原始样式相同的卡片内边距
+# - 本变体布局：Camera/Lens 整体上移一行（0.151/0.131），
+#   原 lens 行（0.111）改放 Location（标签 "Location" + location 值），
+#   卡片高度同步扩张 0.13→0.15 以保持与原始样式相同的卡片内边距
 #
 # 布局基准：3:2 横图（如 6000×4000）。所有 margin 相对原图短边
 # （reference_side）。position=bottom-right 选择照片右下角参考点并
@@ -29,7 +29,7 @@ colors:
   # ── 表头小标题（标签列）金黄色，明暗背景自适应 ──
   # 深色磨砂 → 金黄；浅色磨砂 → 深金黄（保证对比度）
   # 编号与 defined_texts 条目一一对应（01 Camera、02 Lens、03 Location、
-  # 04 Author、05 FL、06 AP、07 ST、08 ISO），共 8 个标签
+  # 04 FL、05 AP、06 ST、07 ISO），共 7 个标签
   custom_defined_text_01_light_color: [112, 60, 4]
   custom_defined_text_01_dark_color: [239, 195, 84]
   custom_defined_text_02_light_color: [112, 60, 4]
@@ -44,8 +44,6 @@ colors:
   custom_defined_text_06_dark_color: [239, 195, 84]
   custom_defined_text_07_light_color: [112, 60, 4]
   custom_defined_text_07_dark_color: [239, 195, 84]
-  custom_defined_text_08_light_color: [112, 60, 4]
-  custom_defined_text_08_dark_color: [239, 195, 84]
 
 fonts:
   latin:
@@ -80,19 +78,18 @@ layout:
     rect_01:
       # 向右延长卡片，并保留四列文本的左右内边距
       width_ratio: 0.35
-      # 本配置较原始样式内容上移两行（+0.04），卡片高度同步 +0.04
-      # （0.13→0.17）：底边由 margin_bottom 0.04 锚定不动（底部曝光行
-      # 未变，下内边距不变），高度增加全部向上扩张，顶边 0.17→0.21，
-      # 上内边距与原始样式保持一致
-      height_ratio: 0.17
+      # 本变体 Camera/Lens 行整体上移 0.02，卡片高度同步 +0.02（0.13→0.15）：
+      # 底边由 margin_bottom 0.04 锚定不动（底部曝光行未变，下内边距不变），
+      # 高度增加全部向上扩张，顶边 0.17→0.19，上内边距与原始样式保持一致
+      height_ratio: 0.15
       opacity: 0.65                # 覆盖 55% 黑/白（只作用于填充层，
                                    #   下层模糊保持 100% 不透明）
       placement: inside
-      position: bottom-right
+      position: bottom-right 
       alignment: bottom-right
       margin_right: 0.04
       margin_bottom: 0.04
-      corner_radius:               # 圆角（短边的 2.5%，约为卡片高的 14.7%）
+      corner_radius:               # 圆角（短边的 2.5%，约为卡片高的 16.7%）
         top_left: 0.025
         top_right: 0.025
         bottom_left: 0.025
@@ -105,35 +102,26 @@ layout:
         radius: 50
 
   # ── EXIF 数据（绝对定位，左对齐） ──
-  # Camera/Lens/Location 上移两行（0.171/0.151/0.131），lens 下方第一行
-  # Location、第二行 Author（原 lens 位 0.111）；标签与 FL 共用第一列，
-  # 数值与 AP 共用第二列。四列横向锚点以 0.08×短边等距排布，
-  # 并随卡片整体向右平移。
-  # 行底边高度：camera 0.171 → lens 0.151 → location 0.131 →
-  #             author 0.111 → 曝光标签 0.08 → 曝光数值 0.06
-  #             （行距 0.02 保持不变）。
+  # Camera/Lens 整体上移一行（0.151/0.131），腾出的原 lens 行（0.111）
+  # 改放 Location；标签与 FL 共用第一列，数值与 AP 共用第二列。
+  # 四列横向锚点以 0.08×短边等距排布，并随卡片整体向右平移。
+  # 行底边高度：camera 0.151 → lens 0.131 → location 0.111 →
+  #             曝光标签 0.08 → 曝光数值 0.06（行距 0.02 保持不变）。
   info_position:
     camera:
       placement: "inside"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.286
-      margin_bottom: 0.171
+      margin_bottom: 0.151
     lens:
       placement: "inside"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.286
-      margin_bottom: 0.151
-    # Location 数值与 camera/lens 同列（第二列），位于 lens 下方第一行
-    location:
-      placement: "inside"
-      position: "bottom-right"
-      alignment: "bottom-left"
-      margin_right: 0.286
       margin_bottom: 0.131
-    # Author 数值与 camera/lens 同列（第二列），位于 lens 下方第二行
-    author:
+    # Location 数值与 camera/lens 同列（第二列），占据原 lens 行高度
+    location:
       placement: "inside"
       position: "bottom-right"
       alignment: "bottom-left"
@@ -165,9 +153,9 @@ layout:
       margin_bottom: 0.06
 
   # ── 标签行（固定文案，绝对定位，左对齐） ──
-  # Camera/Lens/Location/Author/FL 共用第一列；四个曝光标签处于同一高度，
+  # Camera/Lens/Location/FL 共用第一列；四个曝光标签处于同一高度，
   # 每个标签的横向锚点与下方数值一致，列距固定为 0.08×短边。
-  # Author 标签占据原 Lens 行高度（0.111），Lens/Location 随行上移。
+  # Location 标签占据原 Lens 行高度（0.111），Lens 随 Camera 上移至 0.131。
   defined_texts:
     defined_text_01:
       placement: "inside"
@@ -175,52 +163,44 @@ layout:
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.366
-      margin_bottom: 0.171
+      margin_bottom: 0.151
     defined_text_02:
       placement: "inside"
       content: "Lens"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.366
-      margin_bottom: 0.151
-    # lens 下方第一行：Location 标签，数值在 info_position.location
+      margin_bottom: 0.131
+    # 原 lens 行（0.111）改放 Location 标签，数值在 info_position.location
     defined_text_03:
       placement: "inside"
       content: "Location"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.366
-      margin_bottom: 0.131
-    # lens 下方第二行（原 lens 位 0.111）：Author 标签，数值在 info_position.author
-    defined_text_04:
-      placement: "inside"
-      content: "Author"
-      position: "bottom-right"
-      alignment: "bottom-left"
-      margin_right: 0.366
       margin_bottom: 0.111
-    defined_text_05:
+    defined_text_04:
       placement: "inside"
       content: "FL"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.366
       margin_bottom: 0.08
-    defined_text_06:
+    defined_text_05:
       placement: "inside"
       content: "AP"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.286
       margin_bottom: 0.08
-    defined_text_07:
+    defined_text_06:
       placement: "inside"
       content: "ST"
       position: "bottom-right"
       alignment: "bottom-left"
       margin_right: 0.206
       margin_bottom: 0.08
-    defined_text_08:
+    defined_text_07:
       placement: "inside"
       content: "ISO"
       position: "bottom-right"
