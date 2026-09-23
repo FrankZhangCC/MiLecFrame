@@ -1,21 +1,60 @@
 # 样式配置指南 (Style Guide)
 
-> 面向样式创作者：本文档说明如何编写和修改 `.yaml` 样式配置文件，控制相框的布局、文字、颜色、字体和 Logo 效果。
+> 面向样式创作者：本文档说明如何编写和修改 `.yaml` 样式配置文件，控制相框的画布、布局、文字、颜色、字体、矩形和 Logo。背景类型、用户输入、水印等运行时选项仍由 GUI 或 CLI 控制。
 
-## 目次
+## 目录
 
 1. [快速入门](#1-快速入门)
+   - [什么是样式配置文件？](#什么是样式配置文件)
+   - [最简单的样式](#最简单的样式)
+   - [创建新样式的三种方式](#创建新样式的三种方式)
+   - [文件存放位置](#文件存放位置)
 2. [文件组织规范](#2-文件组织规范)
+   - [2.1 基本结构](#21-基本结构)
+   - [2.2 缩略图](#22-缩略图)
+   - [2.3 变体系统](#23-变体系统)
    - [2.4 竖图方向适配默认值](#24-竖图方向适配默认值default_portrait_adaptation)
 3. [布局配置](#3-布局配置)
-   - [3.5 自定义矩形（rectangles）](#35-自定义矩形-rectangles)
+   - [3.1 坐标系概念](#31-坐标系概念)
+   - [3.2 画布扩展](#32-画布扩展expand_canvas)
+   - [3.3 安全区域](#33-安全区域padding)
+   - [3.4 原图圆角](#34-原图圆角corner_radius)
+   - [3.5 自定义矩形](#35-自定义矩形-rectangles)
 4. [元素定位系统](#4-元素定位系统)
+   - [4.1 什么是“元素”？](#41-什么是元素)
+   - [4.2 绝对定位](#42-绝对定位)
+   - [4.3 相对定位](#43-相对定位)
+   - [4.4 树级组合定位](#44-树级组合定位tree_align)
+   - [4.5 定位参数速查表](#45-定位参数速查表)
 5. [文本内容配置](#5-文本内容配置)
+   - [5.1 info_position — 显示 EXIF 和拍摄信息](#51-info_position--显示-exif-和拍摄信息)
+   - [5.2 defined_texts — 固定文字](#52-defined_texts--固定文字)
+   - [5.3 custom_text — 用户自定义文字](#53-custom_text--用户自定义文字)
+   - [5.4 多行文本行间距与行内对齐](#54-多行文本行间距与行内对齐)
 6. [颜色配置](#6-颜色配置)
+   - [颜色优先级](#颜色优先级从上到下)
+   - [自定义背景色](#自定义背景色可选)
+   - [通用文字颜色覆盖](#通用文字颜色覆盖)
+   - [按元素类型独立覆盖](#按元素类型独立覆盖)
+   - [矩形颜色](#矩形颜色)
 7. [字体配置](#7-字体配置)
+   - [完整 YAML 示例](#完整-yaml-示例)
+   - [关键说明](#关键说明)
+   - [全局字重覆盖](#全局字重覆盖)
 8. [Logo 配置](#8-logo-配置)
+   - [完整 YAML 示例](#完整-yaml-示例-1)
+   - [尺寸计算](#尺寸计算)
+   - [Logo 来源](#logo-来源)
+   - [自动匹配时的颜色变体](#自动匹配时的颜色变体)
+   - [品牌补偿系数](#品牌补偿系数)
 9. [水印配置](#9-水印配置)
 10. [常见问题 FAQ](#10-常见问题-faq)
+    - [如何让一整行文字水平居中？](#q-如何让一整行文字水平居中)
+    - [Logo 太大或太小怎么办？](#q-logo-太大或太小怎么办)
+    - [如何去掉某个 EXIF 信息（比如不显示 ISO）？](#q-如何去掉某个-exif-信息比如不显示-iso)
+    - [修改样式 YAML 后 GUI 不更新？](#q-修改样式-yaml-后-gui-不更新)
+    - [为什么 padding 的值不影响原图位置？](#q-为什么-padding-的值不影响原图位置)
+    - [tree_align: true 对单元素有影响吗？](#q-tree_align-true-对单元素有影响吗)
 11. [附录A：完整 default.yaml 示例](#附录a完整-defaultyaml-示例)
 12. [附录B：_STYLE_TEMPLATE.txt 使用指南](#附录b_styletemplatetxt-使用指南)
 
@@ -25,7 +64,7 @@
 
 ### 什么是样式配置文件？
 
-一个 YAML 文件控制一张照片添加相框后的**所有视觉效果**——画布大小、文字位置、字体颜色、Logo 大小等。每种样式对应一个文件夹，文件夹内存放一个 `default.yaml`。
+样式 YAML 控制相框的大部分视觉规则，例如画布大小、元素位置、字体颜色和 Logo 尺寸。每种样式通常对应一个文件夹，主配置文件为 `default.yaml`；照片、作者、地点、自定义文字、背景类型和水印等内容由运行时传入。
 
 ### 最简单的样式
 
@@ -64,6 +103,8 @@ fonts:
 
 ### 文件存放位置
 
+开发环境中的内置样式放在：
+
 ```
 src/frame_styles/configs/样式名称/
 ├── default.yaml       # ← 这是你要编写的文件
@@ -71,14 +112,16 @@ src/frame_styles/configs/样式名称/
 └── no_location.yaml   # 可选，地点缺失时的变体
 ```
 
+便携版中，程序内置样式位于只读资源目录；用户自建样式应放在 **exe 同目录的 `styles/`** 中，目录结构与上面相同。用户目录中的同名样式会覆盖内置样式。开发环境默认只扫描 `src/frame_styles/configs/`，不会自动扫描项目根目录下的 `styles/`。
+
 ---
 
 ## 2. 文件组织规范
 
 ### 2.1 基本结构
 
-- **每种样式必须是一个文件夹**（即使只有一个变体）。文件夹名 = GUI 中显示的样式名称。
-- **`default.yaml` 必须存在**——程序在无法匹配变体时回退到此文件。
+- **新样式建议使用文件夹结构**（即使只有一个变体）。文件夹名就是 GUI 中显示的样式名称。
+- **每个文件夹都应提供 `default.yaml`**——它是没有更具体变体时的稳定兜底。程序虽然会在缺少 `default.*` 时尝试读取目录中的第一个配置文件，但文件顺序不应作为样式行为的一部分。
 - **传统单文件样式**（将 `样式名.yaml` 直接放在 `configs/` 根目录）已不再推荐。
 
 ### 2.2 缩略图
@@ -105,7 +148,7 @@ src/frame_styles/configs/样式名称/
 | `no_{field}.yaml` | 当 `{field}` 的值为空时匹配 |
 | `no_{field1}_no_{field2}.yaml` | 多个字段同时为空时匹配，优先级高于单字段变体 |
 
-支持的 `{field}` 名称：`location`、`author`、`custom_text`、`timestamp`。
+当前渲染入口会传入四种可用性条件：`location`、`author`、`custom_text`、`timestamp`。变体文件名中的字段应从这四项中选择。
 
 #### 示例
 
@@ -177,7 +220,7 @@ default_portrait_adaptation: clockwise   # clockwise / counterclockwise / none
 | **原图** | 你拍摄的原始照片 | 所有计算的起点 |
 | **参照边（short side）** | 原图的短边长度（像素） | 所有浮点比例系数的基准。`size_ratio: 0.015` 表示字号 = 短边 × 1.5% |
 | **画布** | 经过 `expand_canvas` 扩展后的总绘图区域 | 背景填充覆盖这里 |
-| **安全区域（padding）** | 从画布四边向内收缩得到的矩形 | 文字和 Logo 的活动范围，**高于一切 margin** |
+| **安全区域（padding）** | 从画布四边向内收缩得到的矩形 | 文字和 Logo 的最终活动范围，优先于 margin |
 
 > **为什么所有尺寸都用比例？** 保证同一份样式配置在横版 6000×4000 和竖版 4000×6000 的照片上视觉效果一致。
 
@@ -196,7 +239,7 @@ layout:
 ```
 
 - 每边的扩展量独立设置，不用的方向可以写 `0` 或省略
-- `enabled: false` 时画布 = 原图，不能放置外部元素
+- `enabled: false` 时画布与原图等大，不会产生可供外部元素使用的额外区域；设置为 `outside` 的文字或 Logo 通常会被 padding 夹回画布并与照片重叠
 
 ### 3.3 安全区域（padding）
 
@@ -212,8 +255,10 @@ layout:
 ```
 
 - 不影响原始照片的位置
-- **优先级**：padding 对所有元素的最终坐标有截断权，即 `padding > margin`
+- **优先级**：padding 会在定位完成后夹持文字、Logo 和文字依赖树的最终坐标，因此可能覆盖 margin 带来的位移
 - 四边默认值均为 `0`（= 画布边界）
+- 矩形不受 padding 约束；水印使用独立定位系统
+- 如果元素本身大于安全区域，程序只能贴到安全区域的一侧，无法保证另一侧也不越界
 
 ### 3.4 原图圆角（corner_radius）
 
@@ -286,7 +331,7 @@ layout:
 ┌────────────────────────────┐
 │     背景填充层               │
 │  ┌──────────────────┐      │
-│  │ ★ 旧式矩形层 ★    │      │  ← 未使用效果字段的 rectangles 在此
+│  │ ★ 基础矩形层 ★    │      │  ← 未启用效果栈的 rectangles 在此
 │  └──────────────────┘      │
 │  ┌──────────────────┐      │
 │  │     原图          │      │
@@ -298,7 +343,7 @@ layout:
 └────────────────────────────┘
 ```
 
-未使用效果字段的矩形在背景之上、原图之下（legacy 模式，照片内不可见）；显式配置效果字段的矩形在原图之上（效果栈模式，照片内可见）。文字和 Logo 始终覆盖在两种矩形上方。
+未启用效果栈的矩形使用基础模式，绘制在背景之上、原图之下，因此落在照片范围内的部分会被原图遮住；显式选择效果栈的矩形绘制在原图之上，在照片内部也可见。代码中仍使用 `legacy` 表示前一种矩形模式，但它与已经删除的旧定位算法无关。文字和 Logo 始终绘制在两种矩形上方。
 
 #### 效果栈：描边 / 填充 / 高斯模糊（v2.6 新增）
 
@@ -336,7 +381,7 @@ layout:
 画布）。它与"对最终合成场景二次模糊"（磨砂玻璃精确语义）在跨界处的
 纹理可能存在跳变，这是当前版本的既定设计。
 
-##### 首要示例：FrameBar 磨砂信息条（零配置升级）
+##### 示例：在不改文字布局的前提下升级 FrameBar 信息条
 
 在现有"边框信息条 FrameBar"样式的 `rect_01` 上追加三块效果字段，
 即可把装饰色条升级为磨砂信息条——`info_position` 完全零改动，
@@ -397,11 +442,18 @@ layout:
 - **`rectangles`**：装饰性矩形色块（不受 padding 约束）
 - **Logo**：品牌标识图片
 
-所有元素的定位方式分为两种，互斥（`relative_to` 有值时使用相对定位）。
+文字和 Logo 支持绝对定位或相对定位；`relative_to` 为非空值时走相对定位，否则走绝对定位。两种写法不要混用。
+
+当前实现还有以下边界：
+
+- 矩形在文字注册之前绘制，不能可靠地使用 `relative_to`，应只使用绝对定位；
+- 文字只能引用同一文字渲染阶段中的 `info_position`、`defined_texts` 或 `custom_text` 元素；
+- Logo 在文字之后绘制，因此 Logo 可以引用已经完成定位的文字，但文字不能反过来引用 Logo；
+- 相对依赖必须能形成无环链，参考名称也必须存在。对于已配置但当前没有文字内容的绝对根节点，渲染器可能把它注册成 `0×0` 的定位锚点；完全不存在或尚未完成定位的目标会触发运行时错误。
 
 ### 4.2 绝对定位
 
-以**原始照片边界**为参考系。定位分两步走，两个参数各司其职、互不越界：
+以**原始照片边界**为参考系。定位可以理解为连续三步：选择照片参考点、计算元素锚点、放置元素布局盒。
 
 ```text
 照片边界
@@ -426,7 +478,6 @@ layout:
 | `placement` | `inside` / `outside` | `outside` | 元素放在原图边界主轴的内侧还是外侧（对 `center` 无意义） |
 | `position` | 九点值（见下表） | **必填** | 照片九点参考位 |
 | `alignment` | 九点值（同下表） | **必填** | 元素布局盒相对元素锚点的自对齐 |
-| `line_alignment` | `left` / `center` / `right` | `left` | 多行文本块**内部**行对齐（单行文字忽略；与 alignment 完全分离） |
 
 #### 九点 position 值与照片参考点
 
@@ -442,7 +493,11 @@ layout:
 | `bottom-center` | 原图底边中点 |
 | `bottom-right` | 原图右下角 |
 
-placement 只决定主轴方向：顶部三点沿上/下主轴内外平移，底部三点同理；`center-left`/`center-right` 沿水平主轴内外平移；`center` 无内外之分。
+`placement` 只决定主轴方向：
+
+- `top-*` / `bottom-*` 沿垂直主轴向照片内或照片外移动；水平方向仍使用左右 margin 在照片边缘内侧定位；
+- `center-left` / `center-right` 沿水平主轴向照片内或照片外移动；垂直方向由 `margin_top - margin_bottom` 调整；
+- `center` 无内外之分，`placement` 会被忽略；其坐标由原图中心加上左右、上下 margin 的差值获得。
 
 #### 九点 alignment 值与布局盒对齐点
 
@@ -466,6 +521,8 @@ alignment 决定**元素布局盒的哪个点**与元素锚点重合：
 > 等单轴别名和 `both-center` 已删除，样式加载阶段直接拒绝并提示迁移候选。
 > 单轴旧值无法唯一决定九点目标，需结合元素实际位置人工选择完整九点值。
 
+旧方案中的 `positioning_semantics` 版本开关已经删除。顶层出现该字段时样式会被拒绝；写在 `layout` 内也不会改变算法，只会成为无效字段。迁移旧配置时应将它彻底删除。
+
 #### margin 边距体系
 
 margin 是元素锚点相对于照片参考点的偏移量，四个方向独立：
@@ -479,6 +536,7 @@ margin 是元素锚点相对于照片参考点的偏移量，四个方向独立�
 - 整数 → 绝对像素值
 - 优先级：`margin_方向` > `margin` > 默认 `0`
 - 推荐使用浮点数比例以保持响应式
+- 对居中方位，成对 margin 以差值生效：水平偏移为 `margin_left - margin_right`，垂直偏移为 `margin_top - margin_bottom`
 
 #### 绝对定位完整示例
 
@@ -495,7 +553,7 @@ camera_lens:
 
 ### 4.3 相对定位
 
-以**另一个已存在的元素**为参考，相对于它放置当前元素。相对定位使用独立的**三值交叉轴对齐 `cross_alignment`**，与绝对定位的九点 `alignment` 互不混用——相对节点中出现 `alignment` 字段会在样式加载阶段被拒绝。
+以**另一个已经完成定位的元素**为参考，相对于它放置当前元素。相对定位使用独立的**三值交叉轴对齐 `cross_alignment`**，与绝对定位的九点 `alignment` 互不混用。相对节点中出现 `alignment` 字段会在样式加载阶段被拒绝；`position`、`placement` 和 `margin_*` 对相对定位没有作用，也不应保留。
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
@@ -516,6 +574,8 @@ camera_lens:
 > ⚠ 旧值迁移：`after` → `below`，`before` → `above`；相对节点旧 `alignment`
 > 字段改名为 `cross_alignment`。轴向不匹配的值（如 `right-of + left`）直接拒绝。
 
+相对定位完成后，程序会把参考元素、当前元素和已经注册的从属元素作为一个组合盒处理 padding。组合盒越界时，相关元素会一起平移，而不是只移动新加入的元素。
+
 #### 相对定位示例
 
 ```yaml
@@ -530,7 +590,7 @@ timestamp_author:
 
 ### 4.4 树级组合定位（tree_align）
 
-将一组通过 `relative_to` 串联的元素（如 A → B → C → D）作为一个**整体**进行定位：整棵树的视觉包围盒被当作一个普通元素盒，用根节点的 `position` / `alignment` / `margin_*` 走与单元素完全相同的定位公式，然后整树平移（成员相对位置不变），最后做一次 padding 夹持。
+`tree_align` 目前只作用于文字渲染阶段中的依赖树，也就是 `info_position`、`defined_texts` 和启用的 `custom_text`。它把一组通过 `relative_to` 串联的文字（如 A → B → C → D）作为一个整体定位：整棵树的视觉包围盒被当作普通元素盒，使用根节点的 `position` / `alignment` / `margin_*` 走与单元素相同的定位公式，然后整树平移，最后统一做一次 padding 夹持。
 
 **适用场景**：多段文字组成一条水平链，希望整条链在照片上居中。
 
@@ -553,7 +613,8 @@ defined_texts:
 
 - 未声明 `tree_align: true` 的依赖链不受影响
 - `tree_align` 只属于绝对定位节点；相对节点上声明会拒绝加载
-- 整树包围盒与同尺寸矩形在相同配置下得到完全一致的坐标
+- 整树包围盒与同尺寸普通盒使用相同的原始定位公式；最终阶段文字树会受 padding 约束，而矩形不会
+- Logo 和矩形不参与文字树；在它们的配置中写 `tree_align` 不会获得上述组合定位效果
 
 ### 4.5 定位参数速查表
 
@@ -564,7 +625,6 @@ defined_texts:
 | `placement` | `"inside"` / `"outside"` | `"outside"` | 元素在照片边界主轴内侧还是外侧 |
 | `position` | 九点值 | 必填 | 照片九点参考位，参见 [§4.2](#42-绝对定位) |
 | `alignment` | 九点值 | 必填 | 元素布局盒自对齐 |
-| `line_alignment` | `left` / `center` / `right` | `left` | 多行文本块内部行对齐 |
 | `margin` | `float` / `int` | `0` | 统一边距 |
 | `margin_top` / `_bottom` / `_left` / `_right` | `float` / `int` | `0` | 各方向独立边距 |
 | `tree_align` | `bool` | `false` | 启用树级组合定位（仅绝对节点） |
@@ -578,6 +638,8 @@ defined_texts:
 | `cross_alignment` | 三值 | 必填 | 交叉轴对齐（方向决定合法值） |
 | `relative_margin` | `float` | `0.01` | 间距比例 |
 | `offset_x_ratio` / `offset_y_ratio` | `float` | `0` | 微调偏移 |
+
+`line_alignment` 是文字专用字段，与绝对/相对定位模式无关；合法值为 `left` / `center` / `right`，缺省为 `left`。它只在渲染内容中确实包含换行符时生效。
 
 ---
 
@@ -602,7 +664,7 @@ defined_texts:
 | `focal_length_formatted` | `35mm` | 35mm 等效焦距 |
 | `aperture_formatted` | `f/2.8` | 光圈值 |
 | `shutter_speed_formatted` | `1/125s` | 快门速度（已格式化） |
-| `iso_formatted` | `ISO200` | 感光度 |
+| `iso_formatted` | `200` | 感光度裸值；`ISO` 前缀由固定标签或 `exif` 组合文本提供 |
 
 **镜头显示模式** 和 **使用短版镜头名** 这两个选项在 GUI 中控制，影响 `camera_lens` 和 `lens` 的输出格式。详见 [GUI 功能指南](../README.md#镜头显示控制)。
 
@@ -630,37 +692,46 @@ defined_texts:
     relative_margin: 0.005
 ```
 
-### 5.3 custom_text — 用户个性文字
+### 5.3 custom_text — 用户自定义文字
 
-在 GUI 文本框中输入的多行文字（如寄语、签名等）。
+在图片处理页的输入框中填写寄语、签名等文字。
 
 ```yaml
 custom_text:
   enabled: true
   position: "bottom-center"
   alignment: "top-center"     # 布局盒顶边贴照片下方外侧锚点
-  line_alignment: "left"      # 多行块内部行对齐（可选，默认 left）
   margin_bottom: 0.03
 ```
 
-- `enabled: true` 时，GUI 显示文本输入框
-- 默认内容：`"Always believe that something wonderful\nis about to happen."`
-- 支持多行，用户可用换行分隔
-- `line_alignment` 只影响多行文本块**内部**各行的左右对齐，与元素
-  `alignment`（整个文本块相对元素锚点的方位）完全分离
+- `enabled: true` 时，图片处理页的自定义文字输入框可用；关闭时输入框仍显示但不可编辑
+- PySide6 图片处理页当前使用单行输入框，没有内置默认内容
+- 渲染器会把 `custom_text` 中的换行符替换为空格，因此当前版本按单段文字绘制；`line_alignment` 和多行行间距不会改变它的显示结果
+- 如果需要固定的多行文字，请使用包含换行符的 `defined_texts.content`
 
 ### 5.4 多行文本行间距与行内对齐
 
 ```yaml
 fonts:
   line_spacing_ratio: 0.005    # 行间距 = 参照边 × 0.5%
+
+layout:
+  defined_texts:
+    defined_text_01:
+      content: |-
+        第一行
+        第二行更长
+      position: "bottom-center"
+      alignment: "top-center"
+      line_alignment: "center"
 ```
 
-- 仅对包含换行符 `\n` 的文本生效
+- 仅对渲染阶段仍包含换行符 `\n` 的文本生效；最常见的使用位置是 `defined_texts.content`
 - 可在 `info_position`、`defined_texts` 或 `custom_text` 条目中用 `line_spacing_ratio` 覆盖全局值
 - 多行块内部行对齐用 `line_alignment`（`left` / `center` / `right`，缺省
   `left`）：改变它只移动块内各行 x，不改变文本块整体位置；改变元素
   `alignment` 只移动整个文本块，不改变块内各行相对位置
+- 当前 `custom_text` 会先合并换行，因此即使配置了这两个字段也不会进入多行布局
 
 ---
 
@@ -698,6 +769,8 @@ colors:
 
 - 若未声明，系统自动计算颜色亮度判定：`亮度 = 0.299×R + 0.587×G + 0.114×B`，低于 128 判为 dark，否则为 light
 - **手动指定时机**：自动检测偶尔会误判——例如暗黄 `#A09030`（亮度≈142，自动判 light 但与淡色文字对比较弱），此时可手动声明 `"dark"` 强制使用亮色文字和 Logo
+- `custom_bg_text_scheme` 应只写 `dark` 或 `light`。StyleManager 当前不会拒绝其他字符串，而渲染器会把非 `dark` 值按非暗色处理，因此不要依赖这一宽松行为
+- Logo 的明暗变体规则只用于自动匹配。当前 PySide6 页面可能在进入渲染器之前就根据 GUI 背景选项确定 Logo 文件；使用 `custom_bg_color` 时应以实际预览确认颜色变体，手动选择的 Logo 不会被替换
 
 ### 通用文字颜色覆盖
 
@@ -737,15 +810,15 @@ colors:
   custom_rect_02_light_color: [30, 100, 200]
 ```
 
-- 每个矩形需分别配置 `dark` 和 `light` 颜色
-- 若仅配了一种，则无论背景明暗都使用该颜色
+- 每个矩形可以同时配置 `dark` 和 `light` 两种颜色，也可以只配置一种
+- 只配置一种时，无论背景明暗都会回退使用该颜色
 - 未配置颜色的矩形会被跳过（warning）
 
 ---
 
 ## 7. 字体配置
 
-系统支持**拉丁字母**（英文/数字）和 **CJK**（中文/日文/韩文）独立配置字体，并自动回退到系统预装字体。
+系统会把文本拆分为**拉丁字符**和**中文/日文字符**两类，分别选择字体，并在自定义字体不可用时回退到 Windows 系统字体。当前字符检测不单独识别韩文；韩文会按拉丁字符路径选择字体。
 
 ### 完整 YAML 示例
 
@@ -778,6 +851,8 @@ fonts:
 - **字重映射**：`weight` 用抽象值（`light`/`regular`/`medium`），通过 `weights` 表解析为实际文件名后缀
 - **独立字号**：`sizes` 下的 key 对应 `info_position` 中的元素名；未配置则使用 `size_ratio`
 - **回退链**：自定义字体文件 → 系统字体 → PIL 默认字体
+- YAML 省略 `fonts.size_ratio` 时，渲染器默认使用 `0.02`；GUI 新建样式会显式写入 `0.015`
+- 计算后的字体像素尺寸最小为 `12px`
 
 ### 全局字重覆盖
 
@@ -801,7 +876,7 @@ Logo 采用独立的渲染管线：文件选择由 GUI 控制，布局、尺寸�
 logo:
   enabled: true
   size_ratio: 0.04              # Logo 短边 = 参照边 × 4%
-  max_dim_limit_ratio: 2.5      # 长边上限倍数（防止细长 Logo 失控）
+  diagonal_limit_ratio: 2.5     # 当前 GUI 编辑器使用的长边上限字段
   placement: outside
   position: "bottom-right"
   alignment: "bottom-right"     # 九点自对齐：Logo 右下角贴元素锚点
@@ -819,12 +894,18 @@ logo:
 ### 尺寸计算
 
 1. Logo 短边 = `参照边 × size_ratio`
-2. 长边限制：若缩放后长边 > `参照边 × size_ratio × max_dim_limit_ratio`，按长边上限等比缩小
+2. 长边限制：若缩放后长边 > `参照边 × size_ratio × 长边上限倍数`，按长边上限等比缩小
 3. 品牌补偿系数叠加：从 `data/logo_scale.yaml` 读取该 Logo 文件对应的系数，与上述缩放结果相乘
 
-默认值：`size_ratio = 0.04`，`max_dim_limit_ratio = 2.5`。
+YAML 未写字段时，渲染器使用 `size_ratio = 0.05`、长边上限倍数 `2.5`。GUI 新建样式会显式写入 `size_ratio = 0.04` 和 `diagonal_limit_ratio = 2.0`，因此从 GUI 创建的样式以界面值为准。
 
-> `diagonal_limit_ratio` 是旧字段名，已由 `max_dim_limit_ratio` 替代。旧字段仍兼容，但新样式请使用 `max_dim_limit_ratio`。
+渲染器同时接受两个长边上限字段，并按以下优先级读取：
+
+1. `max_dim_limit_ratio`
+2. `diagonal_limit_ratio`
+3. 默认值 `2.5`
+
+`max_dim_limit_ratio` 是渲染器中的新字段；但当前 GUI 样式编辑器仍读写 `diagonal_limit_ratio`，并不会保留手写的 `max_dim_limit_ratio`。如果配置后续还要通过 GUI 编辑器保存，请使用或核对 `diagonal_limit_ratio`；如果只手工维护 YAML，可以优先使用 `max_dim_limit_ratio`。
 
 ### Logo 来源
 
@@ -836,11 +917,12 @@ logo:
 | 手动选择 | 在下拉列表中指定一个 Logo 文件 |
 | 无 | 不显示 Logo |
 
-### 颜色变体自动选择
+### 自动匹配时的颜色变体
 
 - **暗色背景** → 优先选择文件名以 `_white` 结尾的 Logo（白色在暗背景上醒目）
 - **浅色背景** → 优先选择非 `_white` 结尾的 Logo（深色在浅背景上醒目）
 - 若指定变体不存在，自动回退到该品牌的其他可用文件
+- 以上规则只用于“自动匹配”。手动选择 Logo 时，程序会直接使用指定文件，不会自动替换颜色变体
 
 ### 品牌补偿系数
 
@@ -893,15 +975,15 @@ defined_text_01:
 
 ### Q: 修改样式 YAML 后 GUI 不更新？
 
-GUI 启动时会加载所有样式配置。修改 YAML 后需重启程序，或使用 GUI 内置的样式编辑器（样式编辑器会实时重载并预览）。
+GUI 的样式列表和当前预览不会持续监听磁盘文件。手工修改 YAML 后，可先重新选择样式或重新生成预览；如果界面仍保留旧状态，重启程序。使用内置样式编辑器修改时，以编辑器保存后重新加载的结果为准。
 
 ### Q: 为什么 padding 的值不影响原图位置？
 
-padding 仅约束叠加元素（文字、Logo 等），不移动原始照片。原图位置由 `expand_canvas` 控制。
+padding 只约束文字、Logo 和文字依赖树的最终位置，不移动原始照片。原图位置由 `expand_canvas` 控制；矩形和水印也不使用这套 padding 夹持。
 
 ### Q: tree_align: true 对单元素有影响吗？
 
-没有影响。单成员树与普通元素走同一套盒定位公式，在相同配置下坐标完全一致。
+对于文字元素，没有额外的排版效果。单成员树与普通文字元素使用同一套盒定位和 padding 规则，在相同配置下坐标一致。Logo 和矩形不参与文字树。
 
 ---
 
@@ -984,14 +1066,13 @@ layout:
     enabled: false
     position: "bottom-center"
     alignment: "top-center"
-    line_alignment: "left"
     margin_bottom: 0.03
 
 # 【Logo 配置】（可选）
 logo:
   enabled: true
   size_ratio: 0.04
-  max_dim_limit_ratio: 2.5
+  diagonal_limit_ratio: 2.5   # 当前 GUI 编辑器可完整读写的字段
   placement: outside
   position: "bottom-right"
   alignment: "bottom-right"
@@ -1031,12 +1112,14 @@ fonts:
 
 ## 附录B：_STYLE_TEMPLATE.txt 使用指南
 
-[`_STYLE_TEMPLATE.txt`](../src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是一份规格化填空模板，覆盖所有配置项。使用流程：
+[`_STYLE_TEMPLATE.txt`](../src/frame_styles/configs/_STYLE_TEMPLATE.txt) 是一份规格化填空模板，用于整理大部分常用配置需求。使用流程：
+
+> 当前模板中 `expand_canvas` 的说明仍写着“相对于原图长边”，这与程序实现不一致；实际基准是**原图短边**。此外，模板保留了 `custom_text.line_alignment` 填空项，但当前 PySide6 输入和渲染路径会把自定义文字作为单段文字处理。遇到冲突时以本指南和程序校验结果为准。
 
 1. **打开模板**：在 `src/frame_styles/configs/` 目录中找到 `_STYLE_TEMPLATE.txt`
 2. **填空**：在每个 `[____]` 位置填写你想要的参数值
-3. **交给 AI**：将填好的模板内容发给 AI（如 DeepSeek），要求"根据这个模板生成一个完整的样式 YAML 配置文件"
+3. **交给 AI**：将填好的模板内容发给 AI，要求“根据这个模板和本指南生成完整的样式 YAML 配置文件”
 4. **放入文件夹**：将生成的 YAML 保存为 `src/frame_styles/configs/你的样式名/default.yaml`
 5. **重启程序**：GUI 中即可看到新样式
 
-这是创建样式的**最快方式**——你只需描述需求，AI 负责生成语法正确的 YAML。
+模板和 AI 生成的是配置初稿，不等于已经通过程序校验。保存后应确认样式能被 StyleManager 加载，并至少预览一张横图和一张竖图；定位报错时以本指南的九点枚举和字段规则为准。
