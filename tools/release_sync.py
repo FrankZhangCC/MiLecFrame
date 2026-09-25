@@ -287,15 +287,25 @@ def do_push(refs):
 
 
 @contextmanager
-def temp_worktree(ref):
+def temp_worktree(ref, detach=True):
     """创建指向 ref 的临时 worktree，yield 其路径，退出时强制清理。
 
     release / cherry 的全部 git 写操作都在 worktree 内进行：
     主工作区（dev 分支与用户的未提交改动）完全不受影响。
+
+    参数:
+        ref: 起点 ref。
+        detach: True 时游离签出（orphan 首发场景，随后 checkout --orphan
+            会创建并检出 release 分支）；False 时直接检出 ref 分支，
+            commit 才能推进该分支（接续发行 / 补丁发行场景）。
     """
     tmp = tempfile.mkdtemp(prefix="release_sync_")
     path = Path(tmp) / "wt"
-    git("worktree", "add", "--detach", str(path), ref)
+    args = ["worktree", "add"]
+    if detach:
+        args.append("--detach")
+    args += [str(path), ref]
+    git(*args)
     try:
         yield path
     finally:
@@ -479,7 +489,11 @@ def cmd_release(args):
 
     has_release = bool(git("rev-parse", "--verify", BRANCH_RELEASE, check=False))
 
-    with temp_worktree(src if not has_release else BRANCH_RELEASE) as path:
+    # orphan 首发：游离签出快照源，随后 checkout --orphan 创建 release 分支；
+    # 接续发行：直接检出 release 分支，发行 commit 才能推进分支
+    with temp_worktree(
+        src if not has_release else BRANCH_RELEASE, detach=not has_release
+    ) as path:
         if not has_release:
             # 首发：orphan 起步（无父发行 commit，release 链与 dev 无共同祖先）
             print(f"[1/4] release 分支不存在，orphan 起步（快照源 {src}）")
@@ -550,7 +564,7 @@ def cmd_cherry(args):
 
     msg = args.msg or commit_message_for_cherry(tag, src_subject)
 
-    with temp_worktree(BRANCH_RELEASE) as path:
+    with temp_worktree(BRANCH_RELEASE, detach=False) as path:
         print(f"[1/3] cherry-pick {src_commit[:12]} → release（临时 worktree）")
         git("cherry-pick", src_commit, cwd=str(path), check=False)
         # 冲突检测：git status --porcelain 中 unmerged 条目形如 "UU file"
