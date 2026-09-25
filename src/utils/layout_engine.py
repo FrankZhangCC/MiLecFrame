@@ -753,7 +753,7 @@ class LayoutEngine:
             block_x, block_y: 文本块包围盒左上角（来自 calculate_position）
             block_w: 块宽度（用于行内对齐偏移）
             block_h: 块高度（保留参数，行位置由行高与行间距递推）
-            lines: 每行信息，每项含 height / width / ref_ascent / ref_descent
+            lines: 每行信息，每项含 height / width / baseline_offset
             line_spacing: 行间距（像素）
             line_alignment: 行内水平对齐 left / center / right（缺省 left）
 
@@ -765,17 +765,25 @@ class LayoutEngine:
                 f"line_alignment 值非法: {line_alignment!r}；"
                 f"合法值为 ['center', 'left', 'right']")
 
+        # 空列表是合法的空块；调用方仍负责保留显式空行对应的行槽字典。
+        if not lines:
+            return []
+
         result = []
-        current_y = block_y + lines[0]['ref_ascent'] - lines[0]['ref_descent']
+        line_top = block_y
 
         for ln in lines:
+            if 'baseline_offset' not in ln:
+                raise ValueError(
+                    "多行定位契约错误：每个行槽都必须提供 baseline_offset")
             if line_alignment == 'right':
                 line_x = block_x + (block_w - ln['width'])
             elif line_alignment == 'center':
                 line_x = block_x + (block_w - ln['width']) // 2
             else:  # 'left'
                 line_x = block_x
-            result.append((line_x, current_y))
-            current_y += ln['height'] + line_spacing
+            # y 是布局盒顶；唯一基线来源是该行 Latin 参考度量产生的 offset。
+            result.append((line_x, line_top + ln['baseline_offset']))
+            line_top += ln['height'] + line_spacing
 
         return result
