@@ -315,25 +315,27 @@ class TextRenderer:
                 + max(0, len(line_infos) - 1) * line_spacing_px
             )
 
-            latin_path = getattr(latin_reference_font, 'path', None)
-            logger.debug(
-                f"[测量文字] name={text_type}, latin_reference={latin_path or type(latin_reference_font).__name__}, "
-                f"font_size={getattr(latin_reference_font, 'size', None)}, "
-                f"A_L={latin_ascent}, D_L={latin_descent}, H_L={latin_height}, "
-                f"baseline_offset={baseline_offset}, line_slots={len(line_infos)}, "
-                f"line_spacing={line_spacing_px}, box={total_width}x{total_height}")
-            for line_index, line_info in enumerate(line_infos):
+            # DEBUG 关闭时不构造每行、每段的诊断字符串，避免正常渲染承担日志开销。
+            if logger.isEnabledFor(logging.DEBUG):
+                latin_path = getattr(latin_reference_font, 'path', None)
                 logger.debug(
-                    f"  行槽{line_index}: text={raw_lines[line_index]!r}, "
-                    f"width={line_info['width']}, height={line_info['height']}, "
-                    f"baseline_offset={line_info['baseline_offset']}, "
-                    f"runs={len(line_info['seg_info'])}")
-                for run_index, (run_text, run_font, run_width, run_ascent, run_descent) in enumerate(
-                        line_info['seg_info']):
+                    f"[测量文字] name={text_type}, latin_reference={latin_path or type(latin_reference_font).__name__}, "
+                    f"font_size={getattr(latin_reference_font, 'size', None)}, "
+                    f"A_L={latin_ascent}, D_L={latin_descent}, H_L={latin_height}, "
+                    f"baseline_offset={baseline_offset}, line_slots={len(line_infos)}, "
+                    f"line_spacing={line_spacing_px}, box={total_width}x{total_height}")
+                for line_index, line_info in enumerate(line_infos):
                     logger.debug(
-                        f"    段{run_index}: text={run_text!r}, "
-                        f"font={getattr(run_font, 'path', type(run_font).__name__)}, "
-                        f"width={run_width}, ascent={run_ascent}, descent={run_descent}")
+                        f"  行槽{line_index}: text={raw_lines[line_index]!r}, "
+                        f"width={line_info['width']}, height={line_info['height']}, "
+                        f"baseline_offset={line_info['baseline_offset']}, "
+                        f"runs={len(line_info['seg_info'])}")
+                    for run_index, (run_text, run_font, run_width, run_ascent, run_descent) in enumerate(
+                            line_info['seg_info']):
+                        logger.debug(
+                            f"    段{run_index}: text={run_text!r}, "
+                            f"font={getattr(run_font, 'path', type(run_font).__name__)}, "
+                            f"width={run_width}, ascent={run_ascent}, descent={run_descent}")
 
             if len(line_infos) > 1:
                 draw_items[text_type] = {
@@ -348,7 +350,7 @@ class TextRenderer:
                 draw_items[text_type] = {
                     'type': 'single', 'seg_info': line_infos[0]['seg_info'],
                     'color': text_color, 'width': total_width,
-                    'height': latin_height,
+                    'height': total_height,
                     'baseline_offset': baseline_offset,
                     'latin_height': latin_height,
                 }

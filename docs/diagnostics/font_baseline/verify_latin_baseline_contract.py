@@ -26,7 +26,7 @@ from unittest.mock import patch
 
 import PIL
 import yaml
-from PIL import Image, ImageDraw, features
+from PIL import Image, ImageChops, ImageDraw, features
 
 from src.core.text_renderer import TextRenderer
 from src.frame_styles.style_manager import StyleManager
@@ -526,6 +526,82 @@ def _normalized_mask_equal(
     return same, details
 
 
+def _font_identity(record: dict) -> dict:
+    """用字体内容与实际度量识别字体，排除 checkout 的绝对路径。"""
+    identity = {
+        'sha256': record.get('sha256'),
+        'size': record.get('size'),
+        'metrics': record.get('metrics'),
+    }
+    if identity['sha256'] is None:
+        # 无字体文件的回退对象无法计算哈希，此时保留对象类型辅助识别。
+        identity['object_type'] = record.get('object_type')
+    return identity
+
+
+def _manifest_font_identities(manifest: dict) -> list[dict] | None:
+    """把路径作键的旧 manifest 归一为稳定的字体内容集合。"""
+    fingerprints = manifest.get('font_fingerprints')
+    if not isinstance(fingerprints, dict):
+        return None
+    # 相同字体可能因不同绝对路径出现多次；内容集合才是像素环境的比较对象。
+    unique = {
+        json.dumps(_font_identity(record), ensure_ascii=False, sort_keys=True)
+        for record in fingerprints.values()
+    }
+    return [json.loads(value) for value in sorted(unique)]
+
+
+def _anchor_canvas_mask(output_dir: Path, case: dict) -> tuple[Image.Image | None, dict]:
+    """读取 54px 整画布 mask，并与每个 run 的裁剪 mask 坐标交叉核对。"""
+    mask_file = case.get('aggregate_mask_file')
+    if not mask_file:
+        return None, {'reason': '缺少整画布 mask 文件名'}
+    path = output_dir / mask_file
+    if not path.is_file():
+        return None, {'reason': f'整画布 mask 文件不存在: {path}'}
+    with Image.open(path) as image:
+        canvas = image.convert('L').copy()
+    expected_size = tuple(case['canvas_size'])
+    if canvas.size != expected_size:
+        return None, {'reason': '整画布尺寸不符', 'expected': expected_size,
+                      'actual': canvas.size}
+    expected_bbox = case.get('aggregate_mask_bbox_half_open')
+    if list(canvas.getbbox() or []) != (expected_bbox or []):
+        return None, {'reason': '整画布墨迹框与记录不符',
+                      'expected': expected_bbox, 'actual': canvas.getbbox()}
+
+    # 单独保存的 run mask 已裁剪到墨迹框；放回原点后取非零像素并集。
+    # 多 run 的抗锯齿灰度可能叠加，故仅对像素占用范围做并集核对。
+    reconstructed = Image.new('L', expected_size, 0)
+    binary_lut = [0] + [255] * 255
+    for index, draw in enumerate(case['draws']):
+        if draw.get('mask_bbox_half_open') is None:
+            continue
+        loaded = _mask_pixels(output_dir, draw)
+        if loaded is None:
+            return None, {'reason': '缺少 run mask', 'run_index': index}
+        crop, origin = loaded
+        crop_bbox = [origin[0], origin[1], origin[0] + crop.width,
+                     origin[1] + crop.height]
+        if crop_bbox != draw['mask_bbox_half_open']:
+            return None, {'reason': 'run 裁剪框与记录不符', 'run_index': index,
+                          'expected': draw['mask_bbox_half_open'], 'actual': crop_bbox}
+        if (origin[0] < 0 or origin[1] < 0 or crop_bbox[2] > canvas.width
+                or crop_bbox[3] > canvas.height):
+            return None, {'reason': 'run 裁剪框超出画布', 'run_index': index,
+                          'actual': crop_bbox}
+        layer = Image.new('L', expected_size, 0)
+        layer.paste(crop.point(binary_lut), tuple(origin))
+        reconstructed = ImageChops.lighter(reconstructed, layer)
+
+    difference = ImageChops.difference(canvas.point(binary_lut), reconstructed)
+    if difference.getbbox() is not None:
+        return None, {'reason': '整画布与 run mask 的墨迹像素不符',
+                      'difference_bbox': difference.getbbox()}
+    return canvas, {'canvas_bbox': canvas.getbbox(), 'run_count': len(case['draws'])}
+
+
 def capture(mode: str, output_dir: Path, baseline_dir: Path | None) -> int:
     """逐例运行真实渲染，保存清单、run JSON、mask 与异常堆栈。"""
     base_style, selected_style_path = resolve_style()
@@ -702,12 +778,14 @@ def compare(
             'expected': list(baseline_env), 'actual': list(current_env),
             'delta': '环境不一致；像素阈值不放宽',
         })
-    if baseline_manifest.get('font_fingerprints') != current_manifest.get('font_fingerprints'):
+    baseline_fonts = _manifest_font_identities(baseline_manifest)
+    current_fonts = _manifest_font_identities(current_manifest)
+    if baseline_fonts != current_fonts:
         failures.append({
             'ac': 'environment-fonts', 'case_id': 'manifest',
-            'expected': baseline_manifest.get('font_fingerprints'),
-            'actual': current_manifest.get('font_fingerprints'),
-            'delta': '实际字体路径、metrics 或文件哈希发生变化',
+            'expected': baseline_fonts,
+            'actual': current_fonts,
+            'delta': '实际字体文件哈希、字号或 metrics 发生变化',
         })
     if set(baseline) != set(current):
         failures.append({
@@ -716,6 +794,37 @@ def compare(
             'delta': f'missing={sorted(set(baseline) - set(current))[:8]} '
                      f'extra={sorted(set(current) - set(baseline))[:8]}',
         })
+
+    # 54px 锚点案例读取此前保存的整画布 mask，验证 run 裁剪原点的还原。
+    # 纯西文锚点还要求修复前后整个画布逐像素一致，补充 AC-1 的局部 mask 比较。
+    for case_id, old_case in baseline.items():
+        if not case_id.startswith('anchor54_'):
+            continue
+        now_case = current.get(case_id)
+        old_canvas, old_detail = _anchor_canvas_mask(baseline_dir, old_case)
+        if old_canvas is None:
+            failures.append({
+                'ac': 'anchor-canvas', 'case_id': case_id,
+                'expected': '旧基准整画布与 run mask 一致',
+                'actual': old_detail, 'delta': '旧基准 mask 损坏',
+            })
+        if now_case is None:
+            continue  # 缺失案例已由 coverage 报告。
+        now_canvas, now_detail = _anchor_canvas_mask(output_dir, now_case)
+        if now_canvas is None:
+            failures.append({
+                'ac': 'anchor-canvas', 'case_id': case_id,
+                'expected': '当前整画布与 run mask 一致',
+                'actual': now_detail, 'delta': '当前 mask 损坏',
+            })
+        if (old_case.get('text_kind') == 'latin' and old_canvas is not None
+                and now_canvas is not None and old_canvas.tobytes() != now_canvas.tobytes()):
+            failures.append({
+                'ac': 'AC-1-canvas', 'case_id': case_id,
+                'expected': '修复前后整画布 mask 逐像素相同',
+                'actual': {'old': old_detail, 'current': now_detail},
+                'delta': '纯西文整画布 mask 变化',
+            })
 
     # AC-1：所有字号/字重/对齐的纯西文实际 draw 坐标、字体和 mask 对旧基准不变。
     for case_id, old_case in baseline.items():
@@ -730,8 +839,8 @@ def compare(
             baseline_dir, old_draw, output_dir, now_draw, require_same_y=True)
         exact_draw = bool(old_draw and now_draw and
                           old_draw.get('xy') == now_draw.get('xy') and
-                          old_draw.get('font', {}).get('path') == now_draw.get('font', {}).get('path') and
-                          old_draw.get('font', {}).get('size') == now_draw.get('font', {}).get('size'))
+                          _font_identity(old_draw.get('font', {})) ==
+                          _font_identity(now_draw.get('font', {})))
         if expected != actual or not exact_draw or not mask_same:
             failures.append({
                 'ac': 'AC-1', 'case_id': case_id,
