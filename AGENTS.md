@@ -74,6 +74,41 @@ src/
   等）已全部删除（2026-09-25，本地 + origin）；`v*-dev` 里程碑 tag 全部
   保留。**发行号从 `v2.6.0` 起重新累积**。
 
+### Commit 命名规范
+
+所有 dev 提交采用 Conventional Commits 格式：`<type>: <描述>`（描述用
+中文、简洁陈述本次改动，不加句号）。
+
+**type 取值与语义**：
+
+- `feat`：新功能（渲染管线、GUI 能力、CLI 参数等**程序功能**的新增）
+- `fix`：缺陷修复
+- `docs`：文档改动
+- `style`：**相框样式的新增与修改**（见下方专门说明）
+- `refactor`：重构（不改变行为）
+- `chore`：杂项（工具脚本、构建、依赖、配置）
+- `test`：测试
+
+**style 的项目语义（重点）**：本项目中 `style` **专指相框样式的新增与
+修改**（内置样式 YAML、样式变体拆分、样式库清理、样式字段调整等），
+与 Conventional Commits 标准中"代码格式"的 style 语义不同。**一切样式
+相关的新增和修改一律归为 `style`，不得记作 `feat` 或 `fix`**：
+
+- `style: 新增 InfoCard 样式——布局/字号/金色调校并拆分四种变体`
+- `style: 新增参数胶囊 ParamCapsule 样式并清理样式库`
+- `style: 修改 D2 样式磨砂条透明度`
+
+**版本号修改提交（重点）**：修改 `src/_version.py` 版本号的提交（即
+"chore: 升版本"性质的里程碑提交）**必须以版本号开头**，格式
+`vX.Y.Z-dev: <描述>`，例：
+
+- `v2.7.0-dev: 升版本（版本号/README 徽标/CHANGELOG 条目）`
+
+`release_sync.py milestone` 会校验 dev HEAD 提交首行以 `vX.Y.Z-dev:`
+开头，不合规拒绝打 tag。发行 commit 与补丁发行 commit（`vX.Y.Z: 发行
+说明`）由 `release_sync.py release / cherry` 自动生成，同样以版本号
+开头。
+
 ### Git 分支工作流
 
 采用两线模型（2026-09-25 起，mainline 已废除）：`dev` 永久保存完整开发
@@ -87,9 +122,10 @@ src/
   （feat/fix/docs/chore/refactor/style/test）。
 - **历史**：永久保留完整开发 commit 历史，**永不 reset / 归档**。
   每个任务级提交（feat: xxx / fix: xxx）长期可查、可回溯。
-- **里程碑 tag**：版本收尾时先在 dev 提交"chore: 升版本 x.y.z-dev"
-  （同步更新 `src/_version.py`、`README.md` 徽标、`CHANGELOG.md` 条目、
-  `CHANGELOG_RELEASE.md` 发行条目），再执行
+- **里程碑 tag**：版本收尾时先在 dev 提交版本号修改提交（首行以
+  `vX.Y.Z-dev:` 开头，如 `v2.7.0-dev: 升版本（版本号/README 徽标/
+  CHANGELOG 条目）`，同步更新 `src/_version.py`、`README.md` 徽标、
+  `CHANGELOG.md` 条目、`CHANGELOG_RELEASE.md` 发行条目），再执行
   `release_sync.py milestone x.y.z-dev` 在该提交上打**轻量 tag**
   `vX.Y.Z-dev`。里程碑 tag 只做标记，不产生专属版本 commit。
 - **发行快照来源**：release 上每个发行 commit 的树都取自 dev 某个时点
@@ -153,8 +189,10 @@ dev 上的任务（feat/fix/chore/docs/refactor）必须**逐项通过**后，
 git checkout dev
 # ...多次提交 feat:/fix:/docs: ...
 
-# 2. 版本收尾：dev 上提交"chore: 升版本 x.y.z-dev"（_version.py + README 徽标
-#    + CHANGELOG.md 条目 + CHANGELOG_RELEASE.md 发行条目）→ 打里程碑 tag
+# 2. 版本收尾：dev 上提交版本号修改提交（首行 vX.Y.Z-dev: 开头，_version.py
+#    + README 徽标 + CHANGELOG.md 条目 + CHANGELOG_RELEASE.md 发行条目）
+#    → 打里程碑 tag
+git add -A; git commit -m "v2.7.0-dev: 升版本（版本号/README 徽标/CHANGELOG 条目）"
 python tools/release_sync.py milestone 2.7.0-dev
 python tools/release_sync.py milestone 2.7.0-dev --push   # 推送 tag
 
@@ -242,11 +280,11 @@ python build_release.py --no-clean       # 不清 build 缓存（增量调试）
 #### 公开发行完整流程（脚本化）
 
 ```bash
-# 1. dev：升内部版本号 + 文档同步，提交（Conventional Commits）
+# 1. dev：升内部版本号 + 文档同步，提交（版本号修改提交以版本号开头）
 git checkout dev
 # 改 src/_version.py → 2.7.0-dev；README.md 徽标；CHANGELOG.md 加 v2.7.0-dev 条目；
 # CHANGELOG_RELEASE.md 加 v2.7.0 发行条目
-git add -A; git commit -m "chore: 升版本 2.7.0-dev"
+git add -A; git commit -m "v2.7.0-dev: 升版本（版本号/README 徽标/CHANGELOG 条目）"
 
 # 2. 打 -dev 里程碑 tag + 推送
 python tools/release_sync.py milestone 2.7.0-dev --push
