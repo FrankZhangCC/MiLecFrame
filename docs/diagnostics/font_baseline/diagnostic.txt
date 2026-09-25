@@ -1,0 +1,342 @@
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'vhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'vhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG fontTools.ttLib.ttFont Reading 'CFF ' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'CFF ' table
+DEBUG fontTools.ttLib.ttFont Reading 'hmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'maxp' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'maxp' table
+DEBUG fontTools.ttLib.ttFont Reading 'hhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'hhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'vmtx' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vmtx' table
+DEBUG fontTools.ttLib.ttFont Reading 'vhea' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'vhea' table
+DEBUG fontTools.ttLib.ttFont Reading 'cmap' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'cmap' table
+DEBUG fontTools.ttLib.ttFont Reading 'head' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'head' table
+DEBUG fontTools.ttLib.ttFont Reading 'OS/2' table from disk
+DEBUG fontTools.ttLib.ttFont Decompiling 'OS/2' table
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 0) raw=(1530,280,221,65) final=(1530,280) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(218, 0) raw=(1422,280,437,79) final=(1422,280) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: 永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(108, 0) raw=(1532,280,216,79) final=(1532,280) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 32) raw=(1530,248,221,65) final=(1530,248) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=center photo_ref=(1640, 500) anchor=(1640, 280) self=(218, 39) raw=(1422,241,437,79) final=(1422,241) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: 永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=center photo_ref=(1640, 500) anchor=(1640, 280) self=(108, 39) raw=(1532,241,216,79) final=(1532,241) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=bottom-center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 65) raw=(1530,215,221,65) final=(1530,215) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=bottom-center photo_ref=(1640, 500) anchor=(1640, 280) self=(218, 79) raw=(1422,201,437,79) final=(1422,201) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: 永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['focal_length_formatted', 'aperture_formatted', 'shutter_speed_formatted', 'iso_formatted', 'defined_text_01', 'defined_text_02', 'defined_text_03', 'defined_text_04', 'custom_text']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=defined_text_01 position=bottom-center placement=outside alignment=top-center photo_ref=(1640, 2500) anchor=(1640, 2760) self=(34, 0) raw=(1606,2760,68,65) final=(1606,2760) clamp=(0,0)
+DEBUG src.core.text_renderer [Layout] name=custom_text position=top-center placement=outside alignment=bottom-center photo_ref=(1640, 500) anchor=(1640, 280) self=(108, 79) raw=(1532,201,216,79) final=(1532,201) clamp=(0,0)
+DEBUG src.core.text_renderer [Relative] name=focal_length_formatted relative_to=defined_text_01 direction=right-of cross=center box=(175x65) final=(1694,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_02 relative_to=focal_length_formatted direction=right-of cross=center box=(244x65) final=(1949,2760)
+DEBUG src.core.text_renderer [Relative] name=aperture_formatted relative_to=defined_text_02 direction=right-of cross=center box=(130x65) final=(2213,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_03 relative_to=aperture_formatted direction=right-of cross=center box=(200x65) final=(2423,2760)
+DEBUG src.core.text_renderer [Relative] name=shutter_speed_formatted relative_to=defined_text_03 direction=right-of cross=center box=(164x65) final=(2643,2760)
+DEBUG src.core.text_renderer [Relative] name=defined_text_04 relative_to=shutter_speed_formatted direction=right-of cross=center box=(98x65) final=(2887,2760)
+DEBUG src.core.text_renderer [Relative] name=iso_formatted relative_to=defined_text_04 direction=right-of cross=center box=(99x65) final=(3005,2760)
+DEBUG src.utils.layout_engine [TreeLayout] root=defined_text_01 members=8 bounds_before=(1606,2760,1498,65) target=(891,2760) shift=(-715,0) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG PIL.Image Importing PngImagePlugin
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['probe']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=probe position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 0) raw=(1530,280,221,156) final=(1530,280) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: 永和九年
+AaBbCc
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['probe']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=probe position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 0) raw=(1530,280,221,156) final=(1530,280) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+AaBbCc永和九年
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['probe']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+INFO src.utils.font_manager 字体加载完成: 来源=cust:GlowSansSC-Normal:Medium, 字号=54
+DEBUG src.core.text_renderer [测量 混排行] text_type=probe, line_text=AaBbCc永和九年, ref_ascent=52, ref_descent=13, max_ascent=63, max_descent=16, line_height=79
+DEBUG src.core.text_renderer   段0: text=AaBbCc, width=221, ascent=52, descent=13
+DEBUG src.core.text_renderer   段1: text=永和九年, width=216, ascent=63, descent=16
+DEBUG src.core.text_renderer [Layout] name=probe position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(218, 0) raw=(1422,280,437,156) final=(1422,280) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+DEBUG src.core.text_renderer 开始添加文字图层...
+DEBUG src.core.text_renderer EXIF数据: {'focal_length': '50', 'aperture': '2.8', 'shutter_speed': '1/125', 'iso': '100'}
+DEBUG src.core.text_renderer 作者: None
+DEBUG src.core.text_renderer 地点: None
+DEBUG src.core.text_renderer 自定义文本: AaBbCc
+
+AaBbCc
+DEBUG src.core.text_renderer 图像尺寸: (3280, 3000)
+DEBUG src.core.text_renderer 原始图像尺寸: (3000, 2000)
+DEBUG src.core.text_renderer 待渲染的文本元素: ['probe']
+INFO src.utils.font_manager 字体加载完成: 来源=cust:Gotham:Medium, 字号=54
+DEBUG src.core.text_renderer [Layout] name=probe position=top-center placement=outside alignment=top-center photo_ref=(1640, 500) anchor=(1640, 280) self=(110, 0) raw=(1530,280,221,154) final=(1530,280) clamp=(0,0)
+DEBUG src.core.text_renderer 文字图层添加完成
+INFO root 诊断完成：D:\Coding\MiLecFrame\docs\diagnostics\font_baseline

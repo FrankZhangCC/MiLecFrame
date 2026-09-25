@@ -70,7 +70,7 @@ layout:
   info_position:
     camera_lens:
       position: "bottom-center"
-      alignment: "center"
+      alignment: "top-center"
       margin_top: 0
       margin_bottom: 0.075
       margin_left: 0
@@ -78,54 +78,54 @@ layout:
     focal_length_formatted:
       relative_to: "defined_text_01"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.01
     aperture_formatted:
       relative_to: "defined_text_02"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.01
     shutter_speed_formatted:
       relative_to: "defined_text_03"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.01
     iso_formatted:
       relative_to: "defined_text_04"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.01
 
   defined_texts:
     defined_text_01:
       content: "FL"
-      position: "bottom"
-      alignment: "center"
+      position: "bottom-center"
+      alignment: "top-center"
       tree_align: true
       margin_bottom: 0.13
     defined_text_02:
       content: "Aperture"
       relative_to: "focal_length_formatted"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.04
     defined_text_03:
       content: "Shutter"
       relative_to: "aperture_formatted"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.04
     defined_text_04:
       content: "ISO"
       relative_to: "shutter_speed_formatted"
       relative_position: "right-of"
-      alignment: "left"
+      cross_alignment: "center"
       relative_margin: 0.04
 
 logo:
   enabled: true
-  position: "top"
-  alignment: "both-center"
+  position: "top-center"
+  alignment: "center"
   margin_top: 0.12
   size_ratio: 0.1
   max_dim_limit_ratio: 2.5

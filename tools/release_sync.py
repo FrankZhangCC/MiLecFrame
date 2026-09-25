@@ -1,39 +1,54 @@
 # -*- coding: utf-8 -*-
-"""三线版本同步脚本（dev / mainline / release）。
+"""两线版本同步脚本（dev / release）。
 
-在重建历史（2026-08）之后，三线共享共同祖先（dev 的 Initial commit），
-版本规则更新为「版本同源」：mainline 用 vX.Y.Z-dev，release 用同号去
--dev 后缀的 vX.Y.Z；一个版本 = 一个 commit + 一个 tag；修复走 patch
-号递增，禁止"增补"commit。
+模型（2026-09-25 起；mainline 已废除——其历史版本 commit 由 v*-dev tag
+变达保留，不再有任何分支引用）：
+    dev     完整开发历史（feat/fix/docs 细节提交，永不归档 / 永不 reset），
+            里程碑提交（如"chore: 升版本 x.y.z-dev"）上打轻量 vX.Y.Z-dev tag
+    release 干净发行链（orphan 起步，与 dev 无共同祖先），每个发行 commit
+            的树 = dev 某个时点的快照（read-tree，不含 dev 细节历史），
+            首行 "vX.Y.Z: 发行说明"，带注解 tag vX.Y.Z（同源号去 -dev）
+
+版本同源规则不变：dev 里程碑 v2.6.0-dev ↔ 发行 v2.6.0（同号去 -dev）；
+补丁修复走 patch 号递增（v2.6.0 → v2.6.1）。
 
 用法：
     python tools/release_sync.py check
-        # 三线体检：共同祖先 / tag 完整性 / 版本号与 CHANGELOG 一致性
+        # 两线体检：发行链完整性 / 同源 tag 对齐 / 版本号与文档一致性
 
-    python tools/release_sync.py new-version <ver> --msg "功能简述" [--push]
-        # 把 dev 的新开发以 merge --no-ff 并入 mainline 形成新版本
-        # （ver 形如 2.5.0-dev），自动执行 merge + 写 _version.py +
-        # 版本 commit（amend 进 merge commit）+ tag + dev 归档（reset 对齐）
+    python tools/release_sync.py milestone <ver> [--push]
+        # 在 dev HEAD 打轻量 vX.Y.Z-dev 里程碑 tag（ver 形如 2.7.0-dev）
+        # 前置：dev 上已完成"chore: 升版本"提交（_version.py 与
+        # CHANGELOG.md 条目均已就绪并提交）
 
-    python tools/release_sync.py cherry <commit> <ver> [--also-release] [--push]
-        # 把 dev 上的单个修复 commit cherry-pick 到 mainline 并升 patch 号
-        # （ver 形如 2.4.1-dev 或 2.4.1；带 --also-release 时同步到 release）
+    python tools/release_sync.py release <ver> --msg "发行说明"
+            [--from <ref>] [--notes-file <path>] [--push]
+        # dev → release 发行（ver 形如 2.6.0，无 -dev 后缀）：临时
+        # worktree 中 read-tree 快照 <from>（默认 dev HEAD）+ 发行准备
+        # （_version.py 去 -dev、可选以 --notes-file 覆盖
+        # CHANGELOG_RELEASE.md）+ 发行 commit + 注解 tag
+        # 前置：同源 v<ver>-dev 里程碑 tag 已存在
 
-    python tools/release_sync.py release <ver> --msg "发行说明" [--push]
-        # mainline → release 公开发行（ver 形如 2.4.0，无 -dev 后缀）：
-        # release 锚定 mainline 对应 -dev 版本签出，改 _version.py 去 -dev，
-        # 发行 commit + 注解 tag
+    python tools/release_sync.py cherry <commit> <ver> --msg "补丁说明" [--push]
+        # dev 上的修复 commit → cherry-pick 到 release 干净链上补丁发行
+        # （ver 形如 2.6.1，patch 号递增），并在 dev 源 commit 上打同源
+        # v<ver>-dev 里程碑 tag
 
 约定：
-    - 所有命令必须在 dev 分支、工作区干净的状态下执行（merge/reset 直接作用于工作树）。
-    - tag 均为轻量 tag，推送时用 --follow-tags + --tags 兜底。
+    - release / cherry 全程在临时 worktree 中操作，不触碰主工作区
+      （dev 分支与未提交改动不受影响），因此执行时不要求工作区干净。
+    - milestone tag 为轻量 tag，发行 tag 为注解 tag。
     - 脚本不提供 force push；release 分支受保护，历史不可改写。
+    - dev 分支只在本机（不推送 origin），--push 只推送 tag 与 release 分支。
 """
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 # Windows 控制台默认 GBK，强制 UTF-8 输出避免 ✗/✓ 等符号编码崩溃
@@ -46,16 +61,24 @@ for _stream in (sys.stdout, sys.stderr):
 # 项目根目录（脚本位于 <root>/tools/ 下）
 ROOT = Path(__file__).resolve().parent.parent
 
-# 三线分支名
+# 两线分支名（mainline 已废除）
 BRANCH_DEV = "dev"
-BRANCH_MAINLINE = "mainline"
 BRANCH_RELEASE = "release"
 
-# 版本号正则：2.4.0-dev / v2.4.0 / v2.4.1-dev 均可，split 后比较
+# 版本号正则：2.6.0-dev / v2.6.0 / v2.6.1 均可，split 后比较
 VER_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)(?:-(dev))?$")
 
-# CHANGELOG 条目行示例："## v2.4.0-dev (2026-08-14)"，匹配时转义版本号
+# CHANGELOG 条目行示例："## v2.6.0-dev (2026-09-22)"，匹配时转义版本号
 CHANGELOG_ENTRY_RE = re.compile(r"^##\s+v(\d+\.\d+\.\d+(?:-dev)?)\b", re.MULTILINE)
+
+# 发行 commit 首行格式："v2.6.0: 发行说明"
+RELEASE_SUBJECT_RE = re.compile(r"^(v\d+\.\d+\.\d+):")
+
+# -dev 里程碑 tag 名格式："v2.6.0-dev"
+DEV_TAG_RE = re.compile(r"^v(\d+\.\d+\.\d+)-dev$")
+
+# 发行 tag 名格式："v2.6.0"（排除 -dev / pre-rebuild / archive 等非发行 tag）
+RELEASE_TAG_RE = re.compile(r"^v(\d+\.\d+\.\d+)$")
 
 
 class SyncError(RuntimeError):
@@ -105,8 +128,8 @@ def is_ancestor(commit, branch):
 def parse_version(ver):
     """解析版本号字符串，返回 (major, minor, patch, suffix)。
 
-    suffix: 'dev' 或 None（公开发行）。
-    返回元组可直接用于元组比较（None < 'dev'，均参与比较即可）。
+    suffix: 'dev' 或 ''（公开发行）。
+    返回元组可直接用于元组比较（'' < 'dev'，均参与比较即可）。
     """
     m = VER_RE.match(ver.strip())
     if not m:
@@ -123,7 +146,7 @@ def format_version(t):
 
 
 def tag_name(t):
-    """生成 tag 名：v2.4.0-dev / v2.4.0。"""
+    """生成 tag 名：v2.6.0-dev / v2.6.0。"""
     return "v" + format_version(t)
 
 
@@ -132,27 +155,46 @@ def current_branch():
     return git("rev-parse", "--abbrev-ref", "HEAD")
 
 
-def ensure_clean_worktree():
-    """确保工作区干净（含未跟踪文件），否则中止。"""
-    dirty = git("status", "--porcelain", check=True)
-    if dirty:
-        raise SyncError(
-            "工作区不干净，无法执行同步操作。\n"
-            f"未提交/未跟踪文件:\n{dirty}\n"
-            "请先提交或暂存这些改动。"
-        )
-
-
 def ensure_branch(branch):
-    """确保当前位于指定分支。"""
+    """确保当前位于指定分支（流程约束，避免在错误分支上打 tag）。"""
     cur = current_branch()
     if cur != branch:
         raise SyncError(f"当前分支为 {cur}，此命令必须在 {branch} 分支上执行。")
 
 
-def latest_tag_on(branch):
-    """返回指定分支可达的最新 tag 名（无 tag 返回 None）。"""
-    return git("describe", "--tags", "--abbrev=0", branch, check=False) or None
+def latest_dev_tag():
+    """返回版本号最大的 -dev 里程碑 tag（无则 None）。
+
+    不用 git describe：里程碑 tag 散布在 dev 可达历史（含已废除 mainline
+    的旧版本 commit）上，describe 按拓扑距离取"最近"，未必是版本号最大。
+    """
+    best, best_t = None, None
+    for t in git("tag", "-l", check=False).splitlines():
+        m = DEV_TAG_RE.match(t)
+        if not m:
+            continue
+        try:
+            v = parse_version(t)
+        except SyncError:
+            continue
+        if best is None or v > best:
+            best, best_t = v, t
+    return best_t
+
+
+def latest_release_tag():
+    """返回版本号最大的发行 tag（无则 None）。"""
+    best, best_t = None, None
+    for t in git("tag", "-l", check=False).splitlines():
+        if not RELEASE_TAG_RE.match(t):
+            continue
+        try:
+            v = parse_version(t)
+        except SyncError:
+            continue
+        if best is None or v > best:
+            best, best_t = v, t
+    return best_t
 
 
 def require_newer(new_ver, old_tag):
@@ -162,31 +204,34 @@ def require_newer(new_ver, old_tag):
     try:
         old = parse_version(old_tag)
     except SyncError:
-        # 历史遗留 tag（如 v0.1.0）解析不了的按可比较处理：都兼容即可
+        # 历史遗留 tag（如 v0.1.0-release）解析不了的按可比较处理：都兼容即可
         return
     if new_ver <= old:
         raise SyncError(f"新版本 {format_version(new_ver)} 必须大于当前最新 tag {old_tag}。")
 
 
-def read_version_py():
-    """读取当前工作树 src/_version.py 中的 __version__ 字符串。"""
-    path = ROOT / "src" / "_version.py"
-    text = path.read_text(encoding="utf-8")
-    m = re.search(r'^__version__\s*=\s*"([^"]+)"', text, re.MULTILINE)
+def read_version_py_at(ref):
+    """读取指定 ref 的 src/_version.py 中的 __version__ 字符串。
+
+    读分支头（而非工作区文件）：工作区可以有未提交改动，版本校验一律
+    以分支头为准。
+    """
+    text = git("show", f"{ref}:src/_version.py", check=False)
+    m = re.search(r'^__version__\s*=\s*"([^"]+)"', text or "", re.MULTILINE)
     if not m:
-        raise SyncError("无法从 src/_version.py 读取 __version__。")
+        raise SyncError(f"无法从 {ref}:src/_version.py 读取 __version__。")
     return m.group(1)
 
 
-def write_version_py(ver_tuple):
-    """按新版本号重写 src/_version.py 的 __version__ 与 __version_info__。
+def write_version_py(ver_tuple, path):
+    """按新版本号重写指定 _version.py 的 __version__ 与 __version_info__。
 
     dev 后缀版本写 'dev'，公开发行写 'release'（与 release 线历史一致）。
+    path 指向临时 worktree 内的文件，主工作区的 _version.py 不受影响。
     """
     major, minor, patch, suffix = ver_tuple
     version_str = format_version(ver_tuple)
     tag_str = suffix if suffix else "release"
-    path = ROOT / "src" / "_version.py"
     text = path.read_text(encoding="utf-8")
     text = re.sub(
         r'^__version__\s*=\s*"[^"]*"',
@@ -203,17 +248,26 @@ def write_version_py(ver_tuple):
     path.write_text(text, encoding="utf-8")
 
 
-def changelog_has_version(changelog, ver_tuple):
-    """检查 CHANGELOG.md / CHANGELOG_RELEASE.md 是否含指定版本条目。"""
-    path = ROOT / changelog
-    if not path.exists():
-        return False
-    text = path.read_text(encoding="utf-8")
-    target = "v" + format_version(ver_tuple)
-    for m in CHANGELOG_ENTRY_RE.finditer(text):
-        if m.group(1) == target[1:]:
+def changelog_text_has_version(text, ver_tuple):
+    """检查一段 CHANGELOG 文本是否含指定版本条目。"""
+    target = format_version(ver_tuple)
+    for m in CHANGELOG_ENTRY_RE.finditer(text or ""):
+        if m.group(1) == target:
             return True
     return False
+
+
+def changelog_has_version(changelog, ver_tuple, ref=None):
+    """检查 CHANGELOG.md / CHANGELOG_RELEASE.md 是否含指定版本条目。
+
+    ref 给定时读该 ref 的文件内容（分支头），否则读主工作区文件。
+    """
+    if ref:
+        text = git("show", f"{ref}:{changelog}", check=False)
+    else:
+        path = ROOT / changelog
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+    return changelog_text_has_version(text, ver_tuple)
 
 
 def commit_message_for_cherry(tag, src_subject):
@@ -226,317 +280,359 @@ def commit_message_for_cherry(tag, src_subject):
     return f"{tag}: {subject}"
 
 
-def do_push(push_refspecs):
-    """推送到 origin：各分支 refspec + --tags 兜底轻量 tag。"""
-    for refspec in push_refspecs:
-        git("push", "origin", refspec, "--follow-tags")
-    git("push", "origin", "--tags")
+def do_push(refs):
+    """推送到 origin：逐个推送分支 / tag（轻量与注解 tag 均可直接推）。"""
+    for ref in refs:
+        git("push", "origin", ref)
+
+
+@contextmanager
+def temp_worktree(ref, detach=True):
+    """创建指向 ref 的临时 worktree，yield 其路径，退出时强制清理。
+
+    release / cherry 的全部 git 写操作都在 worktree 内进行：
+    主工作区（dev 分支与用户的未提交改动）完全不受影响。
+
+    参数:
+        ref: 起点 ref。
+        detach: True 时游离签出（orphan 首发场景，随后 checkout --orphan
+            会创建并检出 release 分支）；False 时直接检出 ref 分支，
+            commit 才能推进该分支（接续发行 / 补丁发行场景）。
+    """
+    tmp = tempfile.mkdtemp(prefix="release_sync_")
+    path = Path(tmp) / "wt"
+    args = ["worktree", "add"]
+    if detach:
+        args.append("--detach")
+    args += [str(path), ref]
+    git(*args)
+    try:
+        yield path
+    finally:
+        # 无论成功失败都清理 worktree（--force 兜底残留改动），再删临时目录
+        git("worktree", "remove", "--force", str(path), check=False)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def ensure_release_branch():
+    """确保 release 分支已存在（orphan 首发由人工或脚本首次运行建立）。"""
+    if not git("rev-parse", "--verify", BRANCH_RELEASE, check=False):
+        raise SyncError(
+            f"{BRANCH_RELEASE} 分支不存在。请先执行 release 命令完成首发"
+            "（脚本会自动 orphan 起步），或手动创建该分支。"
+        )
 
 
 def cmd_check(_args):
-    """三线体检：共同祖先、tag 完整性、版本号与文档一致性。"""
+    """两线体检：发行链完整性、同源 tag 对齐、版本号与文档一致性。"""
     problems = []
 
-    # 1. 共同祖先：mainline/release 与 dev 的 merge-base 必须在 mainline 版本链上
-    #    （dev 归档机制下 merge-base 恒为最近版本 commit；release 自 mainline 分叉）
-    base_mainline = git("merge-base", BRANCH_DEV, BRANCH_MAINLINE, check=False)
-    base_release = git("merge-base", BRANCH_DEV, BRANCH_RELEASE, check=False)
-    for name, base in ((BRANCH_MAINLINE, base_mainline), (BRANCH_RELEASE, base_release)):
-        if not base:
-            problems.append(f"{name} 与 dev 无共同祖先")
-        elif not is_ancestor(base, BRANCH_MAINLINE):
-            problems.append(f"{name} 与 dev 的共同祖先不在 mainline 链上: {base[:12]}")
+    # 1. 两线分支存在性
+    for b in (BRANCH_DEV, BRANCH_RELEASE):
+        if not git("rev-parse", "--verify", b, check=False):
+            problems.append(f"分支 {b} 不存在")
 
-    # 2. mainline：每个版本 commit 恰好一个 tag，commit 首行以版本号开头
-    #    沿第一父遍历版本链，Initial commit（无版本前缀）为链尾
-    root = git("rev-list", "--max-parents=0", BRANCH_MAINLINE)
-    commits = git("log", "--first-parent", "--format=%H %s", BRANCH_MAINLINE).splitlines()
-    for line in commits:
-        h, subject = line.split(" ", 1)
-        m = re.match(r"^(v\d+\.\d+\.\d+(?:-dev)?):", subject)
-        if not m:
-            if h == root:
-                break  # 到达 Initial commit，mainline 链结束
-            problems.append(f"mainline commit {h[:12]} 首行无版本号前缀: {subject[:50]}")
-            continue
-        expected = m.group(1)
-        tags = git("tag", "--points-at", h, check=False).splitlines()
-        tags = [t for t in tags if t and not t.startswith("pre-rebuild")]
-        if expected not in tags:
-            problems.append(f"mainline commit {h[:12]} 缺少 tag {expected}")
-        if len(tags) != 1:
-            problems.append(f"mainline commit {h[:12]} tag 数异常: {tags}")
+    has_release = bool(git("rev-parse", "--verify", BRANCH_RELEASE, check=False))
 
-    # 3. release：沿第一父遍历发行链，遇到 mainline 链上的 commit 即止
-    #    （发行 commit 的父直接锚定 mainline 对应版本）
-    commits = git("log", "--first-parent", "--format=%H %s", BRANCH_RELEASE).splitlines()
-    for line in commits:
-        h, subject = line.split(" ", 1)
-        # 发行 commit 的父是 mainline 链，此处即发行链终点
-        if is_ancestor(h, BRANCH_MAINLINE):
-            break
-        m = re.match(r"^(v\d+\.\d+\.\d+(?:-release)?):", subject)
-        if not m:
-            problems.append(f"release commit {h[:12]} 首行无版本号前缀: {subject[:50]}")
-            continue
-        tags = git("tag", "--points-at", h, check=False).splitlines()
-        tags = [t for t in tags if t and not t.startswith("pre-rebuild")]
-        if len(tags) != 1:
-            problems.append(f"release commit {h[:12]} tag 数异常: {tags}")
+    # 2. release 发行链：沿第一父遍历，每个发行 commit 首行 vX.Y.Z: 前缀
+    #    且恰好带一个同名 tag（orphan 链上全部是发行 commit，无链尾特例）
+    if has_release:
+        commits = git("log", "--first-parent", "--format=%H %s", BRANCH_RELEASE).splitlines()
+        for line in commits:
+            h, subject = line.split(" ", 1)
+            m = RELEASE_SUBJECT_RE.match(subject)
+            if not m:
+                problems.append(f"release commit {h[:12]} 首行无发行前缀: {subject[:50]}")
+                continue
+            expected = m.group(1)
+            tags = git("tag", "--points-at", h, check=False).splitlines()
+            tags = [t for t in tags if t and not t.startswith("pre-rebuild")]
+            if expected not in tags:
+                problems.append(f"release commit {h[:12]} 缺少 tag {expected}")
+            if len(tags) != 1:
+                problems.append(f"release commit {h[:12]} tag 数异常: {tags}")
 
-    # 3b. 全部公开发行 tag（含历史上从 mainline 分叉的发行）指向的
-    #     commit 首行应为发行版本前缀
-    release_tag_re = re.compile(r"^v\d+\.\d+\.\d+(?:-release)?$")
+    # 3. 发行 tag 指向的 commit 首行应为发行前缀
+    #    注解 tag 的 rev-parse 返回 tag 对象本身，须解引用到 commit
     for t in git("tag", "-l", check=False).splitlines():
-        if not t or t.startswith("pre-rebuild") or not release_tag_re.match(t):
+        if not RELEASE_TAG_RE.match(t):
             continue
-        # 注解 tag 的 rev-parse 返回 tag 对象本身，须解引用到 commit，
-        # 否则 git show 取到的是 tag 对象头（"tag vX.Y.Z / Tagger: ..."），
-        # 发行前缀校验将永远误报（轻量 tag 无此问题）
         h = git("rev-parse", f"{t}^{{commit}}", check=False)
         subject = git("show", "-s", "--format=%s", h, check=False)
-        if not re.match(r"^v\d+\.\d+\.\d+(?:-release)?:", subject):
+        if not RELEASE_SUBJECT_RE.match(subject):
             problems.append(f"发行 tag {t} 指向的 commit {h[:12]} 首行无发行前缀: {subject[:50]}")
 
-    # 4. _version.py 与分支最新 tag 一致
-    for branch in (BRANCH_MAINLINE, BRANCH_RELEASE):
-        latest = latest_tag_on(branch)
-        if latest and not latest.startswith("pre-rebuild"):
-            file_ver = git("show", f"{branch}:src/_version.py", check=False)
-            m = re.search(r'^__version__\s*=\s*"([^"]+)"', file_ver or "", re.MULTILINE)
-            if m and tag_name(parse_version(m.group(1))) != latest:
-                problems.append(
-                    f"{branch} 的 _version.py={m.group(1)} 与最新 tag {latest} 不一致"
-                )
+    # 4. 同源对齐：每个发行 tag vX.Y.Z 应存在 v(X.Y.Z)-dev 里程碑 tag
+    for t in git("tag", "-l", check=False).splitlines():
+        if not RELEASE_TAG_RE.match(t):
+            continue
+        if not git("rev-parse", "--verify", f"{t}-dev", check=False):
+            problems.append(f"发行 tag {t} 缺少同源里程碑 tag {t}-dev")
 
-    # 5. CHANGELOG 条目：mainline 最新版本应有 CHANGELOG.md 条目
-    latest = latest_tag_on(BRANCH_MAINLINE)
-    if latest and not latest.startswith("pre-rebuild"):
-        if not changelog_has_version("CHANGELOG.md", parse_version(latest)):
-            problems.append(f"CHANGELOG.md 缺少 {latest} 条目")
+    # 5. -dev 里程碑 tag 可达性：应全部可从 dev 到达
+    #    （历史里程碑 tag 指向已废除 mainline 的版本 commit，靠 dev 历史
+    #    中的旧 merge 链保持可达；若不可达说明有孤儿 tag）
+    for t in git("tag", "-l", check=False).splitlines():
+        if not DEV_TAG_RE.match(t):
+            continue
+        h = git("rev-parse", f"{t}^{{commit}}", check=False)
+        if not is_ancestor(h, BRANCH_DEV):
+            problems.append(f"里程碑 tag {t} 指向的 commit {h[:12]} 不可从 dev 到达")
 
-    # 6. 提示性信息：dev 有待快照的提交
-    ahead = git("log", "--oneline", f"{BRANCH_MAINLINE}..{BRANCH_DEV}", check=False)
+    # 6. _version.py 与最新 tag 一致
+    latest_rel = latest_release_tag()
+    latest_dev = latest_dev_tag()
+    if has_release and latest_rel:
+        file_ver = read_version_py_at(BRANCH_RELEASE)
+        if tag_name(parse_version(file_ver)) != latest_rel:
+            problems.append(
+                f"{BRANCH_RELEASE} 的 _version.py={file_ver} 与最新发行 tag {latest_rel} 不一致"
+            )
+    if latest_dev:
+        file_ver = read_version_py_at(BRANCH_DEV)
+        if tag_name(parse_version(file_ver)) != latest_dev:
+            problems.append(
+                f"{BRANCH_DEV} 的 _version.py={file_ver} 与最新里程碑 tag {latest_dev} 不一致"
+                "（若已完成升版本提交请打 milestone tag）"
+            )
+
+    # 7. CHANGELOG 条目：最新版本均应有对应条目
+    if latest_dev and not changelog_has_version("CHANGELOG.md", parse_version(latest_dev), ref=BRANCH_DEV):
+        problems.append(f"CHANGELOG.md 缺少 {latest_dev} 条目")
+    if has_release and latest_rel and not changelog_has_version(
+        "CHANGELOG_RELEASE.md", parse_version(latest_rel), ref=BRANCH_RELEASE
+    ):
+        problems.append(f"CHANGELOG_RELEASE.md（release 分支）缺少 {latest_rel} 条目")
+
+    # 8. 提示性信息：里程碑后 dev 的新提交、工作区状态
+    ahead = ""
+    if latest_dev:
+        ahead = git("log", "--oneline", f"{latest_dev}..{BRANCH_DEV}", check=False)
     dirty = git("status", "--porcelain", check=False)
 
-    print("=== 三线体检 ===")
-    print(f"dev:       {git('rev-parse', '--short', BRANCH_DEV)}")
-    print(f"mainline:  {git('rev-parse', '--short', BRANCH_MAINLINE)} (最新 tag: {latest_tag_on(BRANCH_MAINLINE)})")
-    print(f"release:   {git('rev-parse', '--short', BRANCH_RELEASE)} (最新 tag: {latest_tag_on(BRANCH_RELEASE)})")
+    print("=== 两线体检 ===")
+    print(f"dev:       {git('rev-parse', '--short', BRANCH_DEV)} (最新里程碑: {latest_dev})")
+    print(
+        f"release:   {git('rev-parse', '--short', BRANCH_RELEASE) if has_release else '(不存在)'}"
+        f" (最新发行: {latest_rel})"
+    )
     if ahead:
-        print(f"提示: dev 领先 mainline {len(ahead.splitlines())} 个未快照提交")
+        print(f"提示: dev 自 {latest_dev} 后有 {len(ahead.splitlines())} 个未发行提交")
     if dirty:
-        print(f"提示: 工作区有未提交改动")
+        print("提示: 工作区有未提交改动（不影响同步命令）")
     if problems:
         print("\n发现问题:")
         for p in problems:
             print(f"  ✗ {p}")
         sys.exit(1)
-    print("\n✓ 三线状态健康")
+    print("\n✓ 两线状态健康")
 
 
-def cmd_new_version(args):
-    """dev → mainline：merge --no-ff + 写版本号 + 版本 commit + tag + dev 归档。
-
-    机制说明：dev 在每次里程碑后都会 reset --hard mainline（= 最近版本
-    merge commit），两线 merge-base 恒为最近版本 commit，因此 merge 的
-    三方合并只包含本版本的新开发内容，不会产生冲突（read-tree 快照仅
-    用于历史重建等一次性场景，日常版本更新一律走 merge --no-ff）。
-
-    版本 commit 即 merge commit：--no-ff 强制生成（防止 merge-base 对齐
-    时被 fast-forward 吞掉），第一父为 mainline 上一版本、第二父为 dev
-    本版本末端，dev 的任务级提交历史借此完整并入 mainline；版本号变更
-    与版本消息在 merge 后 amend 进该 merge commit（--amend 只替换
-    commit 对象、完整保留两个父指针），维持「一个版本 = 一个 commit
-    + 一个 tag」。
-    """
+def cmd_milestone(args):
+    """dev HEAD 打轻量 -dev 里程碑 tag（不触碰工作区）。"""
     ensure_branch(BRANCH_DEV)
-    ensure_clean_worktree()
-    # 前置检查：dev 必须有相对 mainline 的新提交（否则 squash 为空）
-    if not git("rev-list", f"{BRANCH_MAINLINE}..{BRANCH_DEV}", check=False):
-        raise SyncError("dev 相对 mainline 无新提交，无需创建新版本。")
     ver = parse_version(args.ver)
     if ver[3] != "dev":
-        raise SyncError("mainline 版本号必须带 -dev 后缀，如 2.5.0-dev。")
+        raise SyncError("里程碑版本号必须带 -dev 后缀，如 2.7.0-dev。")
     tag = tag_name(ver)
-    require_newer(ver, latest_tag_on(BRANCH_MAINLINE))
-    if not changelog_has_version("CHANGELOG.md", ver):
-        raise SyncError(f"CHANGELOG.md 缺少 v{format_version(ver)} 条目，请先在 dev 上补充。")
-    if not args.msg:
-        raise SyncError("必须提供 --msg 版本描述。")
+    require_newer(ver, latest_dev_tag())
 
-    print("[1/5] merge --no-ff: dev → mainline")
-    git("checkout", BRANCH_MAINLINE)
-    # 记录 merge 前 mainline HEAD，用于 "Already up to date"（无变更）检测
-    head_before = git("rev-parse", "HEAD")
-    # -m 占位消息防止非交互环境下 merge 意外弹出编辑器，最终消息在 [3/5] amend 时覆盖
-    git("merge", "--no-ff", "-m", f"Merge branch '{BRANCH_DEV}'", BRANCH_DEV, check=False)
-    # 冲突检测：unmerged 条目形如 "UU file"（正常情况下不会发生）
-    status_out = git("status", "--porcelain", check=False) or ""
-    if any(line[:2] in ("UU", "AA", "AU", "UA", "DD", "DU", "UD") for line in status_out.splitlines()):
-        git("merge", "--abort", check=False)
-        git("checkout", BRANCH_DEV, check=False)
+    # dev 分支头的 _version.py 必须已写好该版本号（升版本提交应先行）
+    file_ver = read_version_py_at(BRANCH_DEV)
+    if file_ver != format_version(ver):
         raise SyncError(
-            "merge --no-ff 冲突。可能原因: dev 与 mainline 的 merge-base 未对齐"
-            "（dev 未归档）或 cherry 修复与后续开发在同一处改动。\n"
-            "请检查两线状态后重试。"
+            f"dev HEAD 的 _version.py={file_ver} 与里程碑版本 {format_version(ver)} 不一致，"
+            "请先提交\"chore: 升版本\"（_version.py + CHANGELOG.md 条目）再打 tag。"
         )
-    # 无变更检测：dev 无有效差异时 merge 输出 "Already up to date"、HEAD 不动
-    if git("rev-parse", "HEAD") == head_before:
-        git("checkout", BRANCH_DEV, check=False)
-        raise SyncError("dev 相对 mainline 无新变更，无需创建新版本。")
+    if not changelog_has_version("CHANGELOG.md", ver, ref=BRANCH_DEV):
+        raise SyncError(f"CHANGELOG.md 缺少 {tag} 条目，请先在 dev 上补充。")
 
-    print(f"[2/5] 写入 _version.py = {format_version(ver)}")
-    write_version_py(ver)
-
-    print(f"[3/5] 版本 commit（amend merge commit）+ tag {tag}")
-    git("add", "-A")
-    # --amend 只替换 commit 对象、完整保留 merge commit 的两个父指针，
-    # 版本号变更（_version.py）随 amend 并入版本 commit
-    git("commit", "--amend", "-m", f"{tag}: {args.msg}")
-    git("tag", tag)
-
-    print("[4/5] dev 归档: reset --hard mainline")
-    git("checkout", BRANCH_DEV)
-    git("reset", "--hard", BRANCH_MAINLINE)
+    print(f"打里程碑 tag {tag} → dev HEAD")
+    git("tag", tag, BRANCH_DEV)
 
     if args.push:
-        print("推送到 origin ...")
-        do_push([BRANCH_MAINLINE])
+        print("推送 tag 到 origin ...")
+        do_push([tag])
 
-    print(f"✓ mainline 新版本 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
-    print("  dev 已归档至该版本，两线 merge-base 对齐，可继续开发。")
-
-
-def cmd_cherry(args):
-    """dev 的单点修复 → cherry-pick 到 mainline（升 patch 号）+ 可选 release。"""
-    ensure_branch(BRANCH_DEV)
-    ensure_clean_worktree()
-
-    # 版本号两种写法：2.4.1-dev（mainline 目标）或 2.4.1（配合 --also-release）
-    ver = parse_version(args.ver)
-    mainline_ver = (ver[0], ver[1], ver[2], "dev")
-    mainline_tag = tag_name(mainline_ver)
-    require_newer(mainline_ver, latest_tag_on(BRANCH_MAINLINE))
-
-    # 校验修复 commit 存在于 dev 且尚未在 mainline
-    src_commit = git("rev-parse", args.commit)
-    if is_ancestor(src_commit, BRANCH_MAINLINE):
-        raise SyncError(f"commit {args.commit} 已在 mainline，无需重复搬运。")
-    src_subject = git("show", "-s", "--format=%s", src_commit)
-
-    # 目标分支与目标版本：mainline 必选；--also-release 时同步 release
-    targets = [(BRANCH_MAINLINE, mainline_ver, mainline_tag)]
-    if args.also_release:
-        release_ver = (ver[0], ver[1], ver[2], "")
-        require_newer(release_ver, latest_tag_on(BRANCH_RELEASE))
-        targets.append((BRANCH_RELEASE, release_ver, tag_name(release_ver)))
-
-    for branch, tver, tag in targets:
-        print(f"--- 处理 {branch}: cherry-pick → {tag}")
-        git("checkout", branch)
-        git("cherry-pick", src_commit, check=False)
-        # 冲突检测：git status --porcelain 中 unmerged 条目形如 "UU file"
-        status_out = git("status", "--porcelain", check=False) or ""
-        if any(line[:2] in ("UU", "AA", "AU", "UA", "DD", "DU", "UD") for line in status_out.splitlines()):
-            git("cherry-pick", "--abort", check=False)
-            git("checkout", BRANCH_DEV, check=False)
-            raise SyncError(
-                f"cherry-pick 到 {branch} 冲突（修复依赖的代码尚未进入该分支）。\n"
-                "建议: 在 dev 上将修复变基到更早的提交后再试，或手动解决冲突。"
-            )
-        # 写入目标版本号并并入 cherry-pick 提交（保持 1 版本 = 1 commit）
-        write_version_py(tver)
-        git("add", "src/_version.py")
-        git("commit", "--amend", "-m", commit_message_for_cherry(tag, src_subject))
-        git("tag", tag)
-
-    git("checkout", BRANCH_DEV)
-
-    if args.push:
-        print("推送到 origin ...")
-        refspecs = [BRANCH_MAINLINE]
-        if args.also_release:
-            refspecs.append(BRANCH_RELEASE)
-        do_push(refspecs)
-
-    print("✓ cherry-pick 完成: " + ", ".join(t[2] for t in targets))
+    print(f"✓ 里程碑 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
 
 
 def cmd_release(args):
-    """mainline → release：锚定对应版本签出 + 发行准备 + 注解 tag。
+    """dev → release 干净发行链：read-tree 快照 + 发行准备 + 注解 tag。
 
-    行业规范（Git Flow 简化）：发行 commit 的父直接锚定 mainline 的
-    对应版本 commit（reset --hard <vX.Y.Z-dev>），发行差异（_version.py
-    去 -dev 等）作为发行准备提交，公开发行打注解 tag。
+    全程在临时 worktree 中进行：
+      - release 分支不存在 → orphan 起步（首发场景，历史从 v2.6.0 起）
+      - release 分支已存在 → 检出 release，在其 HEAD 上接续快照
+    快照树 = <from> 的树（默认 dev HEAD），因此发行 commit 的 diff
+    （相对上一发行 commit）天然只含两次发行之间的净变化，
+    dev 的任务级提交历史不会进入 release 链。
     """
-    ensure_branch(BRANCH_DEV)
-    ensure_clean_worktree()
     ver = parse_version(args.ver)
     if ver[3]:
-        raise SyncError("公开发行版本号不能带 -dev 后缀，如 2.4.0。")
+        raise SyncError("发行版本号不能带 -dev 后缀，如 2.6.0。")
     tag = tag_name(ver)
+    require_newer(ver, latest_release_tag())
 
-    # 要求 mainline 已存在同号 -dev 版本
-    src_tag = tag + "-dev"
-    if not git("rev-parse", src_tag, check=False):
-        raise SyncError(f"mainline 上不存在 tag {src_tag}，请先执行 new-version。")
-    require_newer(ver, latest_tag_on(BRANCH_RELEASE))
-    if not changelog_has_version("CHANGELOG_RELEASE.md", ver):
-        raise SyncError(f"CHANGELOG_RELEASE.md 缺少 v{format_version(ver)} 条目，请先在 dev 上补充。")
+    # 同源校验：发行前必须已有 v<ver>-dev 里程碑（版本同源规则）
+    milestone_tag = tag + "-dev"
+    if not git("rev-parse", "--verify", milestone_tag, check=False):
+        raise SyncError(
+            f"缺少同源里程碑 tag {milestone_tag}，请先在 dev 上执行"
+            f"\"release_sync.py milestone {format_version(ver)}-dev\"。"
+        )
     if not args.msg:
         raise SyncError("必须提供 --msg 发行说明。")
 
-    print(f"[1/4] release 锚定 mainline 版本 {src_tag}")
-    git("checkout", BRANCH_RELEASE)
-    git("reset", "--hard", src_tag)
+    src = args.from_ref or BRANCH_DEV
+    if not git("rev-parse", "--verify", src, check=False):
+        raise SyncError(f"快照源 {src} 不存在。")
 
-    print(f"[2/4] 发行准备: 写入 _version.py = {format_version(ver)}")
-    write_version_py(ver)
+    has_release = bool(git("rev-parse", "--verify", BRANCH_RELEASE, check=False))
 
-    print(f"[3/4] commit + 注解 tag {tag}")
-    git("add", "-A")
-    git("commit", "-m", f"{tag}-release: {args.msg}")
-    git("tag", "-a", tag, "-m", f"{tag}: {args.msg}")
+    # orphan 首发：游离签出快照源，随后 checkout --orphan 创建 release 分支；
+    # 接续发行：直接检出 release 分支，发行 commit 才能推进分支
+    with temp_worktree(
+        src if not has_release else BRANCH_RELEASE, detach=not has_release
+    ) as path:
+        if not has_release:
+            # 首发：orphan 起步（无父发行 commit，release 链与 dev 无共同祖先）
+            print(f"[1/4] release 分支不存在，orphan 起步（快照源 {src}）")
+            git("checkout", "--orphan", BRANCH_RELEASE, cwd=str(path))
+        else:
+            print(f"[1/4] 快照 {src} → release HEAD（临时 worktree）")
 
-    print(f"[4/4] 回到 dev")
-    git("checkout", BRANCH_DEV)
+        # read-tree 快照：<from> 的树覆盖 worktree 的索引与工作树
+        src_tree = git("rev-parse", f"{src}^{{tree}}")
+        git("read-tree", "--reset", "-u", src_tree, cwd=str(path))
+
+        # 发行准备 1：_version.py 去 -dev 后缀
+        print(f"[2/4] 发行准备: _version.py = {format_version(ver)}")
+        write_version_py(ver, path / "src" / "_version.py")
+
+        # 发行准备 2：--notes-file 给定时以该文件覆盖 CHANGELOG_RELEASE.md
+        # （首发场景用于抛掉历史发行条目，从新号段重新累积）
+        if args.notes_file:
+            notes_src = Path(args.notes_file)
+            if not notes_src.is_absolute():
+                notes_src = ROOT / notes_src
+            if not notes_src.exists():
+                raise SyncError(f"--notes-file 文件不存在: {notes_src}")
+            shutil.copyfile(notes_src, path / "CHANGELOG_RELEASE.md")
+            print(f"          CHANGELOG_RELEASE.md 由 {notes_src.name} 覆盖")
+
+        # 发行校验：CHANGELOG_RELEASE.md 必须含本发行条目
+        notes_text = (path / "CHANGELOG_RELEASE.md").read_text(encoding="utf-8")
+        if not changelog_text_has_version(notes_text, ver):
+            raise SyncError(
+                f"CHANGELOG_RELEASE.md 缺少 {tag} 条目，请先补充（或用 --notes-file 传入）。"
+            )
+
+        print(f"[3/4] 发行 commit + 注解 tag {tag}")
+        git("add", "-A", cwd=str(path))
+        git("commit", "-m", f"{tag}: {args.msg}", cwd=str(path))
+        git("tag", "-a", tag, "-m", f"{tag}: {args.msg}", cwd=str(path))
+
+        print("[4/4] 清理临时 worktree")
 
     if args.push:
         print("推送到 origin ...")
-        do_push([BRANCH_RELEASE])
+        do_push([BRANCH_RELEASE, tag])
 
-    print(f"✓ release 新版本 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
-    print("  发行 commit 已锚定 mainline 对应版本，可在 release 分支上打包发行。")
+    print(f"✓ release 新发行 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
+    print("  发行 commit 为 dev 快照（干净发行链），可在 release 分支上打包发行。")
+
+
+def cmd_cherry(args):
+    """dev 的单点修复 → cherry-pick 到 release 干净链补丁发行 + 同源里程碑 tag。"""
+    ver = parse_version(args.ver)
+    if ver[3]:
+        raise SyncError("补丁发行版本号不能带 -dev 后缀，如 2.6.1。")
+    tag = tag_name(ver)
+    require_newer(ver, latest_release_tag())
+    ensure_release_branch()
+
+    # 校验修复 commit 存在于 dev（快照合入后两线无祖先关系，必须显式检查）
+    src_commit = git("rev-parse", args.commit)
+    if not is_ancestor(src_commit, BRANCH_DEV):
+        raise SyncError(f"commit {args.commit} 不在 dev 分支历史中，无法搬运。")
+    src_subject = git("show", "-s", "--format=%s", src_commit)
+
+    # 同源里程碑 tag 将打在 dev 源 commit 上（版本同源规则）
+    milestone_tag = tag + "-dev"
+    if git("rev-parse", "--verify", milestone_tag, check=False):
+        raise SyncError(f"里程碑 tag {milestone_tag} 已存在，请换更高的 patch 号。")
+
+    msg = args.msg or commit_message_for_cherry(tag, src_subject)
+
+    with temp_worktree(BRANCH_RELEASE, detach=False) as path:
+        print(f"[1/3] cherry-pick {src_commit[:12]} → release（临时 worktree）")
+        git("cherry-pick", src_commit, cwd=str(path), check=False)
+        # 冲突检测：git status --porcelain 中 unmerged 条目形如 "UU file"
+        status_out = git("status", "--porcelain", cwd=str(path), check=False) or ""
+        if any(
+            line[:2] in ("UU", "AA", "AU", "UA", "DD", "DU", "UD")
+            for line in status_out.splitlines()
+        ):
+            git("cherry-pick", "--abort", cwd=str(path), check=False)
+            raise SyncError(
+                "cherry-pick 到 release 冲突（该修复依赖尚未发行的代码）。\n"
+                "建议: 改用 release 命令发行包含该修复的完整新版本。"
+            )
+
+        print(f"[2/3] 发行准备: _version.py = {format_version(ver)} + commit + 注解 tag {tag}")
+        # write_version_py 覆盖 cherry-pick 带入的 _version.py 改动（如有），
+        # 并入 cherry-pick 提交，保持 1 发行 = 1 commit
+        write_version_py(ver, path / "src" / "_version.py")
+        git("add", "src/_version.py", cwd=str(path))
+        git("commit", "--amend", "-m", msg, cwd=str(path))
+        git("tag", "-a", tag, "-m", msg, cwd=str(path))
+
+        print("[3/3] 清理临时 worktree")
+
+    # dev 源 commit 上打同源 -dev 里程碑 tag（补丁同样版本同源）
+    print(f"打同源里程碑 tag {milestone_tag} → dev {src_commit[:12]}")
+    git("tag", milestone_tag, src_commit)
+
+    if args.push:
+        print("推送到 origin ...")
+        do_push([BRANCH_RELEASE, tag, milestone_tag])
+
+    print(f"✓ 补丁发行 {tag} 已创建" + ("并推送" if args.push else "（本地）"))
 
 
 def build_parser():
     """构建命令行参数解析器。"""
     p = argparse.ArgumentParser(
         prog="release_sync.py",
-        description="三线版本同步脚本（dev/mainline/release，版本同源规则）",
+        description="两线版本同步脚本（dev/release，版本同源规则）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__.split("用法:")[1] if "用法:" in __doc__ else None,
     )
     sub = p.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("check", help="三线体检")
+    sub.add_parser("check", help="两线体检")
 
-    p_new = sub.add_parser("new-version", help="dev → mainline 新版本快照")
-    p_new.add_argument("ver", help="新版本号，如 2.5.0-dev")
-    p_new.add_argument("--msg", help="版本描述（commit 消息主体）")
+    p_ms = sub.add_parser("milestone", help="dev HEAD 打 -dev 里程碑 tag")
+    p_ms.add_argument("ver", help="里程碑版本号，如 2.7.0-dev")
+    p_ms.add_argument("--push", action="store_true", help="完成后推送 tag 到 origin")
+
+    p_new = sub.add_parser("release", help="dev → release 发行（快照干净发行链）")
+    p_new.add_argument("ver", help="发行版本号，如 2.6.0")
+    p_new.add_argument("--msg", help="发行说明（commit 消息主体）")
+    p_new.add_argument(
+        "--from", dest="from_ref", help="快照源 ref（默认 dev；首发可指定里程碑 tag）"
+    )
+    p_new.add_argument(
+        "--notes-file",
+        help="用指定文件覆盖发行树的 CHANGELOG_RELEASE.md（首发抛历史条目用）",
+    )
     p_new.add_argument("--push", action="store_true", help="完成后推送到 origin")
 
-    p_cherry = sub.add_parser("cherry", help="修复 commit 跨线搬运（patch 号递增）")
+    p_cherry = sub.add_parser("cherry", help="修复 commit 跨线补丁发行（patch 号递增）")
     p_cherry.add_argument("commit", help="dev 上的修复 commit hash")
-    p_cherry.add_argument("ver", help="目标版本号，如 2.4.1-dev（或 2.4.1 + --also-release）")
-    p_cherry.add_argument("--also-release", action="store_true", help="同时同步到 release")
+    p_cherry.add_argument("ver", help="补丁发行版本号，如 2.6.1")
+    p_cherry.add_argument("--msg", help="补丁说明（缺省取源 commit 主题）")
     p_cherry.add_argument("--push", action="store_true", help="完成后推送到 origin")
-
-    p_rel = sub.add_parser("release", help="mainline → release 公开发行")
-    p_rel.add_argument("ver", help="公开发行版本号，如 2.4.0")
-    p_rel.add_argument("--msg", help="发行说明（commit 消息主体）")
-    p_rel.add_argument("--push", action="store_true", help="完成后推送到 origin")
 
     return p
 
@@ -547,12 +643,12 @@ def main():
     try:
         if args.command == "check":
             cmd_check(args)
-        elif args.command == "new-version":
-            cmd_new_version(args)
-        elif args.command == "cherry":
-            cmd_cherry(args)
+        elif args.command == "milestone":
+            cmd_milestone(args)
         elif args.command == "release":
             cmd_release(args)
+        elif args.command == "cherry":
+            cmd_cherry(args)
     except SyncError as e:
         print(f"✗ 同步中止: {e}", file=sys.stderr)
         sys.exit(1)

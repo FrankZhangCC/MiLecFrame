@@ -40,7 +40,7 @@ layout:
   info_position:
     exif:
       position: "bottom-left"
-      alignment: "left"
+      alignment: "top-left"
       margin_top: 0
       margin_bottom: 0.035
       margin_left: 0
@@ -48,11 +48,11 @@ layout:
     timestamp_author:
       relative_to: "exif"
       relative_position: "below"
-      alignment: "left"
+      cross_alignment: "left"
       relative_margin: 0.015
     camera_lens:
       position: "bottom-right"
-      alignment: "right"
+      alignment: "top-right"
       margin_top: 0
       margin_bottom: 0.035
       margin_left: 0
@@ -60,7 +60,7 @@ layout:
     location:
       relative_to: "camera_lens"
       relative_position: "below"
-      alignment: "right"
+      cross_alignment: "right"
       relative_margin: 0.015
 logo:
   enabled: false

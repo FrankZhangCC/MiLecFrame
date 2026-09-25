@@ -2,6 +2,53 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.7.0-dev (2026-09-25)
+
+> 统一定位语义重构（照片锚点与元素对齐分离）+ 新样式 InfoCard（四变体）与参数胶囊 ParamCapsule + 混排文本基线修复 + 版本体系两线模型。
+
+### 🎨 新样式：InfoCard (style, fa22743)
+
+- 新增 InfoCard 样式：卡片式信息栏展示（布局/字号/金色点缀的多轮调校合并于本次提交）
+- 拆分 default / no_author / no_location / no_author_no_location 四种变体，按数据可用性自动匹配
+
+### 🎨 新样式：参数胶囊 ParamCapsule (style, 0a238e8)
+
+- 新增 ParamCapsule 样式：参数信息以胶囊徽章排列展示，提供 default / no_custom_text 两种变体
+- 样式库清理：移除废弃样式配置
+
+### 🔧 重构：统一定位语义——照片锚点与元素对齐分离 (refactor, a7e2f13)
+
+- `layout_engine` 定位语义重构：照片锚点（photo anchors）与元素对齐（element alignment）分离为两个独立概念，消除混用歧义
+- `text_renderer` 跟随调整；旧版定位实现归档至 `docs/legacy/positioning_v1/`
+- 语义审计与修复执行计划文档（`POSITION_ALIGNMENT_SEMANTICS_AUDIT_AND_FIX_PLAN.md` 等）
+
+### 🔴 修复：内置样式迁移至统一定位语义 (fix, 5fb5c7f)
+
+- 全部内置样式配置迁移到统一定位语义；`style_manager` 提供兼容迁移层（旧字段自动转换）
+- `_STYLE_TEMPLATE.txt` 同步新语义字段说明
+
+### 🔴 修复：样式编辑器持久化相对对齐 (fix, c68f77b)
+
+- 样式编辑器（元素编辑器/自定义文字区/Logo 区）保存后相对对齐设置丢失修复，表单模型完整往返
+
+### 🔴 修复：混排文本基线稳定化 (fix, e469644, 3cef652)
+
+- 中英（多文字系统）混排文本基线统一：基线计算按文字内容比较校验，混排文字不再错位
+- 基线校验脚本（`verify_latin_baseline_contract.py`）扩展画布遮罩验证
+
+### 📄 文档 (docs)
+
+- 字体基线诊断报告、执行计划与复测报告（`docs/FONT_BASELINE_*.md`、`docs/diagnostics/font_baseline/`）(f72e928)
+- 统一定位语义文档（STYLE_GUIDE / DEVELOPMENT）(9f32fd5)
+- STYLE_GUIDE 语义边界修订，矩形模糊设计文档归档至 `docs/plans/` (16960da)
+- AGENTS.md 补充新建样式操作要求 (d7db518)
+- Git 分支工作流文档重构：两线逻辑详述，历史沿革移至 `docs/GIT_MODEL_HISTORY.md` (86a6e16)
+
+### 🔧 其他 (chore)
+
+- 版本体系切换为 dev/release 两线模型：mainline 废止，release 干净发行链（orphan 起步，发行号自 v2.6.0 重新累积）；`release_sync.py` 重写为 milestone / release / cherry / check 两线命令 (760d060)
+- `release_sync.py` 临时 worktree 接续发行/补丁发行改为检出分支，修复发行 commit 游离不推进 release 的问题 (c15fb53)
+
 ## v2.6.0-dev (2026-09-22)
 
 > 矩形描边/填充/高斯模糊效果栈 + 全图高斯短路两级缓存 + 旋转适配（用户可选顺/逆时针整帧旋转）。

@@ -79,21 +79,41 @@
 
 【5. 元素布局 info_position】
 
-说明:
+定位语义（唯一一套，运行时不接受旧别名）:
+  position    从照片九点中选出参考点，再结合 margin/placement 得到"元素锚点"；
+              只写完整九点值（旧 top/bottom/left/right/tc/bc/tl/tr/bl/br 已删除）
+  alignment   元素布局盒的九点自对齐——布局盒的哪个点贴到元素锚点；
+              与照片位置无关，也与文字内部排版无关
+              （旧 left/right/top/bottom/both-center 已删除）
+  placement   只决定照片边界主轴的内外（inside/outside），对 center 无意义
+  margin_*    只移动元素锚点；padding 之后还可能做安全区域夹持
   绝对定位元素 = 填写 position / alignment / margin_*
-  相对定位元素 = 填写 relative_to / relative_position / alignment / relative_margin
+  相对定位元素 = 填写 relative_to / relative_position / cross_alignment /
+                 relative_margin（相对节点禁止出现 alignment 字段）
    系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location
+
+  九点值表（position 与 alignment 使用同一组值，但语义分属照片与元素）:
+    top-left       top-center       top-right
+    center-left    center           center-right
+    bottom-left    bottom-center    bottom-right
+
+  常用组合示例:
+    照片下方外侧居中，文字顶边贴锚点 → position: bottom-center + alignment: top-center
+    照片右下角内侧，多行文字左缘对齐 → position: bottom-right + alignment: bottom-left
 
   ┌─────────────────────────────────────────────────────────────────────┐
   │ 元素1: [______________]  (key)                                       │
   │   定位方式: □ 绝对  □ 相对                                          │
-  │   [绝对] position: [______________]  (bottom-left / bottom-right / ...)
-  │          alignment: [______________]  (left / center / both-center / right / ...)
+  │   [绝对] position: [______________]  (九点值，如 bottom-right)       │
+  │          alignment: [______________]  (九点值，如 bottom-left)       │
+  │          line_alignment: [____]  (可选: left/center/right，仅多行   │
+  │          文本块内部行对齐，缺省 left；单行文字忽略)                  │
   │          margin_top: [____]  margin_bottom: [____]                   │
   │          margin_left: [____]  margin_right: [____]                   │
   │   [相对] relative_to: [______________]                              │
   │          relative_position: [______________]  (below / above / left-of / right-of)
-  │          alignment: [______________]  (both-center 等效于 center)    │
+  │          cross_alignment: [____]  (below/above → left/center/right；│
+  │          left-of/right-of → top/center/bottom)                       │
   │          relative_margin: [____]  (默认 0.01)                        │
   │          offset_x_ratio: [____]  offset_y_ratio: [____]  (可选, 默认 0)
   ├─────────────────────────────────────────────────────────────────────┤
@@ -124,7 +144,9 @@
   - 若启用:
       以下为标准布局参数（用户内容由 GUI 文本框输入）：
       □ 绝对定位: position / alignment / margin_*
-      □ 相对定位: relative_to / relative_position / alignment / relative_margin
+      □ 相对定位: relative_to / relative_position / cross_alignment / relative_margin
+      line_alignment: [____]  (可选: left/center/right，多行文本块内部行对齐，
+                               缺省 left；与元素 alignment 无关)
       line_spacing_ratio: [____]  (可选，覆盖全局行间距，仅多行文本生效)
 
 
@@ -154,16 +176,20 @@
 【9. Logo】
   - 启用: □ 是  □ 否
   - 若启用:
-      position: [______________]  (bottom-right / top-left / ...)
-      alignment: [______________]  (left / center / both-center / right / ...)
+      绝对定位（九点值；例如 Logo 位于照片上方外侧:
+      position: top-right + alignment: bottom-right）:
+      placement: [____]  (inside / outside，默认 outside)
+      position: [______________]  (九点值)
+      alignment: [______________]  (九点值，Logo 布局盒自对齐)
       size_ratio: [____]
       max_dim_limit_ratio: [____]  (可选，默认 2.5；长边长度上限 = ratio × size_ratio × reference_side)
       margin_top: [____]  margin_bottom: [____]
       margin_left: [____]  margin_right: [____]
-      或使用相对定位:
+      或使用相对定位（交叉轴三值）:
       relative_to: [______________]
-      relative_position: [______________]
-      alignment: [______________]  (both-center 等效于 center)
+      relative_position: [______________]  (below / above / left-of / right-of)
+      cross_alignment: [____]  (below/above → left/center/right；
+                                left-of/right-of → top/center/bottom)
        relative_margin: [____]
 
 
@@ -191,8 +217,8 @@
    │   width_ratio: [____]  (相对原图短边的宽度比例，如 0.85)              │
    │   height_ratio: [____]  (相对原图短边的高度比例，如 0.04)             │
    │   opacity: [____]  (0.0-1.0，默认 1.0；仅控制填充层透明度)             │
-   │   position: [______________]  (锚点位置，支持全部标准锚点)            │
-   │   alignment: [______________]  (对齐方式)                              │
+   │   position: [______________]  (九点 position，照片参考位)            │
+   │   alignment: [______________]  (九点 alignment，矩形布局盒自对齐)     │
    │   margin_top/bottom/left/right: [____]  (可选，默认 0)                 │
    │   corner_radius: (可选，省略则直角；定义外轮廓，描边自动内缩)          │
    │     top_left: [____]  top_right: [____]                               │

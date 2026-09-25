@@ -7,6 +7,7 @@
 测量、定位坐标计算和绘制。
 """
 import logging
+from collections.abc import Mapping
 from typing import Tuple, Dict, Optional, List
 
 from PIL import Image, ImageDraw
@@ -25,6 +26,98 @@ class TextRenderer:
     def __init__(self, font_manager: FontManager, layout_engine: LayoutEngine):
         self.font_manager = font_manager
         self.layout_engine = layout_engine
+
+    # ── 行内对齐解析 ────────────────────────────────────────
+
+    def _resolve_line_alignment(self, cfg: Dict) -> str:
+        """
+        多行文本块内部行对齐，与"布局盒相对元素锚点的 alignment"完全分离：
+        只读专用字段 line_alignment，缺省为 left，禁止从元素 alignment 推断。
+        单行文字不经过此方法，不受 line_alignment 影响。
+        """
+        return cfg.get('line_alignment', 'left')
+
+    @staticmethod
+    def _read_font_metrics(font, label: str) -> Tuple[int, int]:
+        """读取可信的 Pillow 正值度量；无度量字体不能参与基线布局。"""
+        try:
+            ascent, descent = font.getmetrics()
+            ascent, descent = int(ascent), int(descent)
+        except Exception as exc:
+            raise ValueError(f"{label} 字体无法提供可信的 getmetrics()") from exc
+        if ascent < 0 or descent < 0 or ascent + descent <= 0:
+            raise ValueError(
+                f"{label} 字体返回非法度量: ascent={ascent}, descent={descent}")
+        return ascent, descent
+
+    def _measure_text_line(
+        self,
+        line_text: str,
+        fonts_config: Dict,
+        original_image_size: Tuple[int, int],
+        size_ratio: float,
+        latin_height: int,
+        baseline_offset: int,
+    ) -> Dict:
+        """按既有分段和 bbox 宽度测量一行，纵向统一沿用 Latin 行盒。"""
+        if not line_text:
+            # 空槽仍占用一个正常 Latin 行高，但不会生成任何可绘制 run。
+            return {
+                'seg_info': [], 'width': 0, 'height': latin_height,
+                'baseline_offset': baseline_offset,
+            }
+
+        segments = FontManager.split_mixed_text(line_text)
+        if len(segments) <= 1:
+            # 纯文本继续由 FontManager 按内容选择 Gotham 或 GlowSans。
+            font = self.font_manager.load_font(
+                fonts_config, original_image_size, size_ratio, line_text)
+            bbox = font.getbbox(line_text)
+            width = bbox[2] - bbox[0]
+            ascent, descent = self._read_font_metrics(font, '字形')
+            seg_info = [(line_text, font, width, ascent, descent)]
+        else:
+            # 混排保留原分段顺序、实际字形字体与 bbox 宽度推进规则。
+            loaded_fonts = {}
+            seg_info = []
+            width = 0
+            for segment_text, is_cjk in segments:
+                font_key = 'cjk' if is_cjk else 'latin'
+                if font_key not in loaded_fonts:
+                    loaded_fonts[font_key] = self.font_manager.load_font(
+                        fonts_config, original_image_size, size_ratio,
+                        force_chinese=is_cjk)
+                font = loaded_fonts[font_key]
+                bbox = font.getbbox(segment_text)
+                segment_width = bbox[2] - bbox[0]
+                ascent, descent = self._read_font_metrics(font, '字形')
+                seg_info.append((segment_text, font, segment_width, ascent, descent))
+                width += segment_width
+
+        return {
+            'seg_info': seg_info, 'width': width, 'height': latin_height,
+            'baseline_offset': baseline_offset,
+        }
+
+    @staticmethod
+    def _draw_line_runs(draw, seg_info: List[tuple], line_x: int,
+                        baseline_y: int, color: Tuple[int, int, int]) -> None:
+        """以同一行基线绘制各字体 run，并保留原 bbox 宽度水平推进。"""
+        current_x = line_x
+        for segment_text, font, segment_width, segment_ascent, _ in seg_info:
+            # Pillow 默认 la 锚点的 y 是 ascender 顶；减去字形 ascent 可让
+            # Latin/CJK 两类 run 共用由 Latin 逻辑行盒确定的基线。
+            draw_y = baseline_y - segment_ascent
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    f"[文字段绘制] text={segment_text!r}, "
+                    f"font={getattr(font, 'path', type(font).__name__)}, "
+                    f"ascent={segment_ascent}, baseline={baseline_y}, "
+                    f"draw_y={draw_y}, x={current_x}, width={segment_width}")
+            draw.text((current_x, draw_y), segment_text,
+                      fill=color, font=font)
+            current_x += segment_width
+
 
     # ── 颜色解析 ────────────────────────────────────────────
 
@@ -177,9 +270,21 @@ class TextRenderer:
         # Phase 1: 测量所有元素尺寸
         # ────────────────────────────────────────────────
         draw_items = {}
-        font_size_config = fonts.get('sizes', {})
-        default_size_ratio = fonts.get('size_ratio', 0.02)
-        default_line_spacing_ratio = fonts.get('line_spacing_ratio', 0.005)
+        # Latin/CJK 缺省或 YAML null 表示使用 FontManager 的默认配置；
+        # 其他非映射值属于配置错误，明确指出字段且不修改调用方原配置。
+        fonts_config = dict(fonts)
+        for font_key in ('latin', 'cjk'):
+            font_entry = fonts.get(font_key)
+            if font_entry is None:
+                fonts_config[font_key] = {}
+            elif not isinstance(font_entry, Mapping):
+                raise ValueError(f'fonts.{font_key} 必须是映射或 null')
+            else:
+                fonts_config[font_key] = dict(font_entry)
+
+        font_size_config = fonts_config.get('sizes', {})
+        default_size_ratio = fonts_config.get('size_ratio', 0.02)
+        default_line_spacing_ratio = fonts_config.get('line_spacing_ratio', 0.005)
 
         for text_type, text in text_elements:
             text_config = all_positions.get(text_type, {})
@@ -187,143 +292,68 @@ class TextRenderer:
             text_color = self._determine_text_color(bg_fill_type, colors, text_type)
             line_spacing_ratio = text_config.get('line_spacing_ratio', default_line_spacing_ratio)
             line_spacing_px = int(reference_side * line_spacing_ratio)
+            # 每个非空文本元素仅加载一次 Latin 定位参考字体，内容类别不会切换基线。
+            latin_reference_font = self.font_manager.load_font(
+                fonts_config, original_image_size, text_specific_size_ratio,
+                force_chinese=False)
+            latin_ascent, latin_descent = self._read_font_metrics(
+                latin_reference_font, 'Latin 定位参考')
+            latin_height = latin_ascent + latin_descent
+            baseline_offset = latin_ascent - latin_descent
 
-            if '\n' in text:
-                # ── 多行文本 ──
-                lines = text.split('\n')
-                line_infos = []
-                total_width = 0
-                total_height = 0
+            # 无换行文本自然得到一个行槽；有换行时保留首尾与连续空槽。
+            raw_lines = text.split('\n')
+            line_infos = [
+                self._measure_text_line(
+                    line_text, fonts_config, original_image_size,
+                    text_specific_size_ratio, latin_height, baseline_offset)
+                for line_text in raw_lines
+            ]
+            total_width = max((line['width'] for line in line_infos), default=0)
+            total_height = (
+                len(line_infos) * latin_height
+                + max(0, len(line_infos) - 1) * line_spacing_px
+            )
 
-                for line_text in lines:
-                    if not line_text:
-                        total_height += line_spacing_px
-                        continue
-
-                    segments = FontManager.split_mixed_text(line_text)
-
-                    if len(segments) <= 1:
-                        font = self.font_manager.load_font(
-                            fonts, original_image_size, text_specific_size_ratio, line_text)
-                        bbox = font.getbbox(line_text)
-                        line_width = bbox[2] - bbox[0]
-                        ascent, descent = font.getmetrics()
-                        line_height = ascent + descent
-
-                        seg_info = [(line_text, font, line_width, ascent, descent)]
-                        line_infos.append({
-                            'seg_info': seg_info, 'ref_ascent': ascent,
-                            'ref_descent': descent, 'width': line_width,
-                            'height': line_height, 'mixed': True
-                        })
-                        total_width = max(total_width, line_width)
-                        total_height += line_height + line_spacing_px
-                    else:
-                        drawn_fonts = {}
-
-                        def _get_segment_font_line(is_cjk):
-                            k = 'cjk' if is_cjk else 'latin'
-                            if k not in drawn_fonts:
-                                drawn_fonts[k] = self.font_manager.load_font(
-                                    fonts, original_image_size, text_specific_size_ratio,
-                                    force_chinese=is_cjk
-                                )
-                            return drawn_fonts[k]
-
-                        seg_info = []
-                        line_total_width = 0
-                        for seg_text, is_cjk in segments:
-                            font = _get_segment_font_line(is_cjk)
-                            bbox = font.getbbox(seg_text)
-                            seg_width = bbox[2] - bbox[0]
-                            s_ascent, s_descent = font.getmetrics()
-                            seg_info.append((seg_text, font, seg_width, s_ascent, s_descent))
-                            line_total_width += seg_width
-
-                        ref_font = drawn_fonts.get('latin') or drawn_fonts.get('cjk')
-                        ref_ascent, ref_descent = ref_font.getmetrics()
-                        max_ascent = max(s[3] for s in seg_info)
-                        max_descent = max(s[4] for s in seg_info)
-                        line_height = max_ascent + max_descent
-
+            # DEBUG 关闭时不构造每行、每段的诊断字符串，避免正常渲染承担日志开销。
+            if logger.isEnabledFor(logging.DEBUG):
+                latin_path = getattr(latin_reference_font, 'path', None)
+                logger.debug(
+                    f"[测量文字] name={text_type}, latin_reference={latin_path or type(latin_reference_font).__name__}, "
+                    f"font_size={getattr(latin_reference_font, 'size', None)}, "
+                    f"A_L={latin_ascent}, D_L={latin_descent}, H_L={latin_height}, "
+                    f"baseline_offset={baseline_offset}, line_slots={len(line_infos)}, "
+                    f"line_spacing={line_spacing_px}, box={total_width}x{total_height}")
+                for line_index, line_info in enumerate(line_infos):
+                    logger.debug(
+                        f"  行槽{line_index}: text={raw_lines[line_index]!r}, "
+                        f"width={line_info['width']}, height={line_info['height']}, "
+                        f"baseline_offset={line_info['baseline_offset']}, "
+                        f"runs={len(line_info['seg_info'])}")
+                    for run_index, (run_text, run_font, run_width, run_ascent, run_descent) in enumerate(
+                            line_info['seg_info']):
                         logger.debug(
-                            f"[测量 混排行] text_type={text_type}, line_text={line_text}, "
-                            f"ref_ascent={ref_ascent}, ref_descent={ref_descent}, "
-                            f"max_ascent={max_ascent}, max_descent={max_descent}, "
-                            f"line_height={line_height}")
-                        for i, (st, _, sw, sa, sd) in enumerate(seg_info):
-                            logger.debug(f"  段{i}: text={st}, width={sw}, ascent={sa}, descent={sd}")
+                            f"    段{run_index}: text={run_text!r}, "
+                            f"font={getattr(run_font, 'path', type(run_font).__name__)}, "
+                            f"width={run_width}, ascent={run_ascent}, descent={run_descent}")
 
-                        line_infos.append({
-                            'seg_info': seg_info, 'ref_ascent': ref_ascent,
-                            'ref_descent': ref_descent, 'width': line_total_width,
-                            'height': line_height, 'mixed': True
-                        })
-                        total_width = max(total_width, line_total_width)
-                        total_height += line_height + line_spacing_px
-
-                if line_infos:
-                    total_height -= line_spacing_px
-
+            if len(line_infos) > 1:
                 draw_items[text_type] = {
-                    'type': 'multiline',
-                    'lines': line_infos,
-                    'color': text_color,
-                    'width': total_width,
-                    'height': total_height,
-                    'line_spacing': line_spacing_px,
+                    'type': 'multiline', 'lines': line_infos,
+                    'color': text_color, 'width': total_width,
+                    'height': total_height, 'line_spacing': line_spacing_px,
+                    'latin_height': latin_height,
+                    'baseline_offset': baseline_offset,
                 }
             else:
-                # ── 单行文本 ──
-                segments = FontManager.split_mixed_text(text)
-
-                if len(segments) <= 1:
-                    font = self.font_manager.load_font(
-                        fonts, original_image_size, text_specific_size_ratio, text)
-                    bbox = font.getbbox(text)
-                    text_width = bbox[2] - bbox[0]
-                    text_height = bbox[3] - bbox[1]
-                    ascent, descent = font.getmetrics()
-
-                    draw_items[text_type] = {
-                        'text': text, 'font': font, 'color': text_color,
-                        'width': text_width, 'height': ascent + descent,
-                        'descent': descent, 'ascent': ascent, 'mixed': False
-                    }
-                else:
-                    drawn_fonts = {}
-
-                    def _get_segment_font(is_cjk):
-                        key = 'cjk' if is_cjk else 'latin'
-                        if key not in drawn_fonts:
-                            drawn_fonts[key] = self.font_manager.load_font(
-                                fonts, original_image_size, text_specific_size_ratio,
-                                force_chinese=is_cjk
-                            )
-                        return drawn_fonts[key]
-
-                    seg_info = []
-                    total_width = 0
-                    for seg_text, is_cjk in segments:
-                        font = _get_segment_font(is_cjk)
-                        bbox = font.getbbox(seg_text)
-                        seg_width = bbox[2] - bbox[0]
-                        ascent, descent = font.getmetrics()
-                        seg_info.append((seg_text, font, seg_width, ascent, descent))
-                        total_width += seg_width
-
-                    ref_font = drawn_fonts.get('latin') or drawn_fonts.get('cjk')
-                    ref_ascent, ref_descent = ref_font.getmetrics()
-                    max_ascent = max(s[3] for s in seg_info)
-                    max_descent = max(s[4] for s in seg_info)
-                    text_height = max_ascent + max_descent
-
-                    draw_items[text_type] = {
-                        'seg_info': seg_info, 'ref_ascent': ref_ascent,
-                        'ref_descent': ref_descent, 'color': text_color,
-                        'width': total_width, 'height': text_height,
-                        'ascent': ref_ascent, 'mixed': True
-                    }
+                # 单行 item 沿用同一 line_info 契约；不会再保存旧 descent/ref_ascent。
+                draw_items[text_type] = {
+                    'type': 'single', 'seg_info': line_infos[0]['seg_info'],
+                    'color': text_color, 'width': total_width,
+                    'height': total_height,
+                    'baseline_offset': baseline_offset,
+                    'latin_height': latin_height,
+                }
 
         # ────────────────────────────────────────────────
         # Phase 2: 拓扑排序 + 定位 + 注册
@@ -359,11 +389,26 @@ class TextRenderer:
             x, y = self.layout_engine.calculate_position(
                 item['width'], item['height'], cfg, defer_padding=defer_pad)
 
-            logger.debug(
-                f"[Pos] {name}: calc=({x}, {y}), bbox=({item['width']}x{item['height']}), "
-                f"config={cfg.get('position', '?')}/{cfg.get('alignment', '?')} "
-                f"marg={self.layout_engine._resolve_margins(cfg)}"
-            )
+            if cfg.get('relative_to'):
+                # 相对定位日志：参考元素、方向、交叉轴对齐与最终坐标
+                logger.debug(
+                    f"[Relative] name={name} relative_to={cfg.get('relative_to')} "
+                    f"direction={cfg.get('relative_position')} "
+                    f"cross={cfg.get('cross_alignment')} "
+                    f"box=({item['width']}x{item['height']}) final=({x},{y})")
+            else:
+                # 绝对定位日志：照片参考点 → 元素锚点 → alignment 偏移 →
+                # raw box → final box → clamp delta（完整几何链路各一值）
+                info = self.layout_engine.get_absolute_layout_info(
+                    item['width'], item['height'], cfg)
+                raw_x, raw_y = info['raw']
+                logger.debug(
+                    f"[Layout] name={name} position={info['position']} "
+                    f"placement={info['placement']} alignment={info['alignment']} "
+                    f"photo_ref={info['photo_ref']} anchor={info['anchor']} "
+                    f"self={info['offset']} "
+                    f"raw=({raw_x},{raw_y},{item['width']},{item['height']}) "
+                    f"final=({x},{y}) clamp=({x - raw_x},{y - raw_y})")
 
             self.layout_engine.register_element(
                 name, x, y, item['width'], item['height'], cfg.get('relative_to'))
@@ -383,33 +428,40 @@ class TextRenderer:
             item = draw_items[name]
             cfg = all_positions.get(name, {})
 
+            logger.debug(
+                f"[最终布局盒] name={name}, box=({x},{y},{w},{h}), "
+                f"baseline_offset={item['baseline_offset']}, "
+                f"baseline={y + item['baseline_offset']}")
+
             if item.get('type') == 'multiline':
-                # 多行文本：通过 LayoutEngine 计算每行位置
+                # 多行文本：行内对齐只读专用 line_alignment 字段，
+                # 与元素布局盒相对元素锚点的 alignment 完全分离
                 positions = self.layout_engine.layout_multiline_lines(
                     block_x=x, block_y=y, block_w=w, block_h=h,
                     lines=item['lines'],
                     line_spacing=item['line_spacing'],
-                    alignment=cfg.get('alignment', 'left'),
+                    line_alignment=self._resolve_line_alignment(cfg),
                 )
-                for line_info, (line_x, baseline_y) in zip(item['lines'], positions):
-                    if 'seg_info' not in line_info:
+                if len(positions) != len(item['lines']):
+                    raise ValueError(
+                        f"多行定位契约错误: name={name}, "
+                        f"行槽={len(item['lines'])}, 位置={len(positions)}")
+                for line_index, (line_info, (line_x, baseline_y)) in enumerate(
+                        zip(item['lines'], positions)):
+                    logger.debug(
+                        f"  [行基线] name={name}, slot={line_index}, "
+                        f"line_top={y + line_index * (item['latin_height'] + item['line_spacing'])}, "
+                        f"baseline={baseline_y}, ink_runs={len(line_info['seg_info'])}")
+                    if not line_info['seg_info']:
+                        # 空槽保留行高与位置，不调用 draw.text，也不伪造墨迹边界。
                         continue
-                    seg_current_x = line_x
-                    for seg_text, font, seg_width, seg_ascent, seg_descent in line_info['seg_info']:
-                        seg_y = baseline_y - seg_ascent
-                        draw.text((seg_current_x, seg_y), seg_text,
-                                  fill=item['color'], font=font)
-                        seg_current_x += seg_width
-            elif not item['mixed']:
-                draw.text((x, y - item['descent']), item['text'],
-                          fill=item['color'], font=item['font'])
+                    self._draw_line_runs(
+                        draw, line_info['seg_info'], line_x, baseline_y, item['color'])
             else:
-                baseline_y = y + item['ref_ascent'] - item['ref_descent']
-                current_x = x
-                for seg_text, font, seg_width, seg_ascent, seg_descent in item['seg_info']:
-                    seg_y = baseline_y - seg_ascent
-                    draw.text((current_x, seg_y), seg_text, fill=item['color'], font=font)
-                    current_x += seg_width
+                # Phase 3 才基于树布局/夹持后的最终盒顶确定单行基线。
+                baseline_y = y + item['baseline_offset']
+                self._draw_line_runs(
+                    draw, item['seg_info'], x, baseline_y, item['color'])
 
         logger.debug("文字图层添加完成")
         return result

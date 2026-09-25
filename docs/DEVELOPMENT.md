@@ -224,17 +224,22 @@ self._dependents = {
 | `get_element_bounds(name)` | 查询 | 从 positions 读取（支持模糊匹配） |
 | `calculate_position(w, h, config, defer_padding)` | 分发 | 根据有无 relative_to 分支到绝对/相对；defer_padding=True 跳过 padding 约束 |
 | `_calculate_absolute(w, h, config, defer_padding)` | 绝对定位 | 按 position/alignment/placement/margin 计算；defer_padding=True 时跳过 padding 夹持 |
-| `_get_anchor(...)` | 绝对定位 | 14 种 position 的具体公式实现 |
-| `_align_x(alignment, ox, ow, ew, m)` | 辅助 | 水平对齐函数 |
-| `_align_y(alignment, oy, oh, eh, m)` | 辅助 | 垂直对齐函数 |
+| `_validate_position(value)` / `_validate_alignment(value)` | 校验 | 只接受九点规范值，未知值（含旧别名）抛 ValueError |
+| `_resolve_photo_reference_point(position)` | 绝对定位 | position → 照片九点参考点（不接收元素尺寸） |
+| `_resolve_element_anchor(config)` | 绝对定位 | 照片参考点 + margin/placement → 元素锚点（不接收元素尺寸） |
+| `_resolve_alignment_offset(alignment, ew, eh)` | 绝对定位 | alignment → 布局盒对齐点偏移（不读取照片/margin） |
+| `_place_element_box(ew, eh, config)` | 绝对定位 | 布局盒对齐点贴元素锚点，返回 raw 左上角 |
+| `_clamp_box_to_padding(x, y, ew, eh)` | 绝对定位 | 集中 padding 夹持，返回 (final, delta) |
+| `get_absolute_layout_info(ew, eh, config)` | 诊断 | 只读返回 photo_ref/anchor/offset/raw，供日志 |
 | `_resolve_margins(config)` | 绝对定位 | margin 解析（统一值 → 方向覆盖） |
-| `_calculate_relative(w, h, config)` | 相对定位 | 按 relative_to + relative_position 计算 |
+| `_validate_cross_alignment(rp, ca)` | 相对定位 | cross_alignment 与方向轴匹配校验 |
+| `_calculate_relative(w, h, config)` | 相对定位 | 只读 cross_alignment；目标不可解析时抛错不回退 |
 | `_shift_dependents(name, sx, sy)` | 级联 | 递归平移所有子孙 |
 | `_resolve_element_order(elements, configs)` | 排序 | Kahn 算法拓扑排序 |
 | `_collect_tree_members(root, members)` | 树定位 | BFS 遍历收集依赖树成员 |
-| `_resolve_tree_ref(position, alignment)` | 树定位 | position+alignment → (h_ref, v_ref) |
+| `_shift_tree_members(members, sx, sy)` | 树定位 | 整树统一平移 |
 | `_compute_visual_bounds(members)` | 树定位 | 计算一组元素的视觉包围盒 |
-| `apply_tree_positioning(all_positions)` | 树定位 | 树级组合定位入口 |
+| `apply_tree_positioning(all_positions)` | 树定位 | 整树包围盒 = 普通盒子走统一盒定位 |
 
 #### 4.1.5 文字基线系统
 
@@ -257,50 +262,56 @@ Pillow 的 `draw.text((x, y), text, font=font)` 将 `(x, y)` 解释为**基线�
 
 #### 4.1.6 绝对定位算法
 
-`_calculate_absolute(ew, eh, config, defer_padding=False)` 流程：
+定位语义分三步，每步输入互不越界（详见执行方案
+`docs/plans/POSITION_ALIGNMENT_REPAIR_EXECUTION_PLAN.md` §3）：
+
+1. **`_resolve_photo_reference_point(position)`**：position → 照片九点参考点
+   `(px, py)`。输入只有照片几何，禁止读取元素宽高。
+2. **`_resolve_element_anchor(config)`**：在参考点上应用 margin/placement
+   得到元素锚点 `(ax, ay)`。顶部/底部三点沿上下主轴内外平移；
+   `center-left`/`center-right` 沿水平主轴内外平移；`center` 始终基于
+   原照片中心（忽略 placement）。margin 的职责到此结束。
+3. **`_resolve_alignment_offset(alignment, ew, eh)`** → `_place_element_box()`：
+   alignment 只根据元素尺寸计算布局盒对齐点偏移 `(dx, dy)`
+   （中心一律 `// 2` 向左/上取整，全模块统一不与 round 混用），
+   `raw = anchor - offset`。
+
 ```python
-margins = _resolve_margins(config)           # 步骤 1：解析 margin
-placement = config.get('placement', 'outside')
-position  = config.get('position', 'bottom')
-alignment = config.get('alignment', 'center')
-x, y = _get_anchor(placement, position, alignment,  # 步骤 2：计算锚点
-                   ox, oy, ow, oh, ew, eh, margins)
-if not defer_padding:                        # 步骤 3：padding 约束（可跳过）
-    x = clamp(x, pad_left, pad_right - ew)
-    y = clamp(y, pad_top, pad_bottom - eh)
+raw_x, raw_y = _place_element_box(ew, eh, config)   # 步骤 1-3
+if not defer_padding:                                # 步骤 4：集中 padding 夹持
+    x, y, dx, dy = _clamp_box_to_padding(raw_x, raw_y, ew, eh)
 ```
 
 `defer_padding=True` 时跳过步骤 3 的 padding 夹持，用于需要突破安全区域的场景。当前使用方：
 - `tree_align` 依赖树内的元素（Phase 2 以 defer 模式定位，Phase 2.5 统一约束）
 - **自定义矩形（rectangles）**——矩形不受 padding 安全区域限制，可直接绘制到画布边界
 
-_align_x / _align_y 的核心逻辑：
-```python
-def _align_x(alignment, ox, ow, ew, m):
-    if 'left' in alignment:   return ox + m['left']
-    if 'right' in alignment:  return ox + ow - ew - m['right']
-    return ox + (ow - ew) // 2    # center / both-center / 默认
-
-def _align_y(alignment, oy, oh, eh, m):
-    if 'top' in alignment:    return oy + m['top']
-    if 'bottom' in alignment: return oy + oh - eh - m['bottom']
-    return oy + (oh - eh) // 2    # center / both-center / 默认
-```
-
 margin 解析两阶段：
 1. `config['margin']` → 四边初始值（未设 → 0）。float → `int(reference_side * ratio)`，int → 直接使用。
 2. `config['margin_top']` 等方向覆盖。四个方向各自独立，设了几个覆盖几个。
 
+定位 DEBUG 日志（渲染器输出）：`[Layout] name=... position=... placement=...
+alignment=... photo_ref=(..) anchor=(..) self=(..) raw=(..) final=(..)
+clamp=(..)`；padding 修正发生在 LayoutEngine 内部且仅非零时记一条 clamp DEBUG。
+
 #### 4.1.7 相对定位算法
 
-6 种方向的核心公式（positions 统一存储包围盒顶 y 后，`ty + th` = 参考视觉底部）：
+相对定位只读取 `cross_alignment` 字段（三值交叉轴），不读取绝对定位的
+九点 `alignment`；`relative_position` 只接受 `below` / `above` /
+`right-of` / `left-of`（旧 `after`/`before` 已删除）。字段缺失、枚举非法、
+轴向不匹配、`relative_to` 目标不可解析均直接抛 ValueError，不回退绝对定位。
 
-| 方向 | x 公式 | y 公式 |
-|------|--------|--------|
-| `after` / `below` | `_align_x(alignment, tx, tw, ew)` | `ty + th + margin_px` |
-| `before` / `above` | `_align_x(alignment, tx, tw, ew)` | `ty - eh - margin_px` |
-| `right-of` | `tx + tw + margin_px` | `_align_y(alignment, ty, th, eh)` |
-| `left-of` | `tx - ew - margin_px` | `_align_y(alignment, ty, th, eh)` |
+核心公式（positions 统一存储包围盒顶 y 后，`ty + th` = 参考视觉底部）：
+
+| 方向 | 交叉轴合法值 | x 公式 | y 公式 |
+|------|------|--------|--------|
+| `below` | left/center/right | 参考宽度内对齐 | `ty + th + margin_px` |
+| `above` | left/center/right | 参考宽度内对齐 | `ty - eh - margin_px` |
+| `right-of` | top/center/bottom | `tx + tw + margin_px` | 参考高度内对齐 |
+| `left-of` | top/center/bottom | `tx - ew - margin_px` | 参考高度内对齐 |
+
+组合盒约束与级联平移（§4.1.8）保持不变，平移发生时输出一条
+`[Relative]` DEBUG 日志（含 relative_to/方向/交叉轴/平移量）。
 
 #### 4.1.8 组合盒约束与级联平移
 
@@ -324,34 +335,23 @@ Kahn 算法实现：从 `relative_to` 构建有向边 `ref → name`，入度为
 
 #### 4.1.10 树级组合定位（Phase 2.5）
 
-**算法 8 步**：
+**唯一算法：整树包围盒 = 普通盒子**（不再有第二套 position/alignment
+解释器；旧 `_resolve_tree_ref` 已删除）：
 
 ```
 1. 识别根元素：无 relative_to + tree_align: true + 未被其他树处理过
-2. 收集树成员（BFS）
+2. 收集树成员（含单成员树——与普通元素同公式，保证一致性）
 3. 计算树的视觉包围盒（所有成员合并）
-4. 用根配置的 _calculate_absolute 计算目标位置
-5. _resolve_tree_ref 解析参考方向
-6. 计算平移量（目标 - 当前）
-7. _shift_dependents 平移整棵树
-8. padding 约束（若溢出则整体平移回边界）
+4. 用根配置 + tree_w/tree_h 调用 _place_element_box() 得 raw 目标左上角
+5. shift = 目标左上角 - 当前树包围盒左上角
+6. _shift_tree_members 整树平移（父子相对位置不变）
+7. 重算包围盒
+8. 对整树执行一次 padding 夹持（全部成员平移相同 delta）
 ```
 
-`_resolve_tree_ref(position, alignment)` 映射表（完全对齐 `_get_anchor` 的 14 种组合）：
+每棵树输出一条 DEBUG：`[TreeLayout] root=.. members=..
+bounds_before=(..) target=(..) shift=(..) clamp=(..)`。
 
-| position | alignment | h_ref | v_ref |
-|----------|-----------|-------|-------|
-| `top-left` / `tl` | 任意 | `left` | `top` |
-| `top-right` / `tr` | 任意 | `right` | `top` |
-| `top-center` / `tc` / `top` | 任意 | `center` | `top` |
-| `bottom-left` / `bl` | 任意 | `left` | `bottom` |
-| `bottom-right` / `br` | 任意 | `right` | `bottom` |
-| `bottom-center` / `bc` / `bottom` | 任意 | `center` | `bottom` |
-| `left` / `right` | `*-top` | 对应 | `top` |
-| `left` / `right` | `*-bottom` | 对应 | `bottom` |
-| `left` / `right` | 其他 | 对应 | `center` |
-| `center` | 任意 | `center` | `center` |
-| 任意 | `both-center` | `center` | `center` |
 
 #### 4.1.11 原图圆角裁切
 

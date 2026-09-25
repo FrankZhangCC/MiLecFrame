@@ -41,7 +41,7 @@ layout:
     camera_lens:
       placement: outside
       position: "bottom-left"
-      alignment: "left"
+      alignment: "top-left"
       margin_top: 0.01
       margin_bottom: 0.028
       margin_left: 0.02
@@ -49,12 +49,12 @@ layout:
     timestamp_author:
       relative_to: "camera_lens"
       relative_position: "below"
-      alignment: "left"
+      cross_alignment: "left"
       relative_margin: 0.010
     exif:
       placement: outside
       position: "bottom-right"
-      alignment: "right"
+      alignment: "top-right"
       margin_top: 0.01
       margin_bottom: 0.028
       margin_left: 0.01
@@ -62,13 +62,13 @@ layout:
     location:
       relative_to: "exif"
       relative_position: "below"
-      alignment: "left"
+      cross_alignment: "left"
       relative_margin: 0.010
 logo:
   enabled: true
   relative_to: "exif"
   relative_position: "left-of"
-  alignment: "center"
+  cross_alignment: "center"
   relative_margin: 0.016
   size_ratio: 0.048
   offset_y_ratio: 0.011
