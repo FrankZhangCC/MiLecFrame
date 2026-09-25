@@ -263,6 +263,20 @@ git checkout dev
 - **样式变体系统**：样式可组织为文件夹（文件夹名 = 样式名），内含 `default.yaml`、`no_location.yaml` 等变体。`StyleManager._resolve_style_variant()` 自动根据数据可用性选择最佳变体。
 - **`_STYLE_TEMPLATE.txt`**（`src/frame_styles/configs/`）覆盖全部配置项，填写后交给 AI 即可生成 YAML 配置文件。
 
+### 新建样式操作要求
+
+- **配置 key / 枚举值一律参考 [`docs/STYLE_GUIDE.md`](./docs/STYLE_GUIDE.md)**：
+  指南里列出什么就用什么，**不需要查找原始代码**确认 key 或取值。
+- **不分析字体度量与渲染实现逻辑**（ascent/descent、文字布局盒构成、
+  墨迹偏移成因等），太麻烦且无必要；视觉效果（两轴对齐、文字在框内居中、
+  留白均衡）一律**用视觉能力检测**：渲染样张后放大目测，看不出来时可在
+  图上叠加参考线（元素几何中心线 / 墨迹上下边线）比对。
+- **居中 / 对齐类微调用绝对定位 + margin 数值迭代**：每轮"渲染 → 目测 →
+  调 margin"，以目测结果为准，不推导度量公式计算补偿值。
+- **以下内容不属于交付项，由用户自行处理，AI 不要代做**：
+  样式缩略图 `thumbnail.png`（AI 生成的只能算临时占位，最终由用户自己做）、
+  把视觉校准过程 / 数值记录写进 YAML 注释（注释只保留设计意图与配置说明）。
+
 ### ExpandGroupSettingCard 开发铁律
 
 在往 `ExpandGroupSettingCard` 内添加自定义内容时，必须逐条检查：
