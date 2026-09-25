@@ -76,37 +76,56 @@ src/
 
 ### Git 分支工作流
 
-采用两线模型（2026-09-25 起；mainline 已废除，其历史版本 commit 由
-`v*-dev` tag 变达保留），支持 `cherry-pick` 跨线搬运修复：
+采用两线模型（2026-09-25 起，mainline 已废除）：`dev` 永久保存完整开发
+历史，`release` 保存干净发行链。模型演进历史与设计动机见
+[docs/GIT_MODEL_HISTORY.md](./docs/GIT_MODEL_HISTORY.md)。
 
-```
- v1.0.1-dev ─ ... ─ v2.6.0-dev ─ v2.7.0-dev ─→  (里程碑 tag，打在 dev 提交上)
-            /          |             |
-Initial ───┴── d1 ─ d2 ┴─ d3 ─ d4 ─ d5 ──→  (dev 完整开发历史，永不归档)
-                       |             |
-                    v2.6.0 ────── v2.7.0 ──→  (release 干净发行链，orphan 起步)
-```
+#### dev：开发主线（仅本机）
 
-| 分支 | 用途 | 规则 |
-|------|------|------|
-| `dev` | **开发主线（仅本机）** | Conventional Commits（feat/fix/docs/chore/refactor）。**永久保留完整开发 commit 历史，永不 reset / 归档**。里程碑 tag `vX.Y.Z-dev` 打在升版本提交上。**不推送到 `origin`**。 |
-| `release` | **稳定公开发行** | GitHub 默认分支，受保护。干净发行链：每 commit = 一个发行快照（read-tree 自 dev 时点，**不含 dev 细节历史**），带注解 tag `vX.Y.Z`。推送到 `origin`。 |
+- **职责**：所有日常开发的唯一入口。功能、修复、文档、重构等一切改动
+  一律先在 dev 提交，采用 Conventional Commits
+  （feat/fix/docs/chore/refactor/style/test）。
+- **历史**：永久保留完整开发 commit 历史，**永不 reset / 归档**。
+  每个任务级提交（feat: xxx / fix: xxx）长期可查、可回溯。
+- **里程碑 tag**：版本收尾时先在 dev 提交"chore: 升版本 x.y.z-dev"
+  （同步更新 `src/_version.py`、`README.md` 徽标、`CHANGELOG.md` 条目、
+  `CHANGELOG_RELEASE.md` 发行条目），再执行
+  `release_sync.py milestone x.y.z-dev` 在该提交上打**轻量 tag**
+  `vX.Y.Z-dev`。里程碑 tag 只做标记，不产生专属版本 commit。
+- **发行快照来源**：release 上每个发行 commit 的树都取自 dev 某个时点
+  （read-tree 快照）。dev 的任务级提交历史**不会**因此进入 release。
+- **推送**：dev 分支只存在于本机，**不推送到 `origin`**（开发历史请自行
+  备份）；里程碑 tag 推送到 origin 作为版本标记。
 
-> ⚠️ **历史沿革**：
-> - 2026-08 历史重建：原为三线（dev/mainline/release），通过 commit-tree
->   重建父链共享 dev 的 Initial commit 作为共同祖先。
-> - 2026-09-22：合入方式为 `merge --no-ff`（版本 commit = merge commit，
->   dev 细节历史经第二父并入 mainline）。
-> - **2026-09-25 起 mainline 废除**：其"干净版本链"职责与 release 重复，
->   收敛为两线模型——dev（永久保留开发历史）+ release（干净发行链）。
->   旧 `v*-dev` tag 指向的 mainline 版本 commit 由 tag 保持可达；
->   历史发行 tag 全部删除，发行号从 v2.6.0 起重新累积；release 推倒重建
->   （orphan 起步，首发 v2.6.0）。
-> - 早期"dev 归档机制"（里程碑后 dev `reset --hard mainline`）同步废止。
-> - 更早的 dev 松散历史已归档至 `archive-dev-history-2026-08` tag
->   （本地 `dev-backup*` / `dev-pre-squash` 分支另有备份）。
-> - 全部同步操作由 `tools/release_sync.py` 脚本完成（release/cherry 在
->   临时 worktree 中执行，不触碰主工作区），禁止手工执行 read-tree。
+#### release：稳定公开发行
+
+- **职责**：公开发行线，GitHub 默认分支。便携版打包（`build_release.py`）
+  与 GitHub Release 资产均基于本分支状态制作。
+- **历史形态**：**干净发行链**——orphan 起步（与 dev 无共同祖先），
+  每个 commit = 一个发行快照 + 一个**注解 tag** `vX.Y.Z`（同源号去
+  `-dev`）。`git log release` 沿第一父遍历即发行时间线，**不会**出现
+  dev 的细节提交。
+- **发行 commit 的构成**：树 = dev 时点快照（read-tree）+ 发行准备改动
+  （`src/_version.py` 去 `-dev` 后缀；必要时以 `--notes-file` 覆盖
+  `CHANGELOG_RELEASE.md`）。因此相邻发行 commit 的 diff 就是两次发行
+  之间的净变化。
+- **补丁发行**：已发行版本的 bug 修复同样先在 dev 提交并通过合入门禁，
+  再用 `release_sync.py cherry` 把修复 cherry-pick 到 release 干净链上
+  补丁发行（patch 号递增 `v2.6.0` → `v2.6.1` + 注解 tag），并在 dev
+  源 commit 上打同源 `v2.6.1-dev` 里程碑 tag。
+- **推送**：推送到 origin（`git push origin release` + 发行 tag）。
+  **禁止 force push**，历史不可改写。
+
+#### 两线协作要点
+
+- 两线**无共同祖先**，`merge` 永不可用，跨线搬运只能 `cherry-pick`
+  （由 `release_sync.py cherry` 封装）；快照合入由 `release_sync.py
+  release` 完成。禁止手工执行 read-tree。
+- **版本同源**：dev 里程碑 `vX.Y.Z-dev` ↔ release 发行 `vX.Y.Z`
+  （同号去 `-dev`）。发行前必须已有同源里程碑 tag（脚本强制校验）。
+- release / cherry 全程在临时 worktree 中执行，**不触碰 dev 工作区**
+  （dev 上的未提交改动不受影响）。
+- 具体命令见下方「日常操作流程（脚本化）」与「公开发行完整流程（脚本化）」。
 
 #### 合入门禁（dev → release 发行的先决条件）
 
