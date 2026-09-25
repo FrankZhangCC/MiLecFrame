@@ -1,0 +1,8648 @@
+{
+  "purpose": "复测混排上移的体感显著性，检验原诊断 7px 单点数据的适用范围",
+  "image_sizes": [
+    [
+      2400,
+      1600
+    ],
+    [
+      3000,
+      2000
+    ],
+    [
+      4000,
+      3000
+    ],
+    [
+      6000,
+      4000
+    ],
+    [
+      2000,
+      3000
+    ]
+  ],
+  "texts": [
+    "AaBbCc",
+    "AaBbCc永和九年",
+    "永和九年",
+    "Hello世界",
+    "世界Hello",
+    "摄影Photo 2024永和九年"
+  ],
+  "alignments": [
+    "top-center",
+    "center",
+    "bottom-center"
+  ],
+  "cases": [
+    {
+      "text": "AaBbCc",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1224,
+        "y": 224,
+        "width": 176,
+        "height": 53,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1224,
+            213
+          ],
+          "baseline": 255,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1225,
+          222,
+          1398,
+          256
+        ],
+        "gravity": [
+          1308.7557713974609,
+          241.11464532276725
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1138,
+        "y": 224,
+        "width": 348,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1138,
+            213
+          ],
+          "baseline": 255,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1314,
+            205
+          ],
+          "baseline": 255,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1139,
+          218,
+          1484,
+          259
+        ],
+        "gravity": [
+          1309.619265493453,
+          239.6041651837785
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1226,
+        "y": 224,
+        "width": 172,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1226,
+            211
+          ],
+          "baseline": 261,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1228,
+          224,
+          1396,
+          265
+        ],
+        "gravity": [
+          1309.192800062512,
+          244.08133806239385
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 224,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1214,
+            213
+          ],
+          "baseline": 255,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1325,
+            205
+          ],
+          "baseline": 255,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1217,
+          219,
+          1409,
+          259
+        ],
+        "gravity": [
+          1315.508747048626,
+          238.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 224,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1214,
+            205
+          ],
+          "baseline": 255,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1300,
+            213
+          ],
+          "baseline": 255,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1216,
+          219,
+          1410,
+          259
+        ],
+        "gravity": [
+          1308.8934195147588,
+          238.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1056,
+        "y": 224,
+        "width": 513,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1056,
+            205
+          ],
+          "baseline": 255,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1142,
+            213
+          ],
+          "baseline": 255,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            9,
+            254,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1397,
+            205
+          ],
+          "baseline": 255,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1058,
+          218,
+          1567,
+          259
+        ],
+        "gravity": [
+          1299.3021182911234,
+          238.97820708532927
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1224,
+        "y": 198,
+        "width": 176,
+        "height": 53,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1224,
+            187
+          ],
+          "baseline": 229,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1225,
+          196,
+          1398,
+          230
+        ],
+        "gravity": [
+          1308.7557713974609,
+          215.11464532276725
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1138,
+        "y": 193,
+        "width": 348,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1138,
+            182
+          ],
+          "baseline": 224,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1314,
+            174
+          ],
+          "baseline": 224,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1139,
+          187,
+          1484,
+          228
+        ],
+        "gravity": [
+          1309.619265493453,
+          208.6041651837785
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "永和九年",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1226,
+        "y": 193,
+        "width": 172,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1226,
+            180
+          ],
+          "baseline": 230,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1228,
+          193,
+          1396,
+          234
+        ],
+        "gravity": [
+          1309.192800062512,
+          213.08133806239385
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 193,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1214,
+            182
+          ],
+          "baseline": 224,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1325,
+            174
+          ],
+          "baseline": 224,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1217,
+          188,
+          1409,
+          228
+        ],
+        "gravity": [
+          1315.508747048626,
+          207.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 193,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1214,
+            174
+          ],
+          "baseline": 224,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1300,
+            182
+          ],
+          "baseline": 224,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1216,
+          188,
+          1410,
+          228
+        ],
+        "gravity": [
+          1308.8934195147588,
+          207.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1056,
+        "y": 193,
+        "width": 513,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1056,
+            174
+          ],
+          "baseline": 224,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1142,
+            182
+          ],
+          "baseline": 224,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            9,
+            254,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1397,
+            174
+          ],
+          "baseline": 224,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1058,
+          187,
+          1567,
+          228
+        ],
+        "gravity": [
+          1299.3021182911234,
+          207.97820708532927
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1224,
+        "y": 171,
+        "width": 176,
+        "height": 53,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1224,
+            160
+          ],
+          "baseline": 202,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1225,
+          169,
+          1398,
+          203
+        ],
+        "gravity": [
+          1308.7557713974609,
+          188.11464532276725
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1138,
+        "y": 161,
+        "width": 348,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1138,
+            150
+          ],
+          "baseline": 192,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            1,
+            9,
+            174,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1314,
+            142
+          ],
+          "baseline": 192,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1139,
+          155,
+          1484,
+          196
+        ],
+        "gravity": [
+          1309.619265493453,
+          176.6041651837785
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1226,
+        "y": 161,
+        "width": 172,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1226,
+            148
+          ],
+          "baseline": 198,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1228,
+          161,
+          1396,
+          202
+        ],
+        "gravity": [
+          1309.192800062512,
+          181.08133806239385
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 161,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1214,
+            150
+          ],
+          "baseline": 192,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1325,
+            142
+          ],
+          "baseline": 192,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1217,
+          156,
+          1409,
+          196
+        ],
+        "gravity": [
+          1315.508747048626,
+          175.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1214,
+        "y": 161,
+        "width": 197,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1214,
+            142
+          ],
+          "baseline": 192,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            14,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -36,
+            4
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1300,
+            150
+          ],
+          "baseline": 192,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            10,
+            110,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -32,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1216,
+          156,
+          1410,
+          196
+        ],
+        "gravity": [
+          1308.8934195147588,
+          175.72393024952348
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2400,
+        1600
+      ],
+      "canvas_size": [
+        2624,
+        2400
+      ],
+      "registered_box": {
+        "x": 1056,
+        "y": 161,
+        "width": 513,
+        "height": 63,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1056,
+            142
+          ],
+          "baseline": 192,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            84,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1142,
+            150
+          ],
+          "baseline": 192,
+          "metrics": [
+            42,
+            11
+          ],
+          "ink_rel": [
+            3,
+            9,
+            254,
+            43
+          ],
+          "ink_y_rel_baseline": [
+            -33,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1397,
+            142
+          ],
+          "baseline": 192,
+          "metrics": [
+            50,
+            13
+          ],
+          "ink_rel": [
+            2,
+            13,
+            170,
+            54
+          ],
+          "ink_y_rel_baseline": [
+            -37,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1058,
+          155,
+          1567,
+          196
+        ],
+        "gravity": [
+          1299.3021182911234,
+          175.97820708532927
+        ]
+      },
+      "font_size_px": 43
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1530,
+        "y": 280,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1530,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1531,
+          278,
+          1749,
+          320
+        ],
+        "gravity": [
+          1636.7401582360103,
+          301.58023069586653
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1422,
+        "y": 280,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1422,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1643,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1423,
+          273,
+          1856,
+          323
+        ],
+        "gravity": [
+          1637.776830301892,
+          299.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1532,
+        "y": 280,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1532,
+            264
+          ],
+          "baseline": 327,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1535,
+          281,
+          1745,
+          331
+        ],
+        "gravity": [
+          1636.5873194223448,
+          305.8938323601441
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 280,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1517,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1656,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1521,
+          273,
+          1761,
+          324
+        ],
+        "gravity": [
+          1644.3240247855783,
+          298.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 280,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1517,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1625,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1520,
+          273,
+          1762,
+          324
+        ],
+        "gravity": [
+          1635.9309464853204,
+          298.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1319,
+        "y": 280,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1319,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1427,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1746,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1321,
+          273,
+          1959,
+          324
+        ],
+        "gravity": [
+          1623.589468077543,
+          298.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1530,
+        "y": 248,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1530,
+            235
+          ],
+          "baseline": 287,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1531,
+          246,
+          1749,
+          288
+        ],
+        "gravity": [
+          1636.7401582360103,
+          269.58023069586653
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1422,
+        "y": 241,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1422,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1643,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1423,
+          234,
+          1856,
+          284
+        ],
+        "gravity": [
+          1637.776830301892,
+          260.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1532,
+        "y": 241,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1532,
+            225
+          ],
+          "baseline": 288,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1535,
+          242,
+          1745,
+          292
+        ],
+        "gravity": [
+          1636.5873194223448,
+          266.8938323601441
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 241,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1517,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1656,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1521,
+          234,
+          1761,
+          285
+        ],
+        "gravity": [
+          1644.3240247855783,
+          259.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 241,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1517,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1625,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1520,
+          234,
+          1762,
+          285
+        ],
+        "gravity": [
+          1635.9309464853204,
+          259.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1319,
+        "y": 241,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1319,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1427,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1746,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1321,
+          234,
+          1959,
+          285
+        ],
+        "gravity": [
+          1623.589468077543,
+          259.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1530,
+        "y": 215,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1530,
+            202
+          ],
+          "baseline": 254,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1531,
+          213,
+          1749,
+          255
+        ],
+        "gravity": [
+          1636.7401582360103,
+          236.58023069586656
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1422,
+        "y": 201,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1422,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1643,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1423,
+          194,
+          1856,
+          244
+        ],
+        "gravity": [
+          1637.776830301892,
+          220.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1532,
+        "y": 201,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1532,
+            185
+          ],
+          "baseline": 248,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1535,
+          202,
+          1745,
+          252
+        ],
+        "gravity": [
+          1636.5873194223448,
+          226.89383236014407
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 201,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1517,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1656,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1521,
+          194,
+          1761,
+          245
+        ],
+        "gravity": [
+          1644.3240247855783,
+          219.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1517,
+        "y": 201,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1517,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1625,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1520,
+          194,
+          1762,
+          245
+        ],
+        "gravity": [
+          1635.9309464853204,
+          219.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        3000,
+        2000
+      ],
+      "canvas_size": [
+        3280,
+        3000
+      ],
+      "registered_box": {
+        "x": 1319,
+        "y": 201,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1319,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1427,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1746,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1321,
+          194,
+          1959,
+          245
+        ],
+        "gravity": [
+          1623.589468077543,
+          219.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2045,
+        "y": 420,
+        "width": 330,
+        "height": 98,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2045,
+            400
+          ],
+          "baseline": 478,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2047,
+          418,
+          2373,
+          479
+        ],
+        "gravity": [
+          2204.481741384705,
+          452.18790344859525
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1883,
+        "y": 420,
+        "width": 654,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1883,
+            400
+          ],
+          "baseline": 478,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2213,
+            384
+          ],
+          "baseline": 478,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1885,
+          409,
+          2532,
+          484
+        ],
+        "gravity": [
+          2206.5662428443175,
+          449.38623328861996
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2048,
+        "y": 420,
+        "width": 324,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2048,
+            396
+          ],
+          "baseline": 490,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2052,
+          421,
+          2367,
+          496
+        ],
+        "gravity": [
+          2205.1812109619996,
+          458.59258020241765
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 420,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2024,
+            400
+          ],
+          "baseline": 478,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2234,
+            384
+          ],
+          "baseline": 478,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2031,
+          410,
+          2391,
+          485
+        ],
+        "gravity": [
+          2216.535597444807,
+          447.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 420,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2024,
+            384
+          ],
+          "baseline": 478,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2186,
+            400
+          ],
+          "baseline": 478,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2029,
+          410,
+          2393,
+          485
+        ],
+        "gravity": [
+          2202.106905545938,
+          447.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1727,
+        "y": 420,
+        "width": 967,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1727,
+            384
+          ],
+          "baseline": 478,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            3,
+            25,
+            158,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            7
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1889,
+            400
+          ],
+          "baseline": 478,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            478,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2370,
+            384
+          ],
+          "baseline": 478,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1730,
+          409,
+          2689,
+          485
+        ],
+        "gravity": [
+          2186.063936822709,
+          448.2352236212872
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2045,
+        "y": 371,
+        "width": 330,
+        "height": 98,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2045,
+            351
+          ],
+          "baseline": 429,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2047,
+          369,
+          2373,
+          430
+        ],
+        "gravity": [
+          2204.481741384705,
+          403.18790344859525
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1883,
+        "y": 361,
+        "width": 654,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1883,
+            341
+          ],
+          "baseline": 419,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2213,
+            325
+          ],
+          "baseline": 419,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1885,
+          350,
+          2532,
+          425
+        ],
+        "gravity": [
+          2206.5662428443175,
+          390.38623328861996
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "永和九年",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2048,
+        "y": 361,
+        "width": 324,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2048,
+            337
+          ],
+          "baseline": 431,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2052,
+          362,
+          2367,
+          437
+        ],
+        "gravity": [
+          2205.1812109619996,
+          399.59258020241765
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 361,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2024,
+            341
+          ],
+          "baseline": 419,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2234,
+            325
+          ],
+          "baseline": 419,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2031,
+          351,
+          2391,
+          426
+        ],
+        "gravity": [
+          2216.535597444807,
+          388.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 361,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2024,
+            325
+          ],
+          "baseline": 419,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2186,
+            341
+          ],
+          "baseline": 419,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2029,
+          351,
+          2393,
+          426
+        ],
+        "gravity": [
+          2202.106905545938,
+          388.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1727,
+        "y": 361,
+        "width": 967,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1727,
+            325
+          ],
+          "baseline": 419,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            3,
+            25,
+            158,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            7
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1889,
+            341
+          ],
+          "baseline": 419,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            478,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2370,
+            325
+          ],
+          "baseline": 419,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1730,
+          350,
+          2689,
+          426
+        ],
+        "gravity": [
+          2186.063936822709,
+          389.2352236212872
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2045,
+        "y": 322,
+        "width": 330,
+        "height": 98,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2045,
+            302
+          ],
+          "baseline": 380,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2047,
+          320,
+          2373,
+          381
+        ],
+        "gravity": [
+          2204.481741384705,
+          354.18790344859525
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1883,
+        "y": 302,
+        "width": 654,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1883,
+            282
+          ],
+          "baseline": 360,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            2,
+            18,
+            328,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2213,
+            266
+          ],
+          "baseline": 360,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1885,
+          291,
+          2532,
+          366
+        ],
+        "gravity": [
+          2206.5662428443175,
+          331.38623328861996
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2048,
+        "y": 302,
+        "width": 324,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2048,
+            278
+          ],
+          "baseline": 372,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2052,
+          303,
+          2367,
+          378
+        ],
+        "gravity": [
+          2205.1812109619996,
+          340.59258020241765
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 302,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2024,
+            282
+          ],
+          "baseline": 360,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2234,
+            266
+          ],
+          "baseline": 360,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2031,
+          292,
+          2391,
+          367
+        ],
+        "gravity": [
+          2216.535597444807,
+          329.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 2024,
+        "y": 302,
+        "width": 372,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2024,
+            266
+          ],
+          "baseline": 360,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            5,
+            26,
+            157,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -68,
+            7
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2186,
+            282
+          ],
+          "baseline": 360,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            207,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2029,
+          292,
+          2393,
+          367
+        ],
+        "gravity": [
+          2202.106905545938,
+          329.73740053877987
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        4000,
+        3000
+      ],
+      "canvas_size": [
+        4420,
+        4500
+      ],
+      "registered_box": {
+        "x": 1727,
+        "y": 302,
+        "width": 967,
+        "height": 118,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1727,
+            266
+          ],
+          "baseline": 360,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            3,
+            25,
+            158,
+            101
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            7
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1889,
+            282
+          ],
+          "baseline": 360,
+          "metrics": [
+            78,
+            20
+          ],
+          "ink_rel": [
+            7,
+            18,
+            478,
+            79
+          ],
+          "ink_y_rel_baseline": [
+            -60,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2370,
+            266
+          ],
+          "baseline": 360,
+          "metrics": [
+            94,
+            24
+          ],
+          "ink_rel": [
+            4,
+            25,
+            319,
+            100
+          ],
+          "ink_y_rel_baseline": [
+            -69,
+            6
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1730,
+          291,
+          2689,
+          367
+        ],
+        "gravity": [
+          2186.063936822709,
+          330.2352236212872
+        ]
+      },
+      "font_size_px": 81
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3060,
+        "y": 560,
+        "width": 440,
+        "height": 130,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3060,
+            534
+          ],
+          "baseline": 638,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3063,
+          559,
+          3496,
+          639
+        ],
+        "gravity": [
+          3271.546761396781,
+          603.7693920221017
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2844,
+        "y": 560,
+        "width": 872,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2844,
+            534
+          ],
+          "baseline": 638,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3284,
+            512
+          ],
+          "baseline": 638,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2847,
+          546,
+          3710,
+          646
+        ],
+        "gravity": [
+          3275.07112135423,
+          600.019588452161
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3064,
+        "y": 560,
+        "width": 432,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3064,
+            528
+          ],
+          "baseline": 654,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3070,
+          562,
+          3490,
+          662
+        ],
+        "gravity": [
+          3273.7551468096453,
+          612.284139049185
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 560,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3032,
+            534
+          ],
+          "baseline": 638,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3312,
+            512
+          ],
+          "baseline": 638,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3041,
+          547,
+          3521,
+          647
+        ],
+        "gravity": [
+          3288.8250583338986,
+          597.8250234214684
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 560,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3032,
+            512
+          ],
+          "baseline": 638,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3248,
+            534
+          ],
+          "baseline": 638,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3039,
+          547,
+          3523,
+          647
+        ],
+        "gravity": [
+          3269.0718565626576,
+          597.8250234214684
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2636,
+        "y": 560,
+        "width": 1289,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2636,
+            512
+          ],
+          "baseline": 638,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            5,
+            34,
+            211,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            9
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2852,
+            534
+          ],
+          "baseline": 638,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            636,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3493,
+            512
+          ],
+          "baseline": 638,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2641,
+          546,
+          3919,
+          647
+        ],
+        "gravity": [
+          3248.4139782044203,
+          598.5027792656285
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3060,
+        "y": 495,
+        "width": 440,
+        "height": 130,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3060,
+            469
+          ],
+          "baseline": 573,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3063,
+          494,
+          3496,
+          574
+        ],
+        "gravity": [
+          3271.546761396781,
+          538.7693920221017
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2844,
+        "y": 481,
+        "width": 872,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2844,
+            455
+          ],
+          "baseline": 559,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3284,
+            433
+          ],
+          "baseline": 559,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2847,
+          467,
+          3710,
+          567
+        ],
+        "gravity": [
+          3275.07112135423,
+          521.019588452161
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "永和九年",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3064,
+        "y": 481,
+        "width": 432,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3064,
+            449
+          ],
+          "baseline": 575,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3070,
+          483,
+          3490,
+          583
+        ],
+        "gravity": [
+          3273.7551468096453,
+          533.284139049185
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 481,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3032,
+            455
+          ],
+          "baseline": 559,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3312,
+            433
+          ],
+          "baseline": 559,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3041,
+          468,
+          3521,
+          568
+        ],
+        "gravity": [
+          3288.8250583338986,
+          518.8250234214684
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 481,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3032,
+            433
+          ],
+          "baseline": 559,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3248,
+            455
+          ],
+          "baseline": 559,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3039,
+          468,
+          3523,
+          568
+        ],
+        "gravity": [
+          3269.0718565626576,
+          518.8250234214684
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2636,
+        "y": 481,
+        "width": 1289,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2636,
+            433
+          ],
+          "baseline": 559,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            5,
+            34,
+            211,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            9
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2852,
+            455
+          ],
+          "baseline": 559,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            636,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3493,
+            433
+          ],
+          "baseline": 559,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2641,
+          467,
+          3919,
+          568
+        ],
+        "gravity": [
+          3248.4139782044203,
+          519.5027792656285
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3060,
+        "y": 430,
+        "width": 440,
+        "height": 130,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3060,
+            404
+          ],
+          "baseline": 508,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3063,
+          429,
+          3496,
+          509
+        ],
+        "gravity": [
+          3271.546761396781,
+          473.76939202210167
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2844,
+        "y": 402,
+        "width": 872,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2844,
+            376
+          ],
+          "baseline": 480,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            3,
+            25,
+            436,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3284,
+            354
+          ],
+          "baseline": 480,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2847,
+          388,
+          3710,
+          488
+        ],
+        "gravity": [
+          3275.07112135423,
+          442.019588452161
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3064,
+        "y": 402,
+        "width": 432,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3064,
+            370
+          ],
+          "baseline": 496,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3070,
+          404,
+          3490,
+          504
+        ],
+        "gravity": [
+          3273.7551468096453,
+          454.284139049185
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 402,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3032,
+            376
+          ],
+          "baseline": 480,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3312,
+            354
+          ],
+          "baseline": 480,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3041,
+          389,
+          3521,
+          489
+        ],
+        "gravity": [
+          3288.8250583338986,
+          439.82502342146836
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 3032,
+        "y": 402,
+        "width": 496,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3032,
+            354
+          ],
+          "baseline": 480,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            7,
+            35,
+            209,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -91,
+            9
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            3248,
+            376
+          ],
+          "baseline": 480,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            275,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          3039,
+          389,
+          3523,
+          489
+        ],
+        "gravity": [
+          3269.0718565626576,
+          439.82502342146836
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        6000,
+        4000
+      ],
+      "canvas_size": [
+        6560,
+        6000
+      ],
+      "registered_box": {
+        "x": 2636,
+        "y": 402,
+        "width": 1289,
+        "height": 158,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            2636,
+            354
+          ],
+          "baseline": 480,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            5,
+            34,
+            211,
+            135
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            9
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            2852,
+            376
+          ],
+          "baseline": 480,
+          "metrics": [
+            104,
+            26
+          ],
+          "ink_rel": [
+            9,
+            25,
+            636,
+            105
+          ],
+          "ink_y_rel_baseline": [
+            -79,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            3493,
+            354
+          ],
+          "baseline": 480,
+          "metrics": [
+            126,
+            32
+          ],
+          "ink_rel": [
+            6,
+            34,
+            426,
+            134
+          ],
+          "ink_y_rel_baseline": [
+            -92,
+            8
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          2641,
+          388,
+          3919,
+          489
+        ],
+        "gravity": [
+          3248.4139782044203,
+          440.50277926562853
+        ]
+      },
+      "font_size_px": 108
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1030,
+        "y": 280,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1030,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1031,
+          278,
+          1249,
+          320
+        ],
+        "gravity": [
+          1136.7401582360103,
+          301.58023069586653
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 922,
+        "y": 280,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            922,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1143,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          923,
+          273,
+          1356,
+          323
+        ],
+        "gravity": [
+          1137.776830301892,
+          299.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1032,
+        "y": 280,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1032,
+            264
+          ],
+          "baseline": 327,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1035,
+          281,
+          1245,
+          331
+        ],
+        "gravity": [
+          1136.5873194223448,
+          305.8938323601441
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 280,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1017,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1156,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1021,
+          273,
+          1261,
+          324
+        ],
+        "gravity": [
+          1144.3240247855783,
+          298.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 280,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1017,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1125,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1020,
+          273,
+          1262,
+          324
+        ],
+        "gravity": [
+          1135.9309464853204,
+          298.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "top-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 819,
+        "y": 280,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            819,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            927,
+            267
+          ],
+          "baseline": 319,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1246,
+            256
+          ],
+          "baseline": 319,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          821,
+          273,
+          1459,
+          324
+        ],
+        "gravity": [
+          1123.589468077543,
+          298.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1030,
+        "y": 248,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1030,
+            235
+          ],
+          "baseline": 287,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1031,
+          246,
+          1249,
+          288
+        ],
+        "gravity": [
+          1136.7401582360103,
+          269.58023069586653
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 922,
+        "y": 241,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            922,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1143,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          923,
+          234,
+          1356,
+          284
+        ],
+        "gravity": [
+          1137.776830301892,
+          260.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1032,
+        "y": 241,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1032,
+            225
+          ],
+          "baseline": 288,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1035,
+          242,
+          1245,
+          292
+        ],
+        "gravity": [
+          1136.5873194223448,
+          266.8938323601441
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 241,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1017,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1156,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1021,
+          234,
+          1261,
+          285
+        ],
+        "gravity": [
+          1144.3240247855783,
+          259.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 241,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1017,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1125,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1020,
+          234,
+          1262,
+          285
+        ],
+        "gravity": [
+          1135.9309464853204,
+          259.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 819,
+        "y": 241,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            819,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            927,
+            228
+          ],
+          "baseline": 280,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1246,
+            217
+          ],
+          "baseline": 280,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          821,
+          234,
+          1459,
+          285
+        ],
+        "gravity": [
+          1123.589468077543,
+          259.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1030,
+        "y": 215,
+        "width": 221,
+        "height": 65,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1030,
+            202
+          ],
+          "baseline": 254,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1031,
+          213,
+          1249,
+          255
+        ],
+        "gravity": [
+          1136.7401582360103,
+          236.58023069586656
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 922,
+        "y": 201,
+        "width": 437,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            922,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            1,
+            11,
+            219,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1143,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          923,
+          194,
+          1356,
+          244
+        ],
+        "gravity": [
+          1137.776830301892,
+          220.7435488570094
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1032,
+        "y": 201,
+        "width": 216,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1032,
+            185
+          ],
+          "baseline": 248,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1035,
+          202,
+          1245,
+          252
+        ],
+        "gravity": [
+          1136.5873194223448,
+          226.89383236014407
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "Hello世界",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 201,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1017,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        },
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1156,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1021,
+          194,
+          1261,
+          245
+        ],
+        "gravity": [
+          1144.3240247855783,
+          219.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "世界Hello",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 1017,
+        "y": 201,
+        "width": 247,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "世界",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1017,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            105,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Hello",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            1125,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            12,
+            137,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -40,
+            1
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          1020,
+          194,
+          1262,
+          245
+        ],
+        "gravity": [
+          1135.9309464853204,
+          219.65344848898087
+        ]
+      },
+      "font_size_px": 54
+    },
+    {
+      "text": "摄影Photo 2024永和九年",
+      "alignment": "bottom-center",
+      "image_size": [
+        2000,
+        3000
+      ],
+      "canvas_size": [
+        2280,
+        4000
+      ],
+      "registered_box": {
+        "x": 819,
+        "y": 201,
+        "width": 643,
+        "height": 79,
+        "ascent": null
+      },
+      "draws": [
+        {
+          "text": "摄影",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            819,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            2,
+            17,
+            106,
+            68
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            5
+          ]
+        },
+        {
+          "text": "Photo 2024",
+          "font": "Gotham-Medium.otf",
+          "xy": [
+            927,
+            188
+          ],
+          "baseline": 240,
+          "metrics": [
+            52,
+            13
+          ],
+          "ink_rel": [
+            4,
+            11,
+            317,
+            53
+          ],
+          "ink_y_rel_baseline": [
+            -41,
+            1
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "xy": [
+            1246,
+            177
+          ],
+          "baseline": 240,
+          "metrics": [
+            63,
+            16
+          ],
+          "ink_rel": [
+            3,
+            17,
+            213,
+            67
+          ],
+          "ink_y_rel_baseline": [
+            -46,
+            4
+          ]
+        }
+      ],
+      "line_ink": {
+        "ink_box": [
+          821,
+          194,
+          1459,
+          245
+        ],
+        "gravity": [
+          1123.589468077543,
+          219.96323847404454
+        ]
+      },
+      "font_size_px": 54
+    }
+  ],
+  "shift_table": [
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "top-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -4,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -1.510480138988754,
+      "gravity_shift_x": 0.8634940959921096,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 345,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09302325581395349,
+      "gravity_shift_ratio": -0.03512744509276172
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "top-center",
+      "text": "永和九年",
+      "baseline_shift": 6,
+      "ink_top_shift": 2,
+      "ink_bottom_shift": 9,
+      "ink_center_shift": 5.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": 2.966692739626609,
+      "gravity_shift_x": 0.43702866505122984,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 168,
+      "baseline_shift_ratio": 0.13953488372093023,
+      "ink_top_shift_ratio": 0.046511627906976744,
+      "gravity_shift_ratio": 0.06899285440992114
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "top-center",
+      "text": "Hello世界",
+      "baseline_shift": 0,
+      "ink_top_shift": -3,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": 0.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -2.3907150732437685,
+      "gravity_shift_x": 6.752975651165116,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 192,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.06976744186046512,
+      "gravity_shift_ratio": -0.05559802495915741
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "top-center",
+      "text": "世界Hello",
+      "baseline_shift": 0,
+      "ink_top_shift": -3,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": 0.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -2.3907150732437685,
+      "gravity_shift_x": 0.13764811729788562,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 194,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.06976744186046512,
+      "gravity_shift_ratio": -0.05559802495915741
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "top-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -4,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -2.1364382374379716,
+      "gravity_shift_x": -9.45365310633747,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 509,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09302325581395349,
+      "gravity_shift_ratio": -0.04968461017297608
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -5,
+      "ink_top_shift": -9,
+      "ink_bottom_shift": -2,
+      "ink_center_shift": -5.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -6.510480138988754,
+      "gravity_shift_x": 0.8634940959921096,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 345,
+      "baseline_shift_ratio": -0.11627906976744186,
+      "ink_top_shift_ratio": -0.20930232558139536,
+      "gravity_shift_ratio": -0.1514065148602036
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "center",
+      "text": "永和九年",
+      "baseline_shift": 1,
+      "ink_top_shift": -3,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": 0.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -2.033307260373391,
+      "gravity_shift_x": 0.43702866505122984,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 168,
+      "baseline_shift_ratio": 0.023255813953488372,
+      "ink_top_shift_ratio": -0.06976744186046512,
+      "gravity_shift_ratio": -0.04728621535752072
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "center",
+      "text": "Hello世界",
+      "baseline_shift": -5,
+      "ink_top_shift": -8,
+      "ink_bottom_shift": -2,
+      "ink_center_shift": -5.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -7.3907150732437685,
+      "gravity_shift_x": 6.752975651165116,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 192,
+      "baseline_shift_ratio": -0.11627906976744186,
+      "ink_top_shift_ratio": -0.18604651162790697,
+      "gravity_shift_ratio": -0.17187709472659926
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "center",
+      "text": "世界Hello",
+      "baseline_shift": -5,
+      "ink_top_shift": -8,
+      "ink_bottom_shift": -2,
+      "ink_center_shift": -5.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -7.3907150732437685,
+      "gravity_shift_x": 0.13764811729788562,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 194,
+      "baseline_shift_ratio": -0.11627906976744186,
+      "ink_top_shift_ratio": -0.18604651162790697,
+      "gravity_shift_ratio": -0.17187709472659926
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -5,
+      "ink_top_shift": -9,
+      "ink_bottom_shift": -2,
+      "ink_center_shift": -5.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -7.136438237437972,
+      "gravity_shift_x": -9.45365310633747,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 509,
+      "baseline_shift_ratio": -0.11627906976744186,
+      "ink_top_shift_ratio": -0.20930232558139536,
+      "gravity_shift_ratio": -0.16596367994041794
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "bottom-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -10,
+      "ink_top_shift": -14,
+      "ink_bottom_shift": -7,
+      "ink_center_shift": -10.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -11.510480138988754,
+      "gravity_shift_x": 0.8634940959921096,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 345,
+      "baseline_shift_ratio": -0.23255813953488372,
+      "ink_top_shift_ratio": -0.32558139534883723,
+      "gravity_shift_ratio": -0.26768558462764547
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "bottom-center",
+      "text": "永和九年",
+      "baseline_shift": -4,
+      "ink_top_shift": -8,
+      "ink_bottom_shift": -1,
+      "ink_center_shift": -4.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -7.033307260373391,
+      "gravity_shift_x": 0.43702866505122984,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 168,
+      "baseline_shift_ratio": -0.09302325581395349,
+      "ink_top_shift_ratio": -0.18604651162790697,
+      "gravity_shift_ratio": -0.16356528512496257
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "bottom-center",
+      "text": "Hello世界",
+      "baseline_shift": -10,
+      "ink_top_shift": -13,
+      "ink_bottom_shift": -7,
+      "ink_center_shift": -10.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -12.390715073243769,
+      "gravity_shift_x": 6.752975651165116,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 192,
+      "baseline_shift_ratio": -0.23255813953488372,
+      "ink_top_shift_ratio": -0.3023255813953488,
+      "gravity_shift_ratio": -0.28815616449404113
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "bottom-center",
+      "text": "世界Hello",
+      "baseline_shift": -10,
+      "ink_top_shift": -13,
+      "ink_bottom_shift": -7,
+      "ink_center_shift": -10.0,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 40,
+      "gravity_shift_y": -12.390715073243769,
+      "gravity_shift_x": 0.13764811729788562,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 194,
+      "baseline_shift_ratio": -0.23255813953488372,
+      "ink_top_shift_ratio": -0.3023255813953488,
+      "gravity_shift_ratio": -0.28815616449404113
+    },
+    {
+      "image_size": [
+        2400,
+        1600
+      ],
+      "font_size_px": 43,
+      "alignment": "bottom-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -10,
+      "ink_top_shift": -14,
+      "ink_bottom_shift": -7,
+      "ink_center_shift": -10.5,
+      "ink_height_pure": 34,
+      "ink_height_mixed": 41,
+      "gravity_shift_y": -12.136438237437972,
+      "gravity_shift_x": -9.45365310633747,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 173,
+      "ink_width_mixed": 509,
+      "baseline_shift_ratio": -0.23255813953488372,
+      "ink_top_shift_ratio": -0.32558139534883723,
+      "gravity_shift_ratio": -0.2822427497078598
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": -1.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -1.836681838857146,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.034012626645502704
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "永和九年",
+      "baseline_shift": 8,
+      "ink_top_shift": 3,
+      "ink_bottom_shift": 11,
+      "ink_center_shift": 7.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": 4.313601664277542,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": 0.14814814814814814,
+      "ink_top_shift_ratio": 0.05555555555555555,
+      "gravity_shift_ratio": 0.07988151230143596
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "Hello世界",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.9267822068856617,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.05419967049788262
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "世界Hello",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.9267822068856617,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.05419967049788262
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.616992221821988,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.04846281892262941
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -8.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -8.836681838857146,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.16364225627513232
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "永和九年",
+      "baseline_shift": 1,
+      "ink_top_shift": -4,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": 0.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -2.6863983357224583,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": 0.018518518518518517,
+      "ink_top_shift_ratio": -0.07407407407407407,
+      "gravity_shift_ratio": -0.049748117328193675
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "Hello世界",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.926782206885662,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.18382930012751225
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "世界Hello",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.926782206885662,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.18382930012751225
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.616992221821988,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.17809244855225903
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -11,
+      "ink_center_shift": -15.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -15.836681838857174,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.2932718859047625
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "永和九年",
+      "baseline_shift": -6,
+      "ink_top_shift": -11,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -9.686398335722487,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": -0.1111111111111111,
+      "ink_top_shift_ratio": -0.2037037037037037,
+      "gravity_shift_ratio": -0.17937774695782382
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "Hello世界",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.92678220688569,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3134589297571424
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "世界Hello",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.92678220688569,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3134589297571424
+    },
+    {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.616992221822017,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3077220781818892
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "top-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -9,
+      "ink_bottom_shift": 5,
+      "ink_center_shift": -2.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -2.801670159975288,
+      "gravity_shift_x": 2.084501459612511,
+      "ink_center_shift_x": -1.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 647,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.1111111111111111,
+      "gravity_shift_ratio": -0.03458852049352207
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "top-center",
+      "text": "永和九年",
+      "baseline_shift": 12,
+      "ink_top_shift": 3,
+      "ink_bottom_shift": 17,
+      "ink_center_shift": 10.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": 6.4046767538224,
+      "gravity_shift_x": 0.6994695772946216,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 315,
+      "baseline_shift_ratio": 0.14814814814814814,
+      "ink_top_shift_ratio": 0.037037037037037035,
+      "gravity_shift_ratio": 0.07907008338052346
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "top-center",
+      "text": "Hello世界",
+      "baseline_shift": 0,
+      "ink_top_shift": -8,
+      "ink_bottom_shift": 6,
+      "ink_center_shift": -1.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -4.450502909815384,
+      "gravity_shift_x": 12.053856060102135,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 360,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09876543209876543,
+      "gravity_shift_ratio": -0.05494448036809116
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "top-center",
+      "text": "世界Hello",
+      "baseline_shift": 0,
+      "ink_top_shift": -8,
+      "ink_bottom_shift": 6,
+      "ink_center_shift": -1.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -4.450502909815384,
+      "gravity_shift_x": -2.3748358387670123,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 364,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09876543209876543,
+      "gravity_shift_ratio": -0.05494448036809116
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "top-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -9,
+      "ink_bottom_shift": 6,
+      "ink_center_shift": -1.5,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 76,
+      "gravity_shift_y": -3.9526798273080317,
+      "gravity_shift_x": -18.417804561996036,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 959,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.1111111111111111,
+      "gravity_shift_ratio": -0.04879851638651891
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -10,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -5,
+      "ink_center_shift": -12.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -12.801670159975288,
+      "gravity_shift_x": 2.084501459612511,
+      "ink_center_shift_x": -1.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 647,
+      "baseline_shift_ratio": -0.12345679012345678,
+      "ink_top_shift_ratio": -0.2345679012345679,
+      "gravity_shift_ratio": -0.15804531061697885
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "center",
+      "text": "永和九年",
+      "baseline_shift": 2,
+      "ink_top_shift": -7,
+      "ink_bottom_shift": 7,
+      "ink_center_shift": 0.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -3.5953232461775997,
+      "gravity_shift_x": 0.6994695772946216,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 315,
+      "baseline_shift_ratio": 0.024691358024691357,
+      "ink_top_shift_ratio": -0.08641975308641975,
+      "gravity_shift_ratio": -0.04438670674293333
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "center",
+      "text": "Hello世界",
+      "baseline_shift": -10,
+      "ink_top_shift": -18,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -11.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -14.450502909815384,
+      "gravity_shift_x": 12.053856060102135,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 360,
+      "baseline_shift_ratio": -0.12345679012345678,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.17840127049154794
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "center",
+      "text": "世界Hello",
+      "baseline_shift": -10,
+      "ink_top_shift": -18,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -11.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -14.450502909815384,
+      "gravity_shift_x": -2.3748358387670123,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 364,
+      "baseline_shift_ratio": -0.12345679012345678,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.17840127049154794
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -10,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -11.5,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 76,
+      "gravity_shift_y": -13.952679827308032,
+      "gravity_shift_x": -18.417804561996036,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 959,
+      "baseline_shift_ratio": -0.12345679012345678,
+      "ink_top_shift_ratio": -0.2345679012345679,
+      "gravity_shift_ratio": -0.1722553065099757
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "bottom-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -20,
+      "ink_top_shift": -29,
+      "ink_bottom_shift": -15,
+      "ink_center_shift": -22.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -22.801670159975288,
+      "gravity_shift_x": 2.084501459612511,
+      "ink_center_shift_x": -1.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 647,
+      "baseline_shift_ratio": -0.24691358024691357,
+      "ink_top_shift_ratio": -0.35802469135802467,
+      "gravity_shift_ratio": -0.28150210074043563
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "bottom-center",
+      "text": "永和九年",
+      "baseline_shift": -8,
+      "ink_top_shift": -17,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -10.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -13.5953232461776,
+      "gravity_shift_x": 0.6994695772946216,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 315,
+      "baseline_shift_ratio": -0.09876543209876543,
+      "ink_top_shift_ratio": -0.20987654320987653,
+      "gravity_shift_ratio": -0.1678434968663901
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "bottom-center",
+      "text": "Hello世界",
+      "baseline_shift": -20,
+      "ink_top_shift": -28,
+      "ink_bottom_shift": -14,
+      "ink_center_shift": -21.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -24.450502909815384,
+      "gravity_shift_x": 12.053856060102135,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 360,
+      "baseline_shift_ratio": -0.24691358024691357,
+      "ink_top_shift_ratio": -0.345679012345679,
+      "gravity_shift_ratio": -0.30185806061500475
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "bottom-center",
+      "text": "世界Hello",
+      "baseline_shift": -20,
+      "ink_top_shift": -28,
+      "ink_bottom_shift": -14,
+      "ink_center_shift": -21.0,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 75,
+      "gravity_shift_y": -24.450502909815384,
+      "gravity_shift_x": -2.3748358387670123,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 364,
+      "baseline_shift_ratio": -0.24691358024691357,
+      "ink_top_shift_ratio": -0.345679012345679,
+      "gravity_shift_ratio": -0.30185806061500475
+    },
+    {
+      "image_size": [
+        4000,
+        3000
+      ],
+      "font_size_px": 81,
+      "alignment": "bottom-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -20,
+      "ink_top_shift": -29,
+      "ink_bottom_shift": -14,
+      "ink_center_shift": -21.5,
+      "ink_height_pure": 61,
+      "ink_height_mixed": 76,
+      "gravity_shift_y": -23.95267982730803,
+      "gravity_shift_x": -18.417804561996036,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 326,
+      "ink_width_mixed": 959,
+      "baseline_shift_ratio": -0.24691358024691357,
+      "ink_top_shift_ratio": -0.35802469135802467,
+      "gravity_shift_ratio": -0.2957120966334325
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "top-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -13,
+      "ink_bottom_shift": 7,
+      "ink_center_shift": -3.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -3.7498035699406955,
+      "gravity_shift_x": 3.5243599574487234,
+      "ink_center_shift_x": -1.0,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 863,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.12037037037037036,
+      "gravity_shift_ratio": -0.03472040342537681
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "top-center",
+      "text": "永和九年",
+      "baseline_shift": 16,
+      "ink_top_shift": 3,
+      "ink_bottom_shift": 23,
+      "ink_center_shift": 13.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": 8.514747027083331,
+      "gravity_shift_x": 2.208385412864118,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 420,
+      "baseline_shift_ratio": 0.14814814814814814,
+      "ink_top_shift_ratio": 0.027777777777777776,
+      "gravity_shift_ratio": 0.07884025025077158
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "top-center",
+      "text": "Hello世界",
+      "baseline_shift": 0,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": 8,
+      "ink_center_shift": -2.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -5.944368600633311,
+      "gravity_shift_x": 17.278296937117375,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 480,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.1111111111111111,
+      "gravity_shift_ratio": -0.05504045000586399
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "top-center",
+      "text": "世界Hello",
+      "baseline_shift": 0,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": 8,
+      "ink_center_shift": -2.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -5.944368600633311,
+      "gravity_shift_x": -2.474904834123663,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 484,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.1111111111111111,
+      "gravity_shift_ratio": -0.05504045000586399
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "top-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -13,
+      "ink_bottom_shift": 8,
+      "ink_center_shift": -2.5,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 101,
+      "gravity_shift_y": -5.266612756473137,
+      "gravity_shift_x": -23.132783192360876,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 1278,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.12037037037037036,
+      "gravity_shift_ratio": -0.04876493293030682
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -27,
+      "ink_bottom_shift": -7,
+      "ink_center_shift": -17.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -17.749803569940696,
+      "gravity_shift_x": 3.5243599574487234,
+      "ink_center_shift_x": -1.0,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 863,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.25,
+      "gravity_shift_ratio": -0.16435003305500645
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "center",
+      "text": "永和九年",
+      "baseline_shift": 2,
+      "ink_top_shift": -11,
+      "ink_bottom_shift": 9,
+      "ink_center_shift": -1.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -5.485252972916669,
+      "gravity_shift_x": 2.208385412864118,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 420,
+      "baseline_shift_ratio": 0.018518518518518517,
+      "ink_top_shift_ratio": -0.10185185185185185,
+      "gravity_shift_ratio": -0.050789379378858045
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "center",
+      "text": "Hello世界",
+      "baseline_shift": -14,
+      "ink_top_shift": -26,
+      "ink_bottom_shift": -6,
+      "ink_center_shift": -16.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -19.94436860063331,
+      "gravity_shift_x": 17.278296937117375,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 480,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.24074074074074073,
+      "gravity_shift_ratio": -0.18467007963549362
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "center",
+      "text": "世界Hello",
+      "baseline_shift": -14,
+      "ink_top_shift": -26,
+      "ink_bottom_shift": -6,
+      "ink_center_shift": -16.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -19.94436860063331,
+      "gravity_shift_x": -2.474904834123663,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 484,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.24074074074074073,
+      "gravity_shift_ratio": -0.18467007963549362
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -27,
+      "ink_bottom_shift": -6,
+      "ink_center_shift": -16.5,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 101,
+      "gravity_shift_y": -19.266612756473137,
+      "gravity_shift_x": -23.132783192360876,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 1278,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.25,
+      "gravity_shift_ratio": -0.17839456255993646
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "bottom-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -28,
+      "ink_top_shift": -41,
+      "ink_bottom_shift": -21,
+      "ink_center_shift": -31.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -31.749803569940696,
+      "gravity_shift_x": 3.5243599574487234,
+      "ink_center_shift_x": -1.0,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 863,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.37962962962962965,
+      "gravity_shift_ratio": -0.29397966268463605
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "bottom-center",
+      "text": "永和九年",
+      "baseline_shift": -12,
+      "ink_top_shift": -25,
+      "ink_bottom_shift": -5,
+      "ink_center_shift": -15.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -19.48525297291667,
+      "gravity_shift_x": 2.208385412864118,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 420,
+      "baseline_shift_ratio": -0.1111111111111111,
+      "ink_top_shift_ratio": -0.23148148148148148,
+      "gravity_shift_ratio": -0.18041900900848767
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "bottom-center",
+      "text": "Hello世界",
+      "baseline_shift": -28,
+      "ink_top_shift": -40,
+      "ink_bottom_shift": -20,
+      "ink_center_shift": -30.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -33.94436860063331,
+      "gravity_shift_x": 17.278296937117375,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 480,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.37037037037037035,
+      "gravity_shift_ratio": -0.31429970926512324
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "bottom-center",
+      "text": "世界Hello",
+      "baseline_shift": -28,
+      "ink_top_shift": -40,
+      "ink_bottom_shift": -20,
+      "ink_center_shift": -30.0,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 100,
+      "gravity_shift_y": -33.94436860063331,
+      "gravity_shift_x": -2.474904834123663,
+      "ink_center_shift_x": 1.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 484,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.37037037037037035,
+      "gravity_shift_ratio": -0.31429970926512324
+    },
+    {
+      "image_size": [
+        6000,
+        4000
+      ],
+      "font_size_px": 108,
+      "alignment": "bottom-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -28,
+      "ink_top_shift": -41,
+      "ink_bottom_shift": -20,
+      "ink_center_shift": -30.5,
+      "ink_height_pure": 80,
+      "ink_height_mixed": 101,
+      "gravity_shift_y": -33.26661275647314,
+      "gravity_shift_x": -23.132783192360876,
+      "ink_center_shift_x": 0.5,
+      "ink_width_pure": 433,
+      "ink_width_mixed": 1278,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.37962962962962965,
+      "gravity_shift_ratio": -0.30802419218956606
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": -1.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -1.836681838857146,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.034012626645502704
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "永和九年",
+      "baseline_shift": 8,
+      "ink_top_shift": 3,
+      "ink_bottom_shift": 11,
+      "ink_center_shift": 7.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": 4.313601664277542,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": 0.14814814814814814,
+      "ink_top_shift_ratio": 0.05555555555555555,
+      "gravity_shift_ratio": 0.07988151230143596
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "Hello世界",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.9267822068856617,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.05419967049788262
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "世界Hello",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.9267822068856617,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.05419967049788262
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "top-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": -0.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -2.616992221821988,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": 0.0,
+      "ink_top_shift_ratio": -0.09259259259259259,
+      "gravity_shift_ratio": -0.04846281892262941
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -8.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -8.836681838857146,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.16364225627513232
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "永和九年",
+      "baseline_shift": 1,
+      "ink_top_shift": -4,
+      "ink_bottom_shift": 4,
+      "ink_center_shift": 0.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -2.6863983357224583,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": 0.018518518518518517,
+      "ink_top_shift_ratio": -0.07407407407407407,
+      "gravity_shift_ratio": -0.049748117328193675
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "Hello世界",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.926782206885662,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.18382930012751225
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "世界Hello",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.926782206885662,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.18382930012751225
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -9.616992221821988,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.17809244855225903
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -11,
+      "ink_center_shift": -15.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -15.836681838857174,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.2932718859047625
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "永和九年",
+      "baseline_shift": -6,
+      "ink_top_shift": -11,
+      "ink_bottom_shift": -3,
+      "ink_center_shift": -7.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -9.686398335722487,
+      "gravity_shift_x": -0.15283881366553942,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 210,
+      "baseline_shift_ratio": -0.1111111111111111,
+      "ink_top_shift_ratio": -0.2037037037037037,
+      "gravity_shift_ratio": -0.17937774695782382
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "Hello世界",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.92678220688569,
+      "gravity_shift_x": 7.583866549568029,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 240,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3134589297571424
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "世界Hello",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.92678220688569,
+      "gravity_shift_x": -0.809211750689883,
+      "ink_center_shift_x": 1.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 242,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3134589297571424
+    },
+    {
+      "image_size": [
+        2000,
+        3000
+      ],
+      "font_size_px": 54,
+      "alignment": "bottom-center",
+      "text": "摄影Photo 2024永和九年",
+      "baseline_shift": -14,
+      "ink_top_shift": -19,
+      "ink_bottom_shift": -10,
+      "ink_center_shift": -14.5,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 51,
+      "gravity_shift_y": -16.616992221822017,
+      "gravity_shift_x": -13.150690158467341,
+      "ink_center_shift_x": 0.0,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 638,
+      "baseline_shift_ratio": -0.25925925925925924,
+      "ink_top_shift_ratio": -0.35185185185185186,
+      "gravity_shift_ratio": -0.3077220781818892
+    }
+  ],
+  "reproducibility": {
+    "expected_latin_baseline_shift": -7,
+    "measured": {
+      "image_size": [
+        3000,
+        2000
+      ],
+      "font_size_px": 54,
+      "alignment": "center",
+      "text": "AaBbCc永和九年",
+      "baseline_shift": -7,
+      "ink_top_shift": -12,
+      "ink_bottom_shift": -4,
+      "ink_center_shift": -8.0,
+      "ink_height_pure": 42,
+      "ink_height_mixed": 50,
+      "gravity_shift_y": -8.836681838857146,
+      "gravity_shift_x": 1.036672065881703,
+      "ink_center_shift_x": -0.5,
+      "ink_width_pure": 218,
+      "ink_width_mixed": 433,
+      "baseline_shift_ratio": -0.12962962962962962,
+      "ink_top_shift_ratio": -0.2222222222222222,
+      "gravity_shift_ratio": -0.16364225627513232
+    }
+  }
+}

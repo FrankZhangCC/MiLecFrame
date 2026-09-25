@@ -1,0 +1,9460 @@
+{
+  "font_runs": [
+    {
+      "font": "Gotham-Light.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            9,
+            0
+          ],
+          "current_width": 9,
+          "advance": 9.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            18,
+            0
+          ],
+          "current_width": 18,
+          "advance": 17.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            16,
+            0
+          ],
+          "current_width": 16,
+          "advance": 15.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -9,
+            3,
+            2
+          ],
+          "current_width": 4,
+          "advance": 3.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -9,
+            7,
+            2
+          ],
+          "current_width": 7,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -7,
+            31,
+            2
+          ],
+          "current_width": 31,
+          "advance": 31.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -10,
+            24,
+            3
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -10,
+            12,
+            3
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Light.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            8,
+            0
+          ],
+          "current_width": 8,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            14,
+            0
+          ],
+          "current_width": 14,
+          "advance": 14.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            13,
+            1
+          ],
+          "current_width": 13,
+          "advance": 13.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -10,
+            3,
+            3
+          ],
+          "current_width": 3,
+          "advance": 3.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -10,
+            7,
+            3
+          ],
+          "current_width": 7,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            42,
+            1
+          ],
+          "current_width": 42,
+          "advance": 42.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -8,
+            26,
+            3
+          ],
+          "current_width": 26,
+          "advance": 26.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -11,
+            48,
+            1
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -3,
+            24,
+            2
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Light.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -19,
+            21,
+            0
+          ],
+          "current_width": 21,
+          "advance": 21.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -19,
+            41,
+            0
+          ],
+          "current_width": 41,
+          "advance": 40.953125,
+          "left_bearing": 0,
+          "right_overhang": 0.046875
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -19,
+            34,
+            0
+          ],
+          "current_width": 34,
+          "advance": 33.9375,
+          "left_bearing": 0,
+          "right_overhang": 0.0625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -19,
+            7,
+            5
+          ],
+          "current_width": 8,
+          "advance": 7.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -20,
+            17,
+            5
+          ],
+          "current_width": 17,
+          "advance": 17.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -20,
+            110,
+            0
+          ],
+          "current_width": 110,
+          "advance": 110.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -14,
+            70,
+            5
+          ],
+          "current_width": 70,
+          "advance": 70.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -22,
+            56,
+            6
+          ],
+          "current_width": 56,
+          "advance": 56.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -22,
+            28,
+            6
+          ],
+          "current_width": 28,
+          "advance": 28.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Light.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -20,
+            16,
+            0
+          ],
+          "current_width": 16,
+          "advance": 16.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -20,
+            32,
+            0
+          ],
+          "current_width": 32,
+          "advance": 32.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -20,
+            31,
+            1
+          ],
+          "current_width": 31,
+          "advance": 31.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -22,
+            8,
+            6
+          ],
+          "current_width": 8,
+          "advance": 8.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -22,
+            17,
+            6
+          ],
+          "current_width": 17,
+          "advance": 17.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -22,
+            95,
+            1
+          ],
+          "current_width": 95,
+          "advance": 95.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -17,
+            62,
+            6
+          ],
+          "current_width": 62,
+          "advance": 62.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -23,
+            108,
+            2
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -7,
+            54,
+            3
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Light.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -38,
+            43,
+            0
+          ],
+          "current_width": 43,
+          "advance": 43.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -38,
+            84,
+            0
+          ],
+          "current_width": 84,
+          "advance": 83.921875,
+          "left_bearing": 0,
+          "right_overhang": 0.078125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -38,
+            69,
+            1
+          ],
+          "current_width": 69,
+          "advance": 68.890625,
+          "left_bearing": 0,
+          "right_overhang": 0.109375
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -39,
+            13,
+            9
+          ],
+          "current_width": 14,
+          "advance": 13.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -40,
+            33,
+            9
+          ],
+          "current_width": 33,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -41,
+            220,
+            1
+          ],
+          "current_width": 220,
+          "advance": 220.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -29,
+            140,
+            9
+          ],
+          "current_width": 140,
+          "advance": 140.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -43,
+            108,
+            11
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -43,
+            54,
+            11
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            48,
+            0
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Light.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -40,
+            33,
+            0
+          ],
+          "current_width": 33,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -40,
+            65,
+            0
+          ],
+          "current_width": 65,
+          "advance": 65.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -40,
+            61,
+            1
+          ],
+          "current_width": 61,
+          "advance": 61.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -44,
+            15,
+            12
+          ],
+          "current_width": 15,
+          "advance": 15.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -44,
+            33,
+            12
+          ],
+          "current_width": 33,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -44,
+            191,
+            1
+          ],
+          "current_width": 191,
+          "advance": 191.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -33,
+            123,
+            12
+          ],
+          "current_width": 123,
+          "advance": 123.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -46,
+            216,
+            4
+          ],
+          "current_width": 216,
+          "advance": 216.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -14,
+            108,
+            5
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            51,
+            0
+          ],
+          "current_width": 51,
+          "advance": 51.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Light.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -57,
+            64,
+            0
+          ],
+          "current_width": 64,
+          "advance": 64.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -57,
+            125,
+            0
+          ],
+          "current_width": 125,
+          "advance": 124.875,
+          "left_bearing": 0,
+          "right_overhang": 0.125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -57,
+            104,
+            1
+          ],
+          "current_width": 104,
+          "advance": 103.828125,
+          "left_bearing": 0,
+          "right_overhang": 0.171875
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -58,
+            20,
+            13
+          ],
+          "current_width": 21,
+          "advance": 20.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -60,
+            49,
+            13
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -59,
+            328,
+            1
+          ],
+          "current_width": 328,
+          "advance": 328.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -42,
+            207,
+            13
+          ],
+          "current_width": 207,
+          "advance": 207.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -65,
+            164,
+            17
+          ],
+          "current_width": 164,
+          "advance": 164.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -65,
+            82,
+            17
+          ],
+          "current_width": 82,
+          "advance": 82.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            72,
+            0
+          ],
+          "current_width": 72,
+          "advance": 72.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Light.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -60,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -60,
+            96,
+            0
+          ],
+          "current_width": 96,
+          "advance": 96.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -60,
+            93,
+            1
+          ],
+          "current_width": 93,
+          "advance": 93.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -66,
+            23,
+            18
+          ],
+          "current_width": 23,
+          "advance": 23.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -66,
+            51,
+            18
+          ],
+          "current_width": 51,
+          "advance": 51.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -65,
+            286,
+            1
+          ],
+          "current_width": 286,
+          "advance": 286.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -50,
+            184,
+            18
+          ],
+          "current_width": 184,
+          "advance": 184.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -69,
+            324,
+            6
+          ],
+          "current_width": 324,
+          "advance": 324.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -20,
+            162,
+            8
+          ],
+          "current_width": 162,
+          "advance": 162.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            75,
+            0
+          ],
+          "current_width": 75,
+          "advance": 75.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Light.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -71,
+            79,
+            0
+          ],
+          "current_width": 79,
+          "advance": 79.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -71,
+            154,
+            1
+          ],
+          "current_width": 154,
+          "advance": 153.84375,
+          "left_bearing": 0,
+          "right_overhang": 0.15625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -70,
+            128,
+            1
+          ],
+          "current_width": 128,
+          "advance": 127.796875,
+          "left_bearing": 0,
+          "right_overhang": 0.203125
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -71,
+            25,
+            16
+          ],
+          "current_width": 26,
+          "advance": 25.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -74,
+            61,
+            16
+          ],
+          "current_width": 61,
+          "advance": 61.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -73,
+            405,
+            1
+          ],
+          "current_width": 405,
+          "advance": 405.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -52,
+            257,
+            16
+          ],
+          "current_width": 257,
+          "advance": 257.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -80,
+            200,
+            21
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -80,
+            100,
+            21
+          ],
+          "current_width": 100,
+          "advance": 100.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            90,
+            0
+          ],
+          "current_width": 90,
+          "advance": 90.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Light.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -74,
+            61,
+            0
+          ],
+          "current_width": 61,
+          "advance": 61.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -74,
+            120,
+            0
+          ],
+          "current_width": 120,
+          "advance": 120.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -74,
+            114,
+            2
+          ],
+          "current_width": 114,
+          "advance": 114.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -81,
+            29,
+            22
+          ],
+          "current_width": 29,
+          "advance": 29.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -81,
+            63,
+            22
+          ],
+          "current_width": 63,
+          "advance": 63.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -80,
+            353,
+            2
+          ],
+          "current_width": 353,
+          "advance": 353.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -61,
+            228,
+            22
+          ],
+          "current_width": 228,
+          "advance": 228.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -85,
+            400,
+            7
+          ],
+          "current_width": 400,
+          "advance": 400.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -25,
+            200,
+            9
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            93,
+            0
+          ],
+          "current_width": 93,
+          "advance": 93.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Book.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            9,
+            0
+          ],
+          "current_width": 9,
+          "advance": 9.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            18,
+            0
+          ],
+          "current_width": 18,
+          "advance": 17.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            16,
+            0
+          ],
+          "current_width": 16,
+          "advance": 15.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -9,
+            3,
+            2
+          ],
+          "current_width": 4,
+          "advance": 3.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -9,
+            7,
+            2
+          ],
+          "current_width": 7,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -7,
+            31,
+            2
+          ],
+          "current_width": 31,
+          "advance": 31.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -10,
+            24,
+            3
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -10,
+            12,
+            3
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            8,
+            0
+          ],
+          "current_width": 8,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            14,
+            0
+          ],
+          "current_width": 14,
+          "advance": 14.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            13,
+            1
+          ],
+          "current_width": 13,
+          "advance": 13.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -10,
+            3,
+            3
+          ],
+          "current_width": 3,
+          "advance": 3.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -10,
+            7,
+            3
+          ],
+          "current_width": 7,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            42,
+            1
+          ],
+          "current_width": 42,
+          "advance": 42.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -8,
+            28,
+            3
+          ],
+          "current_width": 28,
+          "advance": 28.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -11,
+            48,
+            1
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -3,
+            24,
+            2
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Book.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -19,
+            21,
+            0
+          ],
+          "current_width": 21,
+          "advance": 21.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -19,
+            41,
+            0
+          ],
+          "current_width": 41,
+          "advance": 40.953125,
+          "left_bearing": 0,
+          "right_overhang": 0.046875
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -19,
+            34,
+            0
+          ],
+          "current_width": 34,
+          "advance": 33.953125,
+          "left_bearing": 0,
+          "right_overhang": 0.046875
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -20,
+            7,
+            5
+          ],
+          "current_width": 8,
+          "advance": 7.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -20,
+            17,
+            5
+          ],
+          "current_width": 17,
+          "advance": 17.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -20,
+            110,
+            0
+          ],
+          "current_width": 110,
+          "advance": 110.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -14,
+            70,
+            5
+          ],
+          "current_width": 70,
+          "advance": 70.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -22,
+            56,
+            6
+          ],
+          "current_width": 56,
+          "advance": 56.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -22,
+            28,
+            6
+          ],
+          "current_width": 28,
+          "advance": 28.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -20,
+            16,
+            0
+          ],
+          "current_width": 16,
+          "advance": 16.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -20,
+            32,
+            0
+          ],
+          "current_width": 32,
+          "advance": 32.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -20,
+            31,
+            1
+          ],
+          "current_width": 31,
+          "advance": 31.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -22,
+            8,
+            6
+          ],
+          "current_width": 8,
+          "advance": 8.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -22,
+            17,
+            6
+          ],
+          "current_width": 17,
+          "advance": 17.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -22,
+            95,
+            1
+          ],
+          "current_width": 95,
+          "advance": 95.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -17,
+            63,
+            6
+          ],
+          "current_width": 63,
+          "advance": 63.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -23,
+            108,
+            2
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -7,
+            54,
+            3
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Book.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -38,
+            43,
+            0
+          ],
+          "current_width": 43,
+          "advance": 43.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -38,
+            84,
+            0
+          ],
+          "current_width": 84,
+          "advance": 83.921875,
+          "left_bearing": 0,
+          "right_overhang": 0.078125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -38,
+            70,
+            1
+          ],
+          "current_width": 70,
+          "advance": 69.890625,
+          "left_bearing": 0,
+          "right_overhang": 0.109375
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -39,
+            14,
+            9
+          ],
+          "current_width": 15,
+          "advance": 14.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -40,
+            34,
+            9
+          ],
+          "current_width": 34,
+          "advance": 34.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -40,
+            220,
+            1
+          ],
+          "current_width": 220,
+          "advance": 220.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -29,
+            140,
+            9
+          ],
+          "current_width": 140,
+          "advance": 140.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -43,
+            108,
+            11
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -43,
+            54,
+            11
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            48,
+            0
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -40,
+            33,
+            0
+          ],
+          "current_width": 33,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -40,
+            65,
+            0
+          ],
+          "current_width": 65,
+          "advance": 65.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -40,
+            62,
+            1
+          ],
+          "current_width": 62,
+          "advance": 62.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -44,
+            16,
+            12
+          ],
+          "current_width": 16,
+          "advance": 16.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -44,
+            35,
+            12
+          ],
+          "current_width": 35,
+          "advance": 35.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -44,
+            191,
+            1
+          ],
+          "current_width": 191,
+          "advance": 191.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -34,
+            123,
+            12
+          ],
+          "current_width": 123,
+          "advance": 123.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -46,
+            216,
+            4
+          ],
+          "current_width": 216,
+          "advance": 216.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -14,
+            108,
+            6
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            48,
+            0
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Book.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -57,
+            64,
+            0
+          ],
+          "current_width": 64,
+          "advance": 64.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -57,
+            125,
+            0
+          ],
+          "current_width": 125,
+          "advance": 124.875,
+          "left_bearing": 0,
+          "right_overhang": 0.125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -57,
+            104,
+            1
+          ],
+          "current_width": 104,
+          "advance": 103.84375,
+          "left_bearing": 0,
+          "right_overhang": 0.15625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -58,
+            21,
+            13
+          ],
+          "current_width": 22,
+          "advance": 21.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -60,
+            51,
+            13
+          ],
+          "current_width": 51,
+          "advance": 51.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -60,
+            329,
+            1
+          ],
+          "current_width": 329,
+          "advance": 329.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -43,
+            210,
+            13
+          ],
+          "current_width": 210,
+          "advance": 210.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -65,
+            164,
+            17
+          ],
+          "current_width": 164,
+          "advance": 164.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -65,
+            82,
+            17
+          ],
+          "current_width": 82,
+          "advance": 82.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            72,
+            0
+          ],
+          "current_width": 72,
+          "advance": 72.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -60,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -60,
+            97,
+            0
+          ],
+          "current_width": 97,
+          "advance": 97.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -60,
+            93,
+            1
+          ],
+          "current_width": 93,
+          "advance": 93.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -66,
+            23,
+            18
+          ],
+          "current_width": 23,
+          "advance": 23.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -66,
+            51,
+            18
+          ],
+          "current_width": 51,
+          "advance": 51.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -65,
+            286,
+            1
+          ],
+          "current_width": 286,
+          "advance": 286.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -50,
+            186,
+            18
+          ],
+          "current_width": 186,
+          "advance": 186.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -69,
+            324,
+            6
+          ],
+          "current_width": 324,
+          "advance": 324.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -20,
+            162,
+            9
+          ],
+          "current_width": 162,
+          "advance": 162.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            72,
+            0
+          ],
+          "current_width": 72,
+          "advance": 72.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Book.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -71,
+            79,
+            0
+          ],
+          "current_width": 79,
+          "advance": 79.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -71,
+            154,
+            1
+          ],
+          "current_width": 154,
+          "advance": 153.84375,
+          "left_bearing": 0,
+          "right_overhang": 0.15625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -70,
+            129,
+            1
+          ],
+          "current_width": 129,
+          "advance": 128.8125,
+          "left_bearing": 0,
+          "right_overhang": 0.1875
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -72,
+            26,
+            16
+          ],
+          "current_width": 27,
+          "advance": 26.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -74,
+            63,
+            16
+          ],
+          "current_width": 63,
+          "advance": 63.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -74,
+            406,
+            1
+          ],
+          "current_width": 406,
+          "advance": 406.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -53,
+            257,
+            16
+          ],
+          "current_width": 257,
+          "advance": 257.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -80,
+            200,
+            21
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -80,
+            100,
+            21
+          ],
+          "current_width": 100,
+          "advance": 100.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            90,
+            0
+          ],
+          "current_width": 90,
+          "advance": 90.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -74,
+            61,
+            0
+          ],
+          "current_width": 61,
+          "advance": 61.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -74,
+            120,
+            0
+          ],
+          "current_width": 120,
+          "advance": 120.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -74,
+            116,
+            2
+          ],
+          "current_width": 116,
+          "advance": 116.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            0,
+            -82,
+            29,
+            22
+          ],
+          "current_width": 29,
+          "advance": 29.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -82,
+            64,
+            22
+          ],
+          "current_width": 64,
+          "advance": 64.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -81,
+            355,
+            2
+          ],
+          "current_width": 355,
+          "advance": 355.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -62,
+            231,
+            23
+          ],
+          "current_width": 231,
+          "advance": 231.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -85,
+            400,
+            7
+          ],
+          "current_width": 400,
+          "advance": 400.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -25,
+            200,
+            11
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            90,
+            0
+          ],
+          "current_width": 90,
+          "advance": 90.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Medium.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            10,
+            0
+          ],
+          "current_width": 10,
+          "advance": 9.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            18,
+            0
+          ],
+          "current_width": 18,
+          "advance": 17.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            16,
+            0
+          ],
+          "current_width": 16,
+          "advance": 15.984375,
+          "left_bearing": 0,
+          "right_overhang": 0.015625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -9,
+            3,
+            2
+          ],
+          "current_width": 4,
+          "advance": 3.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -9,
+            8,
+            2
+          ],
+          "current_width": 8,
+          "advance": 8.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 49.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -7,
+            31,
+            2
+          ],
+          "current_width": 31,
+          "advance": 31.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -10,
+            24,
+            3
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -10,
+            12,
+            3
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "current_width": 12,
+          "advance": 12.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "size": 12,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -9,
+            8,
+            0
+          ],
+          "current_width": 8,
+          "advance": 7.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -9,
+            15,
+            0
+          ],
+          "current_width": 15,
+          "advance": 14.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -9,
+            15,
+            1
+          ],
+          "current_width": 15,
+          "advance": 15.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -11,
+            4,
+            3
+          ],
+          "current_width": 5,
+          "advance": 4.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -11,
+            8,
+            3
+          ],
+          "current_width": 8,
+          "advance": 8.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -10,
+            43,
+            1
+          ],
+          "current_width": 43,
+          "advance": 43.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -8,
+            29,
+            3
+          ],
+          "current_width": 29,
+          "advance": 29.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -11,
+            48,
+            1
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -3,
+            24,
+            2
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            9,
+            0
+          ],
+          "current_width": 9,
+          "advance": 9.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Medium.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -19,
+            21,
+            0
+          ],
+          "current_width": 21,
+          "advance": 21.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -19,
+            41,
+            0
+          ],
+          "current_width": 41,
+          "advance": 40.953125,
+          "left_bearing": 0,
+          "right_overhang": 0.046875
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -19,
+            35,
+            0
+          ],
+          "current_width": 35,
+          "advance": 34.953125,
+          "left_bearing": 0,
+          "right_overhang": 0.046875
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -20,
+            8,
+            5
+          ],
+          "current_width": 9,
+          "advance": 8.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -20,
+            18,
+            5
+          ],
+          "current_width": 18,
+          "advance": 18.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -20,
+            110,
+            0
+          ],
+          "current_width": 110,
+          "advance": 110.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -14,
+            70,
+            5
+          ],
+          "current_width": 70,
+          "advance": 70.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -22,
+            56,
+            6
+          ],
+          "current_width": 56,
+          "advance": 56.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -22,
+            28,
+            6
+          ],
+          "current_width": 28,
+          "advance": 28.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "size": 27,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -21,
+            17,
+            0
+          ],
+          "current_width": 17,
+          "advance": 17.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -21,
+            34,
+            0
+          ],
+          "current_width": 34,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -21,
+            32,
+            1
+          ],
+          "current_width": 32,
+          "advance": 32.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -23,
+            8,
+            7
+          ],
+          "current_width": 9,
+          "advance": 8.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -23,
+            18,
+            7
+          ],
+          "current_width": 18,
+          "advance": 18.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -22,
+            98,
+            1
+          ],
+          "current_width": 98,
+          "advance": 98.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -18,
+            63,
+            7
+          ],
+          "current_width": 63,
+          "advance": 63.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -23,
+            108,
+            2
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -7,
+            54,
+            4
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            24,
+            0
+          ],
+          "current_width": 24,
+          "advance": 24.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Medium.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -38,
+            43,
+            0
+          ],
+          "current_width": 43,
+          "advance": 43.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -38,
+            84,
+            0
+          ],
+          "current_width": 84,
+          "advance": 83.921875,
+          "left_bearing": 0,
+          "right_overhang": 0.078125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -38,
+            70,
+            1
+          ],
+          "current_width": 70,
+          "advance": 69.90625,
+          "left_bearing": 0,
+          "right_overhang": 0.09375
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -39,
+            15,
+            9
+          ],
+          "current_width": 16,
+          "advance": 15.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -40,
+            35,
+            9
+          ],
+          "current_width": 35,
+          "advance": 35.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -41,
+            221,
+            1
+          ],
+          "current_width": 221,
+          "advance": 221.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -30,
+            140,
+            9
+          ],
+          "current_width": 140,
+          "advance": 140.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -43,
+            108,
+            11
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -43,
+            54,
+            11
+          ],
+          "current_width": 54,
+          "advance": 54.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            48,
+            0
+          ],
+          "current_width": 48,
+          "advance": 48.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "size": 54,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -41,
+            34,
+            0
+          ],
+          "current_width": 34,
+          "advance": 33.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -41,
+            66,
+            0
+          ],
+          "current_width": 66,
+          "advance": 65.0,
+          "left_bearing": 0,
+          "right_overhang": 1.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -41,
+            64,
+            1
+          ],
+          "current_width": 64,
+          "advance": 64.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -46,
+            16,
+            13
+          ],
+          "current_width": 17,
+          "advance": 16.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -46,
+            36,
+            13
+          ],
+          "current_width": 36,
+          "advance": 36.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -44,
+            194,
+            1
+          ],
+          "current_width": 194,
+          "advance": 194.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -35,
+            127,
+            13
+          ],
+          "current_width": 127,
+          "advance": 127.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -46,
+            216,
+            4
+          ],
+          "current_width": 216,
+          "advance": 216.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -14,
+            108,
+            7
+          ],
+          "current_width": 108,
+          "advance": 108.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            45,
+            0
+          ],
+          "current_width": 45,
+          "advance": 45.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Medium.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -57,
+            64,
+            0
+          ],
+          "current_width": 64,
+          "advance": 64.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -57,
+            125,
+            0
+          ],
+          "current_width": 125,
+          "advance": 124.875,
+          "left_bearing": 0,
+          "right_overhang": 0.125
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -57,
+            105,
+            1
+          ],
+          "current_width": 105,
+          "advance": 104.859375,
+          "left_bearing": 0,
+          "right_overhang": 0.140625
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -59,
+            23,
+            13
+          ],
+          "current_width": 24,
+          "advance": 23.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -60,
+            53,
+            13
+          ],
+          "current_width": 53,
+          "advance": 53.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -60,
+            330,
+            1
+          ],
+          "current_width": 330,
+          "advance": 330.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -44,
+            210,
+            13
+          ],
+          "current_width": 210,
+          "advance": 210.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -65,
+            164,
+            17
+          ],
+          "current_width": 164,
+          "advance": 164.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -65,
+            82,
+            17
+          ],
+          "current_width": 82,
+          "advance": 82.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            72,
+            0
+          ],
+          "current_width": 72,
+          "advance": 72.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "size": 81,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -61,
+            50,
+            0
+          ],
+          "current_width": 50,
+          "advance": 50.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -61,
+            99,
+            0
+          ],
+          "current_width": 99,
+          "advance": 99.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -61,
+            96,
+            2
+          ],
+          "current_width": 96,
+          "advance": 96.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -69,
+            24,
+            19
+          ],
+          "current_width": 25,
+          "advance": 24.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -69,
+            53,
+            19
+          ],
+          "current_width": 53,
+          "advance": 53.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -66,
+            292,
+            2
+          ],
+          "current_width": 292,
+          "advance": 292.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -52,
+            192,
+            19
+          ],
+          "current_width": 192,
+          "advance": 192.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -69,
+            324,
+            6
+          ],
+          "current_width": 324,
+          "advance": 324.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -20,
+            162,
+            10
+          ],
+          "current_width": 162,
+          "advance": 162.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            69,
+            0
+          ],
+          "current_width": 69,
+          "advance": 69.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-Medium.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -71,
+            79,
+            0
+          ],
+          "current_width": 79,
+          "advance": 79.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -71,
+            154,
+            1
+          ],
+          "current_width": 154,
+          "advance": 153.84375,
+          "left_bearing": 0,
+          "right_overhang": 0.15625
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -70,
+            131,
+            1
+          ],
+          "current_width": 131,
+          "advance": 130.828125,
+          "left_bearing": 0,
+          "right_overhang": 0.171875
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -1,
+            -73,
+            29,
+            16
+          ],
+          "current_width": 30,
+          "advance": 29.0,
+          "left_bearing": -1,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -74,
+            67,
+            16
+          ],
+          "current_width": 67,
+          "advance": 67.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -74,
+            408,
+            1
+          ],
+          "current_width": 408,
+          "advance": 408.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -54,
+            261,
+            16
+          ],
+          "current_width": 261,
+          "advance": 261.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -80,
+            200,
+            21
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -80,
+            100,
+            21
+          ],
+          "current_width": 100,
+          "advance": 100.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            90,
+            0
+          ],
+          "current_width": 90,
+          "advance": 90.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            0,
+            -75,
+            62,
+            0
+          ],
+          "current_width": 62,
+          "advance": 62.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            0,
+            -75,
+            122,
+            0
+          ],
+          "current_width": 122,
+          "advance": 122.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "To",
+          "bbox_ls": [
+            0,
+            -75,
+            119,
+            2
+          ],
+          "current_width": 119,
+          "advance": 119.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -2,
+            -85,
+            30,
+            23
+          ],
+          "current_width": 32,
+          "advance": 30.0,
+          "left_bearing": -2,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "fj",
+          "bbox_ls": [
+            0,
+            -85,
+            66,
+            23
+          ],
+          "current_width": 66,
+          "advance": 66.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            0,
+            -81,
+            362,
+            2
+          ],
+          "current_width": 362,
+          "advance": 362.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "gypq",
+          "bbox_ls": [
+            0,
+            -64,
+            236,
+            24
+          ],
+          "current_width": 236,
+          "advance": 236.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "永和九年",
+          "bbox_ls": [
+            0,
+            -85,
+            400,
+            8
+          ],
+          "current_width": 400,
+          "advance": 400.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "，。",
+          "bbox_ls": [
+            0,
+            -25,
+            200,
+            13
+          ],
+          "current_width": 200,
+          "advance": 200.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "   ",
+          "bbox_ls": [
+            0,
+            0,
+            87,
+            0
+          ],
+          "current_width": 87,
+          "advance": 87.0,
+          "left_bearing": 0,
+          "right_overhang": 0.0
+        }
+      ]
+    }
+  ],
+  "italic_examples": [
+    {
+      "font": "Gotham-BookItalic.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            -5,
+            -71,
+            76,
+            0
+          ],
+          "current_width": 81,
+          "advance": 76.0,
+          "left_bearing": -5,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -12,
+            -72,
+            30,
+            16
+          ],
+          "current_width": 42,
+          "advance": 26.0,
+          "left_bearing": -12,
+          "right_overhang": 4.0
+        },
+        {
+          "text": "f",
+          "bbox_ls": [
+            0,
+            -73,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 38.0,
+          "left_bearing": 0,
+          "right_overhang": 11.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            -5,
+            -71,
+            157,
+            1
+          ],
+          "current_width": 162,
+          "advance": 147.875,
+          "left_bearing": -5,
+          "right_overhang": 9.125
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            -5,
+            -74,
+            402,
+            1
+          ],
+          "current_width": 407,
+          "advance": 402.0,
+          "left_bearing": -5,
+          "right_overhang": 0.0
+        }
+      ]
+    },
+    {
+      "font": "Gotham-MediumItalic.otf",
+      "size": 100,
+      "runs": [
+        {
+          "text": "A",
+          "bbox_ls": [
+            -6,
+            -71,
+            76,
+            0
+          ],
+          "current_width": 82,
+          "advance": 76.0,
+          "left_bearing": -6,
+          "right_overhang": 0.0
+        },
+        {
+          "text": "j",
+          "bbox_ls": [
+            -13,
+            -73,
+            34,
+            16
+          ],
+          "current_width": 47,
+          "advance": 29.0,
+          "left_bearing": -13,
+          "right_overhang": 5.0
+        },
+        {
+          "text": "f",
+          "bbox_ls": [
+            0,
+            -74,
+            49,
+            0
+          ],
+          "current_width": 49,
+          "advance": 40.0,
+          "left_bearing": 0,
+          "right_overhang": 9.0
+        },
+        {
+          "text": "AV",
+          "bbox_ls": [
+            -6,
+            -71,
+            158,
+            1
+          ],
+          "current_width": 164,
+          "advance": 147.875,
+          "left_bearing": -6,
+          "right_overhang": 10.125
+        },
+        {
+          "text": "AaBbCc",
+          "bbox_ls": [
+            -6,
+            -74,
+            403,
+            1
+          ],
+          "current_width": 409,
+          "advance": 402.0,
+          "left_bearing": -6,
+          "right_overhang": 1.0
+        }
+      ]
+    }
+  ],
+  "mixed_runs": [
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 4,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        16
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 12,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        0,
+        14
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 7,
+          "advance": 7.0,
+          "bbox": [
+            0,
+            3,
+            7,
+            14
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 7,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        }
+      ],
+      "registered_width": 31,
+      "sum_advance": 31.0,
+      "ink_x_relative_to_origin": [
+        0,
+        30
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 9,
+          "advance": 9.0,
+          "bbox": [
+            0,
+            3,
+            9,
+            12
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 9,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 21,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 25,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            4,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 37,
+      "sum_advance": 36.0,
+      "ink_x_relative_to_origin": [
+        0,
+        36
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 24,
+          "current_width": 53,
+          "advance": 53.0,
+          "bbox": [
+            0,
+            2,
+            53,
+            12
+          ]
+        }
+      ],
+      "registered_width": 77,
+      "sum_advance": 77.0,
+      "ink_x_relative_to_origin": [
+        0,
+        77
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 49,
+          "advance": 49.0,
+          "bbox": [
+            0,
+            2,
+            49,
+            12
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 49,
+          "current_width": 48,
+          "advance": 48.0,
+          "bbox": [
+            0,
+            3,
+            48,
+            15
+          ]
+        }
+      ],
+      "registered_width": 97,
+      "sum_advance": 97.0,
+      "ink_x_relative_to_origin": [
+        0,
+        97
+      ],
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            7,
+            7,
+            31
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 8,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 35,
+      "sum_advance": 34.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        34
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 27,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            7,
+            7,
+            31
+          ]
+        }
+      ],
+      "registered_width": 35,
+      "sum_advance": 34.0,
+      "ink_x_relative_to_origin": [
+        1,
+        32
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 17,
+          "advance": 17.0,
+          "bbox": [
+            0,
+            6,
+            17,
+            31
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 17,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        }
+      ],
+      "registered_width": 71,
+      "sum_advance": 71.0,
+      "ink_x_relative_to_origin": [
+        1,
+        68
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 21,
+          "advance": 21.0,
+          "bbox": [
+            0,
+            7,
+            21,
+            26
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 21,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 48,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            7,
+            7,
+            31
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 56,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 83,
+      "sum_advance": 82.0,
+      "ink_x_relative_to_origin": [
+        1,
+        80
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 54,
+          "current_width": 118,
+          "advance": 118.0,
+          "bbox": [
+            0,
+            6,
+            118,
+            26
+          ]
+        }
+      ],
+      "registered_width": 172,
+      "sum_advance": 172.0,
+      "ink_x_relative_to_origin": [
+        1,
+        172
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 110,
+          "advance": 110.0,
+          "bbox": [
+            0,
+            6,
+            110,
+            26
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 110,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            9,
+            108,
+            34
+          ]
+        }
+      ],
+      "registered_width": 218,
+      "sum_advance": 218.0,
+      "ink_x_relative_to_origin": [
+        1,
+        217
+      ],
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 14,
+          "advance": 13.0,
+          "bbox": [
+            -1,
+            13,
+            13,
+            61
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 14,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 68,
+      "sum_advance": 67.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        65
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 54,
+          "current_width": 14,
+          "advance": 13.0,
+          "bbox": [
+            -1,
+            13,
+            13,
+            61
+          ]
+        }
+      ],
+      "registered_width": 68,
+      "sum_advance": 67.0,
+      "ink_x_relative_to_origin": [
+        3,
+        63
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 33,
+          "advance": 33.0,
+          "bbox": [
+            0,
+            12,
+            33,
+            61
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 33,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        }
+      ],
+      "registered_width": 141,
+      "sum_advance": 141.0,
+      "ink_x_relative_to_origin": [
+        2,
+        135
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 43,
+          "advance": 43.0,
+          "bbox": [
+            0,
+            14,
+            43,
+            52
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 43,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 97,
+          "current_width": 14,
+          "advance": 13.0,
+          "bbox": [
+            -1,
+            13,
+            13,
+            61
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 111,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            18,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 165,
+      "sum_advance": 164.0,
+      "ink_x_relative_to_origin": [
+        2,
+        159
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 108,
+          "current_width": 236,
+          "advance": 236.0,
+          "bbox": [
+            0,
+            11,
+            236,
+            53
+          ]
+        }
+      ],
+      "registered_width": 344,
+      "sum_advance": 344.0,
+      "ink_x_relative_to_origin": [
+        3,
+        342
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 220,
+          "advance": 220.0,
+          "bbox": [
+            0,
+            11,
+            220,
+            53
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 220,
+          "current_width": 216,
+          "advance": 216.0,
+          "bbox": [
+            0,
+            17,
+            216,
+            67
+          ]
+        }
+      ],
+      "registered_width": 436,
+      "sum_advance": 436.0,
+      "ink_x_relative_to_origin": [
+        2,
+        433
+      ],
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 21,
+          "advance": 20.0,
+          "bbox": [
+            -1,
+            20,
+            20,
+            91
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 21,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            100
+          ]
+        }
+      ],
+      "registered_width": 102,
+      "sum_advance": 101.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        97
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            100
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 81,
+          "current_width": 21,
+          "advance": 20.0,
+          "bbox": [
+            -1,
+            20,
+            20,
+            91
+          ]
+        }
+      ],
+      "registered_width": 102,
+      "sum_advance": 101.0,
+      "ink_x_relative_to_origin": [
+        4,
+        94
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 49,
+          "advance": 49.0,
+          "bbox": [
+            0,
+            18,
+            49,
+            91
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 49,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            26,
+            162,
+            100
+          ]
+        }
+      ],
+      "registered_width": 211,
+      "sum_advance": 211.0,
+      "ink_x_relative_to_origin": [
+        3,
+        202
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 64,
+          "advance": 64.0,
+          "bbox": [
+            0,
+            21,
+            64,
+            78
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 64,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            100
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 145,
+          "current_width": 21,
+          "advance": 20.0,
+          "bbox": [
+            -1,
+            20,
+            20,
+            91
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 166,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            99
+          ]
+        }
+      ],
+      "registered_width": 247,
+      "sum_advance": 246.0,
+      "ink_x_relative_to_origin": [
+        3,
+        238
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            26,
+            162,
+            100
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 162,
+          "current_width": 352,
+          "advance": 352.0,
+          "bbox": [
+            0,
+            19,
+            352,
+            79
+          ]
+        }
+      ],
+      "registered_width": 514,
+      "sum_advance": 514.0,
+      "ink_x_relative_to_origin": [
+        4,
+        511
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 328,
+          "advance": 328.0,
+          "bbox": [
+            0,
+            19,
+            328,
+            79
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 328,
+          "current_width": 324,
+          "advance": 324.0,
+          "bbox": [
+            0,
+            25,
+            324,
+            100
+          ]
+        }
+      ],
+      "registered_width": 652,
+      "sum_advance": 652.0,
+      "ink_x_relative_to_origin": [
+        3,
+        647
+      ],
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 26,
+          "advance": 25.0,
+          "bbox": [
+            -1,
+            25,
+            25,
+            112
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 26,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 126,
+      "sum_advance": 125.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        120
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 100,
+          "current_width": 26,
+          "advance": 25.0,
+          "bbox": [
+            -1,
+            25,
+            25,
+            112
+          ]
+        }
+      ],
+      "registered_width": 126,
+      "sum_advance": 125.0,
+      "ink_x_relative_to_origin": [
+        5,
+        116
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 61,
+          "advance": 61.0,
+          "bbox": [
+            0,
+            22,
+            61,
+            112
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 61,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            32,
+            200,
+            123
+          ]
+        }
+      ],
+      "registered_width": 261,
+      "sum_advance": 261.0,
+      "ink_x_relative_to_origin": [
+        4,
+        250
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 79,
+          "advance": 79.0,
+          "bbox": [
+            0,
+            25,
+            79,
+            96
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 79,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Light.otf",
+          "current_x": 179,
+          "current_width": 26,
+          "advance": 25.0,
+          "bbox": [
+            -1,
+            25,
+            25,
+            112
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 205,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            33,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 305,
+      "sum_advance": 304.0,
+      "ink_x_relative_to_origin": [
+        4,
+        294
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 0,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            32,
+            200,
+            123
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 200,
+          "current_width": 435,
+          "advance": 435.0,
+          "bbox": [
+            0,
+            23,
+            435,
+            97
+          ]
+        }
+      ],
+      "registered_width": 635,
+      "sum_advance": 635.0,
+      "ink_x_relative_to_origin": [
+        5,
+        631
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Light.otf",
+          "current_x": 0,
+          "current_width": 405,
+          "advance": 405.0,
+          "bbox": [
+            0,
+            23,
+            405,
+            97
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Light.otf",
+          "current_x": 405,
+          "current_width": 400,
+          "advance": 400.0,
+          "bbox": [
+            0,
+            31,
+            400,
+            123
+          ]
+        }
+      ],
+      "registered_width": 805,
+      "sum_advance": 805.0,
+      "ink_x_relative_to_origin": [
+        4,
+        799
+      ],
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 4,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        16
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 12,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        0,
+        15
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 7,
+          "advance": 7.0,
+          "bbox": [
+            0,
+            3,
+            7,
+            14
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 7,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        }
+      ],
+      "registered_width": 31,
+      "sum_advance": 31.0,
+      "ink_x_relative_to_origin": [
+        0,
+        30
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 9,
+          "advance": 9.0,
+          "bbox": [
+            0,
+            3,
+            9,
+            12
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 9,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 21,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 25,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            4,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 37,
+      "sum_advance": 36.0,
+      "ink_x_relative_to_origin": [
+        0,
+        36
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 24,
+          "current_width": 53,
+          "advance": 53.0,
+          "bbox": [
+            0,
+            2,
+            53,
+            12
+          ]
+        }
+      ],
+      "registered_width": 77,
+      "sum_advance": 77.0,
+      "ink_x_relative_to_origin": [
+        0,
+        77
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 49,
+          "advance": 49.0,
+          "bbox": [
+            0,
+            2,
+            49,
+            12
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 49,
+          "current_width": 48,
+          "advance": 48.0,
+          "bbox": [
+            0,
+            3,
+            48,
+            15
+          ]
+        }
+      ],
+      "registered_width": 97,
+      "sum_advance": 97.0,
+      "ink_x_relative_to_origin": [
+        0,
+        97
+      ],
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            6,
+            7,
+            31
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 8,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 35,
+      "sum_advance": 34.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        34
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 27,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            6,
+            7,
+            31
+          ]
+        }
+      ],
+      "registered_width": 35,
+      "sum_advance": 34.0,
+      "ink_x_relative_to_origin": [
+        1,
+        32
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 17,
+          "advance": 17.0,
+          "bbox": [
+            0,
+            6,
+            17,
+            31
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 17,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        }
+      ],
+      "registered_width": 71,
+      "sum_advance": 71.0,
+      "ink_x_relative_to_origin": [
+        1,
+        68
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 21,
+          "advance": 21.0,
+          "bbox": [
+            0,
+            7,
+            21,
+            26
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 21,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 48,
+          "current_width": 8,
+          "advance": 7.0,
+          "bbox": [
+            -1,
+            6,
+            7,
+            31
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 56,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 83,
+      "sum_advance": 82.0,
+      "ink_x_relative_to_origin": [
+        1,
+        80
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 54,
+          "current_width": 118,
+          "advance": 118.0,
+          "bbox": [
+            0,
+            6,
+            118,
+            26
+          ]
+        }
+      ],
+      "registered_width": 172,
+      "sum_advance": 172.0,
+      "ink_x_relative_to_origin": [
+        1,
+        172
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 110,
+          "advance": 110.0,
+          "bbox": [
+            0,
+            6,
+            110,
+            26
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 110,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            9,
+            108,
+            34
+          ]
+        }
+      ],
+      "registered_width": 218,
+      "sum_advance": 218.0,
+      "ink_x_relative_to_origin": [
+        1,
+        217
+      ],
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 15,
+          "advance": 14.0,
+          "bbox": [
+            -1,
+            13,
+            14,
+            61
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 15,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 69,
+      "sum_advance": 68.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        66
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 54,
+          "current_width": 15,
+          "advance": 14.0,
+          "bbox": [
+            -1,
+            13,
+            14,
+            61
+          ]
+        }
+      ],
+      "registered_width": 69,
+      "sum_advance": 68.0,
+      "ink_x_relative_to_origin": [
+        3,
+        64
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 34,
+          "advance": 34.0,
+          "bbox": [
+            0,
+            12,
+            34,
+            61
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 34,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        }
+      ],
+      "registered_width": 142,
+      "sum_advance": 142.0,
+      "ink_x_relative_to_origin": [
+        2,
+        136
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 43,
+          "advance": 43.0,
+          "bbox": [
+            0,
+            14,
+            43,
+            52
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 43,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 97,
+          "current_width": 15,
+          "advance": 14.0,
+          "bbox": [
+            -1,
+            13,
+            14,
+            61
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 112,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            18,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 166,
+      "sum_advance": 165.0,
+      "ink_x_relative_to_origin": [
+        2,
+        160
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 108,
+          "current_width": 236,
+          "advance": 236.0,
+          "bbox": [
+            0,
+            12,
+            236,
+            53
+          ]
+        }
+      ],
+      "registered_width": 344,
+      "sum_advance": 344.0,
+      "ink_x_relative_to_origin": [
+        3,
+        342
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 220,
+          "advance": 220.0,
+          "bbox": [
+            0,
+            12,
+            220,
+            53
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 220,
+          "current_width": 216,
+          "advance": 216.0,
+          "bbox": [
+            0,
+            17,
+            216,
+            67
+          ]
+        }
+      ],
+      "registered_width": 436,
+      "sum_advance": 436.0,
+      "ink_x_relative_to_origin": [
+        2,
+        433
+      ],
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 22,
+          "advance": 21.0,
+          "bbox": [
+            -1,
+            20,
+            21,
+            91
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 22,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            99
+          ]
+        }
+      ],
+      "registered_width": 103,
+      "sum_advance": 102.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        98
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            99
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 81,
+          "current_width": 22,
+          "advance": 21.0,
+          "bbox": [
+            -1,
+            20,
+            21,
+            91
+          ]
+        }
+      ],
+      "registered_width": 103,
+      "sum_advance": 102.0,
+      "ink_x_relative_to_origin": [
+        4,
+        96
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 51,
+          "advance": 51.0,
+          "bbox": [
+            0,
+            18,
+            51,
+            91
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 51,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            26,
+            162,
+            99
+          ]
+        }
+      ],
+      "registered_width": 213,
+      "sum_advance": 213.0,
+      "ink_x_relative_to_origin": [
+        3,
+        204
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 64,
+          "advance": 64.0,
+          "bbox": [
+            0,
+            21,
+            64,
+            78
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 64,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            99
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 145,
+          "current_width": 22,
+          "advance": 21.0,
+          "bbox": [
+            -1,
+            20,
+            21,
+            91
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 167,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            99
+          ]
+        }
+      ],
+      "registered_width": 248,
+      "sum_advance": 247.0,
+      "ink_x_relative_to_origin": [
+        3,
+        239
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            26,
+            162,
+            99
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 162,
+          "current_width": 353,
+          "advance": 353.0,
+          "bbox": [
+            0,
+            18,
+            353,
+            79
+          ]
+        }
+      ],
+      "registered_width": 515,
+      "sum_advance": 515.0,
+      "ink_x_relative_to_origin": [
+        4,
+        512
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 329,
+          "advance": 329.0,
+          "bbox": [
+            0,
+            18,
+            329,
+            79
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 329,
+          "current_width": 324,
+          "advance": 324.0,
+          "bbox": [
+            0,
+            25,
+            324,
+            100
+          ]
+        }
+      ],
+      "registered_width": 653,
+      "sum_advance": 653.0,
+      "ink_x_relative_to_origin": [
+        3,
+        648
+      ],
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 27,
+          "advance": 26.0,
+          "bbox": [
+            -1,
+            24,
+            26,
+            112
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 27,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 127,
+      "sum_advance": 126.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        121
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 100,
+          "current_width": 27,
+          "advance": 26.0,
+          "bbox": [
+            -1,
+            24,
+            26,
+            112
+          ]
+        }
+      ],
+      "registered_width": 127,
+      "sum_advance": 126.0,
+      "ink_x_relative_to_origin": [
+        6,
+        118
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 63,
+          "advance": 63.0,
+          "bbox": [
+            0,
+            22,
+            63,
+            112
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 63,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            32,
+            200,
+            123
+          ]
+        }
+      ],
+      "registered_width": 263,
+      "sum_advance": 263.0,
+      "ink_x_relative_to_origin": [
+        4,
+        252
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 79,
+          "advance": 79.0,
+          "bbox": [
+            0,
+            25,
+            79,
+            96
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 79,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Book.otf",
+          "current_x": 179,
+          "current_width": 27,
+          "advance": 26.0,
+          "bbox": [
+            -1,
+            24,
+            26,
+            112
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 206,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            33,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 306,
+      "sum_advance": 305.0,
+      "ink_x_relative_to_origin": [
+        3,
+        295
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 0,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            32,
+            200,
+            123
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 200,
+          "current_width": 436,
+          "advance": 436.0,
+          "bbox": [
+            0,
+            22,
+            436,
+            97
+          ]
+        }
+      ],
+      "registered_width": 636,
+      "sum_advance": 636.0,
+      "ink_x_relative_to_origin": [
+        6,
+        632
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Book.otf",
+          "current_x": 0,
+          "current_width": 406,
+          "advance": 406.0,
+          "bbox": [
+            0,
+            22,
+            406,
+            97
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Regular.otf",
+          "current_x": 406,
+          "current_width": 400,
+          "advance": 400.0,
+          "bbox": [
+            0,
+            31,
+            400,
+            123
+          ]
+        }
+      ],
+      "registered_width": 806,
+      "sum_advance": 806.0,
+      "ink_x_relative_to_origin": [
+        3,
+        800
+      ],
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 4,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        16
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 12,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        }
+      ],
+      "registered_width": 16,
+      "sum_advance": 15.0,
+      "ink_x_relative_to_origin": [
+        0,
+        15
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 8,
+          "advance": 8.0,
+          "bbox": [
+            0,
+            3,
+            8,
+            14
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 8,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        }
+      ],
+      "registered_width": 32,
+      "sum_advance": 32.0,
+      "ink_x_relative_to_origin": [
+        0,
+        31
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 10,
+          "advance": 9.0,
+          "bbox": [
+            0,
+            3,
+            10,
+            12
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 10,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            3,
+            12,
+            15
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 22,
+          "current_width": 4,
+          "advance": 3.0,
+          "bbox": [
+            -1,
+            3,
+            3,
+            14
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 26,
+          "current_width": 12,
+          "advance": 12.0,
+          "bbox": [
+            0,
+            4,
+            12,
+            15
+          ]
+        }
+      ],
+      "registered_width": 38,
+      "sum_advance": 36.0,
+      "ink_x_relative_to_origin": [
+        0,
+        37
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 24,
+          "advance": 24.0,
+          "bbox": [
+            0,
+            3,
+            24,
+            15
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 24,
+          "current_width": 53,
+          "advance": 53.0,
+          "bbox": [
+            0,
+            2,
+            53,
+            12
+          ]
+        }
+      ],
+      "registered_width": 77,
+      "sum_advance": 77.0,
+      "ink_x_relative_to_origin": [
+        0,
+        77
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 49,
+          "advance": 49.0,
+          "bbox": [
+            0,
+            2,
+            49,
+            12
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 49,
+          "current_width": 48,
+          "advance": 48.0,
+          "bbox": [
+            0,
+            3,
+            48,
+            15
+          ]
+        }
+      ],
+      "registered_width": 97,
+      "sum_advance": 97.0,
+      "ink_x_relative_to_origin": [
+        0,
+        97
+      ],
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 9,
+          "advance": 8.0,
+          "bbox": [
+            -1,
+            6,
+            8,
+            31
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 9,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 36,
+      "sum_advance": 35.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        35
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 27,
+          "current_width": 9,
+          "advance": 8.0,
+          "bbox": [
+            -1,
+            6,
+            8,
+            31
+          ]
+        }
+      ],
+      "registered_width": 36,
+      "sum_advance": 35.0,
+      "ink_x_relative_to_origin": [
+        1,
+        33
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 18,
+          "advance": 18.0,
+          "bbox": [
+            0,
+            6,
+            18,
+            31
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 18,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        }
+      ],
+      "registered_width": 72,
+      "sum_advance": 72.0,
+      "ink_x_relative_to_origin": [
+        0,
+        70
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 21,
+          "advance": 21.0,
+          "bbox": [
+            0,
+            7,
+            21,
+            26
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 21,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 48,
+          "current_width": 9,
+          "advance": 8.0,
+          "bbox": [
+            -1,
+            6,
+            8,
+            31
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 57,
+          "current_width": 27,
+          "advance": 27.0,
+          "bbox": [
+            0,
+            9,
+            27,
+            34
+          ]
+        }
+      ],
+      "registered_width": 84,
+      "sum_advance": 83.0,
+      "ink_x_relative_to_origin": [
+        0,
+        82
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            9,
+            54,
+            34
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 54,
+          "current_width": 118,
+          "advance": 118.0,
+          "bbox": [
+            0,
+            6,
+            118,
+            26
+          ]
+        }
+      ],
+      "registered_width": 172,
+      "sum_advance": 172.0,
+      "ink_x_relative_to_origin": [
+        1,
+        172
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 110,
+          "advance": 110.0,
+          "bbox": [
+            0,
+            6,
+            110,
+            26
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 110,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            9,
+            108,
+            34
+          ]
+        }
+      ],
+      "registered_width": 218,
+      "sum_advance": 218.0,
+      "ink_x_relative_to_origin": [
+        0,
+        217
+      ],
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 16,
+          "advance": 15.0,
+          "bbox": [
+            -1,
+            13,
+            15,
+            61
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 16,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 70,
+      "sum_advance": 69.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        67
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 54,
+          "current_width": 16,
+          "advance": 15.0,
+          "bbox": [
+            -1,
+            13,
+            15,
+            61
+          ]
+        }
+      ],
+      "registered_width": 70,
+      "sum_advance": 69.0,
+      "ink_x_relative_to_origin": [
+        3,
+        66
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 35,
+          "advance": 35.0,
+          "bbox": [
+            0,
+            12,
+            35,
+            61
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 35,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        }
+      ],
+      "registered_width": 143,
+      "sum_advance": 143.0,
+      "ink_x_relative_to_origin": [
+        1,
+        138
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 43,
+          "advance": 43.0,
+          "bbox": [
+            0,
+            14,
+            43,
+            52
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 43,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            17,
+            54,
+            67
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 97,
+          "current_width": 16,
+          "advance": 15.0,
+          "bbox": [
+            -1,
+            13,
+            15,
+            61
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 113,
+          "current_width": 54,
+          "advance": 54.0,
+          "bbox": [
+            0,
+            18,
+            54,
+            67
+          ]
+        }
+      ],
+      "registered_width": 167,
+      "sum_advance": 166.0,
+      "ink_x_relative_to_origin": [
+        1,
+        162
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 108,
+          "advance": 108.0,
+          "bbox": [
+            0,
+            17,
+            108,
+            67
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 108,
+          "current_width": 237,
+          "advance": 237.0,
+          "bbox": [
+            0,
+            11,
+            237,
+            53
+          ]
+        }
+      ],
+      "registered_width": 345,
+      "sum_advance": 345.0,
+      "ink_x_relative_to_origin": [
+        3,
+        343
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 221,
+          "advance": 221.0,
+          "bbox": [
+            0,
+            11,
+            221,
+            53
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 221,
+          "current_width": 216,
+          "advance": 216.0,
+          "bbox": [
+            0,
+            17,
+            216,
+            67
+          ]
+        }
+      ],
+      "registered_width": 437,
+      "sum_advance": 437.0,
+      "ink_x_relative_to_origin": [
+        1,
+        434
+      ],
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 24,
+          "advance": 23.0,
+          "bbox": [
+            -1,
+            19,
+            23,
+            91
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 24,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            25,
+            81,
+            100
+          ]
+        }
+      ],
+      "registered_width": 105,
+      "sum_advance": 104.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        101
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            25,
+            81,
+            100
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 81,
+          "current_width": 24,
+          "advance": 23.0,
+          "bbox": [
+            -1,
+            19,
+            23,
+            91
+          ]
+        }
+      ],
+      "registered_width": 105,
+      "sum_advance": 104.0,
+      "ink_x_relative_to_origin": [
+        4,
+        98
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 53,
+          "advance": 53.0,
+          "bbox": [
+            0,
+            18,
+            53,
+            91
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 53,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            25,
+            162,
+            100
+          ]
+        }
+      ],
+      "registered_width": 215,
+      "sum_advance": 215.0,
+      "ink_x_relative_to_origin": [
+        2,
+        207
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 64,
+          "advance": 64.0,
+          "bbox": [
+            0,
+            21,
+            64,
+            78
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 64,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            25,
+            81,
+            100
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 145,
+          "current_width": 24,
+          "advance": 23.0,
+          "bbox": [
+            -1,
+            19,
+            23,
+            91
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 169,
+          "current_width": 81,
+          "advance": 81.0,
+          "bbox": [
+            0,
+            26,
+            81,
+            100
+          ]
+        }
+      ],
+      "registered_width": 250,
+      "sum_advance": 249.0,
+      "ink_x_relative_to_origin": [
+        2,
+        242
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 162,
+          "advance": 162.0,
+          "bbox": [
+            0,
+            25,
+            162,
+            100
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 162,
+          "current_width": 354,
+          "advance": 354.0,
+          "bbox": [
+            0,
+            18,
+            354,
+            79
+          ]
+        }
+      ],
+      "registered_width": 516,
+      "sum_advance": 516.0,
+      "ink_x_relative_to_origin": [
+        4,
+        514
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 330,
+          "advance": 330.0,
+          "bbox": [
+            0,
+            18,
+            330,
+            79
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 330,
+          "current_width": 324,
+          "advance": 324.0,
+          "bbox": [
+            0,
+            25,
+            324,
+            100
+          ]
+        }
+      ],
+      "registered_width": 654,
+      "sum_advance": 654.0,
+      "ink_x_relative_to_origin": [
+        2,
+        649
+      ],
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "j永",
+      "runs": [
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 30,
+          "advance": 29.0,
+          "bbox": [
+            -1,
+            23,
+            29,
+            112
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 30,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            31,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 130,
+      "sum_advance": 129.0,
+      "ink_x_relative_to_origin": [
+        -1,
+        124
+      ],
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "永j",
+      "runs": [
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            31,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 100,
+          "current_width": 30,
+          "advance": 29.0,
+          "bbox": [
+            -1,
+            23,
+            29,
+            112
+          ]
+        }
+      ],
+      "registered_width": 130,
+      "sum_advance": 129.0,
+      "ink_x_relative_to_origin": [
+        5,
+        121
+      ],
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "fj永和",
+      "runs": [
+        {
+          "text": "fj",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 67,
+          "advance": 67.0,
+          "bbox": [
+            0,
+            22,
+            67,
+            112
+          ]
+        },
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 67,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            31,
+            200,
+            123
+          ]
+        }
+      ],
+      "registered_width": 267,
+      "sum_advance": 267.0,
+      "ink_x_relative_to_origin": [
+        3,
+        256
+      ],
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "A永j和",
+      "runs": [
+        {
+          "text": "A",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 79,
+          "advance": 79.0,
+          "bbox": [
+            0,
+            25,
+            79,
+            96
+          ]
+        },
+        {
+          "text": "永",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 79,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            31,
+            100,
+            123
+          ]
+        },
+        {
+          "text": "j",
+          "font": "Gotham-Medium.otf",
+          "current_x": 179,
+          "current_width": 30,
+          "advance": 29.0,
+          "bbox": [
+            -1,
+            23,
+            29,
+            112
+          ]
+        },
+        {
+          "text": "和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 209,
+          "current_width": 100,
+          "advance": 100.0,
+          "bbox": [
+            0,
+            32,
+            100,
+            123
+          ]
+        }
+      ],
+      "registered_width": 309,
+      "sum_advance": 308.0,
+      "ink_x_relative_to_origin": [
+        3,
+        298
+      ],
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "永和 AaBbCc",
+      "runs": [
+        {
+          "text": "永和",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 0,
+          "current_width": 200,
+          "advance": 200.0,
+          "bbox": [
+            0,
+            31,
+            200,
+            123
+          ]
+        },
+        {
+          "text": " AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 200,
+          "current_width": 438,
+          "advance": 438.0,
+          "bbox": [
+            0,
+            22,
+            438,
+            97
+          ]
+        }
+      ],
+      "registered_width": 638,
+      "sum_advance": 638.0,
+      "ink_x_relative_to_origin": [
+        5,
+        635
+      ],
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "AaBbCc永和九年",
+      "runs": [
+        {
+          "text": "AaBbCc",
+          "font": "Gotham-Medium.otf",
+          "current_x": 0,
+          "current_width": 408,
+          "advance": 408.0,
+          "bbox": [
+            0,
+            22,
+            408,
+            97
+          ]
+        },
+        {
+          "text": "永和九年",
+          "font": "GlowSansSC-Normal-Medium.otf",
+          "current_x": 408,
+          "current_width": 400,
+          "advance": 400.0,
+          "bbox": [
+            0,
+            31,
+            400,
+            124
+          ]
+        }
+      ],
+      "registered_width": 808,
+      "sum_advance": 808.0,
+      "ink_x_relative_to_origin": [
+        3,
+        802
+      ],
+      "weight": "medium",
+      "size": 100
+    }
+  ],
+  "vertical_boxes": [
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -1,
+        9
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        2,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -2,
+        10
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        6,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -1,
+        19
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        5,
+        24
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -4,
+        21
+      ],
+      "top_overflow": 4,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        12,
+        22
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -2,
+        40
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        10,
+        48
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -7,
+        43
+      ],
+      "top_overflow": 7,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        25,
+        44
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -1,
+        59
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        16,
+        71
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -11,
+        64
+      ],
+      "top_overflow": 11,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        38,
+        66
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -1,
+        73
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Light.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        20,
+        88
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -13,
+        79
+      ],
+      "top_overflow": 13,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Light.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        47,
+        81
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "light",
+      "size": 100
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -1,
+        9
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        2,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -2,
+        10
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        6,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -1,
+        19
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        5,
+        24
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -4,
+        21
+      ],
+      "top_overflow": 4,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        12,
+        22
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -1,
+        40
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        10,
+        48
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -7,
+        43
+      ],
+      "top_overflow": 7,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        25,
+        45
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -2,
+        59
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        15,
+        71
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -11,
+        64
+      ],
+      "top_overflow": 11,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        38,
+        67
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -2,
+        73
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Book.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        19,
+        88
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -13,
+        79
+      ],
+      "top_overflow": 13,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Regular.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        47,
+        83
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "regular",
+      "size": 100
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -1,
+        9
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        2,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        -2,
+        10
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        12,
+        3
+      ],
+      "logical_box": [
+        0,
+        15
+      ],
+      "baseline": 9,
+      "ink_y": [
+        6,
+        11
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 12
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -1,
+        19
+      ],
+      "top_overflow": 1,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        5,
+        24
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        -4,
+        21
+      ],
+      "top_overflow": 4,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        26,
+        7
+      ],
+      "logical_box": [
+        0,
+        33
+      ],
+      "baseline": 19,
+      "ink_y": [
+        12,
+        23
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 27
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -2,
+        40
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        9,
+        48
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        -7,
+        43
+      ],
+      "top_overflow": 7,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        52,
+        13
+      ],
+      "logical_box": [
+        0,
+        65
+      ],
+      "baseline": 39,
+      "ink_y": [
+        25,
+        46
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 54
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -2,
+        59
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        14,
+        71
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        -11,
+        64
+      ],
+      "top_overflow": 11,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        78,
+        20
+      ],
+      "logical_box": [
+        0,
+        98
+      ],
+      "baseline": 58,
+      "ink_y": [
+        38,
+        68
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 81
+    },
+    {
+      "text": "AaBbCc",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -2,
+        73
+      ],
+      "top_overflow": 2,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "gypq",
+      "font": "Gotham-Medium.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        18,
+        88
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "永和九年",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        -13,
+        80
+      ],
+      "top_overflow": 13,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 100
+    },
+    {
+      "text": "，。",
+      "font": "GlowSansSC-Normal-Medium.otf",
+      "reference_metrics": [
+        96,
+        24
+      ],
+      "logical_box": [
+        0,
+        120
+      ],
+      "baseline": 72,
+      "ink_y": [
+        47,
+        85
+      ],
+      "top_overflow": 0,
+      "bottom_overflow": 0,
+      "weight": "medium",
+      "size": 100
+    }
+  ],
+  "segmentation_cases": {
+    "中文한글": [
+      [
+        "中文",
+        true
+      ],
+      [
+        "한글",
+        false
+      ]
+    ],
+    "中文𠀀": [
+      [
+        "中文",
+        true
+      ],
+      [
+        "𠀀",
+        false
+      ]
+    ],
+    "永︀": [
+      [
+        "永",
+        true
+      ],
+      [
+        "︀",
+        false
+      ]
+    ],
+    "中文🙂": [
+      [
+        "中文",
+        true
+      ],
+      [
+        "🙂",
+        false
+      ]
+    ]
+  },
+  "oversized_padding": {
+    "padding_bounds": [
+      10,
+      10,
+      90,
+      90
+    ],
+    "box": [
+      10,
+      10,
+      100,
+      100
+    ],
+    "overflow_right": 20,
+    "overflow_bottom": 20
+  },
+  "fuzzy_reference": {
+    "requested_missing_name": "text",
+    "resolved_bounds": [
+      11,
+      22,
+      33,
+      44
+    ]
+  },
+  "style_graph_findings": []
+}

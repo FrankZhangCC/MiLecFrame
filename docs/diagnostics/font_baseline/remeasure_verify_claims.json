@@ -1,0 +1,734 @@
+{
+  "purpose": "复核复评主张 A/B/C，并做 bbox vs advance 干净对照",
+  "claim_A_baseline_restore": [
+    {
+      "size": 54,
+      "latin_ink_rel_baseline": [
+        0,
+        -41,
+        221,
+        1
+      ],
+      "cjk_ink_rel_baseline": [
+        0,
+        -46,
+        216,
+        4
+      ],
+      "pure_ink": [
+        -41,
+        1
+      ],
+      "mixed_ink_after_restore": [
+        -46,
+        4
+      ],
+      "latin_glyph_shift": 0,
+      "ink_top_shift": -5,
+      "ink_bottom_shift": 3,
+      "ink_center_shift": -1.0
+    },
+    {
+      "size": 81,
+      "latin_ink_rel_baseline": [
+        0,
+        -60,
+        330,
+        1
+      ],
+      "cjk_ink_rel_baseline": [
+        0,
+        -69,
+        324,
+        6
+      ],
+      "pure_ink": [
+        -60,
+        1
+      ],
+      "mixed_ink_after_restore": [
+        -69,
+        6
+      ],
+      "latin_glyph_shift": 0,
+      "ink_top_shift": -9,
+      "ink_bottom_shift": 5,
+      "ink_center_shift": -2.0
+    },
+    {
+      "size": 108,
+      "latin_ink_rel_baseline": [
+        0,
+        -79,
+        440,
+        1
+      ],
+      "cjk_ink_rel_baseline": [
+        0,
+        -92,
+        432,
+        8
+      ],
+      "pure_ink": [
+        -79,
+        1
+      ],
+      "mixed_ink_after_restore": [
+        -92,
+        8
+      ],
+      "latin_glyph_shift": 0,
+      "ink_top_shift": -13,
+      "ink_bottom_shift": 7,
+      "ink_center_shift": -3.0
+    }
+  ],
+  "claim_B_advance_vs_bbox": [
+    {
+      "size": 54,
+      "text": "Hello",
+      "sum_bbox_width": 139.0,
+      "sum_advance": 139.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 139,
+          "advance": 139.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "世界",
+      "sum_bbox_width": 108.0,
+      "sum_advance": 108.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "AaBbCc",
+      "sum_bbox_width": 221.0,
+      "sum_advance": 221.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "AaBbCc",
+          "font": "latin",
+          "bbox_width": 221,
+          "advance": 221.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "永和九年",
+      "sum_bbox_width": 216.0,
+      "sum_advance": 216.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "永和九年",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "j",
+      "sum_bbox_width": 16.0,
+      "sum_advance": 15.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 16,
+          "advance": 15.0,
+          "delta": 1.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "fj",
+      "sum_bbox_width": 35.0,
+      "sum_advance": 35.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "fj",
+          "font": "latin",
+          "bbox_width": 35,
+          "advance": 35.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "f",
+      "sum_bbox_width": 20.0,
+      "sum_advance": 20.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "f",
+          "font": "latin",
+          "bbox_width": 20,
+          "advance": 20.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "y",
+      "sum_bbox_width": 32.0,
+      "sum_advance": 32.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "y",
+          "font": "latin",
+          "bbox_width": 32,
+          "advance": 32.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "j永",
+      "sum_bbox_width": 70.0,
+      "sum_advance": 69.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 16,
+          "advance": 15.0,
+          "delta": 1.0
+        },
+        {
+          "seg": "永",
+          "font": "cjk",
+          "bbox_width": 54,
+          "advance": 54.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "永j",
+      "sum_bbox_width": 70.0,
+      "sum_advance": 69.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "永",
+          "font": "cjk",
+          "bbox_width": 54,
+          "advance": 54.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 16,
+          "advance": 15.0,
+          "delta": 1.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "摄影Photo 2024永和九年",
+      "sum_bbox_width": 643.0,
+      "sum_advance": 643.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "摄影",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "Photo 2024",
+          "font": "latin",
+          "bbox_width": 319,
+          "advance": 319.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "永和九年",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "Hello世界",
+      "sum_bbox_width": 247.0,
+      "sum_advance": 247.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 139,
+          "advance": 139.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 54,
+      "text": "世界Hello",
+      "sum_bbox_width": 247.0,
+      "sum_advance": 247.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 139,
+          "advance": 139.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "Hello",
+      "sum_bbox_width": 280.0,
+      "sum_advance": 280.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 280,
+          "advance": 280.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "世界",
+      "sum_bbox_width": 216.0,
+      "sum_advance": 216.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "AaBbCc",
+      "sum_bbox_width": 440.0,
+      "sum_advance": 440.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "AaBbCc",
+          "font": "latin",
+          "bbox_width": 440,
+          "advance": 440.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "永和九年",
+      "sum_bbox_width": 432.0,
+      "sum_advance": 432.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "永和九年",
+          "font": "cjk",
+          "bbox_width": 432,
+          "advance": 432.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "j",
+      "sum_bbox_width": 32.0,
+      "sum_advance": 31.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 32,
+          "advance": 31.0,
+          "delta": 1.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "fj",
+      "sum_bbox_width": 72.0,
+      "sum_advance": 72.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "fj",
+          "font": "latin",
+          "bbox_width": 72,
+          "advance": 72.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "f",
+      "sum_bbox_width": 41.0,
+      "sum_advance": 41.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "f",
+          "font": "latin",
+          "bbox_width": 41,
+          "advance": 41.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "y",
+      "sum_bbox_width": 64.0,
+      "sum_advance": 64.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "y",
+          "font": "latin",
+          "bbox_width": 64,
+          "advance": 64.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "j永",
+      "sum_bbox_width": 140.0,
+      "sum_advance": 139.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 32,
+          "advance": 31.0,
+          "delta": 1.0
+        },
+        {
+          "seg": "永",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "永j",
+      "sum_bbox_width": 140.0,
+      "sum_advance": 139.0,
+      "delta": 1.0,
+      "segments": [
+        {
+          "seg": "永",
+          "font": "cjk",
+          "bbox_width": 108,
+          "advance": 108.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "j",
+          "font": "latin",
+          "bbox_width": 32,
+          "advance": 31.0,
+          "delta": 1.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "摄影Photo 2024永和九年",
+      "sum_bbox_width": 1289.0,
+      "sum_advance": 1289.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "摄影",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "Photo 2024",
+          "font": "latin",
+          "bbox_width": 641,
+          "advance": 641.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "永和九年",
+          "font": "cjk",
+          "bbox_width": 432,
+          "advance": 432.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "Hello世界",
+      "sum_bbox_width": 496.0,
+      "sum_advance": 496.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 280,
+          "advance": 280.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        }
+      ]
+    },
+    {
+      "size": 108,
+      "text": "世界Hello",
+      "sum_bbox_width": 496.0,
+      "sum_advance": 496.0,
+      "delta": 0.0,
+      "segments": [
+        {
+          "seg": "世界",
+          "font": "cjk",
+          "bbox_width": 216,
+          "advance": 216.0,
+          "delta": 0.0
+        },
+        {
+          "seg": "Hello",
+          "font": "latin",
+          "bbox_width": 280,
+          "advance": 280.0,
+          "delta": 0.0
+        }
+      ]
+    }
+  ],
+  "claim_B_clean_contrast": {
+    "text": "j永和九年",
+    "size": 54,
+    "segments": [
+      "j",
+      "永和九年"
+    ],
+    "origins_current_bbox_advance": [
+      80,
+      96
+    ],
+    "origins_reference_advance": [
+      80,
+      95
+    ],
+    "origin_delta": [
+      0,
+      1
+    ],
+    "ink_bbox_mode": [
+      79,
+      154,
+      309,
+      209
+    ],
+    "ink_advance_mode": [
+      79,
+      154,
+      308,
+      209
+    ],
+    "registered_width_current": 232.0,
+    "registered_width_reference": 231.0
+  },
+  "claim_C_small_sizes": [
+    {
+      "min_side": 200,
+      "font_size": 12,
+      "H_latin": 15,
+      "H_mixed": 18,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.16666666666666666,
+      "ink_top_shift_over_size": -0.08333333333333333
+    },
+    {
+      "min_side": 300,
+      "font_size": 12,
+      "H_latin": 15,
+      "H_mixed": 18,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.16666666666666666,
+      "ink_top_shift_over_size": -0.08333333333333333
+    },
+    {
+      "min_side": 400,
+      "font_size": 12,
+      "H_latin": 15,
+      "H_mixed": 18,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.16666666666666666,
+      "ink_top_shift_over_size": -0.08333333333333333
+    },
+    {
+      "min_side": 444,
+      "font_size": 12,
+      "H_latin": 15,
+      "H_mixed": 18,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.16666666666666666,
+      "ink_top_shift_over_size": -0.08333333333333333
+    },
+    {
+      "min_side": 450,
+      "font_size": 12,
+      "H_latin": 15,
+      "H_mixed": 18,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.16666666666666666,
+      "ink_top_shift_over_size": -0.08333333333333333
+    },
+    {
+      "min_side": 500,
+      "font_size": 13,
+      "H_latin": 17,
+      "H_mixed": 20,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.15384615384615385,
+      "ink_top_shift_over_size": -0.07692307692307693
+    },
+    {
+      "min_side": 600,
+      "font_size": 16,
+      "H_latin": 20,
+      "H_mixed": 24,
+      "baseline_shift": -2,
+      "ink_top_shift": -1,
+      "baseline_shift_over_size": -0.125,
+      "ink_top_shift_over_size": -0.0625
+    },
+    {
+      "min_side": 740,
+      "font_size": 19,
+      "H_latin": 24,
+      "H_mixed": 29,
+      "baseline_shift": -2,
+      "ink_top_shift": -3,
+      "baseline_shift_over_size": -0.10526315789473684,
+      "ink_top_shift_over_size": -0.15789473684210525
+    },
+    {
+      "min_side": 750,
+      "font_size": 20,
+      "H_latin": 25,
+      "H_mixed": 30,
+      "baseline_shift": -3,
+      "ink_top_shift": -2,
+      "baseline_shift_over_size": -0.15,
+      "ink_top_shift_over_size": -0.1
+    },
+    {
+      "min_side": 800,
+      "font_size": 21,
+      "H_latin": 27,
+      "H_mixed": 32,
+      "baseline_shift": -3,
+      "ink_top_shift": -3,
+      "baseline_shift_over_size": -0.14285714285714285,
+      "ink_top_shift_over_size": -0.14285714285714285
+    },
+    {
+      "min_side": 1000,
+      "font_size": 27,
+      "H_latin": 33,
+      "H_mixed": 40,
+      "baseline_shift": -4,
+      "ink_top_shift": -3,
+      "baseline_shift_over_size": -0.14814814814814814,
+      "ink_top_shift_over_size": -0.1111111111111111
+    }
+  ]
+}
