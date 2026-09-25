@@ -1,0 +1,734 @@
+# Copyright (c) 2026 FrankZhangCC
+# GNU General Public License v3.0 - see LICENSE file for details
+
+"""
+EXIF信息处理辅助模块
+负责提取、解析和格式化照片的EXIF信息
+"""
+import csv
+import logging
+import io
+import os
+import piexif
+from PIL import Image, ImageCms
+from datetime import datetime
+from typing import Dict, Optional, Tuple, Union
+from .device_mapper import DeviceMapper
+
+
+class ExifHelper:
+    """EXIF信息处理助手类"""
+    
+    def __init__(self):
+        """初始化EXIF助手，创建设备映射器实例"""
+        self.logger = logging.getLogger(__name__)
+        self.device_mapper = DeviceMapper()
+    
+    def extract_exif_data(self, image_source: Union[str, bytes]) -> Optional[Dict[str, str]]:
+        """
+        提取图像的EXIF数据
+        
+        Args:
+            image_source: 图像文件路径(str)或图像二进制数据(bytes)
+            
+        Returns:
+            EXIF数据字典，如果无法提取则返回None
+        """
+        try:
+            exif_dict = piexif.load(image_source)
+            
+            # 提取所需字段
+            exif_data = {}
+            
+            # 图像信息
+            if "0th" in exif_dict:
+                # 相机品牌和型号
+                if piexif.ImageIFD.Make in exif_dict["0th"]:
+                    exif_data['camera_make'] = self._safe_decode(exif_dict["0th"][piexif.ImageIFD.Make])
+                
+                if piexif.ImageIFD.Model in exif_dict["0th"]:
+                    exif_data['camera_model'] = self._safe_decode(exif_dict["0th"][piexif.ImageIFD.Model])
+            
+            # Exif子IFD信息
+            if "Exif" in exif_dict:
+                # 镜头信息
+                if piexif.ExifIFD.LensModel in exif_dict["Exif"]:
+                    exif_data['lens_model'] = self._safe_decode(exif_dict["Exif"][piexif.ExifIFD.LensModel])
+                
+                # 焦距信息
+                if piexif.ExifIFD.FocalLength in exif_dict["Exif"]:
+                    focal_length = exif_dict["Exif"][piexif.ExifIFD.FocalLength]
+                    if isinstance(focal_length, tuple):
+                        # 如果是分数形式 (分子, 分母)，转换为浮点数
+                        actual_focal = focal_length[0] / focal_length[1]
+                        exif_data['focal_length'] = f"{actual_focal:.1f}"
+                    else:
+                        exif_data['focal_length'] = str(focal_length)
+                
+                # 35mm等效焦距（相机直接提供的，优先使用）
+                if piexif.ExifIFD.FocalLengthIn35mmFilm in exif_dict["Exif"]:
+                    fl35 = exif_dict["Exif"][piexif.ExifIFD.FocalLengthIn35mmFilm]
+                    fl35_value = fl35[0] / fl35[1] if isinstance(fl35, tuple) else float(fl35)
+                    exif_data['focal_length_35mm'] = str(int(round(fl35_value)))
+                
+                # 光圈
+                if piexif.ExifIFD.FNumber in exif_dict["Exif"]:
+                    f_number = exif_dict["Exif"][piexif.ExifIFD.FNumber]
+                    if isinstance(f_number, tuple):
+                        aperture = f_number[0] / f_number[1]
+                        exif_data['aperture'] = f"{aperture:.1f}"
+                    else:
+                        exif_data['aperture'] = str(f_number)
+                
+                # 快门速度
+                if piexif.ExifIFD.ExposureTime in exif_dict["Exif"]:
+                    exposure_time = exif_dict["Exif"][piexif.ExifIFD.ExposureTime]
+                    if isinstance(exposure_time, tuple):
+                        shutter_speed = exposure_time[0] / exposure_time[1]
+                        exif_data['shutter_speed'] = ExifHelper._format_shutter_speed(shutter_speed)
+                    else:
+                        exif_data['shutter_speed'] = str(exposure_time)
+                
+                # ISO
+                if piexif.ExifIFD.ISOSpeedRatings in exif_dict["Exif"]:
+                    iso = exif_dict["Exif"][piexif.ExifIFD.ISOSpeedRatings]
+                    exif_data['iso'] = str(iso)
+                
+                # 拍摄时间
+                if piexif.ExifIFD.DateTimeOriginal in exif_dict["Exif"]:
+                    date_str = self._safe_decode(exif_dict["Exif"][piexif.ExifIFD.DateTimeOriginal])
+                    formatted_date = ExifHelper._format_datetime(date_str)
+                    exif_data['datetime_original'] = formatted_date
+            
+            # GPS 信息提取
+            # piexif 将 GPS 数据存储在 "GPS" IFD 中，经纬度以 Rational 元组存储：
+            #   GPSLatitude: ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+            #   GPSLongitude: 同上
+            #   GPSLatitudeRef: b'N' 或 b'S'
+            #   GPSLongitudeRef: b'E' 或 b'W'
+            gps_str, gps_raw = ExifHelper._extract_gps(exif_dict)
+            if gps_str:
+                exif_data['gps'] = gps_str
+                exif_data['gps_raw'] = gps_raw
+            
+            # 记录设备信息到 CSV（独立 try/except，不影响 EXIF 提取结果）
+            if exif_data:
+                try:
+                    self._record_device_info(exif_data)
+                except Exception as e:
+                    self.logger.warning(f"记录设备信息失败（不影响 EXIF 提取结果）: {e}")
+            
+            return exif_data
+        except Exception as e:
+            self.logger.warning(f"EXIF提取错误: {str(e)}")
+            return None
+    
+    def extract_raw_exif(self, image_source: Union[str, bytes]) -> Optional[Dict]:
+        """
+        提取完整的原始EXIF字典（piexif格式），不做字段拆解
+        
+        Args:
+            image_source: 图像文件路径(str)或图像二进制数据(bytes)
+            
+        Returns:
+            完整的piexif EXIF字典，如果无法提取则返回None
+        """
+        try:
+            return piexif.load(image_source)
+        except Exception as e:
+            self.logger.warning(f"EXIF原始提取错误: {str(e)}")
+            return None
+
+    def _safe_decode(self, byte_string):
+        """
+        安全解码字节串到字符串，尝试多种编码方式
+        
+        Args:
+            byte_string: 需要解码的字节串
+            
+        Returns:
+            解码后的字符串
+        """
+        if isinstance(byte_string, str):
+            return byte_string
+        
+        if not isinstance(byte_string, bytes):
+            return str(byte_string)
+        
+        # 常见编码列表
+        encodings = ['utf-8', 'latin-1', 'cp1252', 'shift-jis', 'gbk', 'big5']
+        
+        for encoding in encodings:
+            try:
+                decoded = byte_string.decode(encoding, errors='replace')
+                # 移除null字符和其他控制字符
+                decoded = ''.join(char for char in decoded if ord(char) >= 32 or char in '\n\r\t')
+                return decoded.strip()
+            except UnicodeDecodeError:
+                continue
+        
+        # 如果所有编码都失败，使用latin-1（永远不会失败）但替换非打印字符
+        fallback = byte_string.decode('latin-1', errors='replace')
+        fallback = ''.join(char for char in fallback if ord(char) >= 32 or char in '\n\r\t')
+        return fallback.strip()
+    
+    def _record_device_info(self, exif_data: Dict[str, str]) -> None:
+        """
+        记录设备信息到CSV文件中
+        
+        Args:
+            exif_data: EXIF数据字典
+        """
+        import csv
+        from pathlib import Path
+        import os
+        from datetime import datetime
+        
+        # 确定记录文件路径（打包后位于 exe 同目录 data/，保持可写）
+        from src.utils.app_paths import get_app_dir
+        _app_data_dir = get_app_dir() / 'data'
+        camera_map_path = str(_app_data_dir / 'camera_map.csv')
+        lens_map_path = str(_app_data_dir / 'lens_map.csv')
+        
+        # 添加时间戳
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 处理相机信息
+        if 'camera_make' in exif_data and 'camera_model' in exif_data:
+            original_brand = exif_data['camera_make']
+            original_model = exif_data['camera_model']
+
+            # 双重去重检查：
+            #   1) 优先查 DeviceMapper 内存 dict（快，避免每张图读 CSV）
+            #   2) 内存未命中时再读 CSV 兜底（进程内可能存在多个 ExifHelper 实例，
+            #      各自内存 dict 独立，仅靠内存检查会导致同一设备被重复追加写入）
+            if (original_brand, original_model) not in self.device_mapper.camera_map and \
+                    not self._camera_exists_in_csv(camera_map_path, original_brand, original_model):
+                camera_map_file = Path(camera_map_path)
+                header_exists = camera_map_file.exists()
+                # ⚠️ 追加模式必须用 utf-8（utf-8-sig 在追加时会重复写出 BOM）；
+                # BOM 由 DeviceMapper._ensure_dbs_exist 创建文件时写入
+                with open(camera_map_path, 'a', newline='', encoding='utf-8') as csvfile:
+                    fieldnames = ['original_brand', 'original_model', 'mapped_brand', 'mapped_model', 'timestamp']
+                    writer = csv.writer(csvfile)
+                    
+                    if not header_exists:
+                        writer.writerow(fieldnames)
+                    
+                    # 默认情况下，映射值等于原始值
+                    writer.writerow([
+                        original_brand,
+                        original_model,
+                        original_brand,  # 默认映射品牌等于原始品牌
+                        original_model,  # 默认映射机型等于原始机型
+                        timestamp
+                    ])
+
+                # 写盘成功后同步更新内存 dict，避免同一实例处理后续图片时重复检查通过
+                self.device_mapper.camera_map[(original_brand, original_model)] = {
+                    'mapped_brand': original_brand,
+                    'mapped_model': original_model,
+                }
+        
+        # 处理镜头信息
+        if 'lens_model' in exif_data:
+            original_lens = exif_data['lens_model']
+
+            # 双重去重检查（同相机信息，内存 dict + CSV 兜底）
+            if original_lens not in self.device_mapper.lens_map and \
+                    not self._lens_exists_in_csv(lens_map_path, original_lens):
+                lens_map_file = Path(lens_map_path)
+                header_exists = lens_map_file.exists()
+                # ⚠️ 追加模式必须用 utf-8，理由同上 camera_map 追加点
+                with open(lens_map_path, 'a', newline='', encoding='utf-8') as csvfile:
+                    fieldnames = ['original_lens', 'mapped_lens', 'short_lens', 'brand', 'mount', 'timestamp']
+                    writer = csv.writer(csvfile)
+
+                    if not header_exists:
+                        writer.writerow(fieldnames)
+
+                    # 默认情况下，映射值等于原始值
+                    writer.writerow([original_lens, original_lens, original_lens, '', '', timestamp])
+
+                # 写盘成功后同步更新内存 dict（含短版映射）
+                self.device_mapper.lens_map[original_lens] = original_lens
+                self.device_mapper.short_lens_map[original_lens] = original_lens
+
+    @staticmethod
+    def _camera_exists_in_csv(camera_map_path: str, original_brand: str, original_model: str) -> bool:
+        """
+        读取相机映射 CSV，检查 (原始品牌, 原始机型) 是否已存在
+
+        用于跨 ExifHelper 实例的去重兜底：内存 dict 只在各实例初始化时加载一次，
+        其他实例写入 CSV 后不会同步到本实例，因此必须直接检查 CSV 文件本身。
+
+        Args:
+            camera_map_path: 相机映射 CSV 文件路径
+            original_brand: 原始品牌名
+            original_model: 原始机型名
+
+        Returns:
+            CSV 中是否已存在该相机记录
+        """
+        try:
+            if not os.path.exists(camera_map_path):
+                return False
+            # utf-8-sig 读：自动剥离 BOM，兼容有/无 BOM 两种历史文件
+            with open(camera_map_path, 'r', encoding='utf-8-sig') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if row.get('original_brand', '').strip() == original_brand and \
+                            row.get('original_model', '').strip() == original_model:
+                        return True
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"读取相机映射 CSV 失败: {e}")
+        return False
+
+    @staticmethod
+    def _lens_exists_in_csv(lens_map_path: str, original_lens: str) -> bool:
+        """
+        读取镜头映射 CSV，检查原始镜头名是否已存在
+
+        用途同 _camera_exists_in_csv：跨 ExifHelper 实例的去重兜底。
+
+        Args:
+            lens_map_path: 镜头映射 CSV 文件路径
+            original_lens: 原始镜头名
+
+        Returns:
+            CSV 中是否已存在该镜头记录
+        """
+        try:
+            if not os.path.exists(lens_map_path):
+                return False
+            with open(lens_map_path, 'r', encoding='utf-8-sig') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if row.get('original_lens', '').strip() == original_lens:
+                        return True
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"读取镜头映射 CSV 失败: {e}")
+        return False
+    
+    def get_formatted_exif_for_display(self, exif_data: Dict[str, str]) -> Dict[str, str]:
+        """
+        获取格式化的EXIF数据，包含映射后的信息
+        
+        Args:
+            exif_data: 原始EXIF数据字典
+            
+        Returns:
+            包含原始和映射后数据的字典
+        """
+        if not exif_data:
+            return {}
+        
+        formatted_data = {}
+        
+        # 处理品牌和机型（一起处理，因为它们关联在一起）
+        if 'camera_make' in exif_data and 'camera_model' in exif_data:
+            original_make = exif_data['camera_make']
+            original_model = exif_data['camera_model']
+            
+            mapped_make, mapped_model = self.device_mapper.get_mapped_brand_and_model(original_make, original_model)
+            
+            # 只返回映射后的值，不显示映射标记
+            formatted_data['camera_make'] = mapped_make
+            formatted_data['camera_model'] = mapped_model
+        elif 'camera_make' in exif_data:
+            # 如果只有品牌没有型号，使用原始值（虽然这种情况比较少见）
+            original_make = exif_data['camera_make']
+            formatted_data['camera_make'] = original_make
+        elif 'camera_model' in exif_data:
+            # 如果只有型号没有品牌，使用映射后的型号
+            original_model = exif_data['camera_model']
+            mapped_model = self.device_mapper.get_mapped_model(original_model)
+            formatted_data['camera_model'] = mapped_model
+        
+        # 处理镜头
+        if 'lens_model' in exif_data:
+            original_lens = exif_data['lens_model']
+            mapped_lens = self.device_mapper.get_mapped_lens(original_lens)
+            short_lens = self.device_mapper.get_short_lens(original_lens)
+            formatted_data['lens_model'] = mapped_lens
+            formatted_data['short_lens'] = short_lens
+        
+        # 其他非设备信息保持不变
+        for key in ['focal_length', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
+            if key in exif_data:
+                formatted_data[key] = exif_data[key]
+        
+        return formatted_data
+
+    @staticmethod
+    def get_file_info(image: Image.Image) -> Dict[str, str]:
+        """
+        提取图像文件级元数据（格式、色彩空间、像素尺寸）
+
+        Args:
+            image: PIL Image 对象
+
+        Returns:
+            包含 format, color_space, width, height 的字典
+        """
+        img_format = image.format or "未知"
+        img_width, img_height = image.size
+
+        icc = image.info.get('icc_profile')
+        if icc:
+            try:
+                color_space = ImageCms.getProfileDescription(io.BytesIO(icc))
+            except Exception:
+                color_space = "未知色彩空间"
+        else:
+            color_space = "sRGB（默认）"
+
+        return {
+            'format': img_format,
+            'color_space': color_space,
+            'width': img_width,
+            'height': img_height,
+        }
+
+    def get_display_data(self, exif_data: Dict[str, str]) -> Dict[str, str]:
+        """
+        获取用于显示的数据，包括相机型号（品牌+型号）和镜头型号的组合
+        
+        Args:
+            exif_data: 原始EXIF数据字典
+            
+        Returns:
+            包含用于显示的数据的字典
+        """
+        if not exif_data:
+            return {}
+        
+        # 获取格式化的EXIF数据
+        formatted_exif = self.get_formatted_exif_for_display(exif_data)
+        
+        display_data = {}
+        
+        # 组合相机型号（品牌+型号），同时保留映射后的品牌供 render_context 暴露
+        if 'camera_make' in formatted_exif and 'camera_model' in formatted_exif:
+            camera_make = formatted_exif['camera_make']
+            camera_model = formatted_exif['camera_model']
+            display_data['camera_make'] = camera_make
+            display_data['camera_combined'] = f"{camera_make} {camera_model}"
+        elif 'camera_make' in formatted_exif:
+            display_data['camera_make'] = formatted_exif['camera_make']
+            display_data['camera_combined'] = formatted_exif['camera_make']
+        elif 'camera_model' in formatted_exif:
+            display_data['camera_combined'] = formatted_exif['camera_model']
+        
+        # 添加镜头型号
+        if 'lens_model' in formatted_exif:
+            display_data['lens_model'] = formatted_exif['lens_model']
+        if 'short_lens' in formatted_exif:
+            display_data['short_lens'] = formatted_exif['short_lens']
+        
+        # 合并相机+镜头为单行输出（用于样式配置中 camera_lens 元素）
+        camera_str = display_data.get('camera_combined', '')
+        lens_str = display_data.get('lens_model', '')
+        if camera_str and lens_str:
+            display_data['camera_lens_combined'] = f"{camera_str}  |  {lens_str}"
+        elif camera_str:
+            display_data['camera_lens_combined'] = camera_str
+        elif lens_str:
+            display_data['camera_lens_combined'] = lens_str
+
+        # 竖幅/方形图片专用：相机 + 短版镜头合并
+        short_lens_str = display_data.get('short_lens', '')
+        if camera_str and short_lens_str:
+            display_data['camera_lens_combined_short'] = f"{camera_str}  |  {short_lens_str}"
+        elif camera_str:
+            display_data['camera_lens_combined_short'] = camera_str
+        elif short_lens_str:
+            display_data['camera_lens_combined_short'] = short_lens_str
+        
+        # 添加格式化的曝光参数
+        display_data['exif_formatted'] = ExifHelper.format_exif_for_display(exif_data)
+        
+        # 添加原始数据用于GUI展示
+        for key in ['camera_make', 'camera_model', 'focal_length', 'focal_length_35mm', 'aperture', 'shutter_speed', 'iso', 'datetime_original', 'gps']:
+            if key in exif_data:
+                display_data[f'raw_{key}'] = exif_data[key]
+        
+        return display_data
+    
+    @staticmethod
+    def _format_shutter_speed(shutter_speed: float) -> str:
+        """
+        格式化快门速度显示
+        
+        Args:
+            shutter_speed: 以秒为单位的快门速度
+            
+        Returns:
+            格式化的快门速度字符串
+        """
+        if shutter_speed >= 1.0:
+            # >=1秒时显示小数形式
+            return f"{shutter_speed:.1f}"
+        else:
+            # <1秒时显示分数形式
+            denominator = round(1 / shutter_speed)
+            return f"1/{denominator}"
+    
+    @staticmethod
+    def _format_datetime(datetime_str: str) -> str:
+        """
+        格式化日期时间字符串
+        
+        Args:
+            datetime_str: 原始日期时间字符串
+            
+        Returns:
+            格式化后的日期时间字符串 (yyyy.mm.dd hh:mm:ss)
+        """
+        try:
+            # 解析原始日期时间
+            dt = datetime.strptime(datetime_str, "%Y:%m:%d %H:%M:%S")
+            # 格式化为指定格式
+            return dt.strftime("%Y.%m.%d %H:%M:%S")
+        except ValueError:
+            # 如果解析失败，返回原始字符串
+            return datetime_str
+    
+    @staticmethod
+    def _extract_gps(exif_dict: dict) -> Tuple[Optional[str], Optional[dict]]:
+        """
+        从 EXIF 字典中提取 GPS 信息并格式化为度分秒 (DMS) 字符串
+        
+        piexif 将 GPS 坐标存储为 Rational 元组：
+          GPSLatitude:  ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+          GPSLongitude: 同上
+          GPSLatitudeRef:  b'N' 或 b'S'（bytes 类型）
+          GPSLongitudeRef: b'E' 或 b'W'（bytes 类型）
+        
+        Args:
+            exif_dict: piexif.load() 返回的完整 EXIF 字典
+            
+        Returns:
+            (gps_dms_string, raw_gps_dict) 或 (None, None)
+        """
+        if 'GPS' not in exif_dict:
+            return None, None
+        
+        gps = exif_dict['GPS']
+        
+        # 提取经纬度坐标和方向标识
+        lat = gps.get(piexif.GPSIFD.GPSLatitude)
+        lat_ref = gps.get(piexif.GPSIFD.GPSLatitudeRef)
+        lon = gps.get(piexif.GPSIFD.GPSLongitude)
+        lon_ref = gps.get(piexif.GPSIFD.GPSLongitudeRef)
+        
+        # 四个字段缺一不可
+        if not all([lat, lat_ref, lon, lon_ref]):
+            return None, None
+        
+        # 确保坐标是三个 Rational 元组的格式
+        if not (isinstance(lat, tuple) and len(lat) == 3):
+            return None, None
+        if not (isinstance(lon, tuple) and len(lon) == 3):
+            return None, None
+        
+        # 分别格式化为 DMS 字符串
+        lat_str = ExifHelper._format_dms(lat, lat_ref)
+        lon_str = ExifHelper._format_dms(lon, lon_ref)
+        
+        gps_str = f"{lat_str} {lon_str}"
+        
+        # 收集原始 GPS 数据（含海拔）
+        raw = {
+            'latitude': lat,
+            'latitude_ref': lat_ref,
+            'longitude': lon,
+            'longitude_ref': lon_ref,
+        }
+        
+        return gps_str, raw
+    
+    @staticmethod
+    def _format_dms(coords: tuple, ref) -> str:
+        """
+        将 piexif Rational 坐标元组格式化为度分秒 (DMS) 字符串
+        
+        Args:
+            coords: ((deg_num, deg_den), (min_num, min_den), (sec_num, sec_den))
+            ref: 方向标识 (b'N'/b'S'/b'E'/b'W' 或字符串)
+            
+        Returns:
+            格式化后的 DMS 字符串，如 "40°26'46.1\"N"
+        """
+        # 将 Rational 元组转为浮点数：值 = 分子 / 分母
+        deg = float(coords[0][0]) / float(coords[0][1])
+        min_val = float(coords[1][0]) / float(coords[1][1])
+        sec = float(coords[2][0]) / float(coords[2][1])
+        
+        # 方向标识可能是 bytes，需解码
+        ref_str = ref.decode('ascii') if isinstance(ref, bytes) else str(ref)
+        
+        return f"{int(deg)}°{int(min_val)}'{sec:.1f}\"{ref_str}"
+    
+    # ------------------------------------------------------------------
+    # 渲染链路共享格式化方法（唯一数据源）
+    #
+    # exif 组合文本（format_exif_for_display）与 RenderContext 的四个
+    # *_formatted 单独元素键共用以下方法，保证同一种数据在所有渲染
+    # 元素中的取值与格式完全一致；新增显示格式时只改这里。
+    # 显示格式约定（与现有样式消费方式对齐）：
+    #   焦距 '70mm'（含单位）、光圈 'f/5.6'（含前缀）、快门 '1/800s'（含单位）、
+    #   ISO 返回裸值 '250' —— ISO 前缀由样式标签元素（如 FilmClip 的
+    #   defined_text 'ISO'）或 exif 组合文本自行承担。
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def format_focal_length(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        焦距显示文本（唯一格式化点）。
+
+        取值优先级：35mm 等效焦距（'focal_length_35mm'）→ 物理焦距
+        （'focal_length'），统一保留个位数整数（'70.0'/'70' → '70mm'）。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '70mm'；无焦距数据返回 None；非数值脏数据原样拼接（不抛异常）
+        """
+        if not exif_data:
+            return None
+        fl = exif_data.get('focal_length_35mm') or exif_data.get('focal_length')
+        if not fl:
+            return None
+        try:
+            return f"{round(float(fl))}mm"
+        except (TypeError, ValueError):
+            return f"{fl}mm"
+
+    @staticmethod
+    def format_aperture(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        光圈显示文本（唯一格式化点），如 'f/5.6'。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 'f/5.6'；无光圈数据返回 None
+        """
+        if not exif_data:
+            return None
+        aperture = exif_data.get('aperture')
+        return f"f/{aperture}" if aperture else None
+
+    @staticmethod
+    def format_shutter_speed_text(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        快门显示文本（唯一格式化点），如 '1/800s'。
+
+        与 _format_shutter_speed(秒值) 的区别：本方法面向渲染显示，
+        输入 exif_data，在提取层已格式化的字符串上附加单位。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '1/800s'；无快门数据返回 None
+        """
+        if not exif_data:
+            return None
+        shutter = exif_data.get('shutter_speed')
+        return f"{shutter}s" if shutter else None
+
+    @staticmethod
+    def get_iso_value(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        ISO 显示值（唯一取值点），返回裸数值字符串如 '250'。
+
+        不带 'ISO' 前缀：前缀由样式标签元素（如 FilmClip 的 defined_text
+        'ISO'）或 exif 组合文本承担——各消费点前缀语义不同，数值必须同源。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            如 '250'；无 ISO 数据返回 None
+        """
+        if not exif_data:
+            return None
+        iso = exif_data.get('iso')
+        return str(iso) if iso else None
+
+    @staticmethod
+    def format_exif_for_display(exif_data: Dict[str, str]) -> str:
+        """
+        将EXIF数据格式化为相框显示文本
+
+        组合文本由四个共享格式化方法的结果组装而成，与 RenderContext
+        的单独元素键同源（唯一差异：ISO 段在此处带 'ISO' 前缀，因组合
+        文本没有样式标签承担前缀职责）。
+
+        Args:
+            exif_data: EXIF数据字典
+
+        Returns:
+            格式化的EXIF显示文本
+        """
+        if not exif_data:
+            return ""
+
+        # 组装相框显示文本（各段与单独元素键同源）
+        parts = []
+
+        # 焦距（'70mm'，含单位）
+        fl_text = ExifHelper.format_focal_length(exif_data)
+        if fl_text:
+            parts.append(fl_text)
+
+        # 光圈（'f/5.6'，含前缀）
+        aperture_text = ExifHelper.format_aperture(exif_data)
+        if aperture_text:
+            parts.append(aperture_text)
+
+        # 快门（'1/800s'，含单位）
+        shutter_text = ExifHelper.format_shutter_speed_text(exif_data)
+        if shutter_text:
+            parts.append(shutter_text)
+
+        # ISO（组合文本中带前缀；单独元素键返回裸值，见 get_iso_value）
+        iso_value = ExifHelper.get_iso_value(exif_data)
+        if iso_value:
+            parts.append(f"ISO{iso_value}")
+
+        return ", ".join(parts)
+    
+    @staticmethod
+    def get_camera_brand(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        从EXIF数据中获取相机品牌
+        
+        Args:
+            exif_data: EXIF数据字典
+            
+        Returns:
+            相机品牌名称
+        """
+        if 'camera_make' in exif_data:
+            return exif_data['camera_make'].strip().lower()
+        return None
+    
+    @staticmethod
+    def get_camera_model(exif_data: Dict[str, str]) -> Optional[str]:
+        """
+        从EXIF数据中获取相机型号
+        
+        Args:
+            exif_data: EXIF数据字典
+            
+        Returns:
+            相机型号
+        """
+        if 'camera_model' in exif_data:
+            return exif_data['camera_model'].strip()
+        return None

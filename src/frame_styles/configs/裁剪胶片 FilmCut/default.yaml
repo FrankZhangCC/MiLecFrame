@@ -1,0 +1,80 @@
+﻿name: 裁剪胶片 FilmCut
+colors:
+  text: '#000000'
+  custom_bg_color: "#0B0904"
+  custom_bg_text_scheme: "dark"
+  custom_text_dark_color: "#F3D28C"
+fonts:
+  size_ratio: 0.018
+  latin:
+    family: Gotham
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+    weight: medium
+  cjk:
+    family: GlowSansSC-Normal
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+    weight: medium
+  line_spacing_ratio: 0.005
+layout:
+  expand_canvas:
+    enabled: true
+    top: 0.07
+    bottom: 0.07
+    left: 0.03
+    right: 0.03
+  padding:
+    top: 0.01
+    bottom: 0.01
+    left: 0.01
+    right: 0.01
+  info_position:
+    camera_lens:
+      placement: outside
+      position: top-left
+      alignment: left
+      margin_top: 0.008
+      margin_bottom: 0.0
+      margin_left: 0.0
+      margin_right: 0.0
+      tree_align: true
+    exif:
+      placement: outside
+      position: bottom-left
+      alignment: left
+      margin_top: 0.0
+      margin_bottom: 0.017
+      margin_left: 0.0
+      margin_right: 0.0
+    timestamp_author:
+      placement: outside
+      position: bottom-right
+      alignment: right
+      margin_top: 0.0
+      margin_bottom: 0.017
+      margin_left: 0.0
+      margin_right: 0.0
+    location:
+      placement: outside
+      position: top-right
+      alignment: right
+      margin_top: 0.008
+      margin_bottom: 0.0
+      margin_left: 0.0
+      margin_right: 0.0
+logo:
+  enabled: true
+  alignment: both-center
+  size_ratio: 0.03
+  diagonal_limit_ratio: 3.0
+  placement: outside
+  position: bottom-center
+  margin_top: 0.0
+  margin_bottom: 0.018
+  margin_left: 0.0
+  margin_right: 0.0

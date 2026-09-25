@@ -1,0 +1,231 @@
+=============================================================================
+  相框样式配置文件模板
+  使用方式：复制此文件，填写各项参数，发给AI即可生成 YAML 配置
+  参考: README.md 样式配置规范章节
+=============================================================================
+
+【1. 基本信息】
+  - 样式名称: [________________]  (如: Polaroid / 经典白框 / Modern ...)
+  - 文件名:   [________________]  (如: Polaroid.yaml)
+  - 变体:     □ 单文件  □ 文件夹变体（需要时在【9】中列出变体列表）
+  - 默认竖图适配 default_portrait_adaptation（顶层可选字段）:
+       □ 不启用（缺省/none，保持旧行为，推荐绝大多数样式）
+       □ clockwise（顺时针适配）
+       □ counterclockwise（逆时针适配）
+    说明：仅对竖图生效——渲染前整帧旋转 90° 按横向构图布局，输出前还原；
+    横图/方形图不受预设影响（保持原方向）。仅当用户在图片处理页选择
+    "默认（跟随样式）"时生效，用户显式选择"顺/逆时针适配"会对所有图片
+    生效并覆盖本值。
+    只接受 clockwise / counterclockwise / none 三个值（非法值整份样式拒绝加载）。
+
+
+【2. 画布扩展 expand_canvas】（相对于原图长边的比例）
+  - 是否启用: □ 是  □ 否
+  - top:    [____]  (例: 0.03 = 长边的 3%)
+  - bottom: [____]
+  - left:   [____]
+  - right:  [____]
+
+
+【3. 安全区域 padding】（从画布边缘向内收缩的比例，约束所有叠加元素）
+  - top:    [____]  (常用 0.02)
+  - bottom: [____]
+  - left:   [____]
+  - right:  [____]
+
+
+【4. 字体 fonts】
+
+  支持拉丁（Latin）和 CJK（中文/日文）独立配置，留空则使用系统预装字体。
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 拉丁字体 (Latin):                                                  │
+  │   - 自定义文件: latin.family  = [________]  (例: Gotham)          │
+  │   - 当前字重:   latin.weight  = [________]  (light / regular / medium)
+  │   - 三档字重映射: latin.weights =                                   │
+  │       light:   [________]  (例: Light, 对应文件后缀)                │
+  │       regular: [________]  (例: Book, 对应文件后缀)                 │
+  │       medium:  [________]  (例: Medium, 对应文件后缀)               │
+  │   - 或启用系统字体: latin.system = Segoe UI（勾选则忽略 family）    │
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ CJK 字体:                                                          │
+  │   - 自定义文件: cjk.family  = [________]  (例: GlowSansSC-Normal)   │
+  │   - 当前字重:   cjk.weight  = [________]  (light / regular / medium)│
+  │   - 三档字重映射: cjk.weights =                                     │
+  │       light:   [________]  (例: Light)                              │
+  │       regular: [________]  (例: Regular)                            │
+  │       medium:  [________]  (例: Medium)                             │
+  │   - 或启用系统字体: cjk.system = Microsoft JhengHei UI（勾选则忽略）│
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 全局:                                                              │
+  │   - 默认尺寸 size_ratio: [____]  (例: 0.015)                       │
+  │   - 行间距 line_spacing_ratio: [____]  (例: 0.005，仅多行文本生效) │
+  └─────────────────────────────────────────────────────────────────────┘
+  各元素独立尺寸（留空则使用 size_ratio）:
+      exif: [________]
+      timestamp: [________]
+      timestamp_author: [________]
+      camera: [________]
+      lens: [________]
+      camera_lens: [________]
+      author: [________]
+      location: [________]
+      defined_text_01: [________]
+      defined_text_02: [________]
+      defined_text_03: [________]
+      defined_text_04: [________]
+      custom_text: [________]
+
+
+【5. 元素布局 info_position】
+
+说明:
+  绝对定位元素 = 填写 position / alignment / margin_*
+  相对定位元素 = 填写 relative_to / relative_position / alignment / relative_margin
+   系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 元素1: [______________]  (key)                                       │
+  │   定位方式: □ 绝对  □ 相对                                          │
+  │   [绝对] position: [______________]  (bottom-left / bottom-right / ...)
+  │          alignment: [______________]  (left / center / both-center / right / ...)
+  │          margin_top: [____]  margin_bottom: [____]                   │
+  │          margin_left: [____]  margin_right: [____]                   │
+  │   [相对] relative_to: [______________]                              │
+  │          relative_position: [______________]  (below / above / left-of / right-of)
+  │          alignment: [______________]  (both-center 等效于 center)    │
+  │          relative_margin: [____]  (默认 0.01)                        │
+  │          offset_x_ratio: [____]  offset_y_ratio: [____]  (可选, 默认 0)
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 元素2: [______________]  (key)                                       │
+  │   定位方式: □ 绝对  □ 相对                                          │
+  │   ...
+   └─────────────────────────────────────────────────────────────────────┘
+
+
+【6. 预定义文本 defined_texts】（固定内容文本，内容写死在配置中）
+  采用补零编号命名：defined_text_01, defined_text_02, ...
+  与 info_position 共享同一命名空间，relative_to 可跨区域引用
+  每个条目包含 content（文本内容）和标准布局参数
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 文本1 key: [defined_text_01]                                         │
+  │   content: [________]  (如: "FL")                                    │
+  │   □ 绝对定位  或  □ 相对定位（参数与 info_position 完全相同）        │
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 文本2 key: [defined_text_02]                                         │
+  │   content: [________]  (如: "shutter")                               │
+  │   □ 绝对定位  或  □ 相对定位                                         │
+  └─────────────────────────────────────────────────────────────────────┘
+
+
+【7. 自定义文本 custom_text】（用户在 GUI 运行时输入）
+  - 是否启用: □ 是  □ 否
+  - 若启用:
+      以下为标准布局参数（用户内容由 GUI 文本框输入）：
+      □ 绝对定位: position / alignment / margin_*
+      □ 相对定位: relative_to / relative_position / alignment / relative_margin
+      line_spacing_ratio: [____]  (可选，覆盖全局行间距，仅多行文本生效)
+
+
+【8. 颜色 colors】（按文本类型独立覆盖，留空则使用系统兜底）
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 自定义背景填充色（可选，指定后 GUI 背景样式不可选）:                  │
+  │   custom_bg_color: [______________]  (例: "#FF6B6B" 或 [255,107,107]) │
+  │   custom_bg_text_scheme: [________]  (可选: dark / light；留空自动 │
+  │                                           根据亮度检测)             │
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 通用兜底:                                                           │
+  │   custom_text_light_color: [______________]  (例: [51,51,51] 或 "#333")
+  │   custom_text_dark_color:  [______________]  (例: [204,204,204] 或 "#CCC")
+  ├─────────────────────────────────────────────────────────────────────┤
+  │ 按类型覆盖（如需）:                                                 │
+  │   custom_exif_light_color: [____]   dark: [____]                    │
+  │   custom_timestamp_light_color: [____]   dark: [____]               │
+  │   custom_timestamp_author_light_color: [____]   dark: [____]        │
+  │   custom_camera_light_color: [____]   dark: [____]                  │
+  │   custom_lens_light_color: [____]   dark: [____]                    │
+  │   custom_camera_lens_light_color: [____]   dark: [____]             │
+  │   custom_author_light_color: [____]   dark: [____]                  │
+  │   custom_location_light_color: [____]   dark: [____]                │
+  └─────────────────────────────────────────────────────────────────────┘
+
+
+【9. Logo】
+  - 启用: □ 是  □ 否
+  - 若启用:
+      position: [______________]  (bottom-right / top-left / ...)
+      alignment: [______________]  (left / center / both-center / right / ...)
+      size_ratio: [____]
+      max_dim_limit_ratio: [____]  (可选，默认 2.5；长边长度上限 = ratio × size_ratio × reference_side)
+      margin_top: [____]  margin_bottom: [____]
+      margin_left: [____]  margin_right: [____]
+      或使用相对定位:
+      relative_to: [______________]
+      relative_position: [______________]
+      alignment: [______________]  (both-center 等效于 center)
+       relative_margin: [____]
+
+
+【10. 自定义矩形 rectangles】
+   用于绘制装饰性矩形，支持明暗背景自适应和独立圆角。
+   命名规则：rect_01, rect_02, ...（补零编号）
+
+   ⚠ 效果栈迁移提示（重要）：
+   矩形默认绘制在「原图下方」（legacy 模式，照片内不可见）。
+   只要显式写出 fill: 字段，或开启 stroke:/gaussian_blur: 的 enabled: true，
+   该矩形就会迁移到「原图上方」的效果栈（照片内可见），
+   固定层级为：高斯模糊底层 → 纯色填充中层 → 内描边顶层。
+   仅写 stroke.enabled: false / gaussian_blur.enabled: false 不会触发迁移。
+
+   颜色在【8. 颜色 colors】中定义：
+     custom_rect_01_dark_color:  [________]   (深色背景时；填充色)
+     custom_rect_01_light_color: [________]  (浅色背景时；填充色)
+     custom_rect_01_stroke_dark_color:  [________]  (可选，描边色)
+     custom_rect_01_stroke_light_color: [________]  (可选，描边色)
+     （描边色四级回退：当前方案描边色 → 另一方案描边色 →
+       当前方案填充色 → 另一方案填充色）
+
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │ 矩形1 key: [rect_01]                                                 │
+   │   width_ratio: [____]  (相对原图短边的宽度比例，如 0.85)              │
+   │   height_ratio: [____]  (相对原图短边的高度比例，如 0.04)             │
+   │   opacity: [____]  (0.0-1.0，默认 1.0；仅控制填充层透明度)             │
+   │   position: [______________]  (锚点位置，支持全部标准锚点)            │
+   │   alignment: [______________]  (对齐方式)                              │
+   │   margin_top/bottom/left/right: [____]  (可选，默认 0)                 │
+   │   corner_radius: (可选，省略则直角；定义外轮廓，描边自动内缩)          │
+   │     top_left: [____]  top_right: [____]                               │
+   │     bottom_left: [____]  bottom_right: [____]                         │
+   │                                                                        │
+   │   # ── 以下三块为效果栈字段（v2.6 新增，全部可选） ──                  │
+   │   fill:  (纯色填充开关；显式写出即迁移到原图上方效果栈)               │
+   │     enabled: [true/false]  (缺失时默认 true)                           │
+   │   gaussian_blur:  (矩形底层磨砂效果)                                   │
+   │     enabled: [true/false]  (缺失时默认 false)                          │
+   │     radius: [____]  (全分辨率等效模糊半径，默认 200，上限 1000)        │
+   │   stroke:  (内描边，不改变矩形外部尺寸与定位)                          │
+   │     enabled: [true/false]  (缺失时默认 false)                          │
+   │     radius_ratio: [____]  (描边厚度相对原图短边比例，默认 0.005)       │
+   │     opacity: [____]  (0.0-1.0，描边独立透明度，默认 1.0)               │
+   ├─────────────────────────────────────────────────────────────────────┤
+   │ 矩形2 key: [rect_02]                                                 │
+   │   ...
+   └─────────────────────────────────────────────────────────────────────┘
+
+
+【11. 变体配置】（仅当【1】选择"文件夹变体"时填写）
+  - 需要支持的缺失字段: □ location  □ author  □ 其他 [______]
+  - 自动生成的变体文件名:
+      default.yaml               (兜底)
+      no_location.yaml           (location 缺失)
+      no_author.yaml             (author 缺失)
+      no_location_no_author.yaml (两者均缺失)
+  - 变体配置精简规则: 移除与缺失字段相关的 colors / fonts.sizes / info_position 条目
+  - ⚠ 若【1】声明了 default_portrait_adaptation，每个变体文件都必须
+    显式写入相同值（变体是独立完整配置，不会从 default.yaml 继承；
+    遗漏会导致适配随运行时数据可用性漂移）
+
+=============================================================================
+  填写完毕后直接发给AI，我会按模板生成 YAML 配置文件。
+=============================================================================

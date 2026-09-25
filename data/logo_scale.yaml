@@ -1,0 +1,9 @@
+# LOGO 品牌尺寸补偿系数
+# keyword: 文件名匹配关键字（不区分大小写）
+# scale_factor: 缩放系数（1.0=不变，<1.0 缩小，>1.0 放大）
+# 细长条 LOGO（如索尼/佳能/富士）需缩小，紧凑型 LOGO（如哈苏）需放大
+
+hasselblad_logo: 1.5
+sony_logo: 0.7
+canon_logo: 0.7
+fujifilm_logo: 0.7
