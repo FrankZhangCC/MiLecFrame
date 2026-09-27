@@ -11,6 +11,7 @@
 - 胶片栏（底部横向缩略图列表）
 - 手风琴式配置面板（5 个折叠 Tab）
 """
+import hashlib
 import logging
 import os
 import shutil
@@ -49,6 +50,10 @@ from src.utils.config_manager import default_config_manager
 from src.core.image_processor import ImageProcessor
 from src.core.blur_cache import PreparedBlurLRU
 from src.core.renderer import RenderMetadata, RenderOptions
+# 输出标识导出校验（只读验证器，GUI 不自行拼接任何元数据字段）
+from src.utils.output_metadata import (
+    read_output_software, verify_output_metadata, OutputMetadataError,
+)
 # 竖图方向适配（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §6）：
 # 枚举值单点来源于 utils 工具模块，GUI 不自定义第二份合法值集合
 from src.utils.orientation_adaptation import (
@@ -1260,6 +1265,57 @@ class ImageProcessingPage(QWidget):
             "胶片栏 — 将图片拖拽到此处或点击\"添加图片\"按钮加载"
         )
 
+    @staticmethod
+    def _file_sha256(path: str) -> str:
+        """计算文件 SHA-256（用于导出副本与源结果的一致性校验）"""
+        digest = hashlib.sha256()
+        with open(path, 'rb') as fh:
+            for chunk in iter(lambda: fh.read(65536), b''):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def _export_verified(self, src_path: str, dst_path: str) -> None:
+        """
+        导出结果文件并验证：先复制到同目录临时文件，校验通过才发布到目标
+
+        校验两项（方案 §6.4）：
+          1. 副本与源结果的 SHA-256 完全一致（证明复制完整、未经二次编码）；
+          2. 用生产只读验证器读回标识（Software 字段必须有效且与源一致）。
+
+        校验失败时只清理本次临时副本，不动目标位置可能已存在的旧文件。
+        GUI 只调用验证器，不自行拼接或修复任何元数据字段。
+
+        Args:
+            src_path: 已成功生成的结果文件
+            dst_path: 用户选择的导出目标路径
+
+        Raises:
+            OutputMetadataError/OSError: 复制或校验失败
+        """
+        tmp_path = dst_path + '.part'
+        try:
+            shutil.copy2(src_path, tmp_path)
+
+            # 1) 哈希一致：排除复制不完整或被二次编码
+            if self._file_sha256(src_path) != self._file_sha256(tmp_path):
+                raise OutputMetadataError("导出副本与源结果哈希不一致")
+
+            # 2) 读回标识：源文件的软件值作为期望值，验证副本字段一致
+            expected = read_output_software(src_path)
+            suffix = Path(tmp_path).suffix.lower()
+            expected_format = 'PNG' if suffix == '.png' else 'JPEG'
+            verify_output_metadata(tmp_path, expected_format, expected)
+
+            # 验证通过才替换目标输出
+            os.replace(tmp_path, dst_path)
+            tmp_path = None
+        finally:
+            if tmp_path is not None and os.path.exists(tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except OSError as e:
+                    logger.warning(f"[output-metadata] 导出临时文件清理失败 {tmp_path}: {e}")
+
     def _on_export_current(self):
         """导出当前选中的图片到用户选择的位置"""
         if self.current_index < 0 or self.current_index >= len(self.file_items):
@@ -1278,7 +1334,14 @@ class ImageProcessingPage(QWidget):
             "JPEG 图片 (*.jpg);;PNG 图片 (*.png)"
         )
         if path:
-            shutil.copy2(item.result_path, path)
+            try:
+                self._export_verified(item.result_path, path)
+            except Exception as e:
+                # 本次导出失败：不宣称成功，目标位置不留下未通过校验的文件
+                logger.error(f"[output-metadata] 导出校验失败 {item.file_name} -> {path}: {e}")
+                InfoBar.error(title="导出失败",
+                              content=f"导出校验失败: {e}", parent=self)
+                return
             InfoBar.success(title="导出成功", content=f"已保存到: {path}", parent=self)
             logger.info(f"导出当前图像: {item.file_name} → {path}")
 
@@ -1409,9 +1472,17 @@ class ImageProcessingPage(QWidget):
                 QTimer.singleShot(1500, self.state_tooltip.hide)
                 logger.info(f"生成相框成功: {item.file_name}")
             else:
+                # 本次生成失败：不设置本次 result_path / is_processed，
+                # 上次有效结果保持原状（方案 §6.4）
                 self.state_tooltip.setContent('生成失败')
                 self.state_tooltip.setState(False)
                 QTimer.singleShot(1500, self.state_tooltip.hide)
+                if item.is_processed and item.result_path:
+                    InfoBar.warning(title="生成失败",
+                                    content="本次生成失败，已保留上次结果", parent=self)
+                else:
+                    InfoBar.warning(title="生成失败",
+                                    content="生成失败", parent=self)
                 logger.error(f"生成相框失败: {item.file_name}")
         except Exception as e:
             logger.error(f"生成相框异常: {e}")
@@ -1419,6 +1490,14 @@ class ImageProcessingPage(QWidget):
                 self.state_tooltip.setContent('出错')
                 self.state_tooltip.setState(False)
                 QTimer.singleShot(1500, self.state_tooltip.hide)
+            # 异常同样不代表本次成功：有上次有效结果时明确说明保留状态
+            current = (self.file_items[self.current_index]
+                       if 0 <= self.current_index < len(self.file_items) else None)
+            if current is not None and current.is_processed and current.result_path:
+                InfoBar.error(title="生成失败",
+                              content="本次生成失败，已保留上次结果", parent=self)
+            else:
+                InfoBar.error(title="生成失败", content="生成失败", parent=self)
 
     def _on_export_all(self):
         """一键导出所有已处理的图片到用户选择的文件夹"""
@@ -1433,17 +1512,27 @@ class ImageProcessingPage(QWidget):
             return
 
         exported = 0
+        export_failed = []
         for item in processed:
             try:
                 ext = Path(item.result_path).suffix
                 dest = os.path.join(folder, Path(item.file_name).stem + '_frame' + ext)
-                shutil.copy2(item.result_path, dest)
+                # 复制 + 哈希/标识校验 + 验证后发布（与单张导出同一路径）
+                self._export_verified(item.result_path, dest)
                 exported += 1
             except Exception as e:
-                logger.error(f"导出失败 {item.file_name}: {e}")
+                export_failed.append(item.file_name)
+                logger.error(f"[output-metadata] 导出失败 {item.file_name}: {e}")
 
-        InfoBar.success(title="批量导出完成", content=f"已导出 {exported} 张图片到 {folder}", parent=self)
         logger.info(f"一键导出 {exported}/{len(processed)} 张图片 → {folder}")
+        if export_failed:
+            InfoBar.warning(
+                title="批量导出完成",
+                content=f"已导出 {exported} 张，{len(export_failed)} 张校验失败",
+                parent=self)
+        else:
+            InfoBar.success(title="批量导出完成",
+                            content=f"已导出 {exported} 张图片到 {folder}", parent=self)
 
     def _on_clear_all(self):
         """清空所有图片"""

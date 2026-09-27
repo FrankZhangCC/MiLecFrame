@@ -6,6 +6,18 @@
 
 > 统一定位语义重构（照片锚点与元素对齐分离）+ 新样式 InfoCard（四变体）与参数胶囊 ParamCapsule + 混排文本基线修复 + 版本体系两线模型。
 
+### 🟢 新功能：输出照片写入 MiLecFrame 软件标识 (feat)
+
+- 新生成的 JPEG/PNG 输出（GUI 单张生成与导出、GUI 一键导出、CLI 单张与批量）在 EXIF `0th IFD Software` 写入 `MiLecFrame`；PNG 同时写入文本字段 `Software`，两处内容保持一致
+- 原软件名保留与去重：`Adobe Lightroom` → `Adobe Lightroom; MiLecFrame`；已有品牌 token（含大小写差异）只保留一份，重复处理不会重复追加；异常/非 ASCII 原值确定性转义为可打印 ASCII 后保留可表示部分
+- PNG/HEIC/AVIF 输入从已加载图像对象补读源 EXIF 与软件字段，原软件名可读时保留并追加（不再因 piexif 不支持该容器而直接放弃原值）
+- 分级降级保证标识不丢失：`preserved`（原样保留）→ `cleaned`（定向移除坏标签/MakerNote）→ `minimal`（最小标识兜底）；兜底仍失败则该照片判为处理失败
+- 保存事务：同目录临时写入 → 只读读回验证（不触发像素解码）→ 验证通过才 `os.replace` 发布；失败清理临时文件并保留既有输出，不产生"成功但无标识"的文件
+- 非 JPEG/PNG 的直接调用输出保留既有保存能力并告警，不纳入本期标识保证范围；**不扫描、不回写历史输出**（历史补标需另行处理）
+- 新增模块 `src/utils/output_metadata.py`（构建与验证分离，验证不修复输入）；GUI 导出增加哈希与标识读回校验
+- EXIF 处理流审查修复（详见 `docs/diagnostics/EXIF_PIPELINE_AUDIT.md`）：EXIF `Software` 空值/非法类型时按优先级回落补充来源，不再丢失原软件名；GUI/批量显示链路对 PNG/HEIC/AVIF 增加容器回落（EXIF 面板、Logo 自动匹配、GPS 替换与输出取值一致）；PNG 文本关键字大小写不敏感；方向转正后丢弃旧方向的 EXIF 缩略图；`level` 与移除记录语义一致
+- 说明：该字段属普通元数据，可被后续编辑器删除，不是不可移除的画面水印或数字签名
+
 ### 🎨 新样式：InfoCard (style, fa22743)
 
 - 新增 InfoCard 样式：卡片式信息栏展示（布局/字号/金色点缀的多轮调校合并于本次提交）
