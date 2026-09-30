@@ -111,6 +111,9 @@ class DefinedTextsSection(ExpandGroupSettingCard):
         editor = ElementEditor(frame, show_key_selector=False)
         editor.load_defined_text(item)
         editor.changed.connect(self._on_changed)
+        # 模式切换后刷新折叠卡高度（G10/D2-③ 防御性 sizeHint 刷新）
+        editor.mode_changed.connect(
+            lambda: QTimer.singleShot(0, self._adjustViewSize))
         vbox.addWidget(editor)
 
         # 存储

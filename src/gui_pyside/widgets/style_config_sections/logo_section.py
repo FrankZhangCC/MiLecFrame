@@ -189,7 +189,9 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(self.offset_y_sb, r, 3)
 
         layout.addWidget(self._rel_widget)
-        self._rel_widget.hide()
+        # 初始禁用（非隐藏）恒占位（D1/G10 同根因修复：hide 之后
+        # setEnabled 不会恢复可见，切到相对模式时参数组曾完全不可见）
+        self._rel_widget.setEnabled(False)
 
         self.addGroupWidget(container)
 

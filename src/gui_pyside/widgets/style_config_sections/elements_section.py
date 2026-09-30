@@ -94,6 +94,9 @@ class ElementsSection(ExpandGroupSettingCard):
         # 元素 key 变更会改变"排除自身"的过滤结果，通知页面刷新选项池
         editor.key_combo.currentTextChanged.connect(
             lambda _text: self.keys_changed.emit())
+        # 模式切换后刷新折叠卡高度（G10/D2-③ 防御性 sizeHint 刷新）
+        editor.mode_changed.connect(
+            lambda: QTimer.singleShot(0, self._adjustViewSize))
         vbox.addWidget(editor)
 
         # 存储

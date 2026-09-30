@@ -45,6 +45,8 @@ class ElementEditor(QWidget):
     """
 
     changed = Signal()
+    # 定位模式切换信号（G10/D2-③：宿主卡片借此在切换后刷新折叠卡高度）
+    mode_changed = Signal()
 
     def __init__(self, parent=None, show_key_selector: bool = True):
         """
@@ -249,8 +251,12 @@ class ElementEditor(QWidget):
         rel_grid.addWidget(self.rel_offset_y, r, 1)
         rel_grid.setColumnStretch(1, 1)
 
-        # 默认显示绝对定位
-        self.rel_widget.hide()
+        # 默认显示绝对定位；相对组以禁用态恒占位（D1：setEnabled 而非
+        # hide，模式切换不改变卡片内容高度），并且必须加入编辑器布局
+        # （G10 修复：此前 rel_widget 从未 addWidget，不参与布局管理，
+        # 几何停留在 QWidget 默认 100x30，相对字段被严重裁剪）
+        self.rel_widget.setEnabled(False)
+        layout.addWidget(self.rel_widget)
 
     # ── 模式切换 ───────────────────────────────────────────
 
@@ -258,8 +264,10 @@ class ElementEditor(QWidget):
         """定位模式切换"""
         self._current_mode = mode
         is_absolute = mode == 'absolute'
-        self.abs_widget.setVisible(is_absolute)
-        self.rel_widget.setVisible(not is_absolute)
+        # D1：非当前模式参数组禁用（灰显）而非隐藏——两组恒占位，
+        # 模式切换不改变卡片内容高度
+        self.abs_widget.setEnabled(is_absolute)
+        self.rel_widget.setEnabled(not is_absolute)
         # tree_align 只属于绝对定位的树根节点，相对模式下禁用
         self.tree_align_btn.setEnabled(is_absolute)
 
@@ -274,6 +282,8 @@ class ElementEditor(QWidget):
                         break
 
         self._on_changed()
+        # 通知宿主卡片刷新折叠卡高度（G10/D2-③ 防御性刷新）
+        self.mode_changed.emit()
 
     def _on_relative_position_changed(self, direction: str):
         """
