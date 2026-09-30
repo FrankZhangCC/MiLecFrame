@@ -162,17 +162,33 @@ def _color_to_text(val) -> str:
     return str(val)
 
 
+def _flow_list(dumper, seq):
+    """列表 representer：序列化为 flow style（[1, 2] 而非逐行块列表）"""
+    return dumper.represent_sequence(
+        'tag:yaml.org,2002:seq', seq, flow_style=True)
+
+
+class _FlowListDumper(yaml.Dumper):
+    """列表使用 flow_style 的专用 Dumper（G5 修复：序列化隔离）
+
+    此前实现直接对全局 yaml.Dumper 类调用 add_representer(list, ...)，
+    修改的是类级 representer 表——进程内之后所有 yaml.dump() 调用的
+    列表输出都被改成 flow style，且每次导出重复注册。改为模块级专用
+    子类单点注册，全局 Dumper 行为保持不变。
+    """
+
+
+_FlowListDumper.add_representer(list, _flow_list)
+
+
 def _build_yaml_config(data: dict) -> str:
-    """将 dict 序列化为 YAML 字符串，列表使用 flow_style"""
-    def flow_list(dumper, seq):
-        return dumper.represent_sequence(
-            'tag:yaml.org,2002:seq', seq, flow_style=True)
+    """将 dict 序列化为 YAML 字符串，列表使用 flow_style
 
-    dumper = yaml.Dumper
-    dumper.add_representer(list, flow_list)
-
+    使用模块级专用 Dumper（G5：不污染全局 yaml.Dumper 的
+    representer 表，进程内其他 yaml.dump 调用不受影响）。
+    """
     return yaml.dump(
-        data, Dumper=dumper, sort_keys=False,
+        data, Dumper=_FlowListDumper, sort_keys=False,
         allow_unicode=True, default_flow_style=False, width=120,
     )
 

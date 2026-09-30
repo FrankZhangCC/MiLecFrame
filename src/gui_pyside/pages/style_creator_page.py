@@ -602,19 +602,13 @@ class StyleCreatorPage(QWidget):
 
     def _on_export_yaml(self):
         """导出 YAML 预览弹窗"""
-        from PySide6.QtWidgets import QTextEdit
-
         try:
-            yaml_str = self.form_data.save_to_file(
-                str(CONFIGS_DIR / '__temp_preview__.yaml'))
-            # 删除临时文件
-            temp_path = CONFIGS_DIR / '__temp_preview__.yaml'
-            if temp_path.exists():
-                temp_path.unlink()
+            # 直接从模型生成 YAML 文本（G4 修复：此前写到内置样式目录
+            # 下的临时文件再删除，纯属浪费且有崩溃残留污染样式列表的风险）
+            yaml_str = _build_yaml_config(self.form_data.to_yaml_dict())
         except Exception as e:
-            # 即使保存失败，直接从模型生成
-            config = self.form_data.to_yaml_dict()
-            yaml_str = _build_yaml_config(config)
+            yaml_str = f'# 生成 YAML 预览失败: {e}'
+            logger.warning("生成 YAML 预览失败: %s", e)
 
         dialog = Dialog(
             'YAML 配置预览',
@@ -671,7 +665,7 @@ class StyleCreatorPage(QWidget):
     def _render_preview(self):
         """执行预览渲染"""
         # 首渲之前跳过 __init__ 阶段的 debounce 触发
-        if getattr(self, '_first_show', True):
+        if self._first_show:
             return
         try:
             # 获取样式配置
@@ -729,9 +723,10 @@ class StyleCreatorPage(QWidget):
     def resizeEvent(self, event):
         """窗口大小变化时延迟刷新预览（确保子部件几何已稳定）"""
         super().resizeEvent(event)
-        if hasattr(self, 'preview'):
-            QTimer.singleShot(
-                0, self.preview.rescale_pixmap)
+        # preview 在 __init__ 的 _create_preview_panel() 中无条件创建，
+        # resizeEvent 首次触发晚于构造完成（实测确认），无需防御
+        QTimer.singleShot(
+            0, self.preview.rescale_pixmap)
 
 
 

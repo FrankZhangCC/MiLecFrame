@@ -16,20 +16,19 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QSplitter,
     QFileDialog, QApplication, QSizePolicy, QLineEdit,
 )
-from PySide6.QtCore import Qt, Signal, QSize, QTimer, QEvent, QObject
-from PySide6.QtGui import QImage, QPixmap, QWheelEvent, QColorSpace, QDragEnterEvent, QDropEvent, QColor, QKeySequence, QShortcut
+from PySide6.QtCore import Qt, Signal, QTimer, QEvent, QObject
+from PySide6.QtGui import QImage, QPixmap, QColorSpace, QDragEnterEvent, QDropEvent, QColor, QKeySequence, QShortcut
 
 from qfluentwidgets import (
     PrimaryPushButton, PushButton, TransparentPushButton,
     StrongBodyLabel, BodyLabel, SubtitleLabel, CaptionLabel,
-    InfoBar, InfoBarPosition,
-    ExpandSettingCard, ExpandGroupSettingCard, SettingCardGroup, ComboBox,
+    InfoBar,
+    ExpandSettingCard, ExpandGroupSettingCard, ComboBox,
     FluentIcon, SwitchButton, LineEdit, Slider,
     SmoothScrollArea, StateToolTip, RoundMenu, Action, ScrollArea,
     ExpandLayout,
@@ -40,7 +39,6 @@ from qfluentwidgets.common.style_sheet import (
 )
 
 from ..models.file_item import FileItem, compute_cache_key
-from ..models.processing_config import ProcessingConfig
 from ..utils.temp_manager import TempManager
 from ..widgets.style_selector_card import StyleSelectorCard
 from src.utils.exif_helper import ExifHelper
@@ -174,7 +172,6 @@ class ImageProcessingPage(QWidget):
         # ── 数据 ──
         self.file_items: list[FileItem] = []  # 胶片栏中的所有文件
         self.current_index: int = -1  # 当前选中的文件索引
-        self.config = ProcessingConfig()  # 当前共享配置
         self.filmstrip_labels: list[QLabel] = []  # 胶片栏缩略图标签（用于动态缩放）
         self.state_tooltip = None  # 处理状态提示
 
@@ -837,9 +834,6 @@ class ImageProcessingPage(QWidget):
 
     def _load_files(self, file_paths: list[str]):
         """加载图片文件到胶片栏"""
-        import io
-        import os
-
         n = len(file_paths)
         tip = self._show_progress('加载中', f'正在加载第 1/{n} 张图片...')
 
@@ -1641,9 +1635,9 @@ class ImageProcessingPage(QWidget):
 
     def save_config(self):
         """收集当前控件值并保存到 ConfigManager（由 MainWindow.closeEvent 调用）"""
-        # 作者名
-        if self.edit_author.text():
-            default_config_manager.save_user_author(self.edit_author.text())
+        # 作者名（D6 决策：显式写空——用户清空输入框后旧值不再残留，
+        # ConfigManager 对空串正常存取，加载端空串不回填、控件默认即空）
+        default_config_manager.save_user_author(self.edit_author.text())
         # 最近使用配置
         default_config_manager.save_last_used_settings({
             'style_name': self.style_selector_card.current_style or "底部信息条 Bottom Bars",
