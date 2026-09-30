@@ -7,7 +7,7 @@
 > 范围：`src/gui_pyside/`（`src/gui_legacy/` 已封存不计入）；`src/utils/output_metadata.py`、`src/core/renderer.py` 等 GUI 消费方仅在与 GUI 缺陷直接相关处涉及。
 > 运行证据：[`review_evidence/gui_report_reaudit.json`](./review_evidence/gui_report_reaudit.json)（探针脚本 `review_evidence/gui_report_reaudit.py`，Qt offscreen 真实控件 + 生产验证器，覆盖 14 个内置样式的三层往返、导出、布局几何、Dumper 副作用、源码指纹）。
 > 行号基于 `8e50ced` 工作区，用于定位；实施时以函数名为准。
-> **状态：审查、复审与决策已完成，修复尚未实施。** 实施前必读 §2 决策记录与 §3 排版契约面。
+> **状态：已实施（2026-09-30，随 v2.7.2-dev 里程碑发行）。** T0–T9 全部任务包完成：正确性修复 commit `8cd4a96`（G13）/ `d78901c`（G14+G15+G16）/ `e705b98`（G10），清理与结构重构 `d83922a..b2fb919`。每任务包独立 commit，commit message 内含验收记录，预期行为差异按 §6 逐项标注。另有一项超出本清单的实测发现：LogoSection/CustomTextSection 的相对参数组初始 hide 后切相对模式完全不可见（与 G10 同根因），已随 T3 一并修复。
 
 ## 1. 结论与使用方法
 
