@@ -401,16 +401,54 @@ class StyleManager:
 
         return errors
 
+    def _detect_relative_cycles(self, positioned: Dict[str, Dict]) -> list:
+        """
+        相对定位依赖环检测（审计 Q14-12）：单节点字段校验无法发现成环的
+        relative_to 链，而渲染端向上找根的遍历遇环无法结束，必须在样式
+        加载阶段拒绝。
+
+        每个节点至多声明一个 relative_to（函数图），沿链行走并用已访问
+        链判重；错误信息给出完整环链。已报告环的成员不再作为起点重复
+        报告，同一环只产生一条错误。
+        """
+        errors = []
+        reported = set()
+        for start_name, cfg in positioned.items():
+            if start_name in reported:
+                continue
+            chain = [start_name]
+            walk = start_name
+            while True:
+                ref = (positioned.get(walk) or {}).get('relative_to')
+                if not ref:
+                    # 链终点：绝对定位根，或目标不在定位元素集合内
+                    #（后者由运行时"目标不可解析"规则处理，此处不报错）
+                    break
+                if ref in chain:
+                    cycle = chain[chain.index(ref):] + [ref]
+                    errors.append(
+                        f"layout.{start_name}.relative_to: 定位依赖存在环"
+                        f"（{' → '.join(cycle)}）；相对定位链必须终止于"
+                        f"绝对定位元素，请修正 relative_to 配置")
+                    reported.update(cycle)
+                    break
+                chain.append(ref)
+                walk = ref
+        return errors
+
     def _validate_positioning(self, config: Dict, source: str = '') -> bool:
         """
         遍历五类定位元素执行新语义校验。
 
-        错误策略：任何旧别名、未知枚举、绝对/相对字段混用、轴向不匹配
-        均视为样式加载失败；错误信息包含样式源文件、字段路径、错误值和
-        人工迁移建议。返回 True 表示全部通过。
+        错误策略：任何旧别名、未知枚举、绝对/相对字段混用、轴向不匹配、
+        relative_to 依赖环均视为样式加载失败；错误信息包含样式源文件、
+        字段路径、错误值和人工迁移建议。返回 True 表示全部通过。
         """
         all_errors = []
 
+        # 裸名 → 配置：与渲染端 all_positions 的合并键一致（后写覆盖），
+        # relative_to 引用的就是这一命名空间的名字
+        positioned: Dict[str, Dict] = {}
         for path, cfg in self._iter_positioned_elements(config):
             if cfg.get('relative_to'):
                 all_errors.extend(
@@ -418,6 +456,11 @@ class StyleManager:
             else:
                 all_errors.extend(
                     self._validate_absolute_position_config(path, cfg))
+            positioned[path.rsplit('.', 1)[-1]] = cfg
+
+        # 依赖环检测（Q14-12）：无论环节点是否有实际文本，配置边界一律
+        # 拒绝；渲染端另有直调路径的运行时有界防御兜底
+        all_errors.extend(self._detect_relative_cycles(positioned))
 
         for err in all_errors:
             src = f"[{source}] " if source else ""

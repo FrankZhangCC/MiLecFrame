@@ -375,11 +375,21 @@ class TextRenderer:
 
             defer_pad = False
             if cfg.get('relative_to'):
+                # 向上找根判断 tree_align；chain 记录已走节点，防御绕过
+                # StyleManager 直调渲染器时配置成环导致遍历无法结束
+                # （审计 Q14-12；正式拒绝在样式加载阶段完成）
                 walk = name
+                chain = [name]
                 while walk:
                     wc = all_positions.get(walk, {})
                     wp = wc.get('relative_to')
                     if wp:
+                        if wp in chain:
+                            raise ValueError(
+                                "定位依赖存在环: "
+                                f"{' → '.join(chain[chain.index(wp):] + [wp])}；"
+                                "相对定位链必须终止于绝对定位元素")
+                        chain.append(wp)
                         walk = wp
                     else:
                         if wc.get('tree_align'):

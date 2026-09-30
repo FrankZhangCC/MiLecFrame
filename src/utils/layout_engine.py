@@ -466,14 +466,24 @@ class LayoutEngine:
                 f"合法值为 {sorted(legal)}")
         return cross_alignment
 
-    def _shift_dependents(self, name: str, shift_x: int, shift_y: int):
+    def _shift_dependents(self, name: str, shift_x: int, shift_y: int,
+                          _chain=None):
+        # _chain 记录递归路径：依赖图成环时受控报错而非无限递归
+        # （审计 Q14-12；外部调用方不传 _chain，行为不变）
+        if _chain is None:
+            _chain = []
+        if name in _chain:
+            cycle = _chain[_chain.index(name):] + [name]
+            raise ValueError(
+                f"依赖图存在环: {' → '.join(cycle)}；组合盒平移中止")
+        _chain.append(name)
         if name not in self._dependents:
             return
         for dep_name in self._dependents[name]:
             if dep_name in self.positions:
                 self.positions[dep_name]['x'] += shift_x
                 self.positions[dep_name]['y'] += shift_y
-                self._shift_dependents(dep_name, shift_x, shift_y)
+                self._shift_dependents(dep_name, shift_x, shift_y, _chain)
 
     def _calculate_relative(
         self,
@@ -613,13 +623,23 @@ class LayoutEngine:
 
     # ── tree_align 组合树定位 ────────────────────────────────
 
-    def _collect_tree_members(self, root_name: str, members: set):
+    def _collect_tree_members(self, root_name: str, members: set, _chain=None):
         """
         递归收集以 root_name 为根的依赖树中所有元素名称
+
+        _chain 记录递归路径：依赖图成环时受控报错而非无限递归
+        （审计 Q14-12；外部调用方不传 _chain，行为不变）。
         """
+        if _chain is None:
+            _chain = []
+        if root_name in _chain:
+            cycle = _chain[_chain.index(root_name):] + [root_name]
+            raise ValueError(
+                f"依赖图存在环: {' → '.join(cycle)}；树成员收集中止")
+        _chain.append(root_name)
         members.add(root_name)
         for dep_name in self._dependents.get(root_name, []):
-            self._collect_tree_members(dep_name, members)
+            self._collect_tree_members(dep_name, members, _chain)
 
     def _compute_visual_bounds(self, member_names):
         """
