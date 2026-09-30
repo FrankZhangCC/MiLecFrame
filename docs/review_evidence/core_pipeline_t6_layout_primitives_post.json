@@ -1,0 +1,2028 @@
+{
+  "nine_point_grid": {
+    "plain_odd|top-left|top-left|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-left|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      0
+    ],
+    "plain_odd|top-left|top-center|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-center|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-right|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-right|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-left|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-left|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      0
+    ],
+    "plain_odd|top-left|center|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-right|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-right|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-left|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-left|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      0
+    ],
+    "plain_odd|top-left|bottom-center|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-center|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-right|outside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-right|inside|[]": [
+      0,
+      0
+    ],
+    "plain_odd|top-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "plain_odd|top-center|top-left|outside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|top-left|inside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      0
+    ],
+    "plain_odd|top-center|top-center|outside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|top-center|inside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      0
+    ],
+    "plain_odd|top-center|top-right|outside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|top-right|inside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      0
+    ],
+    "plain_odd|top-center|center-left|outside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|center-left|inside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      0
+    ],
+    "plain_odd|top-center|center|outside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|center|inside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      0
+    ],
+    "plain_odd|top-center|center-right|outside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|center-right|inside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      0
+    ],
+    "plain_odd|top-center|bottom-left|outside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|bottom-left|inside|[]": [
+      50,
+      0
+    ],
+    "plain_odd|top-center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      0
+    ],
+    "plain_odd|top-center|bottom-center|outside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|bottom-center|inside|[]": [
+      34,
+      0
+    ],
+    "plain_odd|top-center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      0
+    ],
+    "plain_odd|top-center|bottom-right|outside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|bottom-right|inside|[]": [
+      17,
+      0
+    ],
+    "plain_odd|top-center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      0
+    ],
+    "plain_odd|top-right|top-left|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-left|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-center|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-center|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-right|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-right|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      0
+    ],
+    "plain_odd|top-right|center-left|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center-left|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center-right|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center-right|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      0
+    ],
+    "plain_odd|top-right|bottom-left|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-left|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-center|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-center|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-right|outside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-right|inside|[]": [
+      68,
+      0
+    ],
+    "plain_odd|top-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      0
+    ],
+    "plain_odd|center-left|top-left|outside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-left|inside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      97
+    ],
+    "plain_odd|center-left|top-center|outside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-center|inside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      97
+    ],
+    "plain_odd|center-left|top-right|outside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-right|inside|[]": [
+      0,
+      102
+    ],
+    "plain_odd|center-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      97
+    ],
+    "plain_odd|center-left|center-left|outside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center-left|inside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      89
+    ],
+    "plain_odd|center-left|center|outside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center|inside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      89
+    ],
+    "plain_odd|center-left|center-right|outside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center-right|inside|[]": [
+      0,
+      94
+    ],
+    "plain_odd|center-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      89
+    ],
+    "plain_odd|center-left|bottom-left|outside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-left|inside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      80
+    ],
+    "plain_odd|center-left|bottom-center|outside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-center|inside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      80
+    ],
+    "plain_odd|center-left|bottom-right|outside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-right|inside|[]": [
+      0,
+      85
+    ],
+    "plain_odd|center-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      80
+    ],
+    "plain_odd|center|top-left|outside|[]": [
+      50,
+      102
+    ],
+    "plain_odd|center|top-left|inside|[]": [
+      50,
+      102
+    ],
+    "plain_odd|center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      97
+    ],
+    "plain_odd|center|top-center|outside|[]": [
+      34,
+      102
+    ],
+    "plain_odd|center|top-center|inside|[]": [
+      34,
+      102
+    ],
+    "plain_odd|center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      97
+    ],
+    "plain_odd|center|top-right|outside|[]": [
+      17,
+      102
+    ],
+    "plain_odd|center|top-right|inside|[]": [
+      17,
+      102
+    ],
+    "plain_odd|center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      97
+    ],
+    "plain_odd|center|center-left|outside|[]": [
+      50,
+      94
+    ],
+    "plain_odd|center|center-left|inside|[]": [
+      50,
+      94
+    ],
+    "plain_odd|center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      89
+    ],
+    "plain_odd|center|center|outside|[]": [
+      34,
+      94
+    ],
+    "plain_odd|center|center|inside|[]": [
+      34,
+      94
+    ],
+    "plain_odd|center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      89
+    ],
+    "plain_odd|center|center-right|outside|[]": [
+      17,
+      94
+    ],
+    "plain_odd|center|center-right|inside|[]": [
+      17,
+      94
+    ],
+    "plain_odd|center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      89
+    ],
+    "plain_odd|center|bottom-left|outside|[]": [
+      50,
+      85
+    ],
+    "plain_odd|center|bottom-left|inside|[]": [
+      50,
+      85
+    ],
+    "plain_odd|center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      80
+    ],
+    "plain_odd|center|bottom-center|outside|[]": [
+      34,
+      85
+    ],
+    "plain_odd|center|bottom-center|inside|[]": [
+      34,
+      85
+    ],
+    "plain_odd|center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      80
+    ],
+    "plain_odd|center|bottom-right|outside|[]": [
+      17,
+      85
+    ],
+    "plain_odd|center|bottom-right|inside|[]": [
+      17,
+      85
+    ],
+    "plain_odd|center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      80
+    ],
+    "plain_odd|center-right|top-left|outside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-left|inside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      97
+    ],
+    "plain_odd|center-right|top-center|outside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-center|inside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      97
+    ],
+    "plain_odd|center-right|top-right|outside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-right|inside|[]": [
+      68,
+      102
+    ],
+    "plain_odd|center-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      97
+    ],
+    "plain_odd|center-right|center-left|outside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center-left|inside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      89
+    ],
+    "plain_odd|center-right|center|outside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center|inside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      89
+    ],
+    "plain_odd|center-right|center-right|outside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center-right|inside|[]": [
+      68,
+      94
+    ],
+    "plain_odd|center-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      89
+    ],
+    "plain_odd|center-right|bottom-left|outside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-left|inside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      80
+    ],
+    "plain_odd|center-right|bottom-center|outside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-center|inside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      80
+    ],
+    "plain_odd|center-right|bottom-right|outside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-right|inside|[]": [
+      68,
+      85
+    ],
+    "plain_odd|center-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      80
+    ],
+    "plain_odd|bottom-left|top-left|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-left|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      188
+    ],
+    "plain_odd|bottom-left|top-center|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-center|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-right|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-right|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-left|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-left|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      188
+    ],
+    "plain_odd|bottom-left|center|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-right|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-right|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-left|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-left|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      1,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-center|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-center|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-right|outside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-right|inside|[]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      188
+    ],
+    "plain_odd|bottom-center|top-left|outside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|top-left|inside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      188
+    ],
+    "plain_odd|bottom-center|top-center|outside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|top-center|inside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      188
+    ],
+    "plain_odd|bottom-center|top-right|outside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|top-right|inside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      188
+    ],
+    "plain_odd|bottom-center|center-left|outside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|center-left|inside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      188
+    ],
+    "plain_odd|bottom-center|center|outside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|center|inside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      188
+    ],
+    "plain_odd|bottom-center|center-right|outside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|center-right|inside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-left|outside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-left|inside|[]": [
+      50,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      48,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-center|outside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-center|inside|[]": [
+      34,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      32,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-right|outside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-right|inside|[]": [
+      17,
+      188
+    ],
+    "plain_odd|bottom-center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      15,
+      188
+    ],
+    "plain_odd|bottom-right|top-left|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-left|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-center|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-center|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-right|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-right|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      188
+    ],
+    "plain_odd|bottom-right|center-left|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center-left|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center-right|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center-right|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-left|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-left|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-center|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-center|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-right|outside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-right|inside|[]": [
+      68,
+      188
+    ],
+    "plain_odd|bottom-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      65,
+      188
+    ],
+    "expand_asym|top-left|top-left|outside|[]": [
+      20,
+      10
+    ],
+    "expand_asym|top-left|top-left|inside|[]": [
+      20,
+      10
+    ],
+    "expand_asym|top-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      8
+    ],
+    "expand_asym|top-left|top-center|outside|[]": [
+      4,
+      10
+    ],
+    "expand_asym|top-left|top-center|inside|[]": [
+      4,
+      10
+    ],
+    "expand_asym|top-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      8
+    ],
+    "expand_asym|top-left|top-right|outside|[]": [
+      0,
+      10
+    ],
+    "expand_asym|top-left|top-right|inside|[]": [
+      0,
+      10
+    ],
+    "expand_asym|top-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      8
+    ],
+    "expand_asym|top-left|center-left|outside|[]": [
+      20,
+      2
+    ],
+    "expand_asym|top-left|center-left|inside|[]": [
+      20,
+      2
+    ],
+    "expand_asym|top-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      0
+    ],
+    "expand_asym|top-left|center|outside|[]": [
+      4,
+      2
+    ],
+    "expand_asym|top-left|center|inside|[]": [
+      4,
+      2
+    ],
+    "expand_asym|top-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      0
+    ],
+    "expand_asym|top-left|center-right|outside|[]": [
+      0,
+      2
+    ],
+    "expand_asym|top-left|center-right|inside|[]": [
+      0,
+      2
+    ],
+    "expand_asym|top-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "expand_asym|top-left|bottom-left|outside|[]": [
+      20,
+      0
+    ],
+    "expand_asym|top-left|bottom-left|inside|[]": [
+      20,
+      0
+    ],
+    "expand_asym|top-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      0
+    ],
+    "expand_asym|top-left|bottom-center|outside|[]": [
+      4,
+      0
+    ],
+    "expand_asym|top-left|bottom-center|inside|[]": [
+      4,
+      0
+    ],
+    "expand_asym|top-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      0
+    ],
+    "expand_asym|top-left|bottom-right|outside|[]": [
+      0,
+      0
+    ],
+    "expand_asym|top-left|bottom-right|inside|[]": [
+      0,
+      0
+    ],
+    "expand_asym|top-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      0
+    ],
+    "expand_asym|top-center|top-left|outside|[]": [
+      70,
+      10
+    ],
+    "expand_asym|top-center|top-left|inside|[]": [
+      70,
+      10
+    ],
+    "expand_asym|top-center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      8
+    ],
+    "expand_asym|top-center|top-center|outside|[]": [
+      54,
+      10
+    ],
+    "expand_asym|top-center|top-center|inside|[]": [
+      54,
+      10
+    ],
+    "expand_asym|top-center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      8
+    ],
+    "expand_asym|top-center|top-right|outside|[]": [
+      37,
+      10
+    ],
+    "expand_asym|top-center|top-right|inside|[]": [
+      37,
+      10
+    ],
+    "expand_asym|top-center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      8
+    ],
+    "expand_asym|top-center|center-left|outside|[]": [
+      70,
+      2
+    ],
+    "expand_asym|top-center|center-left|inside|[]": [
+      70,
+      2
+    ],
+    "expand_asym|top-center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "expand_asym|top-center|center|outside|[]": [
+      54,
+      2
+    ],
+    "expand_asym|top-center|center|inside|[]": [
+      54,
+      2
+    ],
+    "expand_asym|top-center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      0
+    ],
+    "expand_asym|top-center|center-right|outside|[]": [
+      37,
+      2
+    ],
+    "expand_asym|top-center|center-right|inside|[]": [
+      37,
+      2
+    ],
+    "expand_asym|top-center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      0
+    ],
+    "expand_asym|top-center|bottom-left|outside|[]": [
+      70,
+      0
+    ],
+    "expand_asym|top-center|bottom-left|inside|[]": [
+      70,
+      0
+    ],
+    "expand_asym|top-center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      0
+    ],
+    "expand_asym|top-center|bottom-center|outside|[]": [
+      54,
+      0
+    ],
+    "expand_asym|top-center|bottom-center|inside|[]": [
+      54,
+      0
+    ],
+    "expand_asym|top-center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      0
+    ],
+    "expand_asym|top-center|bottom-right|outside|[]": [
+      37,
+      0
+    ],
+    "expand_asym|top-center|bottom-right|inside|[]": [
+      37,
+      0
+    ],
+    "expand_asym|top-center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      0
+    ],
+    "expand_asym|top-right|top-left|outside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-left|inside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      8
+    ],
+    "expand_asym|top-right|top-center|outside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-center|inside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      8
+    ],
+    "expand_asym|top-right|top-right|outside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-right|inside|[]": [
+      87,
+      10
+    ],
+    "expand_asym|top-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      8
+    ],
+    "expand_asym|top-right|center-left|outside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center-left|inside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|center|outside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center|inside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|center-right|outside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center-right|inside|[]": [
+      87,
+      2
+    ],
+    "expand_asym|top-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      0
+    ],
+    "expand_asym|top-right|bottom-left|outside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-left|inside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-center|outside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-center|inside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-right|outside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-right|inside|[]": [
+      87,
+      0
+    ],
+    "expand_asym|top-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      0
+    ],
+    "expand_asym|center-left|top-left|outside|[]": [
+      20,
+      60
+    ],
+    "expand_asym|center-left|top-left|inside|[]": [
+      20,
+      60
+    ],
+    "expand_asym|center-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      19,
+      55
+    ],
+    "expand_asym|center-left|top-center|outside|[]": [
+      4,
+      60
+    ],
+    "expand_asym|center-left|top-center|inside|[]": [
+      4,
+      60
+    ],
+    "expand_asym|center-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      3,
+      55
+    ],
+    "expand_asym|center-left|top-right|outside|[]": [
+      0,
+      60
+    ],
+    "expand_asym|center-left|top-right|inside|[]": [
+      0,
+      60
+    ],
+    "expand_asym|center-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      55
+    ],
+    "expand_asym|center-left|center-left|outside|[]": [
+      20,
+      52
+    ],
+    "expand_asym|center-left|center-left|inside|[]": [
+      20,
+      52
+    ],
+    "expand_asym|center-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      19,
+      47
+    ],
+    "expand_asym|center-left|center|outside|[]": [
+      4,
+      52
+    ],
+    "expand_asym|center-left|center|inside|[]": [
+      4,
+      52
+    ],
+    "expand_asym|center-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      3,
+      47
+    ],
+    "expand_asym|center-left|center-right|outside|[]": [
+      0,
+      52
+    ],
+    "expand_asym|center-left|center-right|inside|[]": [
+      0,
+      52
+    ],
+    "expand_asym|center-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      47
+    ],
+    "expand_asym|center-left|bottom-left|outside|[]": [
+      20,
+      43
+    ],
+    "expand_asym|center-left|bottom-left|inside|[]": [
+      20,
+      43
+    ],
+    "expand_asym|center-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      19,
+      38
+    ],
+    "expand_asym|center-left|bottom-center|outside|[]": [
+      4,
+      43
+    ],
+    "expand_asym|center-left|bottom-center|inside|[]": [
+      4,
+      43
+    ],
+    "expand_asym|center-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      3,
+      38
+    ],
+    "expand_asym|center-left|bottom-right|outside|[]": [
+      0,
+      43
+    ],
+    "expand_asym|center-left|bottom-right|inside|[]": [
+      0,
+      43
+    ],
+    "expand_asym|center-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      38
+    ],
+    "expand_asym|center|top-left|outside|[]": [
+      70,
+      60
+    ],
+    "expand_asym|center|top-left|inside|[]": [
+      70,
+      60
+    ],
+    "expand_asym|center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      55
+    ],
+    "expand_asym|center|top-center|outside|[]": [
+      54,
+      60
+    ],
+    "expand_asym|center|top-center|inside|[]": [
+      54,
+      60
+    ],
+    "expand_asym|center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      55
+    ],
+    "expand_asym|center|top-right|outside|[]": [
+      37,
+      60
+    ],
+    "expand_asym|center|top-right|inside|[]": [
+      37,
+      60
+    ],
+    "expand_asym|center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      55
+    ],
+    "expand_asym|center|center-left|outside|[]": [
+      70,
+      52
+    ],
+    "expand_asym|center|center-left|inside|[]": [
+      70,
+      52
+    ],
+    "expand_asym|center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      47
+    ],
+    "expand_asym|center|center|outside|[]": [
+      54,
+      52
+    ],
+    "expand_asym|center|center|inside|[]": [
+      54,
+      52
+    ],
+    "expand_asym|center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      47
+    ],
+    "expand_asym|center|center-right|outside|[]": [
+      37,
+      52
+    ],
+    "expand_asym|center|center-right|inside|[]": [
+      37,
+      52
+    ],
+    "expand_asym|center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      47
+    ],
+    "expand_asym|center|bottom-left|outside|[]": [
+      70,
+      43
+    ],
+    "expand_asym|center|bottom-left|inside|[]": [
+      70,
+      43
+    ],
+    "expand_asym|center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      38
+    ],
+    "expand_asym|center|bottom-center|outside|[]": [
+      54,
+      43
+    ],
+    "expand_asym|center|bottom-center|inside|[]": [
+      54,
+      43
+    ],
+    "expand_asym|center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      38
+    ],
+    "expand_asym|center|bottom-right|outside|[]": [
+      37,
+      43
+    ],
+    "expand_asym|center|bottom-right|inside|[]": [
+      37,
+      43
+    ],
+    "expand_asym|center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      38
+    ],
+    "expand_asym|center-right|top-left|outside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-left|inside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      55
+    ],
+    "expand_asym|center-right|top-center|outside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-center|inside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      55
+    ],
+    "expand_asym|center-right|top-right|outside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-right|inside|[]": [
+      87,
+      60
+    ],
+    "expand_asym|center-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      55
+    ],
+    "expand_asym|center-right|center-left|outside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center-left|inside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      47
+    ],
+    "expand_asym|center-right|center|outside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center|inside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      47
+    ],
+    "expand_asym|center-right|center-right|outside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center-right|inside|[]": [
+      87,
+      52
+    ],
+    "expand_asym|center-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      47
+    ],
+    "expand_asym|center-right|bottom-left|outside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-left|inside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      38
+    ],
+    "expand_asym|center-right|bottom-center|outside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-center|inside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      38
+    ],
+    "expand_asym|center-right|bottom-right|outside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-right|inside|[]": [
+      87,
+      43
+    ],
+    "expand_asym|center-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      38
+    ],
+    "expand_asym|bottom-left|top-left|outside|[]": [
+      20,
+      98
+    ],
+    "expand_asym|bottom-left|top-left|inside|[]": [
+      20,
+      98
+    ],
+    "expand_asym|bottom-left|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      98
+    ],
+    "expand_asym|bottom-left|top-center|outside|[]": [
+      4,
+      98
+    ],
+    "expand_asym|bottom-left|top-center|inside|[]": [
+      4,
+      98
+    ],
+    "expand_asym|bottom-left|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      98
+    ],
+    "expand_asym|bottom-left|top-right|outside|[]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|top-right|inside|[]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|center-left|outside|[]": [
+      20,
+      98
+    ],
+    "expand_asym|bottom-left|center-left|inside|[]": [
+      20,
+      98
+    ],
+    "expand_asym|bottom-left|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      98
+    ],
+    "expand_asym|bottom-left|center|outside|[]": [
+      4,
+      98
+    ],
+    "expand_asym|bottom-left|center|inside|[]": [
+      4,
+      98
+    ],
+    "expand_asym|bottom-left|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      98
+    ],
+    "expand_asym|bottom-left|center-right|outside|[]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|center-right|inside|[]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-left|bottom-left|outside|[]": [
+      20,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-left|inside|[]": [
+      20,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      21,
+      98
+    ],
+    "expand_asym|bottom-left|bottom-center|outside|[]": [
+      4,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-center|inside|[]": [
+      4,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      5,
+      98
+    ],
+    "expand_asym|bottom-left|bottom-right|outside|[]": [
+      0,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-right|inside|[]": [
+      0,
+      93
+    ],
+    "expand_asym|bottom-left|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      0,
+      98
+    ],
+    "expand_asym|bottom-center|top-left|outside|[]": [
+      70,
+      98
+    ],
+    "expand_asym|bottom-center|top-left|inside|[]": [
+      70,
+      98
+    ],
+    "expand_asym|bottom-center|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      98
+    ],
+    "expand_asym|bottom-center|top-center|outside|[]": [
+      54,
+      98
+    ],
+    "expand_asym|bottom-center|top-center|inside|[]": [
+      54,
+      98
+    ],
+    "expand_asym|bottom-center|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      98
+    ],
+    "expand_asym|bottom-center|top-right|outside|[]": [
+      37,
+      98
+    ],
+    "expand_asym|bottom-center|top-right|inside|[]": [
+      37,
+      98
+    ],
+    "expand_asym|bottom-center|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      98
+    ],
+    "expand_asym|bottom-center|center-left|outside|[]": [
+      70,
+      98
+    ],
+    "expand_asym|bottom-center|center-left|inside|[]": [
+      70,
+      98
+    ],
+    "expand_asym|bottom-center|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      98
+    ],
+    "expand_asym|bottom-center|center|outside|[]": [
+      54,
+      98
+    ],
+    "expand_asym|bottom-center|center|inside|[]": [
+      54,
+      98
+    ],
+    "expand_asym|bottom-center|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      98
+    ],
+    "expand_asym|bottom-center|center-right|outside|[]": [
+      37,
+      98
+    ],
+    "expand_asym|bottom-center|center-right|inside|[]": [
+      37,
+      98
+    ],
+    "expand_asym|bottom-center|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      98
+    ],
+    "expand_asym|bottom-center|bottom-left|outside|[]": [
+      70,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-left|inside|[]": [
+      70,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      68,
+      98
+    ],
+    "expand_asym|bottom-center|bottom-center|outside|[]": [
+      54,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-center|inside|[]": [
+      54,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      52,
+      98
+    ],
+    "expand_asym|bottom-center|bottom-right|outside|[]": [
+      37,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-right|inside|[]": [
+      37,
+      93
+    ],
+    "expand_asym|bottom-center|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      35,
+      98
+    ],
+    "expand_asym|bottom-right|top-left|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-left|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-center|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-center|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-right|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-right|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|top-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      98
+    ],
+    "expand_asym|bottom-right|center-left|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center-left|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center-right|outside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center-right|inside|[]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|center-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      98
+    ],
+    "expand_asym|bottom-right|bottom-left|outside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-left|inside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-left|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|bottom-center|outside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-center|inside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-center|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      87,
+      98
+    ],
+    "expand_asym|bottom-right|bottom-right|outside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-right|inside|[]": [
+      87,
+      93
+    ],
+    "expand_asym|bottom-right|bottom-right|outside|[('margin_bottom', 7), ('margin_left', 0.01), ('margin_right', 0.03), ('margin_top', 2)]": [
+      84,
+      98
+    ]
+  },
+  "clamp_and_units": {
+    "q12_normal_box": [
+      20,
+      0
+    ],
+    "q12_single_member_tree": [
+      0,
+      0,
+      80,
+      10
+    ],
+    "q13_padding_int_10": 40000,
+    "q13_margin_int_10": 10,
+    "q13_margin_float_10": 40000,
+    "q13_margin_direction_override": 80,
+    "q4_exempt_rect": [
+      0,
+      0
+    ],
+    "q4_clamp_text": [
+      100,
+      100
+    ],
+    "q4_tree_root": [
+      100,
+      95,
+      20,
+      10
+    ],
+    "q4_tree_child": [
+      124,
+      95,
+      20,
+      10
+    ],
+    "q4_shared_chain_helper": {
+      "available": true,
+      "chain_of_c": [
+        "c",
+        "b",
+        "a"
+      ],
+      "terminal_is_root": true,
+      "cycle_none": true,
+      "cycle_detected": [
+        "a",
+        "b",
+        "a"
+      ]
+    },
+    "q9_positions_equal_alignments": true,
+    "q9_reject_position": "position 值非法: 'top'；九个规范值为 ['bottom-center', 'bottom-left', 'bottom-right', 'cen",
+    "q9_reject_alignment": "alignment 值非法: 'both-center'；九个规范值为 ['bottom-center', 'bottom-left', 'bottom-rig"
+  },
+  "lookup_and_shift": {
+    "q11_exact": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "q11_suffix_match": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "q11_missing": null,
+    "q11_resolved_key": "custom_author",
+    "q11_shift_leaf": [
+      29,
+      0
+    ],
+    "q11_root_after_shift": [
+      50,
+      0,
+      20,
+      10
+    ]
+  }
+}

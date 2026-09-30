@@ -13,7 +13,7 @@ from typing import Tuple, Dict, Optional, List
 from PIL import Image, ImageDraw
 
 from src.utils.font_manager import FontManager
-from src.utils.layout_engine import LayoutEngine
+from src.utils.layout_engine import LayoutEngine, resolve_relative_chain
 from src.utils.render_context import RenderContext
 from src.utils.background_fill import BackgroundFillManager
 from src.utils.color_utils import parse_color_value
@@ -374,31 +374,23 @@ class TextRenderer:
             item = draw_items[name]
             cfg = all_positions.get(name, {})
 
-            defer_pad = False
+            # 向上找根判断 tree_align：复用共享的依赖链分析（审计 Q4，
+            # 与 StyleManager 环校验同一实现）；环在样式加载阶段已被
+            # 拒绝，这里对绕过 StyleManager 的直调路径兜底受控报错
+            padding_mode = 'clamp'
             if cfg.get('relative_to'):
-                # 向上找根判断 tree_align；chain 记录已走节点，防御绕过
-                # StyleManager 直调渲染器时配置成环导致遍历无法结束
-                # （审计 Q14-12；正式拒绝在样式加载阶段完成）
-                walk = name
-                chain = [name]
-                while walk:
-                    wc = all_positions.get(walk, {})
-                    wp = wc.get('relative_to')
-                    if wp:
-                        if wp in chain:
-                            raise ValueError(
-                                "定位依赖存在环: "
-                                f"{' → '.join(chain[chain.index(wp):] + [wp])}；"
-                                "相对定位链必须终止于绝对定位元素")
-                        chain.append(wp)
-                        walk = wp
-                    else:
-                        if wc.get('tree_align'):
-                            defer_pad = True
-                        break
+                _chain, terminal_cfg, cycle = resolve_relative_chain(
+                    all_positions, name)
+                if cycle:
+                    raise ValueError(
+                        "定位依赖存在环: "
+                        f"{' → '.join(cycle)}；"
+                        "相对定位链必须终止于绝对定位元素")
+                if terminal_cfg.get('tree_align'):
+                    padding_mode = 'defer'
 
             x, y = self.layout_engine.calculate_position(
-                item['width'], item['height'], cfg, defer_padding=defer_pad)
+                item['width'], item['height'], cfg, padding_mode=padding_mode)
 
             if cfg.get('relative_to'):
                 # 相对定位日志：参考元素、方向、交叉轴对齐与最终坐标

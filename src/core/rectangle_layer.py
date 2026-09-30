@@ -266,8 +266,10 @@ def analyze_rectangles(
         rect_h = int(ref * height_ratio)
         position_cfg = {k: v for k, v in rect_cfg.items()
                         if k not in RECTANGLE_SKIP_KEYS}
+        # 矩形按设计永久豁免 padding 安全区（STYLE_GUIDE §padding，
+        # 审计 Q4 的 exempt 语义），不是延迟夹持
         rect_x, rect_y = layout_engine.calculate_position(
-            rect_w, rect_h, position_cfg, defer_padding=True)
+            rect_w, rect_h, position_cfg, padding_mode='exempt')
 
         # ── 分流：分类/几何/颜色此后按身份解析，不再有第二条路径 ──
         if not is_effect_stack(rect_cfg):

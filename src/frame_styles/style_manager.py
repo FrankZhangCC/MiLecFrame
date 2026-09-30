@@ -26,6 +26,7 @@ from src.utils.layout_engine import (
     HORIZONTAL_CROSS_ALIGNMENTS,
     VERTICAL_CROSS_ALIGNMENTS,
     RELATIVE_POSITIONS,
+    resolve_relative_chain,
 )
 
 # 旧 position 单轴别名 → 新九点迁移建议（唯一映射，直接给出目标值）
@@ -407,33 +408,23 @@ class StyleManager:
         relative_to 链，而渲染端向上找根的遍历遇环无法结束，必须在样式
         加载阶段拒绝。
 
-        每个节点至多声明一个 relative_to（函数图），沿链行走并用已访问
-        链判重；错误信息给出完整环链。已报告环的成员不再作为起点重复
-        报告，同一环只产生一条错误。
+        链遍历复用 layout_engine.resolve_relative_chain（审计 Q4：根查找
+        与环检测同一实现）。每个节点至多声明一个 relative_to（函数图）；
+        错误信息给出完整环链，已报告环的成员不再作为起点重复报告。
         """
         errors = []
         reported = set()
-        for start_name, cfg in positioned.items():
+        for start_name in positioned:
             if start_name in reported:
                 continue
-            chain = [start_name]
-            walk = start_name
-            while True:
-                ref = (positioned.get(walk) or {}).get('relative_to')
-                if not ref:
-                    # 链终点：绝对定位根，或目标不在定位元素集合内
-                    #（后者由运行时"目标不可解析"规则处理，此处不报错）
-                    break
-                if ref in chain:
-                    cycle = chain[chain.index(ref):] + [ref]
-                    errors.append(
-                        f"layout.{start_name}.relative_to: 定位依赖存在环"
-                        f"（{' → '.join(cycle)}）；相对定位链必须终止于"
-                        f"绝对定位元素，请修正 relative_to 配置")
-                    reported.update(cycle)
-                    break
-                chain.append(ref)
-                walk = ref
+            _chain, _terminal, cycle = resolve_relative_chain(
+                positioned, start_name)
+            if cycle:
+                errors.append(
+                    f"layout.{cycle[0]}.relative_to: 定位依赖存在环"
+                    f"（{' → '.join(cycle)}）；相对定位链必须终止于"
+                    f"绝对定位元素，请修正 relative_to 配置")
+                reported.update(cycle[:-1])
         return errors
 
     def _validate_positioning(self, config: Dict, source: str = '') -> bool:
