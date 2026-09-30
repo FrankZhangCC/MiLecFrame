@@ -3,6 +3,8 @@ Logo 配置区块
 
 启用开关 + 绝对/相对定位切换 + 尺寸/边距/偏移参数
 """
+import logging
+
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
 from PySide6.QtCore import Qt, Signal
 
@@ -18,6 +20,8 @@ from ...models.style_config_form import (
     HORIZONTAL_CROSS_OPTIONS, VERTICAL_CROSS_OPTIONS,
     RELATIVE_POSITION_OPTIONS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class LogoSection(ExpandGroupSettingCard):
@@ -161,7 +165,8 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(BodyLabel('relative_margin:', container), r, 0)
         self.rel_margin_sb = DoubleSpinBox(self._rel_widget)
         self.rel_margin_sb.setRange(0.0, 1.0)
-        self.rel_margin_sb.setDecimals(3)
+        # margin/offset 类 decimals=4（G16：三位量化会改写 0.1605 类配置）
+        self.rel_margin_sb.setDecimals(4)
         self.rel_margin_sb.setSingleStep(0.005)
         self.rel_margin_sb.setValue(0.01)
         self.rel_margin_sb.valueChanged.connect(self._on_changed)
@@ -171,14 +176,14 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(BodyLabel('offset_x:', container), r, 0)
         self.offset_x_sb = DoubleSpinBox(self._rel_widget)
         self.offset_x_sb.setRange(-1.0, 1.0)
-        self.offset_x_sb.setDecimals(3)
+        self.offset_x_sb.setDecimals(4)
         self.offset_x_sb.setSingleStep(0.001)
         self.offset_x_sb.valueChanged.connect(self._on_changed)
         rel_grid.addWidget(self.offset_x_sb, r, 1)
         rel_grid.addWidget(BodyLabel('offset_y:', container), r, 2)
         self.offset_y_sb = DoubleSpinBox(self._rel_widget)
         self.offset_y_sb.setRange(-1.0, 1.0)
-        self.offset_y_sb.setDecimals(3)
+        self.offset_y_sb.setDecimals(4)
         self.offset_y_sb.setSingleStep(0.001)
         self.offset_y_sb.valueChanged.connect(self._on_changed)
         rel_grid.addWidget(self.offset_y_sb, r, 3)
@@ -194,7 +199,8 @@ class LogoSection(ExpandGroupSettingCard):
         grid.addWidget(BodyLabel(label, parent), row, col)
         sb = DoubleSpinBox(self._abs_widget)
         sb.setRange(0.0, 1.0)
-        sb.setDecimals(3)
+        # margin/offset 类 decimals=4（G16：三位量化损失第四位小数）
+        sb.setDecimals(4)
         sb.setSingleStep(0.005)
         sb.valueChanged.connect(self._on_changed)
         grid.addWidget(sb, row, col + 1)
@@ -243,11 +249,49 @@ class LogoSection(ExpandGroupSettingCard):
     def _on_changed(self, *args):
         self.value_changed.emit()
 
+    def _ensure_relative_to_option(self, value: str):
+        """加载路径：模型引用值不在下拉选项中时先补进选项（G14）
+
+        下拉默认只有固定键，模型引用可能是 defined_text 实例键；
+        直接 setCurrentText 对缺失值静默失败，保存时会改写引用。
+        """
+        if value and self.rel_to.findText(value) < 0:
+            logger.info(
+                f"[LogoSection] relative_to 引用 {value!r} 不在当前选项"
+                f"中，已补入选项（保存后由 StyleManager 校验）")
+            self.rel_to.addItem(value)
+
+    def update_relative_to_options(self, keys: list):
+        """更新 relative_to 下拉选项（G14 接线：注入 defined_text 实例键）
+
+        当前引用值不在新选项集合时保留原文本并记日志——引用指向已删除
+        条目等失效键不得被静默改写，由保存后 StyleManager 校验拒绝。
+        全程屏蔽信号：选项刷新不是数据变更。
+        """
+        current = self.rel_to.currentText()
+        options = list(keys)
+        if current and current not in options:
+            options.append(current)
+            logger.info(
+                f"[LogoSection] relative_to 引用 {current!r} 不在可用键"
+                f"列表，已保留原引用（保存后由 StyleManager 校验）")
+        self.rel_to.blockSignals(True)
+        self.rel_to.clear()
+        self.rel_to.addItems(options)
+        if current:
+            self.rel_to.setCurrentText(current)
+        self.rel_to.blockSignals(False)
+
     def load_from_model(self, data):
         self.enabled_btn.setChecked(data.logo_enabled)
         self.mode_seg.setCurrentItem(data.logo_mode)
         self.size_ratio_sb.setValue(data.logo_size_ratio)
         self.diag_limit_sb.setValue(data.logo_diagonal_limit)
+        # 相对引用的加载在两种模式下都补缺失选项（G14）：模型值可能是
+        # defined_text 实例键，不在默认固定键选项中，直接 setCurrentText
+        # 会静默失败导致保存时引用被改写
+        if data.logo_relative_to:
+            self._ensure_relative_to_option(data.logo_relative_to)
         if data.logo_mode == 'absolute':
             self.abs_placement.setCurrentText(
                 data.logo_placement)

@@ -30,6 +30,7 @@ from qfluentwidgets import (
 from ..widgets.style_preview import StylePreview
 from ..models.style_config_form import (
     StyleConfigFormData,
+    ELEMENT_KEYS,
     NEW_STYLE_PLACEHOLDER,
     _build_yaml_config,
 )
@@ -299,6 +300,13 @@ class StyleCreatorPage(QWidget):
             self.sections[route] = card
             self.config_layout.addWidget(card)
 
+        # G14 接线：defined_text 实例键池变化（条目增删 / key 文本变更 /
+        # 元素 key 变更）时，刷新全部编辑器的 relative_to 下拉选项
+        self.sections[self.ROUTE_DEFINED_TEXTS].keys_changed.connect(
+            self._refresh_relative_to_options)
+        self.sections[self.ROUTE_ELEMENTS].keys_changed.connect(
+            self._refresh_relative_to_options)
+
         self.config_scroll.setWidget(self.config_container)
         layout.addWidget(self.config_scroll, stretch=1)
 
@@ -326,6 +334,29 @@ class StyleCreatorPage(QWidget):
                         "加载区块 %s 失败: %s", route, e)
         finally:
             self._suppress_config_change = False
+            # 加载完成后按模型实际数据刷新 relative_to 选项池（G14）：
+            # defined_text 实例键只有此时才进入各编辑器下拉选项
+            self._refresh_relative_to_options()
+
+    def _refresh_relative_to_options(self):
+        """刷新全部定位编辑器的 relative_to 下拉选项池（G14 接线）
+
+        选项池 = 固定键（ELEMENT_KEYS）+ 当前全部 defined_text 实例键
+        （实时取 key_edit 文本）。列表卡编辑器额外排除自身 key 防自引用；
+        Logo / 自定义文本卡引用实例键但不作为实例键来源，无需排除。
+        刷新过程在各 update/refresh 方法内部屏蔽信号，不触发 value_changed。
+        """
+        card = self.sections.get(self.ROUTE_DEFINED_TEXTS)
+        defined_keys = card.get_defined_keys() if card else []
+        full_keys = list(ELEMENT_KEYS) + defined_keys
+        for route in (self.ROUTE_ELEMENTS, self.ROUTE_DEFINED_TEXTS):
+            section = self.sections.get(route)
+            if section:
+                section.refresh_relative_to_options(full_keys)
+        for route in (self.ROUTE_LOGO, self.ROUTE_CUSTOM_TEXT):
+            section = self.sections.get(route)
+            if section:
+                section.update_relative_to_options(full_keys)
 
     def _save_all_sections(self):
         """从所有配置区块收集数据到 form_data"""

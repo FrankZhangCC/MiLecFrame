@@ -61,10 +61,15 @@ class ElementEditor(QWidget):
         self, label: str, layout: QGridLayout,
         row: int, *,
         min_val: float = 0.0, max_val: float = 1.0,
-        step: float = 0.005, decimals: int = 3,
+        step: float = 0.005, decimals: int = 4,
         col: int = 0,
     ) -> DoubleSpinBox:
-        """在网格布局中添加一行带标签的 DoubleSpinBox"""
+        """在网格布局中添加一行带标签的 DoubleSpinBox
+
+        decimals 默认 4（G16 修复）：margin/offset 类比例值存在四位
+        小数（如 ParamCapsule margin_bottom 0.1605），三位量化会静默
+        改写用户配置。
+        """
         lb = BodyLabel(label, self)
         sb = DoubleSpinBox(self)
         sb.setRange(min_val, max_val)
@@ -212,7 +217,8 @@ class ElementEditor(QWidget):
         r += 1
         self.rel_margin = DoubleSpinBox(self.rel_widget)
         self.rel_margin.setRange(0.0, 1.0)
-        self.rel_margin.setDecimals(3)
+        # margin/offset 类 decimals=4（G16：三位量化会改写 0.1605 类配置）
+        self.rel_margin.setDecimals(4)
         self.rel_margin.setSingleStep(0.005)
         self.rel_margin.setValue(0.01)
         self.rel_margin.valueChanged.connect(self._on_changed)
@@ -223,7 +229,7 @@ class ElementEditor(QWidget):
         r += 1
         self.rel_offset_x = DoubleSpinBox(self.rel_widget)
         self.rel_offset_x.setRange(-1.0, 1.0)
-        self.rel_offset_x.setDecimals(3)
+        self.rel_offset_x.setDecimals(4)
         self.rel_offset_x.setSingleStep(0.001)
         self.rel_offset_x.setValue(0.0)
         self.rel_offset_x.valueChanged.connect(self._on_changed)
@@ -234,7 +240,7 @@ class ElementEditor(QWidget):
         r += 1
         self.rel_offset_y = DoubleSpinBox(self.rel_widget)
         self.rel_offset_y.setRange(-1.0, 1.0)
-        self.rel_offset_y.setDecimals(3)
+        self.rel_offset_y.setDecimals(4)
         self.rel_offset_y.setSingleStep(0.001)
         self.rel_offset_y.setValue(0.0)
         self.rel_offset_y.valueChanged.connect(self._on_changed)
@@ -328,6 +334,9 @@ class ElementEditor(QWidget):
         self.abs_mr.setValue(elem.margin_right)
         self.tree_align_btn.setChecked(elem.tree_align)
         self.tree_align_btn.setEnabled(elem.mode == 'absolute')
+        # 先补缺失选项再设值，保证模型引用（如 defined_text_01 实例键）
+        # 必能被选中（G14：直接 setCurrentText 对缺失值静默失败）
+        self._ensure_relative_to_option(elem.relative_to)
         self.rel_relative_to.setCurrentText(elem.relative_to)
         # 先同步 cross_alignment 合法值集合，再设置当前值
         self._sync_cross_options(elem.relative_position)
@@ -373,6 +382,8 @@ class ElementEditor(QWidget):
         self.abs_mr.setValue(item.margin_right)
         self.tree_align_btn.setChecked(item.tree_align)
         self.tree_align_btn.setEnabled(item.mode == 'absolute')
+        # 先补缺失选项再设值（G14），理由同 load_element
+        self._ensure_relative_to_option(item.relative_to)
         self.rel_relative_to.setCurrentText(item.relative_to)
         self._sync_cross_options(item.relative_position)
         self.rel_cross_alignment.setCurrentText(item.cross_alignment)
@@ -412,10 +423,40 @@ class ElementEditor(QWidget):
         self.rel_cross_alignment.addItems(legal)
         self.rel_cross_alignment.blockSignals(False)
 
+    # ── relative_to 选项管理（G14 修复：实例键引用保留） ──────
+
+    def _ensure_relative_to_option(self, value: str):
+        """加载路径：模型引用值不在下拉选项中时先补进选项再设值
+
+        下拉默认只有固定键（ELEMENT_KEYS），不含 defined_text_01 等
+        实例键；直接 setCurrentText 对缺失值静默失败（保持默认项），
+        保存时会把改写后的引用写回模型。加载时先补选项保证模型中的
+        引用值必能被选中；引用指向不存在键时保留原文本并记日志，
+        由保存后 StyleManager 校验拒绝，不得静默改写。
+        """
+        if value and self.rel_relative_to.findText(value) < 0:
+            logger.info(
+                f"[ElementEditor] relative_to 引用 {value!r} 不在当前"
+                f"选项中，已补入选项（保存后由 StyleManager 校验）")
+            self.rel_relative_to.addItem(value)
+
     def update_relative_to_options(self, keys: list[str]):
-        """更新 relative_to 下拉选项"""
+        """更新 relative_to 下拉选项（G14 接线：注入固定键 + 实例键）
+
+        当前引用值不在新选项集合时保留原文本并记日志——引用指向
+        已删除条目等失效键不得被静默改写。全程屏蔽信号：选项刷新
+        不是数据变更，不应触发 changed / value_changed 链。
+        """
         current = self.rel_relative_to.currentText()
+        options = list(keys)
+        if current and current not in options:
+            options.append(current)
+            logger.info(
+                f"[ElementEditor] relative_to 引用 {current!r} 不在可用"
+                f"键列表，已保留原引用（保存后由 StyleManager 校验）")
+        self.rel_relative_to.blockSignals(True)
         self.rel_relative_to.clear()
-        self.rel_relative_to.addItems(keys)
-        if current in keys:
+        self.rel_relative_to.addItems(options)
+        if current:
             self.rel_relative_to.setCurrentText(current)
+        self.rel_relative_to.blockSignals(False)

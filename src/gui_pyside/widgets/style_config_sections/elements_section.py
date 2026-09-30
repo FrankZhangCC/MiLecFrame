@@ -28,6 +28,9 @@ class ElementsSection(ExpandGroupSettingCard):
     """元素布局配置区块"""
 
     value_changed = Signal()
+    # 可用键集合变化（条目增删 / 元素 key 变更）——页面据此刷新全部
+    # 编辑器的 relative_to 选项池（G14 修复：引用保留与选项接线）
+    keys_changed = Signal()
 
     def __init__(self, parent=None):
         super().__init__(
@@ -88,6 +91,9 @@ class ElementsSection(ExpandGroupSettingCard):
         editor = ElementEditor(frame, show_key_selector=True)
         editor.load_element(elem)
         editor.changed.connect(self._on_changed)
+        # 元素 key 变更会改变"排除自身"的过滤结果，通知页面刷新选项池
+        editor.key_combo.currentTextChanged.connect(
+            lambda _text: self.keys_changed.emit())
         vbox.addWidget(editor)
 
         # 存储
@@ -99,6 +105,7 @@ class ElementsSection(ExpandGroupSettingCard):
         self._items.append(record)
         self._container.addWidget(frame)
         self._on_changed()
+        self.keys_changed.emit()
         QTimer.singleShot(0, self._adjustViewSize)
 
     def _on_delete(self, frame):
@@ -109,11 +116,25 @@ class ElementsSection(ExpandGroupSettingCard):
                 self._container.removeWidget(frame)
                 frame.deleteLater()
                 self._on_changed()
+                self.keys_changed.emit()
                 QTimer.singleShot(0, self._adjustViewSize)
                 return
 
     def _on_changed(self, *args):
         self.value_changed.emit()
+
+    def refresh_relative_to_options(self, full_keys: list):
+        """刷新各编辑器的 relative_to 选项池（G14 接线）
+
+        full_keys 为页面组装的完整键池（固定键 ELEMENT_KEYS + 当前全部
+        defined_text 实例键）；各编辑器排除自身 key（key_combo 当前值），
+        防止自引用死循环。
+        """
+        for rec in self._items:
+            editor = rec['editor']
+            own_key = editor.key_combo.currentText()
+            keys = [k for k in full_keys if k != own_key]
+            editor.update_relative_to_options(keys)
 
     def get_items(self) -> list[ElementConfig]:
         """收集所有元素数据"""

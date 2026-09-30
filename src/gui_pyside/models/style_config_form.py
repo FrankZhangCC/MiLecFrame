@@ -276,6 +276,10 @@ class StyleConfigFormData:
     # colors 下不在 COLOR_ELEMENT_KEYS 白名单的键（如 custom_rect_01_*），
     # 同样加载后原样回写
     _passthrough_colors: dict = field(default_factory=dict)
+    # logo 段不在已识别键集合的键（如 max_dim_limit_ratio——core
+    # renderer 优先消费它、回退 diagonal_limit_ratio），同样加载后
+    # 原样回写，避免 Logo 长边限制等配置经 GUI 读写后静默丢失（G15c）
+    _passthrough_logo: dict = field(default_factory=dict)
 
     # ── 元素布局 ──
     elements: list = field(default_factory=lambda: [_make_default_element()])
@@ -444,6 +448,11 @@ class StyleConfigFormData:
                     entry['offset_x_ratio'] = elem.offset_x
                 if elem.offset_y != 0.0:
                     entry['offset_y_ratio'] = elem.offset_y
+                if elem.line_alignment != 'left':
+                    # 行内对齐与绝对/相对定位模式无关（STYLE_GUIDE：
+                    # 文字专用字段），非默认时写出（G15a 修复：
+                    # 相对分支此前不写，字段经 GUI 读写后静默丢失）
+                    entry['line_alignment'] = elem.line_alignment
             if elem.mode == 'absolute' and elem.tree_align:
                 # tree_align 只属于绝对定位节点
                 entry['tree_align'] = True
@@ -479,6 +488,9 @@ class StyleConfigFormData:
                         dentry['offset_x_ratio'] = dt_item.offset_x
                     if dt_item.offset_y != 0.0:
                         dentry['offset_y_ratio'] = dt_item.offset_y
+                    if dt_item.line_alignment != 'left':
+                        # 行内对齐与定位模式无关，非默认时写出（G15a 修复）
+                        dentry['line_alignment'] = dt_item.line_alignment
                 defined_cfg[dkey] = dentry
             if defined_cfg:
                 layout['defined_texts'] = defined_cfg
@@ -542,6 +554,9 @@ class StyleConfigFormData:
                 logo['margin_right'] = self.logo_mr
         else:
             logo = {'enabled': False}
+        # 合并透传容器（logo 未识别键原样回写；表单生成的键放在后面，
+        # 正常情况下两集合不相交，此处仅防御同名冲突）
+        logo = {**self._passthrough_logo, **logo}
         data['logo'] = logo
 
         return _clean_dict(data)
@@ -642,11 +657,10 @@ class StyleConfigFormData:
         form.font_line_spacing = float(
             fonts.get('line_spacing_ratio', 0.005))
 
-        sizes = fonts.get('sizes', {}) or {}
-        form.font_sizes = {}
-        for k in COLOR_ELEMENT_KEYS:
-            if k in sizes:
-                form.font_sizes[k] = sizes[k]
+        # 逐元素字号不设白名单：白名单会丢弃 defined_text_01 等实例键，
+        # 而 core text_renderer 按 key（含实例键）查逐元素字号
+        # （G15b 修复：实例字号经 GUI 读写后静默丢失）。未识别键原样保留。
+        form.font_sizes = dict(fonts.get('sizes', {}) or {})
 
         # layout
         layout = data.get('layout', {})
@@ -700,8 +714,9 @@ class StyleConfigFormData:
             if not isinstance(entry, dict):
                 continue
             if 'relative_to' in entry:
-                # 相对定位只读 cross_alignment（旧 alignment 字段不透传，
-                # 含旧字段的样式应由 StyleManager 校验拒绝加载）
+                # 相对定位只读 cross_alignment，不读旧 alignment 字段
+                # （含旧字段的样式应由 StyleManager 校验拒绝加载）；
+                # line_alignment 与定位模式无关，两分支都读（G15a 修复）
                 default_cross = 'center' if str(
                     entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
                 elem = ElementConfig(
@@ -714,6 +729,8 @@ class StyleConfigFormData:
                         entry.get('relative_position', 'below')),
                     cross_alignment=str(
                         entry.get('cross_alignment', default_cross)),
+                    line_alignment=str(
+                        entry.get('line_alignment', 'left')),
                     relative_margin=float(
                         entry.get('relative_margin', 0.01)),
                     offset_x=float(entry.get('offset_x_ratio', 0.0)),
@@ -753,6 +770,20 @@ class StyleConfigFormData:
         # logo
         logo = data.get('logo', {})
         if isinstance(logo, dict):
+            # logo 段未识别键透传（G15c：如 max_dim_limit_ratio），
+            # to_yaml_dict() 时原样回写。deepcopy 避免与外部传入的
+            # config dict 共享可变引用。
+            consumed_logo_keys = {
+                'enabled', 'size_ratio', 'diagonal_limit_ratio',
+                'placement', 'position', 'alignment', 'margin',
+                'margin_top', 'margin_bottom', 'margin_left', 'margin_right',
+                'relative_to', 'relative_position', 'cross_alignment',
+                'relative_margin', 'offset_x_ratio', 'offset_y_ratio',
+            }
+            form._passthrough_logo = {
+                k: copy.deepcopy(v) for k, v in logo.items()
+                if k not in consumed_logo_keys
+            }
             form.logo_enabled = bool(logo.get('enabled', False))
             form.logo_placement = str(logo.get('placement', 'outside'))
             form.logo_position = str(logo.get('position', 'top-right'))
