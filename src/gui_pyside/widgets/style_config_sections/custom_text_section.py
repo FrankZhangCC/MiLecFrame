@@ -290,70 +290,64 @@ class CustomTextSection(ExpandGroupSettingCard):
         self.mode_seg.setCurrentItem(data.custom_text_mode)
         self.line_spacing_sb.setValue(
             data.custom_text_line_spacing)
-        self.line_alignment_combo.setCurrentText(
-            data.custom_text_line_alignment)
+        # G1：定位字段（含 line_alignment）已收拢于 data.custom_text_spec
+        spec = data.custom_text_spec
+        self.line_alignment_combo.setCurrentText(spec.line_alignment)
         # 相对引用的加载在两种模式下都补缺失选项（G14）：模型值可能是
         # defined_text 实例键，不在默认固定键选项中，直接 setCurrentText
         # 会静默失败导致保存时引用被改写
-        if data.custom_text_relative_to:
-            self._ensure_relative_to_option(data.custom_text_relative_to)
+        if spec.relative_to:
+            self._ensure_relative_to_option(spec.relative_to)
         if data.custom_text_mode == 'absolute':
-            self.abs_placement.setCurrentText(
-                data.custom_text_placement)
-            self.abs_position.setCurrentText(
-                data.custom_text_position)
-            self.abs_alignment_combo.setCurrentText(
-                data.custom_text_absolute_alignment)
-            self.abs_mt.setValue(data.custom_text_mt)
-            self.abs_mb.setValue(data.custom_text_mb)
-            self.abs_ml.setValue(data.custom_text_ml)
-            self.abs_mr.setValue(data.custom_text_mr)
+            self.abs_placement.setCurrentText(spec.placement)
+            self.abs_position.setCurrentText(spec.position)
+            self.abs_alignment_combo.setCurrentText(spec.absolute_alignment)
+            self.abs_mt.setValue(spec.margin_top)
+            self.abs_mb.setValue(spec.margin_bottom)
+            self.abs_ml.setValue(spec.margin_left)
+            self.abs_mr.setValue(spec.margin_right)
         else:
-            self.rel_to.setCurrentText(
-                data.custom_text_relative_to)
-            self._sync_cross_options(data.custom_text_relative_position)
-            self.rel_cross_combo.setCurrentText(
-                data.custom_text_cross_alignment)
-            self.rel_pos.setCurrentText(
-                data.custom_text_relative_position)
-            self.rel_margin_sb.setValue(
-                data.custom_text_relative_margin)
-            self.offset_x_sb.setValue(
-                data.custom_text_offset_x)
-            self.offset_y_sb.setValue(
-                data.custom_text_offset_y)
+            self.rel_to.setCurrentText(spec.relative_to)
+            self._sync_cross_options(spec.relative_position)
+            self.rel_cross_combo.setCurrentText(spec.cross_alignment)
+            self.rel_pos.setCurrentText(spec.relative_position)
+            self.rel_margin_sb.setValue(spec.relative_margin)
+            self.offset_x_sb.setValue(spec.offset_x)
+            self.offset_y_sb.setValue(spec.offset_y)
 
     def save_to_model(self, data):
         data.custom_text_enabled = self.enabled_btn.isChecked()
         data.custom_text_mode = self._current_mode
-        # 按当前模式只读取对应 alignment 控件，避免隐藏控件覆盖保存值
-        data.custom_text_absolute_alignment = \
-            self.abs_alignment_combo.currentText()
-        data.custom_text_cross_alignment = \
-            self.rel_cross_combo.currentText()
-        data.custom_text_line_alignment = \
-            self.line_alignment_combo.currentText()
         data.custom_text_line_spacing = \
             self.line_spacing_sb.value()
+        # G1：定位字段（含 line_alignment）写回 data.custom_text_spec
+        spec = data.custom_text_spec
+        # 按当前模式只读取对应 alignment 控件，避免隐藏控件覆盖保存值
+        spec.absolute_alignment = \
+            self.abs_alignment_combo.currentText()
+        spec.cross_alignment = \
+            self.rel_cross_combo.currentText()
+        spec.line_alignment = \
+            self.line_alignment_combo.currentText()
         if data.custom_text_mode == 'absolute':
-            data.custom_text_placement = \
+            spec.placement = \
                 self.abs_placement.currentText()
-            data.custom_text_position = \
+            spec.position = \
                 self.abs_position.currentText()
-            data.custom_text_mt = self.abs_mt.value()
-            data.custom_text_mb = self.abs_mb.value()
-            data.custom_text_ml = self.abs_ml.value()
-            data.custom_text_mr = self.abs_mr.value()
+            spec.margin_top = self.abs_mt.value()
+            spec.margin_bottom = self.abs_mb.value()
+            spec.margin_left = self.abs_ml.value()
+            spec.margin_right = self.abs_mr.value()
         else:
-            data.custom_text_relative_to = \
+            spec.relative_to = \
                 self.rel_to.currentText()
-            data.custom_text_relative_position = \
+            spec.relative_position = \
                 self.rel_pos.currentText()
-            data.custom_text_relative_margin = \
+            spec.relative_margin = \
                 self.rel_margin_sb.value()
-            data.custom_text_offset_x = \
+            spec.offset_x = \
                 self.offset_x_sb.value()
-            data.custom_text_offset_y = \
+            spec.offset_y = \
                 self.offset_y_sb.value()
 
     def _sync_cross_options(self, direction: str):

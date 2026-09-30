@@ -70,10 +70,20 @@ NEW_STYLE_PLACEHOLDER = '--- 新建样式 ---'
 # ── 子数据模型 ──────────────────────────────────────────────
 
 @dataclass
-class ElementConfig:
-    """单个 info_position 元素的配置"""
-    id: int = 0
-    key: str = 'exif'
+class PositionedSpec:
+    """定位参数单元（G1 收敛：四份模型拷贝的单点定义与单点序列化）
+
+    "一个带定位参数的元素"的全部字段：绝对分支（placement / position /
+    九点 alignment / 四向 margin / tree_align）与相对分支（relative_to /
+    relative_position / cross_alignment / relative_margin / offset_x/y），
+    外加与定位模式无关的 line_alignment（STYLE_GUIDE：文字专用字段）。
+
+    序列化规则单点收敛在 to_entry() / update_from_entry()，四个宿主
+    （info_position 元素 / 预定义文本 / Logo / 自定义文本）共用；
+    规则吸收 G15 修复（line_alignment 与模式无关地读写）。
+    各宿主的差异化默认值由子类覆写或构造参数给出，缺失键的填充以
+    实例当前值为回退（见 update_from_entry）。
+    """
     mode: str = 'absolute'
     placement: str = 'outside'
     position: str = 'bottom-left'
@@ -94,31 +104,147 @@ class ElementConfig:
     offset_y: float = 0.0
     tree_align: bool = False
 
+    def _absolute_entry(self) -> dict:
+        """绝对分支定位字段（不含 line_alignment / tree_align 修饰）"""
+        return {
+            'placement': self.placement,
+            'position': self.position,
+            'alignment': self.absolute_alignment,
+            'margin_top': self.margin_top,
+            'margin_bottom': self.margin_bottom,
+            'margin_left': self.margin_left,
+            'margin_right': self.margin_right,
+        }
+
+    def _relative_entry(self) -> dict:
+        """相对分支定位字段（不含 relative_to 与 line_alignment）
+
+        relative_to 由调用方写（自定义文本需 strip 后写入）。
+        """
+        entry = {
+            'relative_position': self.relative_position,
+            'cross_alignment': self.cross_alignment,
+            'relative_margin': self.relative_margin,
+        }
+        if self.offset_x != 0.0:
+            entry['offset_x_ratio'] = self.offset_x
+        if self.offset_y != 0.0:
+            entry['offset_y_ratio'] = self.offset_y
+        return entry
+
+    def to_entry(self) -> dict:
+        """单点序列化为完整 YAML entry（按模式分支 + 公共修饰）
+
+        绝对分支只写九点 alignment，相对分支只写 cross_alignment；
+        line_alignment 与模式无关、非默认才写；tree_align 只属于
+        绝对定位节点（Logo/自定义文本不消费 line_alignment 与
+        tree_align，直接用两个分支方法自行组合）。
+        """
+        if self.mode == 'absolute':
+            entry = self._absolute_entry()
+            if self.line_alignment != 'left':
+                entry['line_alignment'] = self.line_alignment
+            if self.tree_align:
+                entry['tree_align'] = True
+            return entry
+        entry = {'relative_to': self.relative_to}
+        entry.update(self._relative_entry())
+        if self.line_alignment != 'left':
+            entry['line_alignment'] = self.line_alignment
+        return entry
+
+    def update_from_entry(self, entry: dict,
+                          *, relative_if_present: bool = True):
+        """单点反序列化：按 YAML entry 填充定位字段（G1 单点）
+
+        缺失键回退到实例当前值（宿主差异化默认值由此保留）；margin
+        统一兜底键缺失回退 0.0（与既有行为一致——margin_bottom 的
+        0.02 默认只在表单新建元素时生效，YAML 缺失一律 0.0）。
+
+        Args:
+            entry: info_position / defined_texts 子项，或 logo /
+                custom_text 段（多余键自动忽略）
+            relative_if_present: 模式判定策略。True（元素列表语义）：
+                entry 含 relative_to 键即相对模式（含空串）；
+                False（logo/custom_text 段语义）：relative_to 为非空
+                值才判相对模式（'relative_to' in entry 且 truthy 的
+                差异按既有行为保留）。
+        """
+        if relative_if_present:
+            is_relative = 'relative_to' in entry
+        else:
+            is_relative = bool(entry.get('relative_to'))
+        if is_relative:
+            # 相对模式只读 cross_alignment（旧 alignment 字段不透传，
+            # 含旧字段的样式应由 StyleManager 校验拒绝加载）
+            self.mode = 'relative'
+            self.relative_to = str(
+                entry.get('relative_to', self.relative_to))
+            self.relative_position = str(
+                entry.get('relative_position', self.relative_position))
+            # cross 缺失默认规则（原四处内联规则的收敛点）：
+            # left-of/right-of → center；above/below → left
+            default_cross = 'center' if str(
+                entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
+            self.cross_alignment = str(
+                entry.get('cross_alignment', default_cross))
+            self.line_alignment = str(
+                entry.get('line_alignment', self.line_alignment))
+            self.relative_margin = float(
+                entry.get('relative_margin', self.relative_margin))
+            self.offset_x = float(entry.get('offset_x_ratio', self.offset_x))
+            self.offset_y = float(entry.get('offset_y_ratio', self.offset_y))
+        else:
+            self.mode = 'absolute'
+            self.placement = str(entry.get('placement', self.placement))
+            self.position = str(entry.get('position', self.position))
+            self.absolute_alignment = str(
+                entry.get('alignment', self.absolute_alignment))
+            self.line_alignment = str(
+                entry.get('line_alignment', self.line_alignment))
+            marg = entry.get('margin')
+            fallback = marg if marg is not None else 0.0
+            self.margin_top = float(entry.get('margin_top', fallback))
+            self.margin_bottom = float(entry.get('margin_bottom', fallback))
+            self.margin_left = float(entry.get('margin_left', fallback))
+            self.margin_right = float(entry.get('margin_right', fallback))
+            self.tree_align = bool(entry.get('tree_align', False))
+
 
 @dataclass
-class DefinedTextConfig:
-    """单个预定义文本条目"""
+class ElementConfig(PositionedSpec):
+    """单个 info_position 元素的配置（定位字段继承 PositionedSpec）"""
+    id: int = 0
+    key: str = 'exif'
+
+
+@dataclass
+class DefinedTextConfig(PositionedSpec):
+    """单个预定义文本条目（定位字段继承 PositionedSpec）
+
+    覆写两个差异化默认值：预定义文本默认无下边距、相对定位默认
+    挂在参考元素右侧。
+    """
     id: int = 0
     key: str = ''
     content: str = ''
-    mode: str = 'absolute'
-    tree_align: bool = False
-    placement: str = 'outside'
-    position: str = 'bottom-left'
-    # 绝对定位九点自对齐 / 相对定位三值交叉轴对齐（按模式二选一序列化）
-    absolute_alignment: str = 'top-left'
-    cross_alignment: str = 'left'
-    # 多行文本块内部行对齐（单行忽略；非默认时才序列化）
-    line_alignment: str = 'left'
-    margin_top: float = 0.0
     margin_bottom: float = 0.0
-    margin_left: float = 0.0
-    margin_right: float = 0.0
-    relative_to: str = 'exif'
     relative_position: str = 'right-of'
-    relative_margin: float = 0.01
-    offset_x: float = 0.0
-    offset_y: float = 0.0
+
+
+def _default_logo_spec() -> PositionedSpec:
+    """Logo 定位默认值（九点默认 bottom-right：Logo 底边贴照片上方外侧锚点）"""
+    return PositionedSpec(
+        position='top-right',
+        absolute_alignment='bottom-right',
+        # Logo 的 left-of/right-of 相对定位默认交叉轴居中
+        cross_alignment='center',
+    )
+
+
+def _default_custom_text_spec() -> PositionedSpec:
+    """自定义文本定位默认值（九点默认 top-center：文字顶边贴照片下方外侧锚点）"""
+    return PositionedSpec(position='bottom-center')
 
 
 # ── 工具函数 ────────────────────────────────────────────────
@@ -258,25 +384,13 @@ class StyleConfigFormData:
         default_factory=lambda: {'light': 'Light', 'regular': 'Regular', 'medium': 'Medium'})
 
     # ── Logo ──
+    # 定位参数收拢为 PositionedSpec 成员（G1：flat 字段拷贝消除）；
+    # enabled/mode/尺寸等非定位字段仍为平铺字段
     logo_enabled: bool = False
     logo_mode: str = 'absolute'
-    logo_placement: str = 'outside'
-    logo_position: str = 'top-right'
-    # 绝对定位九点自对齐（默认 bottom-right：Logo 底边贴照片上方外侧锚点）
-    logo_absolute_alignment: str = 'bottom-right'
-    # 相对定位交叉轴对齐（left-of/right-of 默认 center）
-    logo_cross_alignment: str = 'center'
+    logo_spec: PositionedSpec = field(default_factory=_default_logo_spec)
     logo_size_ratio: float = 0.04
     logo_diagonal_limit: float = 2.0
-    logo_mt: float = 0.0
-    logo_mb: float = 0.0
-    logo_ml: float = 0.0
-    logo_mr: float = 0.0
-    logo_relative_to: str = ''
-    logo_relative_position: str = 'below'
-    logo_relative_margin: float = 0.01
-    logo_offset_x: float = 0.0
-    logo_offset_y: float = 0.0
 
     # ── 颜色 ──
     color_light: str = ''
@@ -304,25 +418,12 @@ class StyleConfigFormData:
     defined_texts: list = field(default_factory=list)
 
     # ── 自定义文本 ──
+    # 定位参数（含与模式无关的 line_alignment）收拢为 PositionedSpec
+    # 成员（G1）；enabled/mode/行间距为非定位字段，保持平铺
     custom_text_enabled: bool = False
     custom_text_mode: str = 'absolute'
-    custom_text_placement: str = 'outside'
-    custom_text_position: str = 'bottom-center'
-    # 绝对定位九点自对齐（默认 top-center：文字顶边贴照片下方外侧锚点）
-    custom_text_absolute_alignment: str = 'top-center'
-    # 相对定位交叉轴对齐（above/below 默认 left）
-    custom_text_cross_alignment: str = 'left'
-    # 多行文本块内部行对齐（与元素 alignment 完全分离）
-    custom_text_line_alignment: str = 'left'
-    custom_text_mt: float = 0.0
-    custom_text_mb: float = 0.0
-    custom_text_ml: float = 0.0
-    custom_text_mr: float = 0.0
-    custom_text_relative_to: str = ''
-    custom_text_relative_position: str = 'below'
-    custom_text_relative_margin: float = 0.01
-    custom_text_offset_x: float = 0.0
-    custom_text_offset_y: float = 0.0
+    custom_text_spec: PositionedSpec = field(
+        default_factory=_default_custom_text_spec)
     custom_text_line_spacing: float = 0.005
 
     def to_yaml_dict(self) -> dict:
@@ -434,45 +535,10 @@ class StyleConfigFormData:
                 'bottom_right': self.cr_br,
             }
 
-        # info_position
+        # info_position（G1：序列化单点在 PositionedSpec.to_entry）
         info_pos = {}
         for elem in self.elements:
-            key = elem.key
-            if elem.mode == 'absolute':
-                # 绝对定位只写九点 alignment，不写 cross_alignment
-                entry = {
-                    'placement': elem.placement,
-                    'position': elem.position,
-                    'alignment': elem.absolute_alignment,
-                    'margin_top': elem.margin_top,
-                    'margin_bottom': elem.margin_bottom,
-                    'margin_left': elem.margin_left,
-                    'margin_right': elem.margin_right,
-                }
-                if elem.line_alignment != 'left':
-                    # 行内对齐仅在非默认时写出（单行文字渲染时忽略）
-                    entry['line_alignment'] = elem.line_alignment
-            else:
-                # 相对定位只写 cross_alignment，绝不通传 alignment
-                entry = {
-                    'relative_to': elem.relative_to,
-                    'relative_position': elem.relative_position,
-                    'cross_alignment': elem.cross_alignment,
-                    'relative_margin': elem.relative_margin,
-                }
-                if elem.offset_x != 0.0:
-                    entry['offset_x_ratio'] = elem.offset_x
-                if elem.offset_y != 0.0:
-                    entry['offset_y_ratio'] = elem.offset_y
-                if elem.line_alignment != 'left':
-                    # 行内对齐与绝对/相对定位模式无关（STYLE_GUIDE：
-                    # 文字专用字段），非默认时写出（G15a 修复：
-                    # 相对分支此前不写，字段经 GUI 读写后静默丢失）
-                    entry['line_alignment'] = elem.line_alignment
-            if elem.mode == 'absolute' and elem.tree_align:
-                # tree_align 只属于绝对定位节点
-                entry['tree_align'] = True
-            info_pos[key] = entry
+            info_pos[elem.key] = elem.to_entry()
         layout['info_position'] = info_pos
 
         # defined_texts
@@ -483,56 +549,28 @@ class StyleConfigFormData:
                 if not dkey:
                     continue
                 dentry = {'content': dt_item.content}
-                if dt_item.mode == 'absolute':
-                    dentry['placement'] = dt_item.placement
-                    dentry['position'] = dt_item.position
-                    dentry['alignment'] = dt_item.absolute_alignment
-                    dentry['margin_top'] = dt_item.margin_top
-                    dentry['margin_bottom'] = dt_item.margin_bottom
-                    dentry['margin_left'] = dt_item.margin_left
-                    dentry['margin_right'] = dt_item.margin_right
-                    if dt_item.line_alignment != 'left':
-                        dentry['line_alignment'] = dt_item.line_alignment
-                    if dt_item.tree_align:
-                        dentry['tree_align'] = True
-                else:
-                    dentry['relative_to'] = dt_item.relative_to
-                    dentry['relative_position'] = dt_item.relative_position
-                    dentry['cross_alignment'] = dt_item.cross_alignment
-                    dentry['relative_margin'] = dt_item.relative_margin
-                    if dt_item.offset_x != 0.0:
-                        dentry['offset_x_ratio'] = dt_item.offset_x
-                    if dt_item.offset_y != 0.0:
-                        dentry['offset_y_ratio'] = dt_item.offset_y
-                    if dt_item.line_alignment != 'left':
-                        # 行内对齐与定位模式无关，非默认时写出（G15a 修复）
-                        dentry['line_alignment'] = dt_item.line_alignment
+                dentry.update(dt_item.to_entry())
                 defined_cfg[dkey] = dentry
             if defined_cfg:
                 layout['defined_texts'] = defined_cfg
 
         # custom_text
         if self.custom_text_enabled:
+            spec = self.custom_text_spec
             ct = {'enabled': True}
-            if self.custom_text_mode == 'relative' and self.custom_text_relative_to.strip():
-                ct['relative_to'] = self.custom_text_relative_to.strip()
-                ct['relative_position'] = self.custom_text_relative_position
-                ct['cross_alignment'] = self.custom_text_cross_alignment
-                ct['relative_margin'] = self.custom_text_relative_margin
-                if self.custom_text_offset_x != 0.0:
-                    ct['offset_x_ratio'] = self.custom_text_offset_x
-                if self.custom_text_offset_y != 0.0:
-                    ct['offset_y_ratio'] = self.custom_text_offset_y
+            # 相对模式且引用非空才写相对分支；引用为空回退绝对
+            # 分支（既有行为保留）
+            use_relative = (spec.mode == 'relative'
+                            and spec.relative_to.strip())
+            if use_relative:
+                ct['relative_to'] = spec.relative_to.strip()
+                ct.update(spec._relative_entry())
             else:
-                ct['placement'] = self.custom_text_placement
-                ct['position'] = self.custom_text_position
-                ct['alignment'] = self.custom_text_absolute_alignment
-                ct['margin_top'] = self.custom_text_mt
-                ct['margin_bottom'] = self.custom_text_mb
-                ct['margin_left'] = self.custom_text_ml
-                ct['margin_right'] = self.custom_text_mr
-            if self.custom_text_line_alignment != 'left':
-                ct['line_alignment'] = self.custom_text_line_alignment
+                ct.update(spec._absolute_entry())
+            # 行内对齐与模式无关（to_entry 的公共修饰在分支外重做，
+            # 因本段 relative_to 的 strip 写法不经过 to_entry）
+            if spec.line_alignment != 'left':
+                ct['line_alignment'] = spec.line_alignment
             if self.custom_text_line_spacing:
                 ct['line_spacing_ratio'] = self.custom_text_line_spacing
             layout['custom_text'] = ct
@@ -542,32 +580,23 @@ class StyleConfigFormData:
         layout = {**self._passthrough_layout, **layout}
         data['layout'] = layout
 
-        # logo
+        # logo（G1：定位字段经 PositionedSpec 分支方法单点序列化；
+        # Logo 不消费 line_alignment/tree_align，故不经 to_entry）
         if self.logo_enabled:
+            spec = self.logo_spec
             logo = {
                 'enabled': True,
                 'size_ratio': self.logo_size_ratio,
                 'diagonal_limit_ratio': self.logo_diagonal_limit,
             }
-            if self.logo_mode == 'relative' and self.logo_relative_to:
-                # 相对定位只写 cross_alignment
-                logo['relative_to'] = self.logo_relative_to
-                logo['relative_position'] = self.logo_relative_position
-                logo['cross_alignment'] = self.logo_cross_alignment
-                logo['relative_margin'] = self.logo_relative_margin
-                if self.logo_offset_x != 0.0:
-                    logo['offset_x_ratio'] = self.logo_offset_x
-                if self.logo_offset_y != 0.0:
-                    logo['offset_y_ratio'] = self.logo_offset_y
+            # 相对模式且引用非空才写相对分支（既有行为保留）
+            use_relative = (self.logo_mode == 'relative'
+                            and spec.relative_to)
+            if use_relative:
+                logo['relative_to'] = spec.relative_to
+                logo.update(spec._relative_entry())
             else:
-                # 绝对定位只写九点 alignment
-                logo['placement'] = self.logo_placement
-                logo['position'] = self.logo_position
-                logo['alignment'] = self.logo_absolute_alignment
-                logo['margin_top'] = self.logo_mt
-                logo['margin_bottom'] = self.logo_mb
-                logo['margin_left'] = self.logo_ml
-                logo['margin_right'] = self.logo_mr
+                logo.update(spec._absolute_entry())
         else:
             logo = {'enabled': False}
         # 合并透传容器（logo 未识别键原样回写；表单生成的键放在后面，
@@ -722,68 +751,22 @@ class StyleConfigFormData:
         else:
             form.cr_enabled = False
 
-        # info_position -> elements
+        # info_position -> elements（G1：反序列化单点在 update_from_entry）
         ip = layout.get('info_position', {})
         elements = []
         elem_id = 1
         for key, entry in ip.items():
             if not isinstance(entry, dict):
                 continue
-            if 'relative_to' in entry:
-                # 相对定位只读 cross_alignment，不读旧 alignment 字段
-                # （含旧字段的样式应由 StyleManager 校验拒绝加载）；
-                # line_alignment 与定位模式无关，两分支都读（G15a 修复）
-                default_cross = 'center' if str(
-                    entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
-                elem = ElementConfig(
-                    id=elem_id,
-                    key=key,
-                    mode='relative',
-                    placement=str(entry.get('placement', 'outside')),
-                    relative_to=str(entry.get('relative_to', 'exif')),
-                    relative_position=str(
-                        entry.get('relative_position', 'below')),
-                    cross_alignment=str(
-                        entry.get('cross_alignment', default_cross)),
-                    line_alignment=str(
-                        entry.get('line_alignment', 'left')),
-                    relative_margin=float(
-                        entry.get('relative_margin', 0.01)),
-                    offset_x=float(entry.get('offset_x_ratio', 0.0)),
-                    offset_y=float(entry.get('offset_y_ratio', 0.0)),
-                )
-            else:
-                # 统一 margin 作为独立 margin 的兜底
-                default_marg = entry.get('margin')
-                elem = ElementConfig(
-                    id=elem_id,
-                    key=key,
-                    mode='absolute',
-                    placement=str(entry.get('placement', 'outside')),
-                    position=str(entry.get('position', 'bottom-left')),
-                    absolute_alignment=str(
-                        entry.get('alignment', 'top-left')),
-                    line_alignment=str(
-                        entry.get('line_alignment', 'left')),
-                    margin_top=float(
-                        entry.get('margin_top', default_marg
-                                  if default_marg is not None else 0.0)),
-                    margin_bottom=float(
-                        entry.get('margin_bottom', default_marg
-                                  if default_marg is not None else 0.0)),
-                    margin_left=float(
-                        entry.get('margin_left', default_marg
-                                  if default_marg is not None else 0.0)),
-                    margin_right=float(
-                        entry.get('margin_right', default_marg
-                                  if default_marg is not None else 0.0)),
-                    tree_align=bool(entry.get('tree_align', False)),
-                )
+            elem = ElementConfig(id=elem_id, key=key)
+            # 元素列表语义：含 relative_to 键即相对模式（含空串）
+            elem.update_from_entry(entry, relative_if_present=True)
             elements.append(elem)
             elem_id += 1
         form.elements = elements if elements else [_make_default_element()]
 
-        # logo
+        # logo（G1：定位字段经 PositionedSpec.update_from_entry 单点填充，
+        # 以 Logo 默认 spec 为基础，缺失键保留宿主默认值）
         logo = data.get('logo', {})
         if isinstance(logo, dict):
             # logo 段未识别键透传（G15c：如 max_dim_limit_ratio），
@@ -801,141 +784,43 @@ class StyleConfigFormData:
                 if k not in consumed_logo_keys
             }
             form.logo_enabled = bool(logo.get('enabled', False))
-            form.logo_placement = str(logo.get('placement', 'outside'))
-            form.logo_position = str(logo.get('position', 'top-right'))
-            # 九点自对齐（绝对）与交叉轴对齐（相对）按模式分别读取
-            form.logo_absolute_alignment = str(
-                logo.get('alignment', 'bottom-right'))
-            _logo_default_cross = 'center' if str(
-                logo.get('relative_position')) in ('left-of', 'right-of') else 'left'
-            form.logo_cross_alignment = str(
-                logo.get('cross_alignment', _logo_default_cross))
             form.logo_size_ratio = float(logo.get('size_ratio', 0.04))
             form.logo_diagonal_limit = float(
                 logo.get('diagonal_limit_ratio', 2.0))
-            _logo_marg = logo.get('margin')
-            form.logo_mt = float(
-                logo.get('margin_top', _logo_marg
-                         if _logo_marg is not None else 0.0))
-            form.logo_mb = float(
-                logo.get('margin_bottom', _logo_marg
-                         if _logo_marg is not None else 0.0))
-            form.logo_ml = float(
-                logo.get('margin_left', _logo_marg
-                         if _logo_marg is not None else 0.0))
-            form.logo_mr = float(
-                logo.get('margin_right', _logo_marg
-                         if _logo_marg is not None else 0.0))
-            form.logo_relative_to = str(logo.get('relative_to', ''))
-            form.logo_relative_position = str(
-                logo.get('relative_position', 'below'))
-            form.logo_relative_margin = float(
-                logo.get('relative_margin', 0.01))
-            form.logo_offset_x = float(logo.get('offset_x_ratio', 0.0))
-            form.logo_offset_y = float(logo.get('offset_y_ratio', 0.0))
-            form.logo_mode = 'relative' if logo.get(
-                'relative_to') else 'absolute'
+            form.logo_spec = _default_logo_spec()
+            # logo/custom_text 段语义：relative_to 为非空值才判相对模式
+            form.logo_spec.update_from_entry(logo, relative_if_present=False)
+            form.logo_mode = form.logo_spec.mode
         else:
             form.logo_enabled = False
 
-        # defined_texts
+        # defined_texts（G1：反序列化单点在 update_from_entry）
         defined_texts_config = layout.get('defined_texts', {})
         dt_list = []
         dt_id = 1
         for dt_key, dt_entry in defined_texts_config.items():
             if not isinstance(dt_entry, dict):
                 continue
-            content = dt_entry.get('content', '')
-            rooted = 'relative_to' not in dt_entry or not dt_entry.get(
-                'relative_to')
-            mode = 'absolute' if rooted else 'relative'
-            _dt_marg = dt_entry.get('margin')
-            _dt_is_relative = not rooted
-            _dt_default_cross = 'center' if str(
-                dt_entry.get('relative_position')) in ('left-of', 'right-of') else 'left'
             dt_item = DefinedTextConfig(
-                id=dt_id,
-                key=dt_key,
-                content=content,
-                mode=mode,
-                tree_align=bool(dt_entry.get('tree_align', False)),
-                placement=str(dt_entry.get('placement', 'outside')),
-                position=str(dt_entry.get('position', 'bottom-left')),
-                # 绝对定位读九点 alignment + line_alignment；
-                # 相对定位只读 cross_alignment
-                absolute_alignment=str(
-                    dt_entry.get('alignment', 'top-left')),
-                cross_alignment=str(
-                    dt_entry.get('cross_alignment', _dt_default_cross)),
-                line_alignment=str(
-                    dt_entry.get('line_alignment', 'left')),
-                margin_top=float(
-                    dt_entry.get('margin_top', _dt_marg
-                                 if _dt_marg is not None else 0.0)),
-                margin_bottom=float(
-                    dt_entry.get('margin_bottom', _dt_marg
-                                 if _dt_marg is not None else 0.0)),
-                margin_left=float(
-                    dt_entry.get('margin_left', _dt_marg
-                                 if _dt_marg is not None else 0.0)),
-                margin_right=float(
-                    dt_entry.get('margin_right', _dt_marg
-                                 if _dt_marg is not None else 0.0)),
-                relative_to=str(dt_entry.get('relative_to', 'exif')),
-                relative_position=str(
-                    dt_entry.get('relative_position', 'right-of')),
-                relative_margin=float(dt_entry.get('relative_margin', 0.01)),
-                offset_x=float(dt_entry.get('offset_x_ratio', 0.0)),
-                offset_y=float(dt_entry.get('offset_y_ratio', 0.0)),
-            )
+                id=dt_id, key=dt_key,
+                content=dt_entry.get('content', ''))
+            # 预定义文本语义：relative_to 非空才判相对模式
+            #（空串视为 rooted 绝对定位，既有行为保留）
+            dt_item.update_from_entry(dt_entry, relative_if_present=False)
             dt_list.append(dt_item)
             dt_id += 1
         form.defined_texts = dt_list
 
-        # custom_text
+        # custom_text（G1：定位 + line_alignment 收拢于 custom_text_spec）
         ct_cfg = layout.get('custom_text', {})
         if isinstance(ct_cfg, dict):
             form.custom_text_enabled = bool(ct_cfg.get('enabled', False))
-            form.custom_text_placement = str(
-                ct_cfg.get('placement', 'outside'))
-            form.custom_text_position = str(
-                ct_cfg.get('position', 'bottom-center'))
-            # 九点自对齐（绝对）与交叉轴对齐（相对）按模式分别读取
-            form.custom_text_absolute_alignment = str(
-                ct_cfg.get('alignment', 'top-center'))
-            _ct_default_cross = 'center' if str(
-                ct_cfg.get('relative_position')) in ('left-of', 'right-of') else 'left'
-            form.custom_text_cross_alignment = str(
-                ct_cfg.get('cross_alignment', _ct_default_cross))
-            form.custom_text_line_alignment = str(
-                ct_cfg.get('line_alignment', 'left'))
-            _ct_marg = ct_cfg.get('margin')
-            form.custom_text_mt = float(
-                ct_cfg.get('margin_top', _ct_marg
-                           if _ct_marg is not None else 0.0))
-            form.custom_text_mb = float(
-                ct_cfg.get('margin_bottom', _ct_marg
-                           if _ct_marg is not None else 0.0))
-            form.custom_text_ml = float(
-                ct_cfg.get('margin_left', _ct_marg
-                           if _ct_marg is not None else 0.0))
-            form.custom_text_mr = float(
-                ct_cfg.get('margin_right', _ct_marg
-                           if _ct_marg is not None else 0.0))
             form.custom_text_line_spacing = float(
                 ct_cfg.get('line_spacing_ratio', 0.005))
-            form.custom_text_relative_to = str(
-                ct_cfg.get('relative_to', ''))
-            form.custom_text_relative_position = str(
-                ct_cfg.get('relative_position', 'below'))
-            form.custom_text_relative_margin = float(
-                ct_cfg.get('relative_margin', 0.01))
-            form.custom_text_offset_x = float(
-                ct_cfg.get('offset_x_ratio', 0.0))
-            form.custom_text_offset_y = float(
-                ct_cfg.get('offset_y_ratio', 0.0))
-            form.custom_text_mode = 'relative' if ct_cfg.get(
-                'relative_to') else 'absolute'
+            form.custom_text_spec = _default_custom_text_spec()
+            form.custom_text_spec.update_from_entry(
+                ct_cfg, relative_if_present=False)
+            form.custom_text_mode = form.custom_text_spec.mode
         else:
             form.custom_text_enabled = False
 

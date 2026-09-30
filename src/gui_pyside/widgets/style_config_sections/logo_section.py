@@ -289,58 +289,53 @@ class LogoSection(ExpandGroupSettingCard):
         self.mode_seg.setCurrentItem(data.logo_mode)
         self.size_ratio_sb.setValue(data.logo_size_ratio)
         self.diag_limit_sb.setValue(data.logo_diagonal_limit)
+        # G1：定位字段已收拢于 data.logo_spec（PositionedSpec）
+        spec = data.logo_spec
         # 相对引用的加载在两种模式下都补缺失选项（G14）：模型值可能是
         # defined_text 实例键，不在默认固定键选项中，直接 setCurrentText
         # 会静默失败导致保存时引用被改写
-        if data.logo_relative_to:
-            self._ensure_relative_to_option(data.logo_relative_to)
+        if spec.relative_to:
+            self._ensure_relative_to_option(spec.relative_to)
         if data.logo_mode == 'absolute':
-            self.abs_placement.setCurrentText(
-                data.logo_placement)
-            self.abs_position.setCurrentText(
-                data.logo_position)
-            self.abs_alignment_combo.setCurrentText(
-                data.logo_absolute_alignment)
-            self.abs_mt.setValue(data.logo_mt)
-            self.abs_mb.setValue(data.logo_mb)
-            self.abs_ml.setValue(data.logo_ml)
-            self.abs_mr.setValue(data.logo_mr)
+            self.abs_placement.setCurrentText(spec.placement)
+            self.abs_position.setCurrentText(spec.position)
+            self.abs_alignment_combo.setCurrentText(spec.absolute_alignment)
+            self.abs_mt.setValue(spec.margin_top)
+            self.abs_mb.setValue(spec.margin_bottom)
+            self.abs_ml.setValue(spec.margin_left)
+            self.abs_mr.setValue(spec.margin_right)
         else:
-            self.rel_to.setCurrentText(
-                data.logo_relative_to)
-            self._sync_cross_options(data.logo_relative_position)
-            self.rel_cross_combo.setCurrentText(
-                data.logo_cross_alignment)
-            self.rel_pos.setCurrentText(
-                data.logo_relative_position)
-            self.rel_margin_sb.setValue(
-                data.logo_relative_margin)
-            self.offset_x_sb.setValue(data.logo_offset_x)
-            self.offset_y_sb.setValue(data.logo_offset_y)
+            self.rel_to.setCurrentText(spec.relative_to)
+            self._sync_cross_options(spec.relative_position)
+            self.rel_cross_combo.setCurrentText(spec.cross_alignment)
+            self.rel_pos.setCurrentText(spec.relative_position)
+            self.rel_margin_sb.setValue(spec.relative_margin)
+            self.offset_x_sb.setValue(spec.offset_x)
+            self.offset_y_sb.setValue(spec.offset_y)
 
     def save_to_model(self, data):
         data.logo_enabled = self.enabled_btn.isChecked()
         data.logo_mode = self._current_mode
         data.logo_size_ratio = self.size_ratio_sb.value()
         data.logo_diagonal_limit = self.diag_limit_sb.value()
+        # G1：定位字段写回 data.logo_spec（PositionedSpec）
+        spec = data.logo_spec
         # 按当前模式只读取对应 alignment 控件，避免隐藏控件覆盖保存值
-        data.logo_absolute_alignment = \
-            self.abs_alignment_combo.currentText()
-        data.logo_cross_alignment = self.rel_cross_combo.currentText()
+        spec.absolute_alignment = self.abs_alignment_combo.currentText()
+        spec.cross_alignment = self.rel_cross_combo.currentText()
         if data.logo_mode == 'absolute':
-            data.logo_placement = self.abs_placement.currentText()
-            data.logo_position = self.abs_position.currentText()
-            data.logo_mt = self.abs_mt.value()
-            data.logo_mb = self.abs_mb.value()
-            data.logo_ml = self.abs_ml.value()
-            data.logo_mr = self.abs_mr.value()
+            spec.placement = self.abs_placement.currentText()
+            spec.position = self.abs_position.currentText()
+            spec.margin_top = self.abs_mt.value()
+            spec.margin_bottom = self.abs_mb.value()
+            spec.margin_left = self.abs_ml.value()
+            spec.margin_right = self.abs_mr.value()
         else:
-            data.logo_relative_to = self.rel_to.currentText()
-            data.logo_relative_position = \
-                self.rel_pos.currentText()
-            data.logo_relative_margin = self.rel_margin_sb.value()
-            data.logo_offset_x = self.offset_x_sb.value()
-            data.logo_offset_y = self.offset_y_sb.value()
+            spec.relative_to = self.rel_to.currentText()
+            spec.relative_position = self.rel_pos.currentText()
+            spec.relative_margin = self.rel_margin_sb.value()
+            spec.offset_x = self.offset_x_sb.value()
+            spec.offset_y = self.offset_y_sb.value()
 
     def _sync_cross_options(self, direction: str):
         """按方向同步 cross_alignment 下拉选项（加载时使用，不发信号）"""
