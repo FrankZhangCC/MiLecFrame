@@ -41,17 +41,24 @@ from qfluentwidgets.common.style_sheet import (
 from ..models.file_item import FileItem, compute_cache_key
 from ..utils.temp_manager import TempManager
 from ..widgets.style_selector_card import StyleSelectorCard
+# G2 拆分：六张配置卡构建与渲染配置收集收敛于独立模块（控件仍归属
+# 页面属性，本页不重复定义）；下拉选项表与历史别名表同源于此
+from .image_processing_config_cards import (
+    create_output_settings_card, create_style_selection_card,
+    create_frame_config_card, create_personalization_card,
+    create_shot_info_card, create_watermark_card,
+    collect_render_options, PORTRAIT_ADAPTATION_ITEMS,
+    _LEGACY_TEXT_ALIASES,
+)
 from src.utils.exif_helper import ExifHelper
 from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
 from src.utils.config_manager import default_config_manager
 from src.core.image_processor import ImageProcessor
 from src.core.blur_cache import PreparedBlurLRU
-from src.core.renderer import RenderMetadata, RenderOptions
-# 输出标识导出校验（只读验证器，GUI 不自行拼接任何元数据字段）
-from src.utils.output_metadata import (
-    read_output_branding, verify_output_metadata, OutputMetadataError,
-)
+# 输出导出服务（G2 拆分：校验与发布流程收敛于 utils/export_service；
+# GUI 只调用服务，不自行拼接或修复任何元数据字段）
+from src.utils.export_service import export_verified, OutputMetadataError
 # 竖图方向适配（方案 docs/plans/PORTRAIT_ORIENTATION_ADAPTATION_PLAN.md §6）：
 # 枚举值单点来源于 utils 工具模块，GUI 不自定义第二份合法值集合
 from src.utils.orientation_adaptation import (
@@ -68,86 +75,9 @@ logger = logging.getLogger(__name__)
 # 图片文件扩展名白名单（与 _on_add_files 文件对话框过滤器一致）
 _ALLOWED_EXT = ('.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.webp')
 
-# 导出目标扩展名 → 实际编码映射（G13 扩展名契约：导出是"已验证结果的
-# 字节副本"，不做转码，目标后缀必须与源实际编码一致，否则拒绝发布）
-_EXPORT_SUFFIX_FORMATS = {'.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG'}
 
-# ── 旋转适配下拉框选项（显示文本, 稳定内部值） ──────────
-# userData 绑定稳定枚举值而非中文文本：未来调整文案不破坏已有
-# config.json 的恢复（方案 §6.3）；'默认'的动态语义在渲染时解析
-PORTRAIT_ADAPTATION_ITEMS = (
-    ('默认（跟随样式）', ADAPT_DEFAULT),
-    ('不旋转', ADAPT_NONE),
-    ('顺时针适配', ADAPT_CLOCKWISE),
-    ('逆时针适配', ADAPT_COUNTERCLOCKWISE),
-)
-
-# ── 下拉框选项（显示文本, 稳定内部值）─────────────────────
-# G3 修复：各下拉框 userData 绑定稳定枚举值而非中文文本，渲染映射
-# 与 config.json 持久化一律读写稳定 key（对齐 PORTRAIT_ADAPTATION_
-# ITEMS 的既有规范模式）；未来调整文案不再使渲染映射/配置恢复失效
-
-OUTPUT_FORMAT_ITEMS = (
-    ('JPEG', 'JPEG'),
-    ('PNG', 'PNG'),
-)
-
-FONT_WEIGHT_ITEMS = (
-    ('中等 (Medium)', 'medium'),
-    ('常规 (Regular)', 'regular'),
-    ('细体 (Light)', 'light'),
-)
-
-TIMESTAMP_DISPLAY_ITEMS = (
-    ('显示日期与时刻', 'full'),
-    ('只显示日期', 'date_only'),
-    ('不显示时间', 'hide'),
-)
-
-LENS_DISPLAY_ITEMS = (
-    ('相机+镜头', 'combined'),
-    ('只显示相机', 'camera_only'),
-    ('只显示镜头', 'lens_only'),
-)
-
-WATERMARK_POSITION_ITEMS = (
-    ('左上', 'top-left'),
-    ('顶部居中', 'top-center'),
-    ('右上', 'top-right'),
-    ('左下', 'bottom-left'),
-    ('底部居中', 'bottom-center'),
-    ('右下', 'bottom-right'),
-)
-
-# 水印颜色 key → RGB（userData 存 JSON 可序列化的稳定 key，
-# 不直接存 tuple：QVariant 往返对 tuple 的还原不可靠）
-WATERMARK_COLOR_ITEMS = (
-    ('白色', 'white'),
-    ('黑色', 'black'),
-)
-_WM_COLOR_RGB = {'white': (255, 255, 255), 'black': (0, 0, 0)}
-
-# Logo 下拉哨兵稳定 key（G3：哨兵文案"自动匹配"/"无"此前被当作
-# 渲染分支判断依据，文案一改映射静默失效）；动态 logo 项的
-# userData 为 logo 文件名本身（文件名即稳定 key）
-LOGO_AUTO = 'auto'
-LOGO_NONE = 'none'
-
-# ── 历史文本 → 稳定 key 别名表（D5 决策：长期保留）────────
-# 修复前的 config.json 以中文显示文本为值；加载恢复时 findData 失败
-# 后查此表迁移到稳定 key，仍失败回退默认项。别名表长期保留不随版本
-# 移除：findText 式一次性兼容只在"文案未变"时有效，恰好漏掉本条
-# 要防的"文案已变"场景；bg_fill 的历史 label 来自
-# BackgroundFillManager 注册表，加载时与静态表合并（见 __init__）。
-_LEGACY_TEXT_ALIASES = {
-    **{text: key for text, key in FONT_WEIGHT_ITEMS},
-    **{text: key for text, key in TIMESTAMP_DISPLAY_ITEMS},
-    **{text: key for text, key in LENS_DISPLAY_ITEMS},
-    **{text: key for text, key in WATERMARK_POSITION_ITEMS},
-    **{text: key for text, key in WATERMARK_COLOR_ITEMS},
-    '自动匹配': LOGO_AUTO,
-    '无': LOGO_NONE,
-}
+# ── 下拉框选项与历史别名表：定义单点在 image_processing_config_cards
+# （G2/G3：稳定 key 选项表随配置卡构建收敛；页面经下方 import 引用）
 
 
 class FilmStripWheelFilter(QObject):
@@ -507,38 +437,97 @@ class ImageProcessingPage(QWidget):
         config_layout.addLayout(card_layout)
 
         # ── Tab 1: 输出设置 ──
-        self.output_settings_card = self._create_output_settings_card()
+        self.output_settings_card = create_output_settings_card(self)
         self.output_settings_card.setParent(config_container)
         card_layout.addWidget(self.output_settings_card)
 
         # ── Tab 2: 样式选择（缩略图网格） ──
-        self.style_selector_card = self._create_style_selection_card()
+        self.style_selector_card = create_style_selection_card(self)
         self.style_selector_card.setParent(config_container)
         card_layout.addWidget(self.style_selector_card)
 
         # ── Tab 3: 相框配置 ──
-        self.frame_config_card = self._create_frame_config_card()
+        self.frame_config_card = create_frame_config_card(self)
         self.frame_config_card.setParent(config_container)
         card_layout.addWidget(self.frame_config_card)
 
         # ── Tab 3: 个性化配置 ──
-        self.personalization_card = self._create_personalization_card()
+        self.personalization_card = create_personalization_card(self)
         self.personalization_card.setParent(config_container)
         card_layout.addWidget(self.personalization_card)
 
         # ── Tab 4: 拍摄信息配置 ──
-        self.shot_info_card = self._create_shot_info_card()
+        self.shot_info_card = create_shot_info_card(self)
         self.shot_info_card.setParent(config_container)
         card_layout.addWidget(self.shot_info_card)
 
         # ── Tab 5: 文本水印 ──
-        self.watermark_card = self._create_watermark_card()
+        self.watermark_card = create_watermark_card(self)
         self.watermark_card.setParent(config_container)
         card_layout.addWidget(self.watermark_card)
 
         panel.setWidget(config_container)
 
         return panel
+
+    def _create_filmstrip(self) -> QWidget:
+        """创建底部胶片栏（横向缩略图列表）"""
+        filmstrip = QWidget()
+        filmstrip.setMinimumHeight(100)
+        filmstrip.setMaximumHeight(250)
+        self._apply_custom_style(filmstrip,
+            lightQss=(
+                "QWidget {"
+                " border-top: 1px solid #e0e0e0;"
+                " background-color: #fafafa;"
+                " }"
+            ),
+            darkQss=(
+                "QWidget {"
+                " border-top: 1px solid #3D3D3D;"
+                " background-color: #282828;"
+                " }"
+            ),
+        )
+
+        layout = QVBoxLayout(filmstrip)
+        layout.setContentsMargins(16, 8, 16, 8)
+        layout.setSpacing(4)
+
+        # 标题栏
+        header = QHBoxLayout()
+        self.filmstrip_title = CaptionLabel("胶片栏 — 将图片拖拽到此处或点击\"添加图片\"按钮加载")
+        header.addWidget(self.filmstrip_title)
+        header.addStretch()
+
+        self.btn_add_files = PushButton("添加图片")
+        self.btn_add_files.clicked.connect(self._on_add_files)
+        header.addWidget(self.btn_add_files)
+        layout.addLayout(header)
+
+        # 缩略图滚动区域（无固定高度限制，随胶片栏缩放）
+        self.filmstrip_scroll = SmoothScrollArea()
+        self.filmstrip_scroll.setWidgetResizable(True)
+        self.filmstrip_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.filmstrip_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.filmstrip_scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        # 安装滚轮事件过滤器（滚轮向下→图片列表向右）
+        self.filmstrip_scroll.viewport().installEventFilter(FilmStripWheelFilter(self.filmstrip_scroll))
+
+        self.filmstrip_container = QWidget()
+        self.filmstrip_layout = QHBoxLayout(self.filmstrip_container)
+        self.filmstrip_layout.setContentsMargins(0, 0, 0, 0)
+        self.filmstrip_layout.setSpacing(8)
+        self.filmstrip_layout.addStretch()
+
+        self.filmstrip_scroll.setWidget(self.filmstrip_container)
+        layout.addWidget(self.filmstrip_scroll)
+
+        return filmstrip
+
+    # ════════════════════════════════════════════════════════
+    #  配置面板 Tab 创建方法
+    # ════════════════════════════════════════════════════════
 
     def _create_filmstrip(self) -> QWidget:
         """创建底部胶片栏（横向缩略图列表）"""
@@ -1344,72 +1333,6 @@ class ImageProcessingPage(QWidget):
             "胶片栏 — 将图片拖拽到此处或点击\"添加图片\"按钮加载"
         )
 
-    @staticmethod
-    def _file_sha256(path: str) -> str:
-        """计算文件 SHA-256（用于导出副本与源结果的一致性校验）"""
-        digest = hashlib.sha256()
-        with open(path, 'rb') as fh:
-            for chunk in iter(lambda: fh.read(65536), b''):
-                digest.update(chunk)
-        return digest.hexdigest()
-
-    def _export_verified(self, src_path: str, dst_path: str) -> None:
-        """
-        导出结果文件并验证：先复制到同目录临时文件，校验通过才发布到目标
-
-        校验两项（方案 §6.4）：
-          1. 副本与源结果的 SHA-256 完全一致（证明复制完整、未经二次编码）；
-          2. 用生产只读验证器读回标识（Software 字段必须有效且与源一致）。
-
-        期望编码取源文件实际编码而非路径后缀（G13 修复：'.part' 临时
-        后缀曾被当作格式判断依据，导致 PNG 导出必然验证失败）；目标
-        扩展名与源实际编码不一致时拒绝导出（导出不转码，不发布内容与
-        扩展名不符的文件——转码会破坏哈希一致性校验的前提）。
-
-        校验失败时只清理本次临时副本，不动目标位置可能已存在的旧文件。
-        GUI 只调用验证器，不自行拼接或修复任何元数据字段。
-
-        Args:
-            src_path: 已成功生成的结果文件
-            dst_path: 用户选择的导出目标路径
-
-        Raises:
-            OutputMetadataError/OSError: 扩展名契约不符、复制或校验失败
-        """
-        tmp_path = dst_path + '.part'
-        try:
-            # G13 扩展名契约：先于任何 I/O 校验目标后缀与源编码一致
-            suffix = Path(dst_path).suffix.lower()
-            suffix_format = _EXPORT_SUFFIX_FORMATS.get(suffix)
-            if suffix_format is None:
-                raise OutputMetadataError(
-                    f"不支持的导出扩展名 {suffix!r}（仅支持 .jpg/.jpeg/.png）")
-
-            shutil.copy2(src_path, tmp_path)
-
-            # 1) 哈希一致：排除复制不完整或被二次编码
-            if self._file_sha256(src_path) != self._file_sha256(tmp_path):
-                raise OutputMetadataError("导出副本与源结果哈希不一致")
-
-            # 2) 读回标识：源文件的软件值与实际编码作为期望值，验证副本一致
-            #    （副本是源的字节拷贝，期望编码取源文件实际编码）
-            expected, source_format = read_output_branding(src_path)
-            if suffix_format != source_format:
-                raise OutputMetadataError(
-                    f"目标扩展名 {suffix!r} 与源图像格式 {source_format} 不符；"
-                    f"导出不转码，请选择与源格式一致的扩展名")
-            verify_output_metadata(tmp_path, source_format, expected)
-
-            # 验证通过才替换目标输出
-            os.replace(tmp_path, dst_path)
-            tmp_path = None
-        finally:
-            if tmp_path is not None and os.path.exists(tmp_path):
-                try:
-                    os.unlink(tmp_path)
-                except OSError as e:
-                    logger.warning(f"[output-metadata] 导出临时文件清理失败 {tmp_path}: {e}")
-
     def _on_export_current(self):
         """导出当前选中的图片到用户选择的位置"""
         if self.current_index < 0 or self.current_index >= len(self.file_items):
@@ -1429,7 +1352,7 @@ class ImageProcessingPage(QWidget):
         )
         if path:
             try:
-                self._export_verified(item.result_path, path)
+                export_verified(item.result_path, path)
             except Exception as e:
                 # 本次导出失败：不宣称成功，目标位置不留下未通过校验的文件
                 logger.error(f"[output-metadata] 导出校验失败 {item.file_name} -> {path}: {e}")
@@ -1461,43 +1384,8 @@ class ImageProcessingPage(QWidget):
         try:
             item = self.file_items[self.current_index]
 
-            # 1. 从 GUI 控件收集配置（G3：下拉框 userData 即稳定 key，
-            # 直接读 currentData()，不再用中文 currentText 反查内联 map）
-            bg_key = self.combo_bg_fill.currentData() or BackgroundFillManager.DEFAULT_FILL
-            fw_key = self.combo_font_weight.currentData() or 'medium'
-            lens_key = self.combo_lens_display.currentData() or 'combined'
-            ts_mode = self.combo_timestamp.currentData() or 'full'
-
-            # GPS 替换逻辑
-            gps_on = self.chk_use_gps.isChecked()
-            gps_str = item.exif_data.get('gps', '') if item.exif_data else ''
-            location = gps_str if (gps_on and gps_str) else self.edit_location.text()
-
-            # LOGO 选择逻辑（userData：LOGO_AUTO / LOGO_NONE / 文件名）
-            logo_opt = self.combo_logo.currentData()
-            logo_filename = None
-            if logo_opt == LOGO_NONE:
-                logo_filename = ""
-            elif logo_opt not in (LOGO_AUTO, None):
-                logo_filename = logo_opt
-            # "自动匹配"保持 None：由 render_frame 在样式背景覆盖解析之后，
-            # 按最终背景与显示品牌统一匹配（审计 Q6 决策收敛），此处不再
-            # 按预览所选背景预选，避免样式覆盖背景后 Logo 明暗错位
-
-            # 水印装饰
-            decorations = []
-            if self.chk_watermark.isChecked() and self.edit_watermark_text.text():
-                decorations.append({
-                    'type': 'watermark',
-                    'params': {
-                        'text': self.edit_watermark_text.text(),
-                        'position': self.combo_wm_position.currentData() or 'bottom-right',
-                        'opacity': self.slider_opacity.value(),
-                        'color': _WM_COLOR_RGB.get(
-                            self.combo_wm_color.currentData() or 'white',
-                            (255, 255, 255))
-                    }
-                })
+            # 1. 从 GUI 控件收集渲染配置（G2 拆分：纯函数单点实现）
+            metadata, options, fw_key = collect_render_options(self, item)
 
             # 2. 创建临时文件并调用 ImageProcessor
             suffix = os.path.splitext(item.file_name)[1]
@@ -1511,23 +1399,6 @@ class ImageProcessingPage(QWidget):
 
             # 调用处理器（本调用点是二级模糊缓存的接入位置：
             # source_cache_key 用 FileItem 导入摘要，LRU 页面级持有）
-            metadata = RenderMetadata(
-                author=self.edit_author.text() or None,
-                location=location or None,
-                custom_text=self.edit_custom_text.text() or None,
-                lens_display_mode=lens_key,
-                use_short_lens=self.chk_short_lens.isChecked(),
-                timestamp_display_mode=ts_mode,
-            )
-            options = RenderOptions(
-                bg_fill_type=bg_key,
-                decorations=decorations or None,
-                logo_filename=logo_filename,
-                saturation_override=None if self.chk_enhance.isChecked() else 1.0,
-                source_cache_key=item.cache_key,
-                prepared_blur_cache=self._blur_lru,
-                portrait_adaptation=self._get_portrait_adaptation(),
-            )
             if self._processor is None:
                 self._processor = ImageProcessor()
             success = self._processor.process(
@@ -1605,7 +1476,7 @@ class ImageProcessingPage(QWidget):
                 ext = Path(item.result_path).suffix
                 dest = os.path.join(folder, Path(item.file_name).stem + '_frame' + ext)
                 # 复制 + 哈希/标识校验 + 验证后发布（与单张导出同一路径）
-                self._export_verified(item.result_path, dest)
+                export_verified(item.result_path, dest)
                 exported += 1
             except Exception as e:
                 export_failed.append(item.file_name)
