@@ -30,6 +30,10 @@ from ..models.style_config_form import (
     VERTICAL_CROSS_OPTIONS,
     RELATIVE_POSITION_OPTIONS,
 )
+from .positioning_binding import (
+    PositionControls, load_positioned, save_positioned,
+    sync_cross_options, apply_combo_options,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -258,6 +262,23 @@ class ElementEditor(QWidget):
         self.rel_widget.setEnabled(False)
         layout.addWidget(self.rel_widget)
 
+        # G1 控件层：定位参数绑定束（控件引用协议，见 positioning_binding）
+        self._controls = PositionControls(
+            placement=self.abs_placement,
+            position=self.abs_position,
+            alignment=self.abs_alignment,
+            margin_top=self.abs_mt,
+            margin_bottom=self.abs_mb,
+            margin_left=self.abs_ml,
+            margin_right=self.abs_mr,
+            relative_to=self.rel_relative_to,
+            relative_position=self.rel_relative_position,
+            cross_alignment=self.rel_cross_alignment,
+            relative_margin=self.rel_margin,
+            offset_x=self.rel_offset_x,
+            offset_y=self.rel_offset_y,
+        )
+
     # ── 模式切换 ───────────────────────────────────────────
 
     def _on_mode_changed(self, mode: str):
@@ -286,32 +307,14 @@ class ElementEditor(QWidget):
         self.mode_changed.emit()
 
     def _on_relative_position_changed(self, direction: str):
-        """
-        relative_position 切换时同步 cross_alignment 合法值：
+        """relative_position 切换时同步 cross_alignment 合法值（共享实现）
+
         above/below → left/center/right（默认 left）；
-        left-of/right-of → top/center/bottom（默认 center）。
-        当前值不合法时重置为 center（方向无关的中性值）。
+        left-of/right-of → top/center/bottom（默认 center）；
+        不合法旧值按模型序列化默认规则重置。
         """
-        if direction in ('left-of', 'right-of'):
-            legal = VERTICAL_CROSS_OPTIONS
-            default = 'center'
-        else:
-            legal = HORIZONTAL_CROSS_OPTIONS
-            default = 'left'
-        current = self.rel_cross_alignment.currentText()
-        self.rel_cross_alignment.blockSignals(True)
-        self.rel_cross_alignment.clear()
-        self.rel_cross_alignment.addItems(legal)
-        if current in legal:
-            self.rel_cross_alignment.setCurrentText(current)
-        else:
-            # 原值与新方向轴向不匹配，重置并提示
-            self.rel_cross_alignment.setCurrentText(default)
-            logger.info(
-                f"[ElementEditor] relative_position 切换为 {direction!r}，"
-                f"cross_alignment 原值 {current!r} 不合法，已重置为 "
-                f"{self.rel_cross_alignment.currentText()!r}")
-        self.rel_cross_alignment.blockSignals(False)
+        sync_cross_options(self.rel_cross_alignment, direction,
+                           owner_label='ElementEditor')
         self._on_changed()
 
     def _on_changed(self, *args):
@@ -330,108 +333,42 @@ class ElementEditor(QWidget):
             self._current_mode = mode
             self.mode_seg.setCurrentItem(mode)
 
+    # ── 数据读写（G1 控件层：映射单点在 positioning_binding） ──
+
+    def _load_common(self, positioned):
+        """定位参数加载的共用路径（load_element/load_defined_text 单对化）"""
+        self.set_mode(positioned.mode)
+        # 先补缺失选项再设值，保证模型引用（如 defined_text_01 实例键）
+        # 必能被选中（G14：直接 setCurrentText 对缺失值静默失败）
+        self._ensure_relative_to_option(positioned.relative_to)
+        load_positioned(positioned, self._controls, positioned.mode)
+        self.tree_align_btn.setChecked(positioned.tree_align)
+        self.tree_align_btn.setEnabled(positioned.mode == 'absolute')
+
+    def _save_common(self, target):
+        """定位参数保存的共用路径（save_element/save_defined_text 单对化）"""
+        save_positioned(target, self._controls, self._current_mode)
+        target.tree_align = self.tree_align_btn.isChecked()
+
     def load_element(self, elem: ElementConfig):
         """从 ElementConfig 加载数据"""
         if self._show_key_selector:
             self.key_combo.setCurrentText(elem.key)
-        self.set_mode(elem.mode)
-        self.abs_placement.setCurrentText(elem.placement)
-        self.abs_position.setCurrentText(elem.position)
-        self.abs_alignment.setCurrentText(elem.absolute_alignment)
-        self.abs_mt.setValue(elem.margin_top)
-        self.abs_mb.setValue(elem.margin_bottom)
-        self.abs_ml.setValue(elem.margin_left)
-        self.abs_mr.setValue(elem.margin_right)
-        self.tree_align_btn.setChecked(elem.tree_align)
-        self.tree_align_btn.setEnabled(elem.mode == 'absolute')
-        # 先补缺失选项再设值，保证模型引用（如 defined_text_01 实例键）
-        # 必能被选中（G14：直接 setCurrentText 对缺失值静默失败）
-        self._ensure_relative_to_option(elem.relative_to)
-        self.rel_relative_to.setCurrentText(elem.relative_to)
-        # 先同步 cross_alignment 合法值集合，再设置当前值
-        self._sync_cross_options(elem.relative_position)
-        self.rel_cross_alignment.setCurrentText(elem.cross_alignment)
-        self.rel_relative_position.setCurrentText(
-            elem.relative_position)
-        self.rel_margin.setValue(elem.relative_margin)
-        self.rel_offset_x.setValue(elem.offset_x)
-        self.rel_offset_y.setValue(elem.offset_y)
+        self._load_common(elem)
 
     def save_element(self, target: ElementConfig):
         """保存数据到 ElementConfig 对象"""
         if self._show_key_selector:
             target.key = self.key_combo.currentText()
-        target.mode = self._current_mode
-        target.placement = self.abs_placement.currentText()
-        target.position = self.abs_position.currentText()
-        # 按当前模式只读取当前可见的 alignment 控件，避免隐藏控件
-        # 覆盖用户选择（相对 cross_alignment 保存缺陷修复）
-        target.absolute_alignment = self.abs_alignment.currentText()
-        target.cross_alignment = self.rel_cross_alignment.currentText()
-        target.margin_top = self.abs_mt.value()
-        target.margin_bottom = self.abs_mb.value()
-        target.margin_left = self.abs_ml.value()
-        target.margin_right = self.abs_mr.value()
-        target.tree_align = self.tree_align_btn.isChecked()
-        target.relative_to = self.rel_relative_to.currentText()
-        target.relative_position = \
-            self.rel_relative_position.currentText()
-        target.relative_margin = self.rel_margin.value()
-        target.offset_x = self.rel_offset_x.value()
-        target.offset_y = self.rel_offset_y.value()
+        self._save_common(target)
 
     def load_defined_text(self, item: DefinedTextConfig):
         """从 DefinedTextConfig 加载数据"""
-        self.set_mode(item.mode)
-        self.abs_placement.setCurrentText(item.placement)
-        self.abs_position.setCurrentText(item.position)
-        self.abs_alignment.setCurrentText(item.absolute_alignment)
-        self.abs_mt.setValue(item.margin_top)
-        self.abs_mb.setValue(item.margin_bottom)
-        self.abs_ml.setValue(item.margin_left)
-        self.abs_mr.setValue(item.margin_right)
-        self.tree_align_btn.setChecked(item.tree_align)
-        self.tree_align_btn.setEnabled(item.mode == 'absolute')
-        # 先补缺失选项再设值（G14），理由同 load_element
-        self._ensure_relative_to_option(item.relative_to)
-        self.rel_relative_to.setCurrentText(item.relative_to)
-        self._sync_cross_options(item.relative_position)
-        self.rel_cross_alignment.setCurrentText(item.cross_alignment)
-        self.rel_relative_position.setCurrentText(
-            item.relative_position)
-        self.rel_margin.setValue(item.relative_margin)
-        self.rel_offset_x.setValue(item.offset_x)
-        self.rel_offset_y.setValue(item.offset_y)
+        self._load_common(item)
 
     def save_defined_text(self, target: DefinedTextConfig):
         """保存数据到 DefinedTextConfig 对象"""
-        target.mode = self._current_mode
-        target.placement = self.abs_placement.currentText()
-        target.position = self.abs_position.currentText()
-        # 按当前模式只读取当前可见的 alignment 控件
-        target.absolute_alignment = self.abs_alignment.currentText()
-        target.cross_alignment = self.rel_cross_alignment.currentText()
-        target.margin_top = self.abs_mt.value()
-        target.margin_bottom = self.abs_mb.value()
-        target.margin_left = self.abs_ml.value()
-        target.margin_right = self.abs_mr.value()
-        target.tree_align = self.tree_align_btn.isChecked()
-        target.relative_to = self.rel_relative_to.currentText()
-        target.relative_position = \
-            self.rel_relative_position.currentText()
-        target.relative_margin = self.rel_margin.value()
-        target.offset_x = self.rel_offset_x.value()
-        target.offset_y = self.rel_offset_y.value()
-
-    def _sync_cross_options(self, direction: str):
-        """按方向同步 cross_alignment 下拉选项（加载时使用，不发信号）"""
-        legal = (VERTICAL_CROSS_OPTIONS
-                 if direction in ('left-of', 'right-of')
-                 else HORIZONTAL_CROSS_OPTIONS)
-        self.rel_cross_alignment.blockSignals(True)
-        self.rel_cross_alignment.clear()
-        self.rel_cross_alignment.addItems(legal)
-        self.rel_cross_alignment.blockSignals(False)
+        self._save_common(target)
 
     # ── relative_to 选项管理（G14 修复：实例键引用保留） ──────
 
@@ -451,22 +388,6 @@ class ElementEditor(QWidget):
             self.rel_relative_to.addItem(value)
 
     def update_relative_to_options(self, keys: list[str]):
-        """更新 relative_to 下拉选项（G14 接线：注入固定键 + 实例键）
-
-        当前引用值不在新选项集合时保留原文本并记日志——引用指向
-        已删除条目等失效键不得被静默改写。全程屏蔽信号：选项刷新
-        不是数据变更，不应触发 changed / value_changed 链。
-        """
-        current = self.rel_relative_to.currentText()
-        options = list(keys)
-        if current and current not in options:
-            options.append(current)
-            logger.info(
-                f"[ElementEditor] relative_to 引用 {current!r} 不在可用"
-                f"键列表，已保留原引用（保存后由 StyleManager 校验）")
-        self.rel_relative_to.blockSignals(True)
-        self.rel_relative_to.clear()
-        self.rel_relative_to.addItems(options)
-        if current:
-            self.rel_relative_to.setCurrentText(current)
-        self.rel_relative_to.blockSignals(False)
+        """更新 relative_to 下拉选项（G14 接线，共享实现）"""
+        apply_combo_options(self.rel_relative_to, keys,
+                            owner_label='ElementEditor')
