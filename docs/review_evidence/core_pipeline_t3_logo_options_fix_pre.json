@@ -1,0 +1,37 @@
+{
+  "keep": {
+    "auto_end_to_end": {
+      "digest": "3e6b5ebd2991b1933fb90d94d482beb4f3f8e1bdf595b6a9c6f6790b5487a375",
+      "options_logo_after": "Canon_logo_black.png"
+    },
+    "fixed_end_to_end": {
+      "digest": "3e6b5ebd2991b1933fb90d94d482beb4f3f8e1bdf595b6a9c6f6790b5487a375",
+      "options_logo_after": "Canon_logo_black.png"
+    },
+    "disabled_end_to_end": {
+      "digest": "6f689f11a9a4fe7a0d0bde03833e2129c8eef8aec06a000aa75cd5cc0ec385b0",
+      "options_logo_after": ""
+    }
+  },
+  "fix_probe": {
+    "selector_calls": [
+      [
+        "canon",
+        false
+      ]
+    ],
+    "drawn_files": [
+      "Canon_logo_black.png",
+      "Canon_logo_black.png"
+    ],
+    "options_after_first_frame": {
+      "bg_fill_type": "pure_white",
+      "decorations": null,
+      "logo_filename": "Canon_logo_black.png",
+      "saturation_override": null,
+      "source_cache_key": null,
+      "prepared_blur_cache": null,
+      "portrait_adaptation": "default"
+    }
+  }
+}

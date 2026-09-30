@@ -33,24 +33,23 @@
 仅供排查与迁移参考：不得 import、不得进入运行时分支、不得打包发行。
 """
 import logging
-from typing import Dict, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
 # ── 绝对定位九点枚举 ────────────────────────────────────────────
+# position 与 alignment 共享同一九点值集合（审计 Q9）：两个名字保留
+# 语义别名，校验函数各自的报错文案与迁移提示不变。
 # 只接受完整九点规范值，不保留旧别名映射。旧值（top / bottom / left /
 # right / tc / bc / tl / tr / bl / br / both-center 等）由 StyleManager
 # 在样式加载阶段直接拒绝并给出迁移建议；本引擎仍做防御性异常兜底。
-ABSOLUTE_POSITIONS = frozenset({
+_NINE_POINT_VALUES = frozenset({
     'top-left', 'top-center', 'top-right',
     'center-left', 'center', 'center-right',
     'bottom-left', 'bottom-center', 'bottom-right',
 })
-ABSOLUTE_ALIGNMENTS = frozenset({
-    'top-left', 'top-center', 'top-right',
-    'center-left', 'center', 'center-right',
-    'bottom-left', 'bottom-center', 'bottom-right',
-})
+ABSOLUTE_POSITIONS = _NINE_POINT_VALUES
+ABSOLUTE_ALIGNMENTS = _NINE_POINT_VALUES
 
 # ── 相对定位交叉轴枚举 ──────────────────────────────────────────
 # above/below 在参考元素宽度内水平对齐（左缘/中心/右缘）；
@@ -60,6 +59,41 @@ VERTICAL_CROSS_ALIGNMENTS = frozenset({'top', 'center', 'bottom'})
 
 # 相对定位方向只接受这四个值（旧 after/before 已随旧语义一并删除）。
 RELATIVE_POSITIONS = frozenset({'above', 'below', 'left-of', 'right-of'})
+
+
+def resolve_relative_chain(
+    configs: Dict[str, Dict], start: str
+) -> Tuple[List[str], Dict, Optional[List[str]]]:
+    """沿 relative_to 链自 start 向上找根（审计 Q4）。
+
+    依赖树的根查找与环检测复用同一实现：text_renderer 判断链根的
+    tree_align、StyleManager 校验环均调用本函数，不再各自维护一份
+    向上遍历逻辑。
+
+    Args:
+        configs: 裸名 → 定位配置 dict（与渲染端 all_positions 的合并
+            键空间一致）
+        start: 起始元素名
+
+    Returns:
+        (chain, terminal_cfg, cycle)
+        chain — 节点名链，从 start 开始，按向上遍历顺序
+        terminal_cfg — 链终点配置：终点不在 configs 中时为 {}，
+                       在时为其配置 dict（用于读取 tree_align）
+        cycle — 环节点名链（末尾重复闭环首节点）；无环为 None
+    """
+    chain = [start]
+    walk = start
+    while True:
+        cfg = configs.get(walk) or {}
+        ref = cfg.get('relative_to')
+        if not ref:
+            # 链终点：绝对定位根，或目标不在配置集合内
+            return chain, cfg, None
+        if ref in chain:
+            return chain, cfg, chain[chain.index(ref):] + [ref]
+        chain.append(ref)
+        walk = ref
 
 
 class LayoutEngine:
@@ -75,6 +109,25 @@ class LayoutEngine:
         self.canvas_width, self.canvas_height = self.canvas_size
         self.original_bounds = self._calculate_original_bounds()
         self.padding_bounds = self._calculate_padding_bounds()
+
+        # 照片几何派生只求值一次（审计 Q10）：九点参考点表与边界坐标
+        # 供定位与诊断（get_absolute_layout_info）共享，不再各自解包
+        # original_bounds 重复计算
+        _l, _t, _ow, _oh = self.original_bounds
+        self._photo_edges = (
+            _l, _t, _l + _ow, _t + _oh, _l + _ow // 2, _t + _oh // 2)
+        _l, _t, _r, _b, _cx, _cy = self._photo_edges
+        self._photo_ref_points = {
+            'top-left': (_l, _t),
+            'top-center': (_cx, _t),
+            'top-right': (_r, _t),
+            'center-left': (_l, _cy),
+            'center': (_cx, _cy),
+            'center-right': (_r, _cy),
+            'bottom-left': (_l, _b),
+            'bottom-center': (_cx, _b),
+            'bottom-right': (_r, _b),
+        }
 
         self.positions: Dict[str, dict] = {}
         self._dependents: Dict[str, list] = {}
@@ -119,15 +172,18 @@ class LayoutEngine:
         if not padding_config:
             return 0, 0, self.canvas_width, self.canvas_height
 
-        def to_px(value):
+        def ratio_to_px(value):
+            # padding 的数值一律按参照边比例换算（STYLE_GUIDE §padding）。
+            # 注意与 margin 的单位语义不同（审计 Q13）：margin 整数是
+            # 像素、浮点才是比例，两套换算保持可区分的命名，不得合并。
             if isinstance(value, (int, float)):
                 return int(self.reference_side * float(value))
             return 0
 
-        pad_left = to_px(padding_config.get('left', 0))
-        pad_top = to_px(padding_config.get('top', 0))
-        pad_right = to_px(padding_config.get('right', 0))
-        pad_bottom = to_px(padding_config.get('bottom', 0))
+        pad_left = ratio_to_px(padding_config.get('left', 0))
+        pad_top = ratio_to_px(padding_config.get('top', 0))
+        pad_right = ratio_to_px(padding_config.get('right', 0))
+        pad_bottom = ratio_to_px(padding_config.get('bottom', 0))
 
         return (
             pad_left,
@@ -138,22 +194,35 @@ class LayoutEngine:
 
     # ── 元素位置注册表 ──────────────────────────────────────
 
-    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None, ascent: int = None):
-        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height, 'ascent': ascent}
+    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None):
+        # ascent 字段已删除（审计 Q14-1）：注册表只承载布局盒几何，
+        # 字体度量由 TextRenderer 在测量阶段自行持有
+        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
         if relative_to:
             if relative_to not in self._dependents:
                 self._dependents[relative_to] = []
             if name not in self._dependents[relative_to]:
                 self._dependents[relative_to].append(name)
 
-    def get_element_bounds(self, name: str) -> Optional[Tuple[int, int, int, int]]:
+    def _lookup_position(self, name: str) -> Optional[Tuple[str, Tuple[int, int, int, int]]]:
+        """元素查找唯一入口（审计 Q11）。
+
+        先精确命中，再按双向 endswith 模糊匹配（保持既有 dict 插入序
+        遍历与兼容行为）。返回 (真实注册表 key, (x, y, w, h))，未命中
+        返回 None。get_element_bounds 与相对定位共享本入口，模糊查找
+        逻辑不再存在第二份实现。
+        """
         if name in self.positions:
             pos = self.positions[name]
-            return pos['x'], pos['y'], pos['width'], pos['height']
+            return name, (pos['x'], pos['y'], pos['width'], pos['height'])
         for key, pos in self.positions.items():
             if key == name or key.endswith(name) or name.endswith(key):
-                return pos['x'], pos['y'], pos['width'], pos['height']
+                return key, (pos['x'], pos['y'], pos['width'], pos['height'])
         return None
+
+    def get_element_bounds(self, name: str) -> Optional[Tuple[int, int, int, int]]:
+        found = self._lookup_position(name)
+        return found[1] if found else None
 
     # ── 枚举校验（防御性兜底；样式加载阶段的正式校验在 StyleManager） ──
 
@@ -182,7 +251,7 @@ class LayoutEngine:
         element_width: int,
         element_height: int,
         config: Dict,
-        defer_padding: bool = False,
+        padding_mode: str = 'clamp',
     ) -> Tuple[int, int]:
         """
         计算元素的绘制坐标（统一处理文字和非文字元素）
@@ -200,10 +269,14 @@ class LayoutEngine:
         - alignment: 元素布局盒九点自对齐（元素布局盒的哪个点贴到元素锚点）
         - margin / margin_top / margin_bottom / margin_left / margin_right: 边距
 
-        defer_padding: 是否延迟 padding 约束。为 True 时跳过 padding 夹持和
-            组合盒溢出平移，允许元素暂时超出安全区域。此参数用于 tree_align
-            依赖树内的子孙元素——其最终 padding 约束由 apply_tree_positioning()
-            在整树定位完成后统一处理。
+        padding_mode: 安全区域夹持策略（审计 Q4——此前单个布尔参数混用
+            "延迟"与"永久豁免"两种语义，现拆分为显式三态）：
+            'clamp'  — 立即夹持到 padding 安全区（普通文字、Logo 等默认）
+            'defer'  — 暂缓夹持并跳过组合盒溢出平移，由
+                       apply_tree_positioning() 在整树定位完成后统一处理
+                       （tree_align 依赖树内的子孙元素）
+            'exempt' — 永久豁免：不夹持、后续也不补做。矩形按设计可越出
+                       安全区绘制（STYLE_GUIDE §padding 的既定豁免）
 
         Raises:
             ValueError: position/alignment/relative_position/cross_alignment
@@ -212,11 +285,11 @@ class LayoutEngine:
         # 相对节点必须具有可解析的 relative_to；不得静默退回绝对定位。
         if config.get('relative_to'):
             return self._calculate_relative(
-                element_width, element_height, config, defer_padding)
+                element_width, element_height, config, padding_mode)
 
         # 绝对定位只走唯一的新算法。
         return self._calculate_absolute(
-            element_width, element_height, config, defer_padding)
+            element_width, element_height, config, padding_mode)
 
     # ── 绝对定位：photo ref → element anchor → element box ──
 
@@ -225,27 +298,11 @@ class LayoutEngine:
         position 的第一步：从照片九点中选择参考点 (px, py)。
 
         输入只有照片几何（original_bounds）和 position，禁止接收元素宽高。
-        center 始终基于原照片边界（original_bounds），不受非对称
-        expand_canvas 造成的画布中心偏移影响。
+        参考点来自 __init__ 的一次性派生表（审计 Q10），诊断日志与实际
+        定位取同一值。center 始终基于原照片边界（original_bounds），不受
+        非对称 expand_canvas 造成的画布中心偏移影响。
         """
-        L, T, ow, oh = self.original_bounds
-        R = L + ow
-        B = T + oh
-        CX = L + ow // 2
-        CY = T + oh // 2
-
-        ref_table = {
-            'top-left': (L, T),
-            'top-center': (CX, T),
-            'top-right': (R, T),
-            'center-left': (L, CY),
-            'center': (CX, CY),
-            'center-right': (R, CY),
-            'bottom-left': (L, B),
-            'bottom-center': (CX, B),
-            'bottom-right': (R, B),
-        }
-        return ref_table[position]
+        return self._photo_ref_points[position]
 
     def _resolve_element_anchor(self, config: Dict) -> Tuple[int, int]:
         """
@@ -254,6 +311,7 @@ class LayoutEngine:
         输入只有照片几何、position、placement 和 margin，禁止接收元素宽高——
         元素锚点不得因元素宽高不同而改变。margin 的职责到此结束；
         后续 alignment 不能再次读取或解释 margin。
+        照片边界坐标取自共享派生（审计 Q10），不重新解包 original_bounds。
 
         placement 只决定照片边界主轴的内外方向：
         - 顶部/底部三点沿上/下主轴内外平移；
@@ -268,11 +326,7 @@ class LayoutEngine:
         ml = margins['left']
         mr = margins['right']
 
-        L, T, ow, oh = self.original_bounds
-        R = L + ow
-        B = T + oh
-        CX = L + ow // 2
-        CY = T + oh // 2
+        L, T, R, B, CX, CY = self._photo_edges
 
         inside = (placement == 'inside')
 
@@ -394,7 +448,7 @@ class LayoutEngine:
         element_width: int,
         element_height: int,
         config: Dict,
-        defer_padding: bool = False,
+        padding_mode: str = 'clamp',
     ) -> Tuple[int, int]:
         """唯一的绝对定位入口：统一盒定位 → 集中 padding 夹持"""
         raw_x, raw_y = self._place_element_box(
@@ -402,7 +456,7 @@ class LayoutEngine:
 
         x, y = raw_x, raw_y
         delta_x = delta_y = 0
-        if not defer_padding:
+        if padding_mode == 'clamp':
             x, y, delta_x, delta_y = self._clamp_box_to_padding(
                 raw_x, raw_y, element_width, element_height)
             if delta_x != 0 or delta_y != 0:
@@ -420,16 +474,19 @@ class LayoutEngine:
     def _resolve_margins(self, config: Dict) -> Dict[str, int]:
         reference_side = self.reference_side
 
-        def to_px(value):
+        def margin_value_to_px(value):
+            # margin 的单位语义与 padding 不同（审计 Q13）：
+            # 浮点 = 参照边比例，整数 = 绝对像素（STYLE_GUIDE §定位）。
+            # 两套换算保持可区分的命名，不得合并为同一 ratio_to_px。
+            # 调用方已排除 None，不再保留 None 分支。
             if isinstance(value, float):
                 return int(reference_side * value)
-            return int(value) if value is not None else None
+            return int(value)
 
         # 统一 margin 作为初始值（向后兼容），未设置时默认为 0
         unified = config.get('margin', None)
         if unified is not None:
-            base = to_px(unified)
-            base = base if base is not None else 0
+            base = margin_value_to_px(unified)
         else:
             base = 0
 
@@ -439,9 +496,7 @@ class LayoutEngine:
         for key in ('top', 'bottom', 'left', 'right'):
             val = config.get(f'margin_{key}', None)
             if val is not None:
-                px = to_px(val)
-                if px is not None:
-                    result[key] = px
+                result[key] = margin_value_to_px(val)
 
         return result
 
@@ -466,21 +521,31 @@ class LayoutEngine:
                 f"合法值为 {sorted(legal)}")
         return cross_alignment
 
-    def _shift_dependents(self, name: str, shift_x: int, shift_y: int):
+    def _shift_dependents(self, name: str, shift_x: int, shift_y: int,
+                          _chain=None):
+        # _chain 记录递归路径：依赖图成环时受控报错而非无限递归
+        # （审计 Q14-12；外部调用方不传 _chain，行为不变）
+        if _chain is None:
+            _chain = []
+        if name in _chain:
+            cycle = _chain[_chain.index(name):] + [name]
+            raise ValueError(
+                f"依赖图存在环: {' → '.join(cycle)}；组合盒平移中止")
+        _chain.append(name)
         if name not in self._dependents:
             return
         for dep_name in self._dependents[name]:
             if dep_name in self.positions:
                 self.positions[dep_name]['x'] += shift_x
                 self.positions[dep_name]['y'] += shift_y
-                self._shift_dependents(dep_name, shift_x, shift_y)
+                self._shift_dependents(dep_name, shift_x, shift_y, _chain)
 
     def _calculate_relative(
         self,
         element_width: int,
         element_height: int,
         config: Dict,
-        defer_padding: bool = False,
+        padding_mode: str = 'clamp',
     ) -> Tuple[int, int]:
         """
         相对定位：以参考元素布局盒为基准，沿 relative_position 方向排列，
@@ -516,12 +581,14 @@ class LayoutEngine:
 
         relative_margin_px = int(self.reference_side * relative_margin)
 
-        target_coords = self.get_element_bounds(relative_to)
-        if target_coords is None:
+        # 查找唯一入口（审计 Q11）：同时确定真实注册表 key，
+        # 组合盒平移不再重复实现一遍模糊查找
+        found = self._lookup_position(relative_to)
+        if found is None:
             raise ValueError(
                 f"relative_to 目标不可解析: {relative_to!r}"
                 f"（目标不存在或尚未完成定位，请检查元素依赖顺序）")
-        tx, ty, tw, th = target_coords
+        resolved_key, (tx, ty, tw, th) = found
 
         # 注册到 positions 的 y = 包围盒顶（文字和非文字统一）
         # 因此 ty = 参考包围盒顶，ty + th = 参考包围盒底 = 参考视觉底部
@@ -577,7 +644,7 @@ class LayoutEngine:
 
         shift_x = 0
         shift_y = 0
-        if not defer_padding:
+        if padding_mode == 'clamp':
             if group_left < pad_left:
                 shift_x = pad_left - group_left
             elif group_right > pad_right:
@@ -588,12 +655,8 @@ class LayoutEngine:
                 shift_y = pad_bottom - group_bottom
 
         if shift_x != 0 or shift_y != 0:
-            ref_key = relative_to
-            if ref_key not in self.positions:
-                for key in self.positions:
-                    if key.endswith(relative_to) or relative_to.endswith(key):
-                        ref_key = key
-                        break
+            # 真实 key 已由查找入口确定（审计 Q11）
+            ref_key = resolved_key
             if ref_key in self.positions:
                 logger.debug(
                     f"[Relative] relative_to={relative_to!r} "
@@ -605,21 +668,33 @@ class LayoutEngine:
             x += shift_x
             y += shift_y
 
-        if not defer_padding:
-            x = max(pad_left, min(x, pad_right - element_width))
-            y = max(pad_top, min(y, pad_bottom - element_height))
+        if padding_mode == 'clamp':
+            # 与普通盒共用同一夹持公式（审计 Q12：相同的策略不再各写一份；
+            # 超大盒树的左/右优先级差异属未定契约，此处不涉及）
+            x, y, _, _ = self._clamp_box_to_padding(
+                x, y, element_width, element_height)
 
         return x, y
 
     # ── tree_align 组合树定位 ────────────────────────────────
 
-    def _collect_tree_members(self, root_name: str, members: set):
+    def _collect_tree_members(self, root_name: str, members: set, _chain=None):
         """
         递归收集以 root_name 为根的依赖树中所有元素名称
+
+        _chain 记录递归路径：依赖图成环时受控报错而非无限递归
+        （审计 Q14-12；外部调用方不传 _chain，行为不变）。
         """
+        if _chain is None:
+            _chain = []
+        if root_name in _chain:
+            cycle = _chain[_chain.index(root_name):] + [root_name]
+            raise ValueError(
+                f"依赖图存在环: {' → '.join(cycle)}；树成员收集中止")
+        _chain.append(root_name)
         members.add(root_name)
         for dep_name in self._dependents.get(root_name, []):
-            self._collect_tree_members(dep_name, members)
+            self._collect_tree_members(dep_name, members, _chain)
 
     def _compute_visual_bounds(self, member_names):
         """
@@ -731,12 +806,14 @@ class LayoutEngine:
 
     # ── 多行文本行内对齐 ────────────────────────────────────
 
+    # 行内对齐合法值（审计 Q14-8：提取为常量，替代函数内局部三值元组）
+    LINE_ALIGNMENTS = frozenset({'left', 'center', 'right'})
+
     def layout_multiline_lines(
         self,
         block_x: int,
         block_y: int,
         block_w: int,
-        block_h: int,
         lines: list,
         line_spacing: int,
         line_alignment: str = 'left',
@@ -752,7 +829,6 @@ class LayoutEngine:
         Args:
             block_x, block_y: 文本块包围盒左上角（来自 calculate_position）
             block_w: 块宽度（用于行内对齐偏移）
-            block_h: 块高度（保留参数，行位置由行高与行间距递推）
             lines: 每行信息，每项含 height / width / baseline_offset
             line_spacing: 行间距（像素）
             line_alignment: 行内水平对齐 left / center / right（缺省 left）
@@ -760,10 +836,10 @@ class LayoutEngine:
         Returns:
             [(line_x, baseline_y), ...] 每行的绘制起始坐标
         """
-        if line_alignment not in ('left', 'center', 'right'):
+        if line_alignment not in self.LINE_ALIGNMENTS:
             raise ValueError(
                 f"line_alignment 值非法: {line_alignment!r}；"
-                f"合法值为 ['center', 'left', 'right']")
+                f"合法值为 {sorted(self.LINE_ALIGNMENTS)}")
 
         # 空列表是合法的空块；调用方仍负责保留显式空行对应的行槽字典。
         if not lines:

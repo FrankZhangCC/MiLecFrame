@@ -8,9 +8,12 @@
 import os
 import io
 import re
+import copy
 import logging
+import tempfile
+import time
 from pathlib import Path
-from typing import Tuple, Optional, Dict, List
+from typing import Tuple, Optional, Dict, List, Union
 
 from PIL import Image, ImageOps, ImageCms, ImageDraw, ImageFont
 # 设置PIL最大图像像素限制，解决解压炸弹警告
@@ -21,9 +24,20 @@ import piexif
 from src.utils.exif_helper import ExifHelper
 from src.utils.device_mapper import DeviceMapper
 from src.utils.background_fill import BackgroundFillManager
+from src.utils.output_metadata import (
+    BRANDED_FORMATS,
+    OutputMetadataError,
+    prepare_output_metadata,
+    read_output_software,
+    verify_output_metadata,
+)
 from src.frame_styles.style_manager import StyleManager
 from src.core.renderer import FrameRenderer, RenderMetadata, RenderOptions
 from src.core.hdr_handler import HDRHandler
+
+# piexif 以"文件路径"方式可解析的输入格式；其余容器（PNG/HEIC/AVIF 等）
+# 必须改用已加载图像对象捕获的 EXIF 字节（见 process() 中的来源选择）
+PIEXIF_PATH_FORMATS = ("JPEG", "TIFF", "MPO")
 
 
 class ImageProcessor:
@@ -102,6 +116,12 @@ class ImageProcessor:
             else:
                 image = Image.open(input_path)
 
+            # 3-pre. 捕获源图像元数据（必须早于方向转正、色彩转换与 HDR 转换：
+            #        convert_hdr_to_sdr / _convert_colorspace 会生成丢失 info 的新对象）
+            #        PNG/HEIC/AVIF 的原始 EXIF 字节与软件字段在此以不可变副本留下，
+            #        不保留会随对象转换失效的 info 引用。
+            source_exif_bytes, software_hint = self._capture_source_metadata(image)
+
             # 3a. 应用 EXIF Orientation 转置（竖拍照片方向修正）
             # 佳能等相机的竖拍照片以"横向像素数据 + EXIF Orientation(274) 旋转
             # 标记"存储，PIL 的 Image.open() 不解析该标记，直接渲染会得到横图。
@@ -109,7 +129,20 @@ class ImageProcessor:
             image, orientation_transposed = self._apply_exif_orientation(image)
 
             # 4. 检查EXIF信息
-            exif_data = self.exif_helper.extract_exif_data(input_path)
+            #    piexif 以"文件路径"方式只支持 JPEG/TIFF（含 MPO）；PNG/HEIC/AVIF
+            #    等已知容器直接使用加载阶段捕获的 EXIF 字节作为来源，避免对已知
+            #    不支持的容器反复调用路径解析并记录可预期的失败（方案 §1.1）。
+            can_use_path = img_format in PIEXIF_PATH_FORMATS
+            if can_use_path:
+                exif_data = self.exif_helper.extract_exif_data(input_path)
+            elif source_exif_bytes:
+                exif_data = self.exif_helper.extract_exif_data(source_exif_bytes)
+            else:
+                # 该容器没有可解析的 EXIF 字节：跳过必然失败的路径解析
+                exif_data = None
+                self.logger.debug(
+                    f"[output-metadata] 源容器无可解析 EXIF 字节，跳过路径解析: {input_path}"
+                )
             if not exif_data:
                 warn_msg = f"警告: 未找到EXIF信息 - {input_path}"
                 self.logger.warning(warn_msg)
@@ -119,7 +152,19 @@ class ImageProcessor:
             # （与旧签名行为一致：调用方原本没有传入 EXIF 的途径）
             metadata.exif_data = exif_data
 
-            raw_exif = self.exif_helper.extract_raw_exif(input_path)
+            # 4a. 原始 EXIF：JPEG/TIFF 沿用文件路径解析；PNG/HEIC/AVIF 直接用
+            #     加载阶段捕获的源 EXIF 字节（保原软件名与拍摄字段）。
+            if can_use_path:
+                raw_exif = self.exif_helper.extract_raw_exif(input_path)
+            else:
+                raw_exif = None
+
+            # 4b. 容器补读：文件路径解析失败（或不可用）时，改用源 EXIF 字节，
+            #     使 PNG/HEIC/AVIF 的原软件名得以保留。
+            if raw_exif is None and source_exif_bytes:
+                raw_exif = self.exif_helper.extract_raw_exif_from_bytes(source_exif_bytes)
+                if raw_exif is not None:
+                    self.logger.debug("[output-metadata] 从已加载图像补读到源 EXIF 字节")
 
             # 3b. 像素转正后同步修正 raw_exif 中的 Orientation 标签
             # 输出文件嵌入的 raw_exif 从原文件提取；若像素已按旧标签旋转到位，
@@ -131,6 +176,15 @@ class ImageProcessor:
                     if "0th" not in raw_exif:
                         raw_exif["0th"] = {}
                     raw_exif["0th"][piexif.ImageIFD.Orientation] = 1
+
+                    # EXIF 缩略图是转正前的旧方向，与重置后的 Orientation=1
+                    # 冲突（查看器会显示方向错误的缩略图）；像素已转正，
+                    # 直接丢弃旧缩略图，保持输出内部方向语义一致。
+                    if raw_exif.get("thumbnail"):
+                        raw_exif["thumbnail"] = None
+                        self.logger.info(
+                            "[output-metadata] 方向转正后丢弃旧方向的 EXIF 缩略图"
+                        )
                 except Exception as e:
                     self.logger.warning(f"重置输出 EXIF Orientation 标签失败: {e}")
             
@@ -186,8 +240,9 @@ class ImageProcessor:
                 options=options,
             )
             
-            # 10. 保存图像
-            self._save_image(rendered_image, output_path, img_format, raw_exif, sRGB_icc_bytes)
+            # 10. 保存图像（software_hint 仅在 EXIF 软件值不可用时参与标识构建）
+            self._save_image(rendered_image, output_path, img_format, raw_exif,
+                             sRGB_icc_bytes, software_hint=software_hint)
             
             success_msg = f"成功处理图像: {input_path} -> {output_path}"
             self.logger.info(success_msg)
@@ -203,6 +258,44 @@ class ImageProcessor:
             self.logger.error(traceback.format_exc())
             return False
     
+    def _capture_source_metadata(
+            self, image: Image.Image
+    ) -> Tuple[Optional[bytes], Optional[Union[str, bytes]]]:
+        """
+        在方向转正/色彩转换/HDR 转换之前捕获源图像的 EXIF 字节与软件字段
+
+        必须在 `_apply_exif_orientation()` 之前调用：后续的
+        `convert_hdr_to_sdr()`、`_convert_colorspace()` 都会生成不继承 info
+        的新图像对象，届时原 EXIF 字节与文本字段将无法找回。
+
+        Args:
+            image: 加载器（Image.open / HDRHandler.load_image）返回的原始图像
+
+        Returns:
+            (source_exif_bytes, software_hint) 二元组；缺失项为 None。
+            source_exif_bytes 是不可变字节副本，不持有 image.info 引用。
+        """
+        # 1. 原始 EXIF 字节：拷贝为不可变 bytes（PNG/HEIC/AVIF/JPEG 均为
+        #    带 "Exif\\0\\0" 头的完整 EXIF，可直接交给 piexif.load）
+        raw_bytes = image.info.get('exif')
+        source_exif_bytes = (bytes(raw_bytes)
+                             if isinstance(raw_bytes, (bytes, bytearray)) else None)
+
+        # 2. 软件字段单值补充（仅当 EXIF Software 不可用时由构建阶段选用）
+        hint = self.exif_helper.extract_software_hint(image)
+
+        # 3. PNG 文本可能位于 IDAT 之后，未解码前 info 读不到；此时复用渲染
+        #    本来就需要的那一次解码后再读取（load 幂等，不会额外解码第二遍，
+        #    也不为此重新打开文件）。
+        if hint is None and (image.format or '').upper() == 'PNG':
+            try:
+                image.load()
+                hint = self.exif_helper.extract_software_hint(image)
+            except Exception as e:
+                self.logger.debug(f"[output-metadata] 源 PNG 补读文本 Software 失败: {e}")
+
+        return source_exif_bytes, hint
+
     def _apply_exif_orientation(self, image: Image.Image) -> Tuple[Image.Image, bool]:
         """
         按 EXIF Orientation 标签转置图像像素（方向修正的唯一入口）
@@ -347,44 +440,167 @@ class ImageProcessor:
 
         return image
     
-    def _save_image(self, image: Image.Image, output_path: str, 
+    def _save_image(self, image: Image.Image, output_path: str,
                     original_format: str, raw_exif: Optional[Dict] = None,
-                    icc_profile_bytes: Optional[bytes] = None) -> None:
+                    icc_profile_bytes: Optional[bytes] = None,
+                    *, software_hint=None) -> None:
         """
-        保存图像
+        保存图像（临时写入 → 读回验证 → 发布）
+
+        JPEG/PNG 走品牌元数据事务：
+          1. 内存中构建含 MiLecFrame 标识的元数据（分级降级：preserved/cleaned/minimal）；
+          2. 在目标同目录创建唯一临时文件写入；
+          3. 只读读回验证 Software 字段（PNG 还要验证文本字段）；
+          4. 验证通过后 os.replace() 发布为最终输出，失败则清理临时文件并保留原输出。
+
+        非 JPEG/PNG 的实际编码（标准入口不会产生）保留既有保存能力与旧元数据
+        路径，并输出明确告警：该格式未启用品牌元数据保证。
 
         Args:
             image: 要保存的图像
             output_path: 输出路径
             original_format: 原始图像格式
-            raw_exif: 原始EXIF字典（piexif格式），用于嵌入输出图
+            raw_exif: 原始EXIF字典（piexif格式），用于嵌入输出图；函数不修改该对象
             icc_profile_bytes: sRGB ICC profile字节，用于嵌入输出图
+            software_hint: 仅关键字参数；源图像软件字段补充值，
+                仅当 EXIF Software 不可用时参与标识构建
+
+        Raises:
+            OutputMetadataError: 元数据构建或读回验证失败
+            OSError/ValueError 等: 临时写入或最终替换失败
+        """
+        output_dir = os.path.dirname(output_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # 1. 按实际输出后缀决定编码（沿用现有显式输出路径规则）
+        output_ext = os.path.splitext(output_path)[1].lower()
+        if output_ext in ('.jpg', '.jpeg'):
+            save_format = 'JPEG'
+            save_kwargs = {'quality': 95, 'optimize': True}
+        elif output_ext == '.png':
+            save_format = 'PNG'
+            save_kwargs = {'optimize': True}
+        else:
+            save_format = original_format
+            save_kwargs = {}
+
+        # 嵌入 sRGB ICC profile（ICC 独立于 EXIF 管理，不随 EXIF 降级被删除）
+        if icc_profile_bytes:
+            save_kwargs['icc_profile'] = icc_profile_bytes
+
+        # 2. 非 JPEG/PNG 的实际编码：明确告警 + 既有兼容路径（不套用本方案的
+        #    构建/验证器，也不宣称通过品牌验收；见方案 §5.4）
+        if save_format.upper() not in BRANDED_FORMATS:
+            self.logger.warning(
+                f"[output-metadata] 输出格式 {save_format} 未启用品牌元数据保证"
+                f"（保证范围为 JPEG/PNG），走既有兼容路径"
+            )
+            self._save_legacy(image, output_path, save_format, raw_exif, save_kwargs)
+            return
+
+        timings: Dict[str, float] = {}
+        try:
+            # 3. 内存中构建元数据（深拷贝入参、清理、容量检查、最小兜底）
+            stage_start = time.perf_counter()
+            prepared = prepare_output_metadata(raw_exif, save_format, software_hint)
+            timings['prepare'] = (time.perf_counter() - stage_start) * 1000.0
+
+            save_kwargs['exif'] = prepared.exif_bytes
+            if prepared.pnginfo is not None:
+                # PNG 文本只包含本功能需要的 Software 字段，不复制源图其他文本
+                save_kwargs['pnginfo'] = prepared.pnginfo
+
+            # 4. 同目录唯一临时文件：写入 → 只读验证 → 发布
+            tmp_path: Optional[str] = None
+            try:
+                # Windows 下必须先关闭 mkstemp 句柄，再交给 Pillow 写入，
+                # 否则同一文件会被占用导致写入失败
+                fd, tmp_path = tempfile.mkstemp(
+                    prefix='.mlecframe_', suffix=output_ext or '.tmp',
+                    dir=output_dir or '.'
+                )
+                os.close(fd)
+
+                stage_start = time.perf_counter()
+                image.save(tmp_path, format=save_format, **save_kwargs)
+                timings['save'] = (time.perf_counter() - stage_start) * 1000.0
+
+                # 读回验证（只读、严格比较；禁止在验证阶段重新推导软件值）
+                stage_start = time.perf_counter()
+                verify_output_metadata(tmp_path, save_format, prepared.software_text)
+                timings['verify'] = (time.perf_counter() - stage_start) * 1000.0
+
+                # 验证通过才替换最终输出；替换失败不删除既有输出
+                stage_start = time.perf_counter()
+                os.replace(tmp_path, output_path)
+                tmp_path = None
+                timings['publish'] = (time.perf_counter() - stage_start) * 1000.0
+            finally:
+                # 无论哪一步失败，只清理本次创建的临时文件
+                if tmp_path is not None and os.path.exists(tmp_path):
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError as cleanup_error:
+                        # 清理失败单独告警，不掩盖原始异常
+                        self.logger.warning(
+                            f"[output-metadata] 临时文件清理失败 {tmp_path}: {cleanup_error}"
+                        )
+
+            # 5. 记录结果：只写格式、级别、原因码、移除标签 ID 与阶段耗时，
+            #    不输出整份 EXIF 或照片隐私数据
+            self.logger.info(
+                "[output-metadata] format=%s level=%s reasons=%s removed=%s "
+                "build=%.1fms prepare=%.1fms save=%.1fms verify=%.1fms publish=%.1fms",
+                save_format, prepared.level,
+                ",".join(prepared.reasons) or "-",
+                ",".join(prepared.removed_tags) or "-",
+                prepared.build_ms,
+                timings.get('prepare', 0.0), timings.get('save', 0.0),
+                timings.get('verify', 0.0), timings.get('publish', 0.0),
+            )
+            if prepared.level == 'minimal':
+                self.logger.warning(
+                    "[output-metadata] 原 EXIF 无法完整序列化，已降级为最小标识 "
+                    f"(format={save_format}, reasons={','.join(prepared.reasons)})"
+                )
+        except OutputMetadataError as e:
+            self.logger.error(f"[output-metadata] 标识写入/验证失败: {e}")
+            raise
+        except Exception as e:
+            error_msg = f"保存图像时出错: {str(e)}"
+            self.logger.error(error_msg)
+            raise
+
+    def _save_legacy(self, image: Image.Image, output_path: str,
+                     save_format: str, raw_exif: Optional[Dict],
+                     save_kwargs: Dict) -> None:
+        """
+        非 JPEG/PNG 实际编码的既有保存路径（不提供品牌标识保证）
+
+        保留旧有元数据行为：有原始 EXIF 才尝试嵌入，失败或过大则跳过。
+        与品牌路径的差异：本方法不写标识、不做事后读回验证。
+        操作 EXIF 时使用副本，避免修改调用方传入的对象（M17）。
+
+        Args:
+            image: 要保存的图像
+            output_path: 输出路径
+            save_format: 实际编码格式
+            raw_exif: 原始EXIF字典（只读）
+            save_kwargs: 已确定的保存参数（会被就地补充 exif）
+
+        Raises:
+            保存失败时上抛原始异常
         """
         try:
-            output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
-            output_ext = os.path.splitext(output_path)[1].lower()
-            if output_ext in ('.jpg', '.jpeg'):
-                save_format = 'JPEG'
-                save_kwargs = {'quality': 95, 'optimize': True}
-            elif output_ext == '.png':
-                save_format = 'PNG'
-                save_kwargs = {'optimize': True}
-            else:
-                save_format = original_format
-                save_kwargs = {}
-
-            # 嵌入 sRGB ICC profile
-            if icc_profile_bytes:
-                save_kwargs['icc_profile'] = icc_profile_bytes
-
             if raw_exif:
                 try:
-                    # 移除 MakerNote（厂商私有数据段，易导致 EXIF 总大小超出 JPEG 限制 65535 字节）
-                    if "Exif" in raw_exif and piexif.ExifIFD.MakerNote in raw_exif["Exif"]:
-                        del raw_exif["Exif"][piexif.ExifIFD.MakerNote]
+                    # 使用副本：不在调用方对象上删除标签
+                    exif_copy = copy.deepcopy(raw_exif)
+
+                    # 移除 MakerNote（厂商私有数据段，易导致 EXIF 总大小超出限制）
+                    if "Exif" in exif_copy and piexif.ExifIFD.MakerNote in exif_copy["Exif"]:
+                        del exif_copy["Exif"][piexif.ExifIFD.MakerNote]
 
                     # 容错式序列化：遇到类型不兼容的标签自动丢弃并重试
                     def _try_dump_exif(exif_dict):
@@ -415,7 +631,7 @@ class ImageProcessor:
                                 else:
                                     raise
 
-                    exif_bytes = _try_dump_exif(raw_exif)
+                    exif_bytes = _try_dump_exif(exif_copy)
                     if len(exif_bytes) > 65533:
                         self.logger.warning(
                             f"EXIF 数据过大 ({len(exif_bytes)} 字节)，超出 JPEG 限制，已跳过 EXIF 嵌入"

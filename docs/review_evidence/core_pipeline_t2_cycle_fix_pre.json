@@ -1,0 +1,62 @@
+{
+  "keep": {
+    "tree_chain": {
+      "digest": "0aa669726841b6229ab052c1c4cc34a05c3139e8548400efea307d23b43c0740"
+    },
+    "simple_relative": {
+      "digest": "56a6c7fffd07bb8436fb4f60c37c2783d0b873864b045a73a8c82d3b9c4cb1da"
+    },
+    "cycle_without_text": {
+      "digest": "1977958db19dc7cb8a327c98f8d3c0f338feda83395563ba18d6285ab98cd1c2"
+    },
+    "missing_target": {
+      "error": "ValueError: relative_to 目标不可解析: 'missing_target'（目标不存在或尚未完成定位，请检查元素依赖顺序）"
+    }
+  },
+  "fix_probe": {
+    "two_nodes_walk": [
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+      "b"
+    ],
+    "two_nodes_stopped": true,
+    "self_walk": [
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a"
+    ],
+    "long_walk": [
+      "a",
+      "b",
+      "c",
+      "a",
+      "b",
+      "c",
+      "a",
+      "b",
+      "c",
+      "a",
+      "b",
+      "c"
+    ],
+    "validator_accepts_cycle": true
+  }
+}

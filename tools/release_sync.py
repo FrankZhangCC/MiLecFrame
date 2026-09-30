@@ -18,8 +18,9 @@
 
     python tools/release_sync.py milestone <ver> [--push]
         # 在 dev HEAD 打轻量 vX.Y.Z-dev 里程碑 tag（ver 形如 2.7.0-dev）
-        # 前置：dev 上已完成"chore: 升版本"提交（_version.py 与
-        # CHANGELOG.md 条目均已就绪并提交）
+        # 前置：dev HEAD 为版本号修改提交（首行以 vX.Y.Z-dev: 开头，
+        # 命名规范见 AGENTS.md；_version.py 与 CHANGELOG.md 条目均已
+        # 就绪并提交）
 
     python tools/release_sync.py release <ver> --msg "发行说明"
             [--from <ref>] [--notes-file <path>] [--push]
@@ -437,12 +438,20 @@ def cmd_milestone(args):
     tag = tag_name(ver)
     require_newer(ver, latest_dev_tag())
 
+    # Commit 命名规范：版本号修改提交（升版本提交）必须以 vX.Y.Z-dev: 开头
+    subject = git("show", "-s", "--format=%s", BRANCH_DEV)
+    if not subject.startswith(f"{tag}:"):
+        raise SyncError(
+            f"dev HEAD 提交首行必须以 {tag}: 开头（版本号修改提交命名规范），"
+            f"当前: {subject[:60]}"
+        )
+
     # dev 分支头的 _version.py 必须已写好该版本号（升版本提交应先行）
     file_ver = read_version_py_at(BRANCH_DEV)
     if file_ver != format_version(ver):
         raise SyncError(
             f"dev HEAD 的 _version.py={file_ver} 与里程碑版本 {format_version(ver)} 不一致，"
-            "请先提交\"chore: 升版本\"（_version.py + CHANGELOG.md 条目）再打 tag。"
+            f"请先提交\"{tag}: 升版本\"（_version.py + CHANGELOG.md 条目）再打 tag。"
         )
     if not changelog_has_version("CHANGELOG.md", ver, ref=BRANCH_DEV):
         raise SyncError(f"CHANGELOG.md 缺少 {tag} 条目，请先在 dev 上补充。")

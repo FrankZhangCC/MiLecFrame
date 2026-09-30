@@ -30,13 +30,22 @@ class ExifHelper:
         
         Args:
             image_source: 图像文件路径(str)或图像二进制数据(bytes)
-            
+             
         Returns:
             EXIF数据字典，如果无法提取则返回None
         """
         try:
             exif_dict = piexif.load(image_source)
-            
+        except Exception as e:
+            # piexif 不支持 PNG/HEIC/AVIF 等容器的文件路径与完整文件字节；
+            # 回落 Pillow 读取该容器已解析的 EXIF 字节（只读头部，不解码像素），
+            # 使 GUI 预览/批量匹配与输出侧的取值保持一致
+            exif_dict = self._load_exif_dict_via_pillow(image_source)
+            if exif_dict is None:
+                self.logger.warning(f"EXIF提取错误: {str(e)}")
+                return None
+
+        try:
             # 提取所需字段
             exif_data = {}
             
@@ -129,15 +138,123 @@ class ExifHelper:
         
         Args:
             image_source: 图像文件路径(str)或图像二进制数据(bytes)
-            
+             
         Returns:
             完整的piexif EXIF字典，如果无法提取则返回None
         """
         try:
             return piexif.load(image_source)
         except Exception as e:
+            # 与 extract_exif_data 同一回落策略：容器不被 piexif 支持时
+            # 改读 Pillow 已解析的 EXIF 字节，避免无谓放弃可用数据
+            fallback = self._load_exif_dict_via_pillow(image_source)
+            if fallback is not None:
+                return fallback
             self.logger.warning(f"EXIF原始提取错误: {str(e)}")
             return None
+
+    def _load_exif_dict_via_pillow(self, image_source: Union[str, bytes]) -> Optional[Dict]:
+        """
+        容器回落：用 Pillow 读取来源中已解析的 EXIF 字节，再交给 piexif
+
+        PNG/HEIC/AVIF 的 EXIF 在 Pillow 打开图像时就已解析进 info['exif']，
+        不需要解码像素；由此取到的字节与输出侧的来源完全同源，
+        保证 GUI/批量显示链路与输出 EXIF 的取值一致。
+
+        Args:
+            image_source: 图像文件路径(str)或图像二进制数据(bytes)
+
+        Returns:
+            piexif 字典；无法打开或无 EXIF 字节时返回 None
+        """
+        try:
+            if isinstance(image_source, (bytes, bytearray)):
+                # 完整文件字节（GUI 导入路径传入 item.file_bytes）
+                with Image.open(io.BytesIO(bytes(image_source))) as img:
+                    exif_bytes = img.info.get('exif')
+            elif isinstance(image_source, str) and os.path.exists(image_source):
+                with Image.open(image_source) as img:
+                    exif_bytes = img.info.get('exif')
+            else:
+                return None
+            return self.extract_raw_exif_from_bytes(exif_bytes)
+        except Exception as e:
+            self.logger.debug(f"Pillow 容器回落提取失败: {e}")
+            return None
+
+    def extract_raw_exif_from_bytes(self, exif_bytes: Optional[bytes]) -> Optional[Dict]:
+        """
+        从"已加载图像对象"捕获的 EXIF 字节解析出 piexif 字典（容器补读路径）
+
+        背景：piexif 不支持 PNG 文件路径；HEIC/AVIF 也应保留原软件名称。
+        Pillow 对 PNG(eXIf)/HEIC/AVIF/JPEG 均把带 "Exif\\0\\0" 头的原始 EXIF
+        放在 image.info['exif']，可直接交给 piexif.load 解析（本项目依赖
+        Pillow 12.2.0 / piexif 1.1.3 实测确认）。
+
+        本方法只做"字节 → 字典"，不接触磁盘、不解码像素。
+
+        Args:
+            exif_bytes: 从 image.info['exif'] 拷贝出的不可变字节，可为 None
+
+        Returns:
+            piexif 字典；字节缺失、为空或无法解析时返回 None
+        """
+        if not isinstance(exif_bytes, (bytes, bytearray)) or not exif_bytes:
+            return None
+        try:
+            return piexif.load(bytes(exif_bytes))
+        except Exception as e:
+            # 预期失败（个别容器会返回非标准结构）：降级为"无 EXIF"，不阻断主流程
+            self.logger.debug(f"从图像对象 EXIF 字节解析失败: {e}")
+            return None
+
+    def extract_software_hint(self, image: Image.Image) -> Optional[Union[str, bytes]]:
+        """
+        从已加载图像对象补读"软件字段"单值（不重组整份 EXIF）
+
+        用途：当原始 EXIF 字节不可用或整体解析失败时，作为 Software 的单字段
+        补充来源（§2.3 优先级第 2、3 级）。只读取字段，绝不写回或构造 EXIF。
+
+        读取顺序：
+          1. image.getexif()[305]（Pillow 已解析的 EXIF 单字段）；
+          2. image.info['Software']（PNG 文本字段）。
+
+        注意（Pillow 12.2.0 实测）：
+          - PNG 若没有 eXIf 块，getexif() 会调用一次 load()（幂等，不会重复
+            解码像素）；本程序自身输出的 PNG 必带 eXIf，读取代价为零。
+          - PNG 文本可能位于 IDAT 之后，未 load 前 info 读不到；
+            调用方在"完全无线索"时可先 load 源图再重试本方法。
+
+        Args:
+            image: 已打开（可尚未解码像素）的 PIL 图像
+
+        Returns:
+            原始软件值（str/bytes）；无法读取时返回 None
+        """
+        try:
+            exif = image.getexif()
+            value = exif.get(piexif.ImageIFD.Software) if exif is not None else None
+            if value is not None and value != "":
+                return value
+        except Exception as e:
+            self.logger.debug(f"从 getexif 读取 Software 失败: {e}")
+
+        try:
+            text_value = image.info.get('Software')
+            if text_value is None:
+                # PNG 文本关键字的大小写由写入方决定（tEXt 不做归一化），
+                # 按不区分大小写补找一次，避免源文件用 'software' 等写法时
+                # 原软件名被无谓丢弃
+                for key, candidate in image.info.items():
+                    if isinstance(key, str) and key.casefold() == 'software':
+                        text_value = candidate
+                        break
+        except Exception as e:  # info 理论上不会抛，防御性保留
+            self.logger.debug(f"从图像文本读取 Software 失败: {e}")
+            return None
+        if text_value is not None and text_value != "":
+            return text_value
+        return None
 
     def _safe_decode(self, byte_string):
         """

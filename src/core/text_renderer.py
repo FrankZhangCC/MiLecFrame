@@ -13,9 +13,10 @@ from typing import Tuple, Dict, Optional, List
 from PIL import Image, ImageDraw
 
 from src.utils.font_manager import FontManager
-from src.utils.layout_engine import LayoutEngine
+from src.utils.layout_engine import LayoutEngine, resolve_relative_chain
 from src.utils.render_context import RenderContext
 from src.utils.background_fill import BackgroundFillManager
+from src.utils.color_utils import parse_color_value
 
 logger = logging.getLogger(__name__)
 
@@ -122,13 +123,13 @@ class TextRenderer:
     # ── 颜色解析 ────────────────────────────────────────────
 
     def _parse_color_value(self, custom_color) -> Optional[Tuple[int, int, int]]:
-        if not custom_color:
-            return None
-        if isinstance(custom_color, str) and custom_color.startswith('#'):
-            return tuple(int(custom_color[i:i+2], 16) for i in (1, 3, 5))
-        elif isinstance(custom_color, (tuple, list)) and len(custom_color) == 3:
-            return tuple(custom_color)
-        return None
+        """委托公共颜色解析（审计 Q8 的统一策略变化，单列说明）：
+
+        - 非法十六进制此前抛 ValueError 中断整帧渲染，现在返回 None，
+          由 _determine_text_color 回退下一级配色（与"未配置"同路径）；
+        - RGB 序列项此前原样透传（浮点会传给 PIL），现在逐项 int() 归一。
+        """
+        return parse_color_value(custom_color)
 
     def _resolve_color_from_config(
         self, colors_config: Dict, dark_key: str, light_key: str, bg_fill_type: str
@@ -365,7 +366,7 @@ class TextRenderer:
                 ref_cfg = all_positions[ref]
                 if not ref_cfg.get('relative_to'):
                     rx, ry = self.layout_engine.calculate_position(0, 0, ref_cfg)
-                    self.layout_engine.register_element(ref, rx, ry, 0, 0, ascent=0)
+                    self.layout_engine.register_element(ref, rx, ry, 0, 0)
 
         ordered_names = self._resolve_element_order(text_elements, all_positions)
 
@@ -373,21 +374,23 @@ class TextRenderer:
             item = draw_items[name]
             cfg = all_positions.get(name, {})
 
-            defer_pad = False
+            # 向上找根判断 tree_align：复用共享的依赖链分析（审计 Q4，
+            # 与 StyleManager 环校验同一实现）；环在样式加载阶段已被
+            # 拒绝，这里对绕过 StyleManager 的直调路径兜底受控报错
+            padding_mode = 'clamp'
             if cfg.get('relative_to'):
-                walk = name
-                while walk:
-                    wc = all_positions.get(walk, {})
-                    wp = wc.get('relative_to')
-                    if wp:
-                        walk = wp
-                    else:
-                        if wc.get('tree_align'):
-                            defer_pad = True
-                        break
+                _chain, terminal_cfg, cycle = resolve_relative_chain(
+                    all_positions, name)
+                if cycle:
+                    raise ValueError(
+                        "定位依赖存在环: "
+                        f"{' → '.join(cycle)}；"
+                        "相对定位链必须终止于绝对定位元素")
+                if terminal_cfg.get('tree_align'):
+                    padding_mode = 'defer'
 
             x, y = self.layout_engine.calculate_position(
-                item['width'], item['height'], cfg, defer_padding=defer_pad)
+                item['width'], item['height'], cfg, padding_mode=padding_mode)
 
             if cfg.get('relative_to'):
                 # 相对定位日志：参考元素、方向、交叉轴对齐与最终坐标
@@ -437,7 +440,7 @@ class TextRenderer:
                 # 多行文本：行内对齐只读专用 line_alignment 字段，
                 # 与元素布局盒相对元素锚点的 alignment 完全分离
                 positions = self.layout_engine.layout_multiline_lines(
-                    block_x=x, block_y=y, block_w=w, block_h=h,
+                    block_x=x, block_y=y, block_w=w,
                     lines=item['lines'],
                     line_spacing=item['line_spacing'],
                     line_alignment=self._resolve_line_alignment(cfg),

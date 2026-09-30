@@ -2,9 +2,48 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.7.1-dev (2026-09-30)
+
+> 核心渲染管线质量审计落地：两项正确性修复（效果栈矩形回流 legacy、文字依赖环）、Logo 匹配三态与上下文收敛，以及矩形/布局子系统的等价重构与合成性能优化（全部经逐像素等价验证）。
+
+### 🐛 缺陷修复
+
+- 效果栈矩形不再因分析阶段丢弃而回流 legacy 绘制路径 (fix, 5f2db22)：三层无效或完全在画布外的效果栈矩形此前会被错误绘制到最终边框上，现按统一分流计划不绘制、不回流
+- 相对定位依赖环在样式校验与运行时均有界拒绝 (fix, 33130a5)：成环的 relative_to 链此前会让文字渲染无法结束；样式加载阶段即拒绝并给出完整环链，绕过 StyleManager 直调渲染时也受控报错不挂死
+- Logo 自动匹配结果只在本帧生效，不再回写渲染 options (fix, b3b375c)：复用同一 RenderOptions 连续渲染不同品牌/背景时不再沿用上一帧匹配结果，三态语义（自动/禁用/固定）保持不变
+- Logo 自动匹配统一收敛到渲染器按最终背景执行 (fix, df1d02b)：批处理与 GUI 的自动模式不再按用户所选背景预匹配；样式覆盖背景时 Logo 明暗随最终背景自动纠正（行为变化：旧路径按用户背景预选）
+- 品牌来源调查结论：camera_map 映射表 brand 列存在 16 行映射（NIKON CORPORATION→Nikon 等），子串匹配下原始 EXIF 品牌与显示品牌匹配结果一致，统一到渲染器无匹配差异
+
+### ♻️ 等价重构（逐像素验证输出不变）
+
+- 矩形子系统收敛到 src/core/rectangle_layer.py (refactor, b64388f)：分类/几何/颜色单一决策路径，legacy 与效果栈统一走分析阶段；填充/描边/模糊建模为校验后的可选层；颜色解析统一到 utils/color_utils.parse_color_value（行为变化单列：文字颜色非法十六进制不再中断整帧渲染，改回退默认配色；RGB 序列项逐项 int 归一）
+- 布局原语收敛 (refactor, f8fdc13)：defer_padding 布尔混用拆为 padding_mode 三态（clamp/defer/exempt）；照片九点参考点构造时一次派生，定位与诊断共享；元素查找收敛到 _lookup_position 唯一入口；依赖树根查找与环检测共享 resolve_relative_chain；padding 恒比例与 margin 整数像素/浮点比例的换算分别命名；相对定位末尾夹持复用统一公式（超大盒树的贴边差异属未定契约，保留原行为）
+- 背景语义封装与分项清理 (refactor, 171fcb6)：BackgroundFillManager 新增 is_gaussian/get_text_scheme，渲染器不直读注册表 schema；删除 ascent 死字段、不可达异常回退、恒真分支、未用参数等 9 项；水印偏移直接消费 LayoutEngine.original_bounds 共享几何；超大圆角半径增加告警诊断
+
+### ⚡ 性能
+
+- legacy 矩形合成消除逐矩形全画布转换 (perf, 8e50ced)：背景只转一次 RGBA、逐矩形小层原序合成、末尾转回；3000×2000 画布 12 矩形 0.284s → 0.037s（7.79 倍），峰值内存持平；逐次合成语义经 1×1 反例锁定（与分组合成结果可区分），60 轮随机 fuzz 与旧实现逐字节一致
+
+### ✅ 验证
+
+- 23 场景逐像素回归集（7 个内置矩形样式变体 × 2 背景 + 9 合成边界）在每轮重构后与基线逐字节一致；486 项九点组合坐标穷举等价；CLI 单张（两种样式）+ 批量 32 张实测通过；debug_log 无 ERROR/TRACEBACK
+- 证据脚本与 JSON 基线见 docs/review_evidence/（T1–T8 各自独立）
+
 ## v2.7.0-dev (2026-09-25)
 
 > 统一定位语义重构（照片锚点与元素对齐分离）+ 新样式 InfoCard（四变体）与参数胶囊 ParamCapsule + 混排文本基线修复 + 版本体系两线模型。
+
+### 🟢 新功能：输出照片写入 MiLecFrame 软件标识 (feat)
+
+- 新生成的 JPEG/PNG 输出（GUI 单张生成与导出、GUI 一键导出、CLI 单张与批量）在 EXIF `0th IFD Software` 写入 `MiLecFrame`；PNG 同时写入文本字段 `Software`，两处内容保持一致
+- 原软件名保留与去重：`Adobe Lightroom` → `Adobe Lightroom; MiLecFrame`；已有品牌 token（含大小写差异）只保留一份，重复处理不会重复追加；异常/非 ASCII 原值确定性转义为可打印 ASCII 后保留可表示部分
+- PNG/HEIC/AVIF 输入从已加载图像对象补读源 EXIF 与软件字段，原软件名可读时保留并追加（不再因 piexif 不支持该容器而直接放弃原值）
+- 分级降级保证标识不丢失：`preserved`（原样保留）→ `cleaned`（定向移除坏标签/MakerNote）→ `minimal`（最小标识兜底）；兜底仍失败则该照片判为处理失败
+- 保存事务：同目录临时写入 → 只读读回验证（不触发像素解码）→ 验证通过才 `os.replace` 发布；失败清理临时文件并保留既有输出，不产生"成功但无标识"的文件
+- 非 JPEG/PNG 的直接调用输出保留既有保存能力并告警，不纳入本期标识保证范围；**不扫描、不回写历史输出**（历史补标需另行处理）
+- 新增模块 `src/utils/output_metadata.py`（构建与验证分离，验证不修复输入）；GUI 导出增加哈希与标识读回校验
+- EXIF 处理流审查修复（详见 `docs/diagnostics/EXIF_PIPELINE_AUDIT.md`）：EXIF `Software` 空值/非法类型时按优先级回落补充来源，不再丢失原软件名；GUI/批量显示链路对 PNG/HEIC/AVIF 增加容器回落（EXIF 面板、Logo 自动匹配、GPS 替换与输出取值一致）；PNG 文本关键字大小写不敏感；方向转正后丢弃旧方向的 EXIF 缩略图；`level` 与移除记录语义一致
+- 说明：该字段属普通元数据，可被后续编辑器删除，不是不可移除的画面水印或数字签名
 
 ### 🎨 新样式：InfoCard (style, fa22743)
 

@@ -1,6 +1,6 @@
 ![Features introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.7.0--dev-blue)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.7.1--dev-blue)
 
 > ©FrankZhangCC 2026 · 基于 GPLv3 许可证发布 · 由 DeepSeek V4 辅助开发
 
@@ -16,6 +16,7 @@ MiLecFrame 是一款为摄影师设计的照片相框水印工具，参考各品
 | Logo 支持 | 自动匹配品牌 + 颜色变体自动选择 + 品牌补偿系数 |
 | 水印 | 文字、位置、透明度、颜色 四维可调 |
 | 批量处理 | GUI 多文件排队 + CLI 文件夹递归 |
+| 输出元数据标识 | 新生成的 JPEG/PNG 在 EXIF `Software`（PNG 另写文本字段）中标注 `MiLecFrame`，并保留原软件名 |
 
 > **新用户可直接跳到 [快速上手](#快速上手) 开始使用。**
 
