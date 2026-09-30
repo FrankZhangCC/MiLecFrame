@@ -23,6 +23,7 @@ from ..positioning_binding import (
     PositionControls, load_positioned, save_positioned,
     sync_cross_options, apply_combo_options,
 )
+from ..spinbox_factory import make_spinbox
 
 logger = logging.getLogger(__name__)
 
@@ -219,12 +220,8 @@ class LogoSection(ExpandGroupSettingCard):
         if parent is None:
             parent = self
         grid.addWidget(BodyLabel(label, parent), row, col)
-        sb = DoubleSpinBox(self._abs_widget)
-        sb.setRange(0.0, 1.0)
-        # margin/offset 类 decimals=4（G16：三位量化损失第四位小数）
-        sb.setDecimals(4)
-        sb.setSingleStep(0.005)
-        sb.valueChanged.connect(self._on_changed)
+        # G8：构造单点在 spinbox_factory（decimals=4，见 G16/决策 D7）
+        sb = make_spinbox(self._abs_widget, on_changed=self._on_changed)
         grid.addWidget(sb, row, col + 1)
         return sb
 

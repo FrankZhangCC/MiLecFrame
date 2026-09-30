@@ -421,56 +421,24 @@ class StyleCreatorPage(QWidget):
 
     # ── 样式列表管理 ───────────────────────────────────────
 
-    def _get_existing_styles(self) -> list[str]:
-        """获取已有样式文件列表（含子目录变体），合并用户目录与内置目录"""
-        styles = []
-        seen = set()
-        # 目录顺序：用户目录（CONFIGS_DIR）在前，内置目录在后；
-        # 同名样式（文件夹/文件级）用户目录优先，内置同名自动隐藏
-        base_dirs = [CONFIGS_DIR]
-        if _BUILTIN_CONFIGS_DIR is not None:
-            base_dirs.append(_BUILTIN_CONFIGS_DIR)
+    def _get_style_manager(self):
+        """样式管理器惰性单例（G9：枚举/解析统一走 StyleManager API）"""
+        if self._style_manager is None:
+            from src.frame_styles.style_manager import StyleManager
+            self._style_manager = StyleManager()
+        return self._style_manager
 
-        for base in base_dirs:
-            if not base.exists():
-                continue
-            for entry in sorted(os.listdir(str(base))):
-                if entry.startswith('_'):
-                    continue
-                full = base / entry
-                if full.is_dir():
-                    if entry in seen:
-                        continue
-                    seen.add(entry)
-                    for variant in sorted(os.listdir(str(full))):
-                        if variant.lower().endswith('.yaml') \
-                                and not variant.startswith('_'):
-                            styles.append(f'{entry}/{variant}')
-                elif entry.lower().endswith('.yaml'):
-                    if entry in seen:
-                        continue
-                    seen.add(entry)
-                    styles.append(entry)
-        return styles
+    def _get_existing_styles(self) -> list[str]:
+        """获取已有样式文件列表（G9：枚举单点在 StyleManager）
+
+        复用 list_style_files()（用户目录优先、'_' 前缀过滤、仅
+        YAML 的格式契约见该 API docstring）。
+        """
+        return self._get_style_manager().list_style_files()
 
     def _resolve_style_filepath(self, rel_text: str) -> str:
-        """
-        根据下拉框中的相对路径文本解析实际文件路径
-
-        优先在用户目录（CONFIGS_DIR）查找，再回退到内置目录，
-        兼容打包环境下加载内置只读样式。
-
-        Args:
-            rel_text: 样式相对路径（如 'FilmClip/default.yaml'）
-
-        Returns:
-            实际文件绝对路径，不存在则返回 CONFIGS_DIR 下的拼接结果
-        """
-        for base in [CONFIGS_DIR] + ([_BUILTIN_CONFIGS_DIR] if _BUILTIN_CONFIGS_DIR else []):
-            candidate = base / rel_text
-            if candidate.exists():
-                return str(candidate)
-        return str(CONFIGS_DIR / rel_text)
+        """解析相对路径文本的实际文件路径（G9：解析单点在 StyleManager）"""
+        return self._get_style_manager().resolve_style_file(rel_text)
 
     def _refresh_style_list(self):
         """刷新样式选择下拉列表"""

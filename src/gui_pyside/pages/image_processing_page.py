@@ -41,6 +41,8 @@ from qfluentwidgets.common.style_sheet import (
 from ..models.file_item import FileItem, compute_cache_key
 from ..utils.temp_manager import TempManager
 from ..widgets.style_selector_card import StyleSelectorCard
+from ..widgets.wheel_filter import HorizontalWheelFilter
+from ..utils.image_convert import pil_to_qimage, filmstrip_thumb_size
 # G2 拆分：六张配置卡构建与渲染配置收集收敛于独立模块（控件仍归属
 # 页面属性，本页不重复定义）；下拉选项表与历史别名表同源于此
 from .image_processing_config_cards import (
@@ -78,23 +80,6 @@ _ALLOWED_EXT = ('.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.webp')
 
 # ── 下拉框选项与历史别名表：定义单点在 image_processing_config_cards
 # （G2/G3：稳定 key 选项表随配置卡构建收敛；页面经下方 import 引用）
-
-
-class FilmStripWheelFilter(QObject):
-    """将垂直滚轮事件转为水平滚动（用于胶片栏横向滚动）"""
-
-    def __init__(self, scroll_area):
-        super().__init__(scroll_area)
-        self.scroll_area = scroll_area
-
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.Type.Wheel:
-            delta = event.angleDelta().y()
-            if delta != 0:
-                self.scroll_area.delegate.hScrollBar.scrollValue(-delta)
-                event.accept()
-                return True
-        return False
 
 
 class ImageProcessingPage(QWidget):
@@ -512,7 +497,7 @@ class ImageProcessingPage(QWidget):
         self.filmstrip_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.filmstrip_scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
         # 安装滚轮事件过滤器（滚轮向下→图片列表向右）
-        self.filmstrip_scroll.viewport().installEventFilter(FilmStripWheelFilter(self.filmstrip_scroll))
+        self.filmstrip_scroll.viewport().installEventFilter(HorizontalWheelFilter(self.filmstrip_scroll))
 
         self.filmstrip_container = QWidget()
         self.filmstrip_layout = QHBoxLayout(self.filmstrip_container)
@@ -571,7 +556,7 @@ class ImageProcessingPage(QWidget):
         self.filmstrip_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.filmstrip_scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
         # 安装滚轮事件过滤器（滚轮向下→图片列表向右）
-        self.filmstrip_scroll.viewport().installEventFilter(FilmStripWheelFilter(self.filmstrip_scroll))
+        self.filmstrip_scroll.viewport().installEventFilter(HorizontalWheelFilter(self.filmstrip_scroll))
 
         self.filmstrip_container = QWidget()
         self.filmstrip_layout = QHBoxLayout(self.filmstrip_container)
@@ -1035,20 +1020,13 @@ class ImageProcessingPage(QWidget):
         pil_thumb = pil_img.copy()
         pil_thumb.thumbnail((new_w, new_h), PILImage.Resampling.LANCZOS)
 
-        # 转换为 QImage
-        if pil_thumb.mode != 'RGB':
-            pil_thumb = pil_thumb.convert('RGB')
-        data = pil_thumb.tobytes()
-        q_img = QImage(data, pil_thumb.width, pil_thumb.height, 3 * pil_thumb.width, QImage.Format.Format_RGB888)
-        q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
-        return q_img.copy()  # copy() 确保数据独立
+        # G8：PIL→QImage 转换单点在 utils/image_convert（含 sRGB 与副本语义）
+        return pil_to_qimage(pil_thumb)
 
     def _add_filmstrip_item(self, item: FileItem):
         """在胶片栏中添加一个缩略图项"""
         # 动态计算缩略图尺寸（基于胶片栏可用高度）
-        available_height = max(60, self.filmstrip_scroll.height() - 40)
-        thumb_h = min(available_height, 120)
-        thumb_w = int(thumb_h * 1.25)
+        thumb_w, thumb_h = filmstrip_thumb_size(self.filmstrip_scroll.height())
 
         thumb_label = QLabel()
         thumb_label.setFixedSize(thumb_w, thumb_h)
@@ -1112,9 +1090,7 @@ class ImageProcessingPage(QWidget):
         if not self.filmstrip_labels or not self.file_items:
             return
 
-        available_height = max(60, self.filmstrip_scroll.height() - 40)
-        thumb_h = min(available_height, 120)
-        thumb_w = int(thumb_h * 1.25)
+        thumb_w, thumb_h = filmstrip_thumb_size(self.filmstrip_scroll.height())
 
         for i, label in enumerate(self.filmstrip_labels):
             if i >= len(self.file_items):
@@ -1205,26 +1181,14 @@ class ImageProcessingPage(QWidget):
                 # 使用 PIL 加载大图，避免 Qt QImageIOHandler 的 256MB 分配上限
                 pil_img = PILImage.open(item.result_path)
                 pil_img = self._convert_to_srgb(pil_img)
-                if pil_img.mode != 'RGB':
-                    pil_img = pil_img.convert('RGB')
-                data = pil_img.tobytes()
-                q_img = QImage(data, pil_img.width, pil_img.height,
-                               3 * pil_img.width, QImage.Format.Format_RGB888)
-                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
-                pixmap = QPixmap.fromImage(q_img)
+                pixmap = QPixmap.fromImage(pil_to_qimage(pil_img))
             elif item.file_bytes:
                 pil_img = PILImage.open(io.BytesIO(item.file_bytes))
                 # 原图预览同样需按 EXIF Orientation 转正（与导入缩略图保持一致；
                 # 结果图分支无需处理，输出文件在保存时已将 Orientation 重置为 1）
                 pil_img = PILImageOps.exif_transpose(pil_img)
                 pil_img = self._convert_to_srgb(pil_img)
-                if pil_img.mode != 'RGB':
-                    pil_img = pil_img.convert('RGB')
-                data = pil_img.tobytes()
-                q_img = QImage(data, pil_img.width, pil_img.height,
-                               3 * pil_img.width, QImage.Format.Format_RGB888)
-                q_img.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
-                pixmap = QPixmap.fromImage(q_img)
+                pixmap = QPixmap.fromImage(pil_to_qimage(pil_img))
             else:
                 return
             item.cached_pixmap = pixmap
@@ -1256,9 +1220,8 @@ class ImageProcessingPage(QWidget):
             if idx < len(self.filmstrip_labels):
                 label = self.filmstrip_labels[idx]
                 pixmap = QPixmap.fromImage(item.result_thumbnail)
-                available_height = max(60, self.filmstrip_scroll.height() - 40)
-                thumb_h = min(available_height, 120)
-                thumb_w = int(thumb_h * 1.25)
+                thumb_w, thumb_h = filmstrip_thumb_size(
+                    self.filmstrip_scroll.height())
                 label.setPixmap(
                     pixmap.scaled(thumb_w - 4, thumb_h - 4,
                                   Qt.AspectRatioMode.KeepAspectRatio,

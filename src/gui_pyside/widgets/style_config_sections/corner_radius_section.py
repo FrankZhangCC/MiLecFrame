@@ -11,6 +11,8 @@ from qfluentwidgets import (
     DoubleSpinBox, SwitchButton, FluentIcon, BodyLabel, CaptionLabel,
 )
 
+from ..spinbox_factory import make_spinbox
+
 
 class CornerRadiusSection(ExpandGroupSettingCard):
     """原图圆角配置区块"""
@@ -60,12 +62,9 @@ class CornerRadiusSection(ExpandGroupSettingCard):
         if parent is None:
             parent = self
         grid.addWidget(BodyLabel(label, parent), row, col)
-        sb = DoubleSpinBox(parent)
-        sb.setRange(0.0, 0.5)
-        sb.setDecimals(3)
-        sb.setSingleStep(0.005)
-        sb.setValue(default)
-        sb.valueChanged.connect(self._on_changed)
+        # G8：构造单点在 spinbox_factory（range 0–0.5 为本卡语义）
+        sb = make_spinbox(parent, default=default, max_val=0.5,
+                          on_changed=self._on_changed)
         grid.addWidget(sb, row, col + 1)
         return sb
 

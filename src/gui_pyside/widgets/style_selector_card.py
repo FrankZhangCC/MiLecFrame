@@ -16,28 +16,12 @@ from qfluentwidgets import (
 )
 
 from .style_thumbnail_card import StyleThumbnailCard, CARD_HEIGHT
+from .wheel_filter import HorizontalWheelFilter
 
 logger = logging.getLogger(__name__)
 
 # 滚动区域固定高度：卡片高度 + 上下 padding + 滚动条冗余
 SCROLL_AREA_HEIGHT = CARD_HEIGHT + 22
-
-
-class HorizontalWheelFilter(QObject):
-    """将垂直滚轮事件转换为水平滚动，用于横向缩略图列表"""
-
-    def __init__(self, scroll_area: SmoothScrollArea):
-        super().__init__(scroll_area)
-        self._scroll_area = scroll_area
-
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.Type.Wheel:
-            delta = event.angleDelta().y()
-            if delta != 0:
-                self._scroll_area.delegate.hScrollBar.scrollValue(-delta)
-                event.accept()
-                return True
-        return False
 
 
 class StyleSelectorCard(ExpandGroupSettingCard):

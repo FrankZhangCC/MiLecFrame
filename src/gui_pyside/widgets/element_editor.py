@@ -34,6 +34,7 @@ from .positioning_binding import (
     PositionControls, load_positioned, save_positioned,
     sync_cross_options, apply_combo_options,
 )
+from .spinbox_factory import make_spinbox
 
 logger = logging.getLogger(__name__)
 
@@ -77,12 +78,10 @@ class ElementEditor(QWidget):
         改写用户配置。
         """
         lb = BodyLabel(label, self)
-        sb = DoubleSpinBox(self)
-        sb.setRange(min_val, max_val)
-        sb.setDecimals(decimals)
-        sb.setSingleStep(step)
-        sb.setValue(0.0)
-        sb.valueChanged.connect(self._on_changed)
+        # G8：构造单点在 spinbox_factory（默认 decimals=4，见 G16）
+        sb = make_spinbox(self, default=0.0, min_val=min_val,
+                          max_val=max_val, step=step, decimals=decimals,
+                          on_changed=self._on_changed)
         layout.addWidget(lb, row, col * 2)
         layout.addWidget(sb, row, col * 2 + 1)
         return sb

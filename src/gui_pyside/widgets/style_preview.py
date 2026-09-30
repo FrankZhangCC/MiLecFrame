@@ -15,6 +15,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QImage, QPixmap, QColorSpace
 
+from ..utils.image_convert import pil_to_qimage
+
 from qfluentwidgets import SegmentedWidget, ComboBox, setCustomStyleSheet
 from qfluentwidgets.common.style_sheet import addStyleSheet, CustomStyleSheet
 
@@ -163,16 +165,8 @@ class StylePreview(QWidget):
             self.preview_label.setText("预览渲染失败")
             return
 
-        # PIL → QImage → QPixmap
-        if pil_image.mode != 'RGB':
-            pil_image = pil_image.convert('RGB')
-        data = pil_image.tobytes()
-        qimage = QImage(
-            data, pil_image.width, pil_image.height,
-            3 * pil_image.width, QImage.Format.Format_RGB888,
-        )
-        qimage.setColorSpace(QColorSpace.NamedColorSpace.SRgb)
-        pixmap = QPixmap.fromImage(qimage)
+        # PIL → QImage → QPixmap（G8：转换单点在 utils/image_convert）
+        pixmap = QPixmap.fromImage(pil_to_qimage(pil_image))
         if pixmap.isNull():
             self._cached_pixmap = None
             self.preview_label.setPixmap(QPixmap())
