@@ -14,7 +14,6 @@ from dataclasses import dataclass, field
 
 from src.utils.exif_helper import ExifHelper
 from src.utils.background_fill import BackgroundFillManager
-from src.utils.logo_selector import LogoSelector
 from src.core.image_processor import ImageProcessor
 from src.core.renderer import RenderMetadata, RenderOptions
 
@@ -58,7 +57,6 @@ class BatchProcessor:
     def __init__(self):
         """初始化批量处理器"""
         self.exif_helper = ExifHelper()
-        self.logo_selector = LogoSelector()
 
     @staticmethod
     def discover_files(
@@ -122,7 +120,7 @@ class BatchProcessor:
             decorations: 装饰元素列表，每项 {'type': 'watermark', 'params': {...}}
             font_weight: 字体字重 ('light' / 'regular' / 'medium')
             logo_selection: Logo 选择策略
-                - 'auto' → 逐张自动匹配 (读取 EXIF 品牌 → LogoSelector.auto_match_logo)
+                - 'auto' → 逐张自动匹配（由 render_frame 按最终背景统一执行）
                 - 'none' → 所有图片不使用 Logo
                 - '<filename>' → 所有图片统一使用指定 Logo 文件
             lens_display_mode: 镜头显示模式 ('combined' / 'camera_only' / 'lens_only')
@@ -181,12 +179,13 @@ class BatchProcessor:
                     progress_callback(current_index, result.total, input_path.name, "⏭ 跳过（输出文件已存在）")
                 continue
 
-            # ===== 逐张决定 location（GPS 替换）和 logo_filename（自动匹配）=====
+            # ===== 逐张决定 location（GPS 替换）和 logo_filename（三态）=====
             current_location = location
             current_logo: Optional[str] = None
 
-            # 是否需要读取 EXIF（GPS 替换或 Logo 自动匹配时）
-            need_exif = use_gps_location or logo_selection == 'auto'
+            # 是否需要读取 EXIF（GPS 替换时；Logo 自动匹配已收敛到
+            # render_frame，由渲染器在最终背景确定后统一读取品牌）
+            need_exif = use_gps_location
             exif_data = None
 
             if need_exif:
@@ -203,15 +202,11 @@ class BatchProcessor:
 
             # ---- Logo 选择逻辑 ----
             if logo_selection == 'auto':
-                # 逐张自动匹配：读取 EXIF 品牌 → LogoSelector.auto_match_logo
-                if exif_data:
-                    camera_brand = ExifHelper.get_camera_brand(exif_data)
-                    if camera_brand:
-                        current_logo = self.logo_selector.auto_match_logo(
-                            camera_brand,
-                            is_dark_bg=BackgroundFillManager.is_dark_bg(bg_fill_type)
-                        )
-                    # 如果品牌为空或匹配失败，current_logo 保持 None（使用样式默认）
+                # 自动匹配统一在 render_frame 内完成（审计 Q6 决策收敛）：
+                # 渲染器在解析样式背景覆盖之后，按最终背景与显示品牌选
+                # Logo，避免此处按用户所选背景预匹配、样式覆盖背景后
+                # Logo 明暗错位。品牌缺失或无匹配时同样由渲染器兜底。
+                current_logo = None
             elif logo_selection == 'none':
                 current_logo = ""  # 空字符串表示不使用 Logo
             else:
@@ -222,9 +217,10 @@ class BatchProcessor:
             try:
                 # 逐张变化的字段就地更新（引用同一对象，无重建开销）
                 metadata.location = current_location
-                # 注意：current_logo 可能为 ""（空串=禁用 Logo 自动匹配的哨兵），
-                # 必须原样赋值，禁止做 `or None` 之类的转换——
-                # None 会触发 render_frame 内的品牌自动匹配，改变行为！
+                # 注意：current_logo 三态语义——None=render_frame 内自动
+                # 匹配（auto 分支的预期行为）、""=禁用 Logo、非空=固定
+                # 文件。禁用值 "" 必须原样赋值，禁止做 `or None` 之类的
+                # 转换，否则空串会被误当成自动匹配。
                 options.logo_filename = current_logo
                 success = processor.process(
                     input_path=str(input_path),

@@ -1,0 +1,175 @@
+{
+  "keep": {
+    "auto_end_to_end": {
+      "digest": "3e6b5ebd2991b1933fb90d94d482beb4f3f8e1bdf595b6a9c6f6790b5487a375"
+    },
+    "fixed_end_to_end": {
+      "digest": "3e6b5ebd2991b1933fb90d94d482beb4f3f8e1bdf595b6a9c6f6790b5487a375"
+    },
+    "disabled_end_to_end": {
+      "digest": "6f689f11a9a4fe7a0d0bde03833e2129c8eef8aec06a000aa75cd5cc0ec385b0"
+    }
+  },
+  "survey": {
+    "csv_rows": 74,
+    "mapped_brand_changed": [
+      [
+        "LEICA CAMERA AG",
+        "Leica"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "NIKON CORPORATION",
+        "Nikon"
+      ],
+      [
+        "OM Digital Solutions",
+        "OM System"
+      ]
+    ],
+    "mapped_brand_always_identical": false,
+    "per_brand": {
+      "Canon": {
+        "raw_source": "canon",
+        "display_source": "Canon",
+        "match_light": {
+          "raw": "Canon_logo_black.png",
+          "display": "Canon_logo_black.png"
+        },
+        "consistent": true
+      },
+      "Nikon": {
+        "raw_source": "nikon",
+        "display_source": "Nikon",
+        "match_light": {
+          "raw": "nikon_round_yellow.png",
+          "display": "nikon_round_yellow.png"
+        },
+        "consistent": true
+      },
+      "Apple": {
+        "raw_source": "apple",
+        "display_source": "Apple",
+        "match_light": {
+          "raw": null,
+          "display": null
+        },
+        "consistent": true
+      },
+      "Hasselblad": {
+        "raw_source": "hasselblad",
+        "display_source": "Hasselblad",
+        "match_light": {
+          "raw": "Hasselblad_logo_black.png",
+          "display": "Hasselblad_logo_black.png"
+        },
+        "consistent": true
+      },
+      "Sony": {
+        "raw_source": "sony",
+        "display_source": "Sony",
+        "match_light": {
+          "raw": "sony_logo_black.png",
+          "display": "sony_logo_black.png"
+        },
+        "consistent": true
+      },
+      "Fujifilm": {
+        "raw_source": "fujifilm",
+        "display_source": "Fujifilm",
+        "match_light": {
+          "raw": "Fujifilm_logo_black.png",
+          "display": "Fujifilm_logo_black.png"
+        },
+        "consistent": true
+      },
+      "Leica": {
+        "raw_source": "leica",
+        "display_source": "Leica",
+        "match_light": {
+          "raw": "Leica_round_black.png",
+          "display": "Leica_round_black.png"
+        },
+        "consistent": true
+      },
+      "ricoh": {
+        "raw_source": "ricoh",
+        "display_source": "ricoh",
+        "match_light": {
+          "raw": "ricoh_logo_black.png",
+          "display": "ricoh_logo_black.png"
+        },
+        "consistent": true
+      },
+      "DJI": {
+        "raw_source": "dji",
+        "display_source": "DJI",
+        "match_light": {
+          "raw": "dji_square_black.png",
+          "display": "dji_square_black.png"
+        },
+        "consistent": true
+      }
+    },
+    "all_consistent": true
+  },
+  "fix_probe": {
+    "legacy_upstream_preselect": {
+      "preselected_by_upstream": "Canon_logo_black.png",
+      "drawn_files": [
+        "Canon_logo_black.png"
+      ]
+    }
+  }
+}

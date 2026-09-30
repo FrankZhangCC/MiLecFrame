@@ -1389,12 +1389,9 @@ class ImageProcessingPage(QWidget):
                 logo_filename = ""
             elif logo_opt != "自动匹配":
                 logo_filename = logo_opt
-            else:
-                brand = ExifHelper.get_camera_brand(item.exif_data) if item.exif_data else None
-                if brand:
-                    logo_filename = self.logo_selector.auto_match_logo(
-                        brand, is_dark_bg=BackgroundFillManager.is_dark_bg(bg_key)
-                    )
+            # "自动匹配"保持 None：由 render_frame 在样式背景覆盖解析之后，
+            # 按最终背景与显示品牌统一匹配（审计 Q6 决策收敛），此处不再
+            # 按预览所选背景预选，避免样式覆盖背景后 Logo 明暗错位
 
             # 水印装饰
             decorations = []
