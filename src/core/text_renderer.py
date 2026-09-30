@@ -16,6 +16,7 @@ from src.utils.font_manager import FontManager
 from src.utils.layout_engine import LayoutEngine
 from src.utils.render_context import RenderContext
 from src.utils.background_fill import BackgroundFillManager
+from src.utils.color_utils import parse_color_value
 
 logger = logging.getLogger(__name__)
 
@@ -122,13 +123,13 @@ class TextRenderer:
     # ── 颜色解析 ────────────────────────────────────────────
 
     def _parse_color_value(self, custom_color) -> Optional[Tuple[int, int, int]]:
-        if not custom_color:
-            return None
-        if isinstance(custom_color, str) and custom_color.startswith('#'):
-            return tuple(int(custom_color[i:i+2], 16) for i in (1, 3, 5))
-        elif isinstance(custom_color, (tuple, list)) and len(custom_color) == 3:
-            return tuple(custom_color)
-        return None
+        """委托公共颜色解析（审计 Q8 的统一策略变化，单列说明）：
+
+        - 非法十六进制此前抛 ValueError 中断整帧渲染，现在返回 None，
+          由 _determine_text_color 回退下一级配色（与"未配置"同路径）；
+        - RGB 序列项此前原样透传（浮点会传给 PIL），现在逐项 int() 归一。
+        """
+        return parse_color_value(custom_color)
 
     def _resolve_color_from_config(
         self, colors_config: Dict, dark_key: str, light_key: str, bg_fill_type: str
