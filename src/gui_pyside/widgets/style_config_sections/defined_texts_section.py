@@ -28,6 +28,9 @@ class DefinedTextsSection(ExpandGroupSettingCard):
     """预定义文本配置区块"""
 
     value_changed = Signal()
+    # 可用键集合变化（条目增删 / key 文本变更）——页面据此刷新全部
+    # 编辑器的 relative_to 选项池（G14 修复：引用保留与选项接线）
+    keys_changed = Signal()
 
     def __init__(self, parent=None):
         super().__init__(
@@ -82,6 +85,9 @@ class DefinedTextsSection(ExpandGroupSettingCard):
         key_edit.setText(item.key)
         key_edit.setPlaceholderText('defined_text_01')
         key_edit.textChanged.connect(self._on_changed)
+        # key 文本变更会改变实例键池与"排除自身"过滤结果，
+        # 通知页面刷新全部编辑器的 relative_to 选项池
+        key_edit.textChanged.connect(lambda _text: self.keys_changed.emit())
         top_row.addWidget(key_edit, stretch=1)
 
         del_btn = PushButton(
@@ -105,6 +111,9 @@ class DefinedTextsSection(ExpandGroupSettingCard):
         editor = ElementEditor(frame, show_key_selector=False)
         editor.load_defined_text(item)
         editor.changed.connect(self._on_changed)
+        # 模式切换后刷新折叠卡高度（G10/D2-③ 防御性 sizeHint 刷新）
+        editor.mode_changed.connect(
+            lambda: QTimer.singleShot(0, self._adjustViewSize))
         vbox.addWidget(editor)
 
         # 存储
@@ -118,6 +127,7 @@ class DefinedTextsSection(ExpandGroupSettingCard):
         self._items.append(record)
         self._container.addWidget(frame)
         self._on_changed()
+        self.keys_changed.emit()
         QTimer.singleShot(0, self._adjustViewSize)
 
     def _on_delete(self, frame):
@@ -128,11 +138,33 @@ class DefinedTextsSection(ExpandGroupSettingCard):
                 self._container.removeWidget(frame)
                 frame.deleteLater()
                 self._on_changed()
+                self.keys_changed.emit()
                 QTimer.singleShot(0, self._adjustViewSize)
                 return
 
     def _on_changed(self, *args):
         self.value_changed.emit()
+
+    def get_defined_keys(self) -> list:
+        """收集当前全部条目 key（实时取 key_edit 文本，未保存也生效）
+
+        供页面组装 relative_to 选项池（固定键 + defined_text 实例键）。
+        """
+        return [rec['key_edit'].text().strip()
+                for rec in self._items if rec['key_edit'].text().strip()]
+
+    def refresh_relative_to_options(self, full_keys: list):
+        """刷新各编辑器的 relative_to 选项池（G14 接线）
+
+        full_keys 为页面组装的完整键池（固定键 ELEMENT_KEYS + 当前全部
+        defined_text 实例键）；各编辑器排除自身 key（key_edit 当前文本），
+        防止自引用死循环。
+        """
+        for rec in self._items:
+            editor = rec['editor']
+            own_key = rec['key_edit'].text().strip()
+            keys = [k for k in full_keys if k != own_key]
+            editor.update_relative_to_options(keys)
 
     def get_items(self) -> list[DefinedTextConfig]:
         """收集所有条目数据"""

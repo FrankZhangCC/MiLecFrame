@@ -1,0 +1,1459 @@
+{
+  "head": "b64388f3cd7e992593c5eb724f2866776e779879",
+  "versions": {
+    "PySide6": "6.11.1",
+    "PySide6-Fluent-Widgets": "1.11.2",
+    "PyYAML": "6.0.3"
+  },
+  "exports": {
+    "JPEG": {
+      "source_verification": "success",
+      "export": "success",
+      "target_exists": true,
+      "part_exists": false
+    },
+    "PNG": {
+      "source_verification": "success",
+      "export": "OutputMetadataError: 输出实际格式为 PNG，期望 JPEG",
+      "target_exists": false,
+      "part_exists": false
+    }
+  },
+  "mapping_guards": {
+    "CameraMappingPage": {
+      "table_exists_at_refresh": [
+        false
+      ],
+      "guard_removed_constructor": "AttributeError: 'CameraMappingPage' object has no attribute '_table'"
+    },
+    "LensMappingPage": {
+      "table_exists_at_refresh": [
+        false
+      ],
+      "guard_removed_constructor": "AttributeError: 'LensMappingPage' object has no attribute '_table'"
+    }
+  },
+  "layouts": {
+    "ElementsSection": {
+      "absolute": {
+        "expanded": true,
+        "card_h": 552,
+        "header_h": 70,
+        "space_h": 485,
+        "view_h": 482,
+        "content_hint_h": 482
+      },
+      "relative": {
+        "expanded": true,
+        "card_h": 552,
+        "header_h": 70,
+        "space_h": 485,
+        "view_h": 154,
+        "content_hint_h": 154,
+        "editor_rect": [
+          18,
+          51,
+          644,
+          32
+        ],
+        "relative_rect": [
+          0,
+          0,
+          100,
+          30
+        ],
+        "relative_hint_h": 243,
+        "relative_layout_index": -1
+      },
+      "collapsed": {
+        "expanded": false,
+        "card_h": 70,
+        "header_h": 70,
+        "space_h": 157,
+        "view_h": 154,
+        "content_hint_h": 154
+      }
+    },
+    "DefinedTextsSection": {
+      "absolute": {
+        "expanded": true,
+        "card_h": 591,
+        "header_h": 70,
+        "space_h": 524,
+        "view_h": 521,
+        "content_hint_h": 521
+      },
+      "relative": {
+        "expanded": true,
+        "card_h": 591,
+        "header_h": 70,
+        "space_h": 524,
+        "view_h": 193,
+        "content_hint_h": 193,
+        "editor_rect": [
+          18,
+          96,
+          644,
+          26
+        ],
+        "relative_rect": [
+          0,
+          0,
+          100,
+          30
+        ],
+        "relative_hint_h": 243,
+        "relative_layout_index": -1
+      },
+      "collapsed": {
+        "expanded": false,
+        "card_h": 70,
+        "header_h": 70,
+        "space_h": 196,
+        "view_h": 193,
+        "content_hint_h": 193
+      }
+    },
+    "LogoSection": {
+      "expanded": {
+        "expanded": true,
+        "card_h": 349,
+        "header_h": 70,
+        "space_h": 282,
+        "view_h": 279,
+        "content_hint_h": 279
+      },
+      "collapsed": {
+        "expanded": false,
+        "card_h": 70,
+        "header_h": 70,
+        "space_h": 282,
+        "view_h": 279,
+        "content_hint_h": 279
+      }
+    },
+    "CustomTextSection": {
+      "expanded": {
+        "expanded": true,
+        "card_h": 371,
+        "header_h": 70,
+        "space_h": 304,
+        "view_h": 301,
+        "content_hint_h": 301
+      },
+      "collapsed": {
+        "expanded": false,
+        "card_h": 70,
+        "header_h": 70,
+        "space_h": 304,
+        "view_h": 301,
+        "content_hint_h": 301
+      }
+    }
+  },
+  "models": {
+    "dumper_before": "items:\n- 1\n- 2\n",
+    "dumper_after": "items: [1, 2]\n",
+    "representer_changed": true,
+    "relative_defined_text_line_alignment": {
+      "input": "right",
+      "output": null
+    },
+    "invalid_cross_alignment_fallback": {
+      "ElementEditor": "left",
+      "LogoSection": "center",
+      "CustomTextSection": "center"
+    }
+  },
+  "style_roundtrips": [
+    {
+      "style": "信息卡片 InfoCard\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_08.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_08.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.author.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.author.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.location.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.location.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "信息卡片 InfoCard\\no_author.yaml",
+      "source_to_model": [
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.location.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.location.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "信息卡片 InfoCard\\no_author_no_location.yaml",
+      "source_to_model": [
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "信息卡片 InfoCard\\no_location.yaml",
+      "source_to_model": [
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_05.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_06.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_07.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.expand_canvas.top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.author.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.author.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.lens.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "参数胶囊 ParamCapsule\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "colors.text",
+          "before": null,
+          "after": "#000000"
+        },
+        {
+          "path": "fonts.sizes.defined_text_01",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_02",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_03",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_04",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "layout.custom_text.line_spacing_ratio",
+          "before": null,
+          "after": 0.005
+        },
+        {
+          "path": "layout.custom_text.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.custom_text.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.custom_text.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": [
+        {
+          "path": "layout.info_position.aperture_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        }
+      ]
+    },
+    {
+      "style": "参数胶囊 ParamCapsule\\no_custom_text.yaml",
+      "source_to_model": [
+        {
+          "path": "colors.text",
+          "before": null,
+          "after": "#000000"
+        },
+        {
+          "path": "fonts.sizes.defined_text_01",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_02",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_03",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_04",
+          "before": 0.02,
+          "after": null
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_02.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_03.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_04.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.aperture_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera_lens.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera_lens.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.camera_lens.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_top",
+          "before": null,
+          "after": 0.0
+        }
+      ],
+      "model_to_widgets_to_model": [
+        {
+          "path": "layout.info_position.aperture_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.iso_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.margin_bottom",
+          "before": 0.1605,
+          "after": 0.161
+        }
+      ]
+    },
+    {
+      "style": "宝丽来风格 Polaroid\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.line_spacing_ratio",
+          "before": null,
+          "after": 0.005
+        },
+        {
+          "path": "layout.info_position.camera_lens.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "layout.info_position.exif.placement",
+          "before": null,
+          "after": "outside"
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "底部信息条 Bottom Bars\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.line_spacing_ratio",
+          "before": null,
+          "after": 0.005
+        },
+        {
+          "path": "logo.diagonal_limit_ratio",
+          "before": null,
+          "after": 2.0
+        },
+        {
+          "path": "logo.max_dim_limit_ratio",
+          "before": 2.5,
+          "after": null
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "底部信息条 Bottom Bars\\no_location.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.line_spacing_ratio",
+          "before": null,
+          "after": 0.005
+        },
+        {
+          "path": "logo.diagonal_limit_ratio",
+          "before": null,
+          "after": 2.0
+        },
+        {
+          "path": "logo.max_dim_limit_ratio",
+          "before": 2.5,
+          "after": null
+        }
+      ],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "简洁信息 SimpleInfo\\default.yaml",
+      "source_to_model": [],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "胶片夹风格 FilmClip\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.sizes.defined_text_01",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_02",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_03",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_04",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "layout.custom_text.margin_bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.custom_text.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.custom_text.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.custom_text.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "layout.info_position.camera_lens.placement",
+          "before": null,
+          "after": "outside"
+        }
+      ],
+      "model_to_widgets_to_model": [
+        {
+          "path": "layout.info_position.aperture_formatted.relative_to",
+          "before": "defined_text_02",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.relative_to",
+          "before": "defined_text_01",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.iso_formatted.relative_to",
+          "before": "defined_text_04",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.relative_to",
+          "before": "defined_text_03",
+          "after": "exif"
+        }
+      ]
+    },
+    {
+      "style": "胶片夹风格 FilmClip\\no_custom_text.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.sizes.defined_text_01",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_02",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_03",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "fonts.sizes.defined_text_04",
+          "before": 0.027,
+          "after": null
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.margin_top",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "layout.defined_texts.defined_text_01.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "layout.info_position.camera_lens.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "logo.diagonal_limit_ratio",
+          "before": null,
+          "after": 2.0
+        },
+        {
+          "path": "logo.margin_bottom",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "logo.margin_left",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "logo.margin_right",
+          "before": null,
+          "after": 0.0
+        },
+        {
+          "path": "logo.max_dim_limit_ratio",
+          "before": 2.5,
+          "after": null
+        },
+        {
+          "path": "logo.placement",
+          "before": null,
+          "after": "outside"
+        }
+      ],
+      "model_to_widgets_to_model": [
+        {
+          "path": "layout.info_position.aperture_formatted.relative_to",
+          "before": "defined_text_02",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.focal_length_formatted.relative_to",
+          "before": "defined_text_01",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.iso_formatted.relative_to",
+          "before": "defined_text_04",
+          "after": "exif"
+        },
+        {
+          "path": "layout.info_position.shutter_speed_formatted.relative_to",
+          "before": "defined_text_03",
+          "after": "exif"
+        }
+      ]
+    },
+    {
+      "style": "裁剪胶片 FilmCut\\default.yaml",
+      "source_to_model": [],
+      "model_to_widgets_to_model": []
+    },
+    {
+      "style": "边框信息条 FrameBar\\default.yaml",
+      "source_to_model": [
+        {
+          "path": "fonts.line_spacing_ratio",
+          "before": null,
+          "after": 0.005
+        },
+        {
+          "path": "layout.info_position.camera_lens.placement",
+          "before": null,
+          "after": "outside"
+        },
+        {
+          "path": "layout.info_position.exif.placement",
+          "before": null,
+          "after": "outside"
+        }
+      ],
+      "model_to_widgets_to_model": []
+    }
+  ],
+  "source_hashes": {
+    "src\\gui_pyside\\app.py": "02811144cb89c298f8e2b3569c4fdd49d560c754d6737c6dfeb8e2eff3f12a02",
+    "src\\gui_pyside\\main_window.py": "425c63630d18319966d465ce8c2f2e6a91bf3173930a33f8d3a4a05994393656",
+    "src\\gui_pyside\\__init__.py": "7fd941690b6a48a89244a42a0138713f8df4b3279395c2382bcec4214ad3d0b9",
+    "src\\gui_pyside\\data\\preview_data.py": "a4060bdc89e5a6c65ba69f3579e45bcd0fa0a51657c37f3827a08e82969576b9",
+    "src\\gui_pyside\\data\\__init__.py": "d5203b46b500ba16b19ffc22b0b78c918cb2add9b428213275143b7f6c7e9074",
+    "src\\gui_pyside\\models\\file_item.py": "0bb6d5fe7a25a199a9e69fa9731afea69ec79d16e5151f38f54e7ef3a1b68687",
+    "src\\gui_pyside\\models\\processing_config.py": "adb62b8f8a5add35ea0603a6fda15b79ff391cb30c26d8e8cdaeedeed5d7dd13",
+    "src\\gui_pyside\\models\\style_config_form.py": "1ebf685d31c6d5e8cb1d862afaaf955215db360808262ac9132810f87ece4d2e",
+    "src\\gui_pyside\\models\\__init__.py": "d5203b46b500ba16b19ffc22b0b78c918cb2add9b428213275143b7f6c7e9074",
+    "src\\gui_pyside\\pages\\camera_mapping_page.py": "cc05d99c1a8783b1510f632abd7885152fe8035a7e36b9137d0aabe5aaabf351",
+    "src\\gui_pyside\\pages\\image_processing_page.py": "d47b8155297345ad479cab6643528f483aa7bd520deaf1250f6331d0ae58f8ac",
+    "src\\gui_pyside\\pages\\lens_mapping_page.py": "349e6df7e31b7e6cfdd0814e4653b9783fb4a9ec04c206a3b3f236719c271326",
+    "src\\gui_pyside\\pages\\style_creator_page.py": "43b0a0a4ba025db395a89acda75d7a31d10eefe611819a6a7ea44ad16645b181",
+    "src\\gui_pyside\\pages\\__init__.py": "d5203b46b500ba16b19ffc22b0b78c918cb2add9b428213275143b7f6c7e9074",
+    "src\\gui_pyside\\utils\\layout_debug.py": "aff7f30f4333084bc8c247d44fe0b0ad4922c84c6dc33219161795777d84c5bc",
+    "src\\gui_pyside\\utils\\temp_manager.py": "d0db40e550af2a651e76efcbe2c671e04d62b8dc39d99e31e377fd00bf616a0d",
+    "src\\gui_pyside\\utils\\__init__.py": "d5203b46b500ba16b19ffc22b0b78c918cb2add9b428213275143b7f6c7e9074",
+    "src\\gui_pyside\\widgets\\element_editor.py": "14a7d9f06e1440e9aad3ac9ed8d357c616279e266bb25ca0a8c09a43838bcaac",
+    "src\\gui_pyside\\widgets\\style_preview.py": "2e1a39c30dddf626814571755a5b896390bddf967550c6823f412cefacdce174",
+    "src\\gui_pyside\\widgets\\style_selector_card.py": "bd880a30e4f0f2e2b1145444d3d9ad02a2884429e6d3ee2d413ea6c85c4c4efb",
+    "src\\gui_pyside\\widgets\\style_thumbnail_card.py": "10e407b9c153723f91ddae24361678e1a8f906f6469e887bd8c147fe509d19cc",
+    "src\\gui_pyside\\widgets\\__init__.py": "d5203b46b500ba16b19ffc22b0b78c918cb2add9b428213275143b7f6c7e9074",
+    "src\\gui_pyside\\widgets\\style_config_sections\\basic_info_section.py": "36c14b8b710a3641156702aadea266e2e801847c4e4e4e4e502ca406c858b21e",
+    "src\\gui_pyside\\widgets\\style_config_sections\\canvas_section.py": "02e461dd0bde4a07c8a3729986c7ea2ff0b9c21b5c8a0867cfd5e13a9d16cb65",
+    "src\\gui_pyside\\widgets\\style_config_sections\\colors_section.py": "bcffbc238874750e94e6c9cadb1680688b471e2b4fa8436696294da022323945",
+    "src\\gui_pyside\\widgets\\style_config_sections\\corner_radius_section.py": "676936178094290bf3274d685552231fe20dc60bcf8685e16d248fd1d72a0fe8",
+    "src\\gui_pyside\\widgets\\style_config_sections\\custom_text_section.py": "c101d29175001a9c58830782cc3c237cedf64f16492d153f87ebc819e77bfaae",
+    "src\\gui_pyside\\widgets\\style_config_sections\\defined_texts_section.py": "d1196110f20ac2234df63994465e3c6b5e70db35b3ae8084d05656a31b199a95",
+    "src\\gui_pyside\\widgets\\style_config_sections\\elements_section.py": "d3574b07315e71defcd8f0f4a0f517a949bd5c2edbea18c3fc491793be1a33fe",
+    "src\\gui_pyside\\widgets\\style_config_sections\\fonts_section.py": "59fdd8223c7f5955b25670cd257afa4fd9ae2d99a6cbb6f59ed7320360f09ffb",
+    "src\\gui_pyside\\widgets\\style_config_sections\\logo_section.py": "9235560a49e61823cc79061a75d4144253ab326ab7390b81e45bf8d1af6fe0b1",
+    "src\\gui_pyside\\widgets\\style_config_sections\\padding_section.py": "4e8127540f4bbbd84b5c6f9ac8a6f0dbbbf684a9226c32b798e0226bba10fde3",
+    "src\\gui_pyside\\widgets\\style_config_sections\\__init__.py": "403781b0c46475f93eb2cf0a737e4ec652e18448d2f923f32e7d4c023e32b423",
+    "src\\utils\\output_metadata.py": "c561bf898efc13b8b870b01b666de800689882a061ef9e4e49bc08f217cc2dd3"
+  },
+  "sources_unchanged_during_probe": true,
+  "yaml_count": 14
+}

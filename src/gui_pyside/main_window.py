@@ -156,19 +156,15 @@ class MainWindow(FluentWindow):
         # ── 清理临时文件 ──
         self.temp_manager.cleanup()
 
-        # ── 保存页面配置 ──
+        # ── 保存页面配置并释放内存 ──
+        # 各页面属性均在 __init__ 的 _create_pages() 中无条件创建，
+        # closeEvent 必然晚于构造完成，无需 hasattr 防御（G11）
         if hasattr(self, 'image_page'):
             self.image_page.save_config()
-
-        # ── 释放缩略图内存 ──
-        if hasattr(self, 'image_page'):
-            self.image_page.cleanup()
-        if hasattr(self, 'camera_page'):
-            self.camera_page.cleanup()
-        if hasattr(self, 'lens_page'):
-            self.lens_page.cleanup()
-        if hasattr(self, 'style_page'):
-            self.style_page.cleanup()
+        self.image_page.cleanup()
+        self.camera_page.cleanup()
+        self.lens_page.cleanup()
+        self.style_page.cleanup()
 
         logger.info("资源清理完成")
         event.accept()

@@ -133,6 +133,75 @@ class StyleManager:
         
         return sorted(styles)
     
+
+    def list_style_files(self, extensions=('.yaml',),
+                         include_hidden: bool = False) -> List[str]:
+        """
+        枚举样式文件的相对路径（G9：样式编辑器枚举单点）
+
+        与 get_available_styles() 的样式名枚举互补：本方法返回文件级
+        相对路径——文件夹样式含变体文件（如 'FilmClip/default.yaml'），
+        单文件样式为 'Xxx.yaml'。目录优先级与 get_available_styles()
+        一致：用户目录（extra_dirs）在前，同名条目屏蔽内置同名。
+
+        契约说明：样式编辑器当前只实现 YAML 的加载与保存，默认
+        extensions 仅 '.yaml'；json/toml 等其他支持格式的编辑属后续
+        扩展，编辑器不做静默格式转换。
+
+        Args:
+            extensions: 接受的扩展名集合（小写、含点）
+            include_hidden: 是否包含 '_' 前缀条目（编辑器语义默认
+                过滤——临时/内部文件不入可选列表）
+
+        Returns:
+            排序后的相对路径列表（正斜杠分隔，跨平台一致）
+        """
+        exts = tuple(e.lower() for e in extensions)
+        results = []
+        seen = set()
+        for base in [*self.extra_dirs, self.config_dir]:
+            base_path = Path(base)
+            if not base_path.exists():
+                continue
+            for entry in sorted(os.listdir(base)):
+                if entry.startswith('_') and not include_hidden:
+                    continue
+                full = base_path / entry
+                if full.is_dir():
+                    if entry in seen:
+                        continue
+                    seen.add(entry)
+                    for variant in sorted(os.listdir(str(full))):
+                        if variant.lower().endswith(exts)                                 and not variant.startswith('_'):
+                            results.append(f'{entry}/{variant}')
+                elif entry.lower().endswith(exts):
+                    if entry in seen:
+                        continue
+                    seen.add(entry)
+                    results.append(entry)
+        return sorted(results)
+
+    def resolve_style_file(self, rel_path: str) -> str:
+        """
+        按用户目录优先级解析样式文件相对路径（G9：GUI 解析单点）
+
+        顺序与 get_style_config 一致：extra_dirs 优先，回退内置
+        config_dir；都不存在时返回第一个用户可写目录下的拼接结果
+        （供保存使用，调用方自行判断存在性）。
+
+        Args:
+            rel_path: 样式文件相对路径（如 'FilmClip/default.yaml'）
+
+        Returns:
+            实际文件绝对路径（正斜杠分隔）
+        """
+        bases = self.extra_dirs or [self.config_dir]
+        for base in [*bases, self.config_dir]:
+            candidate = Path(base) / rel_path
+            if candidate.exists():
+                return str(candidate)
+        return str(Path(bases[0]) / rel_path)
+
     def _load_config_file(self, config_path: str) -> Optional[Dict]:
         """加载单个配置文件"""
         ext = os.path.splitext(config_path)[1].lower()

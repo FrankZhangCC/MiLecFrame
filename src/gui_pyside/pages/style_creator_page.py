@@ -30,6 +30,7 @@ from qfluentwidgets import (
 from ..widgets.style_preview import StylePreview
 from ..models.style_config_form import (
     StyleConfigFormData,
+    ELEMENT_KEYS,
     NEW_STYLE_PLACEHOLDER,
     _build_yaml_config,
 )
@@ -299,6 +300,13 @@ class StyleCreatorPage(QWidget):
             self.sections[route] = card
             self.config_layout.addWidget(card)
 
+        # G14 接线：defined_text 实例键池变化（条目增删 / key 文本变更 /
+        # 元素 key 变更）时，刷新全部编辑器的 relative_to 下拉选项
+        self.sections[self.ROUTE_DEFINED_TEXTS].keys_changed.connect(
+            self._refresh_relative_to_options)
+        self.sections[self.ROUTE_ELEMENTS].keys_changed.connect(
+            self._refresh_relative_to_options)
+
         self.config_scroll.setWidget(self.config_container)
         layout.addWidget(self.config_scroll, stretch=1)
 
@@ -326,6 +334,29 @@ class StyleCreatorPage(QWidget):
                         "加载区块 %s 失败: %s", route, e)
         finally:
             self._suppress_config_change = False
+            # 加载完成后按模型实际数据刷新 relative_to 选项池（G14）：
+            # defined_text 实例键只有此时才进入各编辑器下拉选项
+            self._refresh_relative_to_options()
+
+    def _refresh_relative_to_options(self):
+        """刷新全部定位编辑器的 relative_to 下拉选项池（G14 接线）
+
+        选项池 = 固定键（ELEMENT_KEYS）+ 当前全部 defined_text 实例键
+        （实时取 key_edit 文本）。列表卡编辑器额外排除自身 key 防自引用；
+        Logo / 自定义文本卡引用实例键但不作为实例键来源，无需排除。
+        刷新过程在各 update/refresh 方法内部屏蔽信号，不触发 value_changed。
+        """
+        card = self.sections.get(self.ROUTE_DEFINED_TEXTS)
+        defined_keys = card.get_defined_keys() if card else []
+        full_keys = list(ELEMENT_KEYS) + defined_keys
+        for route in (self.ROUTE_ELEMENTS, self.ROUTE_DEFINED_TEXTS):
+            section = self.sections.get(route)
+            if section:
+                section.refresh_relative_to_options(full_keys)
+        for route in (self.ROUTE_LOGO, self.ROUTE_CUSTOM_TEXT):
+            section = self.sections.get(route)
+            if section:
+                section.update_relative_to_options(full_keys)
 
     def _save_all_sections(self):
         """从所有配置区块收集数据到 form_data"""
@@ -390,56 +421,24 @@ class StyleCreatorPage(QWidget):
 
     # ── 样式列表管理 ───────────────────────────────────────
 
-    def _get_existing_styles(self) -> list[str]:
-        """获取已有样式文件列表（含子目录变体），合并用户目录与内置目录"""
-        styles = []
-        seen = set()
-        # 目录顺序：用户目录（CONFIGS_DIR）在前，内置目录在后；
-        # 同名样式（文件夹/文件级）用户目录优先，内置同名自动隐藏
-        base_dirs = [CONFIGS_DIR]
-        if _BUILTIN_CONFIGS_DIR is not None:
-            base_dirs.append(_BUILTIN_CONFIGS_DIR)
+    def _get_style_manager(self):
+        """样式管理器惰性单例（G9：枚举/解析统一走 StyleManager API）"""
+        if self._style_manager is None:
+            from src.frame_styles.style_manager import StyleManager
+            self._style_manager = StyleManager()
+        return self._style_manager
 
-        for base in base_dirs:
-            if not base.exists():
-                continue
-            for entry in sorted(os.listdir(str(base))):
-                if entry.startswith('_'):
-                    continue
-                full = base / entry
-                if full.is_dir():
-                    if entry in seen:
-                        continue
-                    seen.add(entry)
-                    for variant in sorted(os.listdir(str(full))):
-                        if variant.lower().endswith('.yaml') \
-                                and not variant.startswith('_'):
-                            styles.append(f'{entry}/{variant}')
-                elif entry.lower().endswith('.yaml'):
-                    if entry in seen:
-                        continue
-                    seen.add(entry)
-                    styles.append(entry)
-        return styles
+    def _get_existing_styles(self) -> list[str]:
+        """获取已有样式文件列表（G9：枚举单点在 StyleManager）
+
+        复用 list_style_files()（用户目录优先、'_' 前缀过滤、仅
+        YAML 的格式契约见该 API docstring）。
+        """
+        return self._get_style_manager().list_style_files()
 
     def _resolve_style_filepath(self, rel_text: str) -> str:
-        """
-        根据下拉框中的相对路径文本解析实际文件路径
-
-        优先在用户目录（CONFIGS_DIR）查找，再回退到内置目录，
-        兼容打包环境下加载内置只读样式。
-
-        Args:
-            rel_text: 样式相对路径（如 'FilmClip/default.yaml'）
-
-        Returns:
-            实际文件绝对路径，不存在则返回 CONFIGS_DIR 下的拼接结果
-        """
-        for base in [CONFIGS_DIR] + ([_BUILTIN_CONFIGS_DIR] if _BUILTIN_CONFIGS_DIR else []):
-            candidate = base / rel_text
-            if candidate.exists():
-                return str(candidate)
-        return str(CONFIGS_DIR / rel_text)
+        """解析相对路径文本的实际文件路径（G9：解析单点在 StyleManager）"""
+        return self._get_style_manager().resolve_style_file(rel_text)
 
     def _refresh_style_list(self):
         """刷新样式选择下拉列表"""
@@ -571,19 +570,13 @@ class StyleCreatorPage(QWidget):
 
     def _on_export_yaml(self):
         """导出 YAML 预览弹窗"""
-        from PySide6.QtWidgets import QTextEdit
-
         try:
-            yaml_str = self.form_data.save_to_file(
-                str(CONFIGS_DIR / '__temp_preview__.yaml'))
-            # 删除临时文件
-            temp_path = CONFIGS_DIR / '__temp_preview__.yaml'
-            if temp_path.exists():
-                temp_path.unlink()
+            # 直接从模型生成 YAML 文本（G4 修复：此前写到内置样式目录
+            # 下的临时文件再删除，纯属浪费且有崩溃残留污染样式列表的风险）
+            yaml_str = _build_yaml_config(self.form_data.to_yaml_dict())
         except Exception as e:
-            # 即使保存失败，直接从模型生成
-            config = self.form_data.to_yaml_dict()
-            yaml_str = _build_yaml_config(config)
+            yaml_str = f'# 生成 YAML 预览失败: {e}'
+            logger.warning("生成 YAML 预览失败: %s", e)
 
         dialog = Dialog(
             'YAML 配置预览',
@@ -640,7 +633,7 @@ class StyleCreatorPage(QWidget):
     def _render_preview(self):
         """执行预览渲染"""
         # 首渲之前跳过 __init__ 阶段的 debounce 触发
-        if getattr(self, '_first_show', True):
+        if self._first_show:
             return
         try:
             # 获取样式配置
@@ -698,9 +691,10 @@ class StyleCreatorPage(QWidget):
     def resizeEvent(self, event):
         """窗口大小变化时延迟刷新预览（确保子部件几何已稳定）"""
         super().resizeEvent(event)
-        if hasattr(self, 'preview'):
-            QTimer.singleShot(
-                0, self.preview.rescale_pixmap)
+        # preview 在 __init__ 的 _create_preview_panel() 中无条件创建，
+        # resizeEvent 首次触发晚于构造完成（实测确认），无需防御
+        QTimer.singleShot(
+            0, self.preview.rescale_pixmap)
 
 
 

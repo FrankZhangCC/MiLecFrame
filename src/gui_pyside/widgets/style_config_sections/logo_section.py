@@ -3,6 +3,8 @@ Logo 配置区块
 
 启用开关 + 绝对/相对定位切换 + 尺寸/边距/偏移参数
 """
+import logging
+
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
 from PySide6.QtCore import Qt, Signal
 
@@ -15,9 +17,15 @@ from qfluentwidgets import (
 from ...models.style_config_form import (
     ELEMENT_KEYS, PLACEMENT_OPTIONS,
     ANCHOR_POSITION_OPTIONS, ALIGNMENT_OPTIONS,
-    HORIZONTAL_CROSS_OPTIONS, VERTICAL_CROSS_OPTIONS,
-    RELATIVE_POSITION_OPTIONS,
+    HORIZONTAL_CROSS_OPTIONS, RELATIVE_POSITION_OPTIONS,
 )
+from ..positioning_binding import (
+    PositionControls, load_positioned, save_positioned,
+    sync_cross_options, apply_combo_options,
+)
+from ..spinbox_factory import make_spinbox
+
+logger = logging.getLogger(__name__)
 
 
 class LogoSection(ExpandGroupSettingCard):
@@ -161,7 +169,8 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(BodyLabel('relative_margin:', container), r, 0)
         self.rel_margin_sb = DoubleSpinBox(self._rel_widget)
         self.rel_margin_sb.setRange(0.0, 1.0)
-        self.rel_margin_sb.setDecimals(3)
+        # margin/offset 类 decimals=4（G16：三位量化会改写 0.1605 类配置）
+        self.rel_margin_sb.setDecimals(4)
         self.rel_margin_sb.setSingleStep(0.005)
         self.rel_margin_sb.setValue(0.01)
         self.rel_margin_sb.valueChanged.connect(self._on_changed)
@@ -171,20 +180,39 @@ class LogoSection(ExpandGroupSettingCard):
         rel_grid.addWidget(BodyLabel('offset_x:', container), r, 0)
         self.offset_x_sb = DoubleSpinBox(self._rel_widget)
         self.offset_x_sb.setRange(-1.0, 1.0)
-        self.offset_x_sb.setDecimals(3)
+        self.offset_x_sb.setDecimals(4)
         self.offset_x_sb.setSingleStep(0.001)
         self.offset_x_sb.valueChanged.connect(self._on_changed)
         rel_grid.addWidget(self.offset_x_sb, r, 1)
         rel_grid.addWidget(BodyLabel('offset_y:', container), r, 2)
         self.offset_y_sb = DoubleSpinBox(self._rel_widget)
         self.offset_y_sb.setRange(-1.0, 1.0)
-        self.offset_y_sb.setDecimals(3)
+        self.offset_y_sb.setDecimals(4)
         self.offset_y_sb.setSingleStep(0.001)
         self.offset_y_sb.valueChanged.connect(self._on_changed)
         rel_grid.addWidget(self.offset_y_sb, r, 3)
 
         layout.addWidget(self._rel_widget)
-        self._rel_widget.hide()
+        # 初始禁用（非隐藏）恒占位（D1/G10 同根因修复：hide 之后
+        # setEnabled 不会恢复可见，切到相对模式时参数组曾完全不可见）
+        self._rel_widget.setEnabled(False)
+
+        # G1 控件层：定位参数绑定束（本卡网格编排不变，仅收拢映射）
+        self._controls = PositionControls(
+            placement=self.abs_placement,
+            position=self.abs_position,
+            alignment=self.abs_alignment_combo,
+            margin_top=self.abs_mt,
+            margin_bottom=self.abs_mb,
+            margin_left=self.abs_ml,
+            margin_right=self.abs_mr,
+            relative_to=self.rel_to,
+            relative_position=self.rel_pos,
+            cross_alignment=self.rel_cross_combo,
+            relative_margin=self.rel_margin_sb,
+            offset_x=self.offset_x_sb,
+            offset_y=self.offset_y_sb,
+        )
 
         self.addGroupWidget(container)
 
@@ -192,11 +220,8 @@ class LogoSection(ExpandGroupSettingCard):
         if parent is None:
             parent = self
         grid.addWidget(BodyLabel(label, parent), row, col)
-        sb = DoubleSpinBox(self._abs_widget)
-        sb.setRange(0.0, 1.0)
-        sb.setDecimals(3)
-        sb.setSingleStep(0.005)
-        sb.valueChanged.connect(self._on_changed)
+        # G8：构造单点在 spinbox_factory（decimals=4，见 G16/决策 D7）
+        sb = make_spinbox(self._abs_widget, on_changed=self._on_changed)
         grid.addWidget(sb, row, col + 1)
         return sb
 
@@ -220,88 +245,54 @@ class LogoSection(ExpandGroupSettingCard):
         self._on_changed()
 
     def _on_relative_position_changed(self, direction: str):
+        """relative_position 切换时同步 cross_alignment 合法值（共享实现）
+
+        重置默认已按 G1 统一为模型序列化默认规则
+        （left-of/right-of → center，above/below → left）。
         """
-        relative_position 切换时同步 cross_alignment 合法值：
-        above/below → left/center/right；left-of/right-of →
-        top/center/bottom；不合法的旧值重置为 center。
-        """
-        if direction in ('left-of', 'right-of'):
-            legal = VERTICAL_CROSS_OPTIONS
-        else:
-            legal = HORIZONTAL_CROSS_OPTIONS
-        current = self.rel_cross_combo.currentText()
-        self.rel_cross_combo.blockSignals(True)
-        self.rel_cross_combo.clear()
-        self.rel_cross_combo.addItems(legal)
-        if current in legal:
-            self.rel_cross_combo.setCurrentText(current)
-        else:
-            self.rel_cross_combo.setCurrentText('center')
-        self.rel_cross_combo.blockSignals(False)
+        sync_cross_options(self.rel_cross_combo, direction,
+                           owner_label='LogoSection')
         self._on_changed()
 
     def _on_changed(self, *args):
         self.value_changed.emit()
+
+    def _ensure_relative_to_option(self, value: str):
+        """加载路径：模型引用值不在下拉选项中时先补进选项（G14）
+
+        下拉默认只有固定键，模型引用可能是 defined_text 实例键；
+        直接 setCurrentText 对缺失值静默失败，保存时会改写引用。
+        """
+        if value and self.rel_to.findText(value) < 0:
+            logger.info(
+                f"[LogoSection] relative_to 引用 {value!r} 不在当前选项"
+                f"中，已补入选项（保存后由 StyleManager 校验）")
+            self.rel_to.addItem(value)
+
+    def update_relative_to_options(self, keys: list):
+        """更新 relative_to 下拉选项（G14 接线，共享实现）"""
+        apply_combo_options(self.rel_to, keys, owner_label='LogoSection')
 
     def load_from_model(self, data):
         self.enabled_btn.setChecked(data.logo_enabled)
         self.mode_seg.setCurrentItem(data.logo_mode)
         self.size_ratio_sb.setValue(data.logo_size_ratio)
         self.diag_limit_sb.setValue(data.logo_diagonal_limit)
-        if data.logo_mode == 'absolute':
-            self.abs_placement.setCurrentText(
-                data.logo_placement)
-            self.abs_position.setCurrentText(
-                data.logo_position)
-            self.abs_alignment_combo.setCurrentText(
-                data.logo_absolute_alignment)
-            self.abs_mt.setValue(data.logo_mt)
-            self.abs_mb.setValue(data.logo_mb)
-            self.abs_ml.setValue(data.logo_ml)
-            self.abs_mr.setValue(data.logo_mr)
-        else:
-            self.rel_to.setCurrentText(
-                data.logo_relative_to)
-            self._sync_cross_options(data.logo_relative_position)
-            self.rel_cross_combo.setCurrentText(
-                data.logo_cross_alignment)
-            self.rel_pos.setCurrentText(
-                data.logo_relative_position)
-            self.rel_margin_sb.setValue(
-                data.logo_relative_margin)
-            self.offset_x_sb.setValue(data.logo_offset_x)
-            self.offset_y_sb.setValue(data.logo_offset_y)
+        spec = data.logo_spec
+        # 相对引用的加载在两种模式下都补缺失选项（G14）：模型值可能是
+        # defined_text 实例键，不在默认固定键选项中，直接 setCurrentText
+        # 会静默失败导致保存时引用被改写
+        if spec.relative_to:
+            self._ensure_relative_to_option(spec.relative_to)
+        # G1 统一：双分支全字段加载（与 ElementEditor 对齐）——非当前
+        # 模式组禁用占位但控件值跟随模型，消除"切模式丢模型值"
+        load_positioned(spec, self._controls, data.logo_mode)
 
     def save_to_model(self, data):
         data.logo_enabled = self.enabled_btn.isChecked()
         data.logo_mode = self._current_mode
         data.logo_size_ratio = self.size_ratio_sb.value()
         data.logo_diagonal_limit = self.diag_limit_sb.value()
-        # 按当前模式只读取对应 alignment 控件，避免隐藏控件覆盖保存值
-        data.logo_absolute_alignment = \
-            self.abs_alignment_combo.currentText()
-        data.logo_cross_alignment = self.rel_cross_combo.currentText()
-        if data.logo_mode == 'absolute':
-            data.logo_placement = self.abs_placement.currentText()
-            data.logo_position = self.abs_position.currentText()
-            data.logo_mt = self.abs_mt.value()
-            data.logo_mb = self.abs_mb.value()
-            data.logo_ml = self.abs_ml.value()
-            data.logo_mr = self.abs_mr.value()
-        else:
-            data.logo_relative_to = self.rel_to.currentText()
-            data.logo_relative_position = \
-                self.rel_pos.currentText()
-            data.logo_relative_margin = self.rel_margin_sb.value()
-            data.logo_offset_x = self.offset_x_sb.value()
-            data.logo_offset_y = self.offset_y_sb.value()
-
-    def _sync_cross_options(self, direction: str):
-        """按方向同步 cross_alignment 下拉选项（加载时使用，不发信号）"""
-        legal = (VERTICAL_CROSS_OPTIONS
-                 if direction in ('left-of', 'right-of')
-                 else HORIZONTAL_CROSS_OPTIONS)
-        self.rel_cross_combo.blockSignals(True)
-        self.rel_cross_combo.clear()
-        self.rel_cross_combo.addItems(legal)
-        self.rel_cross_combo.blockSignals(False)
+        # G1 控件层：定位字段映射单点在 save_positioned（全字段写回；
+        # 序列化由 PositionedSpec 按模式二选一，双字段互不覆盖）
+        save_positioned(data.logo_spec, self._controls, self._current_mode)

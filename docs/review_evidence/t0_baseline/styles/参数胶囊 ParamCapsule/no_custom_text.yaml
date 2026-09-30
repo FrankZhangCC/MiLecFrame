@@ -1,0 +1,307 @@
+# ============================================================
+# 参数胶囊 ParamCapsule
+# ------------------------------------------------------------
+# 设计要点（源自参考图与需求描述）：
+# 1. 画布扩展：照片顶部与左右两侧扩展距离等距（0.038×参照边），
+#    底部扩展加高（0.30×参照边）承载信息区（需求 1）。
+# 2. 信息区自上而下三行（胶囊与标签上下调换，整体位置不变）：
+#    ① 相机+镜头组合信息（camera_lens，即 camera_lens_combined
+#       组合形态），中心距照片底边 0.088，字号与参数值相同（需求 2）；
+#    ② 四个细描边圆角胶囊框（rectangles 描边层），中心距照片底边
+#       0.155，框内参数值与胶囊两轴中心对齐（需求 3）；
+#    ③ FL / AP / ST / ISO 四个小标签（defined_texts 固定文字，需求 4，
+#       按用户要求调换至胶囊下方），中心距照片底边 0.210。
+#    行距（中心距）：相机→胶囊 0.067、胶囊→标签 0.055。
+# 3. 四列等距：胶囊宽 0.132、间距 0.032 → 列距 d = 0.164，
+#    四列中心相对照片中心偏移 ±0.5d / ±1.5d（整组水平居中）。
+# 4. 颜色明暗自适应（需求 5）：暗色背景下文字与描边纯白、小标签
+#    90% 灰（230,230,230）；亮色背景下文字与描边纯黑、小标签
+#    10% 灰（26,26,26）。
+#
+# 定位实现说明：
+# - 全部元素使用 position: bottom-center（照片底边中点）+
+#   alignment: center（布局盒中心贴锚点）；
+# - 水平偏移按居中方位规则用 margin_left - margin_right 差值生效：
+#   左列增大 margin_right（向左偏移）、右列增大 margin_left（向右偏移）；
+# - 标签与胶囊共享水平偏移 → 标签中心 x = 胶囊中心 x，即标签对齐
+#   胶囊纵轴（垂直中线）；margin_bottom 更大使其位于胶囊正下方；
+# - 参数文字与胶囊同样共享水平偏移（水平居中由几何保证）；垂直方向
+#   文字墨迹的视觉中心相对布局盒中心偏上，故参数文字的 margin_bottom
+#   在胶囊基础上 +0.0055 视觉补偿，使墨迹视觉中心落在胶囊几何中心；
+# - margin_bottom 为锚点（= 元素布局盒中心）距照片底边的向下距离。
+#
+# 布局基准：参照边 = 原图短边（reference_side），横竖图通用
+#（信息条位于照片下方而非长边一侧，无需 default_portrait_adaptation）。
+#
+# 变体说明：本文件为 no_custom_text 变体——用户未输入自定义文字时
+# 命中，信息区第一行显示 camera_lens（相机+镜头组合信息）；用户输入
+# 自定义文字时命中 default.yaml，第一行改显 custom_text。两个变体均
+# 不渲染 author / location / timestamp。
+# ============================================================
+
+name: 参数胶囊 ParamCapsule
+
+# ── 颜色配置（明暗背景自适应，全部按元素类型显式声明） ──
+# 深色背景 → 选用 *_dark_color 系列；浅色背景 → 选用 *_light_color 系列
+colors:
+  # 主体文字：相机信息 + 四个参数值 —— 暗底纯白 / 亮底纯黑
+  custom_camera_lens_dark_color: [255, 255, 255]
+  custom_camera_lens_light_color: [0, 0, 0]
+  custom_focal_length_formatted_dark_color: [255, 255, 255]
+  custom_focal_length_formatted_light_color: [0, 0, 0]
+  custom_aperture_formatted_dark_color: [255, 255, 255]
+  custom_aperture_formatted_light_color: [0, 0, 0]
+  custom_shutter_speed_formatted_dark_color: [255, 255, 255]
+  custom_shutter_speed_formatted_light_color: [0, 0, 0]
+  custom_iso_formatted_dark_color: [255, 255, 255]
+  custom_iso_formatted_light_color: [0, 0, 0]
+
+  # 小标签（defined_text_01..04 = FL / AP / ST / ISO）：
+  # 暗底 90% 灰（255×0.9 ≈ 230）/ 亮底 10% 灰（255×0.1 ≈ 26）
+  custom_defined_text_01_dark_color: [230, 230, 230]
+  custom_defined_text_01_light_color: [26, 26, 26]
+  custom_defined_text_02_dark_color: [230, 230, 230]
+  custom_defined_text_02_light_color: [26, 26, 26]
+  custom_defined_text_03_dark_color: [230, 230, 230]
+  custom_defined_text_03_light_color: [26, 26, 26]
+  custom_defined_text_04_dark_color: [230, 230, 230]
+  custom_defined_text_04_light_color: [26, 26, 26]
+
+  # 胶囊描边色（stroke 专用明暗键）—— 暗底纯白 / 亮底纯黑
+  custom_rect_01_stroke_dark_color: [255, 255, 255]
+  custom_rect_01_stroke_light_color: [0, 0, 0]
+  custom_rect_02_stroke_dark_color: [255, 255, 255]
+  custom_rect_02_stroke_light_color: [0, 0, 0]
+  custom_rect_03_stroke_dark_color: [255, 255, 255]
+  custom_rect_03_stroke_light_color: [0, 0, 0]
+  custom_rect_04_stroke_dark_color: [255, 255, 255]
+  custom_rect_04_stroke_light_color: [0, 0, 0]
+
+  # 填充色与描边同色：fill.enabled 已关闭不会绘制，
+  # 仅作为描边颜色四级回退链的兜底，避免描边色意外缺失
+  custom_rect_01_dark_color: [255, 255, 255]
+  custom_rect_01_light_color: [0, 0, 0]
+  custom_rect_02_dark_color: [255, 255, 255]
+  custom_rect_02_light_color: [0, 0, 0]
+  custom_rect_03_dark_color: [255, 255, 255]
+  custom_rect_03_light_color: [0, 0, 0]
+  custom_rect_04_dark_color: [255, 255, 255]
+  custom_rect_04_light_color: [0, 0, 0]
+
+# ── 字体配置 ──
+fonts:
+  # 拉丁文字：Gotham（几何无衬线，贴近参考图的 Helvetica 风格）
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  # 中日文字符：光栅黑体 Normal 宽度
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  # 默认字号 = 参照边 × 2.4%（参数值实际使用的字号）
+  size_ratio: 0.024
+  sizes:
+    # 相机信息与四个参数值字号相同（需求 2）
+    camera_lens: 0.024
+    focal_length_formatted: 0.024
+    aperture_formatted: 0.024
+    shutter_speed_formatted: 0.024
+    iso_formatted: 0.024
+    # 小标签字号约为参数值的 0.83 倍
+    defined_text_01: 0.020
+    defined_text_02: 0.020
+    defined_text_03: 0.020
+    defined_text_04: 0.020
+  line_spacing_ratio: 0.005
+
+# ── 布局配置 ──
+layout:
+  # 画布扩展（需求 1）：顶部与左右两侧等距扩展 0.038×参照边，
+  # 底部扩展 0.30×参照边承载三行信息区（相机行 + 标签行 + 胶囊行）
+  expand_canvas:
+    enabled: true
+    top: 0.038
+    bottom: 0.30
+    left: 0.038
+    right: 0.038
+
+  # 安全区域：信息区全部位于照片下方扩展区内且四周留有余量，
+  # 不额外收缩，保持"顶部/左右扩展等距"的视觉效果
+  padding:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+  # ── 四个细描边圆角胶囊（需求 3） ──
+  # 显式写 fill + 开启 stroke → 效果栈（原图上方）；本样式的胶囊
+  # 位于照片外的底部扩展区，图层语义不影响最终视觉。
+  # 列距 d = width_ratio 0.132 + 间距 0.032 = 0.164；
+  # 四列中心相对照片中心偏移 ±0.5d = ±0.082、±1.5d = ±0.246。
+  # 垂直位置：胶囊中心距照片底边 0.155×参照边（与标签上下调换后）。
+  rectangles:
+    rect_01:
+      # FL 胶囊（最左列）：中心左移 1.5d
+      width_ratio: 0.132
+      height_ratio: 0.058
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"        # 布局盒中心贴锚点 → 胶囊中心定位
+      margin_bottom: 0.155       # 胶囊中心距照片底边 0.155×参照边
+      margin_right: 0.246        # margin_left - margin_right = -1.5d
+      corner_radius:             # 圆角 = 参照边 × 0.015（约胶囊高的 26%）
+        top_left: 0.015
+        top_right: 0.015
+        bottom_left: 0.015
+        bottom_right: 0.015
+      fill:
+        enabled: false           # 只留描边环，内部透出背景
+      stroke:
+        enabled: true
+        radius_ratio: 0.001      # 细描边 = 参照边 × 0.10%
+        opacity: 1.0
+    rect_02:
+      # AP 胶囊（左二列）：中心左移 0.5d
+      width_ratio: 0.132
+      height_ratio: 0.058
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.155
+      margin_right: 0.082        # margin_left - margin_right = -0.5d
+      corner_radius:
+        top_left: 0.015
+        top_right: 0.015
+        bottom_left: 0.015
+        bottom_right: 0.015
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+    rect_03:
+      # ST 胶囊（右二列）：中心右移 0.5d
+      width_ratio: 0.132
+      height_ratio: 0.058
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.155
+      margin_left: 0.082         # margin_left - margin_right = +0.5d
+      corner_radius:
+        top_left: 0.015
+        top_right: 0.015
+        bottom_left: 0.015
+        bottom_right: 0.015
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+    rect_04:
+      # ISO 胶囊（最右列）：中心右移 1.5d
+      width_ratio: 0.132
+      height_ratio: 0.058
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.155
+      margin_left: 0.246         # margin_left - margin_right = +1.5d
+      corner_radius:
+        top_left: 0.015
+        top_right: 0.015
+        bottom_left: 0.015
+        bottom_right: 0.015
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+
+  # ── 信息文字 ──
+  info_position:
+    # ① 相机+镜头组合信息（camera_lens，即 camera_lens_combined
+    #    组合形态），水平居中于照片，字号与参数值一致（需求 2）
+    camera_lens:
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.08        # 文字中心距照片底边 0.08×参照边
+
+    # ② 四个参数值（需求 3）：水平偏移与各自胶囊一致（水平居中
+    #    由几何保证）；margin_bottom = 胶囊 0.155 + 0.0055 视觉补偿，
+    #    使文字墨迹的视觉中心落在胶囊几何中心（补偿原因见文件头）
+    focal_length_formatted:
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.1605       # rect_01 的 0.155 + 0.0055 视觉补偿
+      margin_right: 0.246
+    aperture_formatted:
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.1605       # rect_02 的 0.155 + 0.0055 视觉补偿
+      margin_right: 0.082
+    shutter_speed_formatted:
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.1605       # rect_03 的 0.155 + 0.0055 视觉补偿
+      margin_left: 0.082
+    iso_formatted:
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.1605       # rect_04 的 0.155 + 0.0055 视觉补偿
+      margin_left: 0.246
+
+  # ── 参数标签（需求 4）：FL / AP / ST / ISO 固定文字 ──
+  # 位于各自胶囊正下方（按用户要求与胶囊上下调换）；水平偏移与胶囊
+  # 一致 → 标签中心 x = 胶囊中心 x（对齐胶囊纵轴/垂直中线的中间），
+  # margin_bottom 更大使其位于胶囊下方。
+  defined_texts:
+    defined_text_01:
+      content: "FL"
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.210       # 标签中心距照片底边 0.210×参照边
+      margin_right: 0.246        # 与 rect_01 同列
+    defined_text_02:
+      content: "AP"
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.210
+      margin_right: 0.082        # 与 rect_02 同列
+    defined_text_03:
+      content: "ST"
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.210
+      margin_left: 0.082          # 与 rect_03 同列
+    defined_text_04:
+      content: "ISO"
+      placement: outside
+      position: "bottom-center"
+      alignment: "center"
+      margin_bottom: 0.210
+      margin_left: 0.246          # 与 rect_04 同列
+
+# ── Logo 配置：参考图无 Logo，关闭 ──
+logo:
+  enabled: false
+

@@ -2,6 +2,42 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.7.2-dev (2026-09-30)
+
+> GUI 代码质量审计落地：四项正确性修复（PNG 导出、样式数据完整性、relative_to 引用保留、定位编辑器布局）、配置持久化稳定 key 化、定位参数模型与控件层单点收敛、页面拆分与样板收敛（docs/CODE_QUALITY_AUDIT_GUI.md T0–T9 全部任务包）。
+
+### 🐛 缺陷修复
+
+- PNG 导出恢复可用 (fix, 8cd4a96)：格式校验期望值改按源文件实际编码判定（G13，此前取 `.part` 临时后缀恒判 JPEG，PNG 导出 100% 失败）；新增导出扩展名契约——目标后缀与源格式不符时明确拒绝（导出不转码，不发布内容与扩展名不符的文件）
+- 样式读写三处数据丢失修复 (fix, d78901c)：相对定位分支的 line_alignment、fonts.sizes 实例键（defined_text_01 等）、logo 段未知键（如 max_dim_limit_ratio）经 GUI 读写后不再静默消失（G15，三处均为 core 真实消费字段）
+- relative_to 引用不再被静默改写 (fix, d78901c)：下拉注入 defined_text 实例键（页面级键池同步增删），加载先补选项再设值；失效引用保留原文本并记日志（G14，此前 FilmClip 四元素引用经样式编辑器保存即全部变成 exif）
+- 定位编辑器相对模式可用 (fix, e705b98)：相对参数组此前从未加入布局（几何停留 100×30，字段被裁剪不可操作）；现恒占位（禁用态灰显），模式切换卡片高度稳定（G10/D2 三步）；Logo/自定义文本卡同类缺陷一并修复（切相对模式后参数组完全不可见）
+- margin/offset 精度提升 (fix, d78901c)：spinbox 小数位 3→4（G16/决策 D7），ParamCapsule margin_bottom 0.1605 类配置不再被量化改写
+
+### ⚙️ 配置与兼容
+
+- 下拉框稳定 key 化 (feat, 06c3f6f)：输出格式/背景填充/字重/拍摄时间/镜头显示/LOGO 哨兵/水印位置与颜色全部改 userData 稳定值，渲染映射与 config.json 持久化不再依赖中文显示文本（G3）；旧配置的中文选项值经历史别名表自动迁移（决策 D5：别名表长期保留），未来调整界面文案不再使映射与恢复失效
+
+### ♻️ 等价重构（验收以 T0 基线机械对比：14 内置样式往返差异只减不增）
+
+- 定位参数模型收敛 (refactor, c085851)：PositionedSpec 单点定义与 to_entry/update_from_entry 单点序列化，ElementConfig/DefinedTextConfig 改继承，logo/custom_text 的 33 个 flat 定位字段收拢为嵌套成员（G1/T6）
+- 定位参数控件层收敛 (refactor, b9f668c)：PositioningControls 绑定协议 + load/save/sync_cross_options/apply_combo_options 单点实现，三宿主编排不变；Logo/自定义文本卡双分支全字段加载、cross 重置规则统一为模型序列化默认（G1/T7，含行为微调）
+- 图像处理页拆分 (refactor, dc82e73)：导出流程收敛 src/utils/export_service.py（搬运 G13 修复后实现）、六张配置卡构建与渲染配置收集（collect_render_options 纯函数）独立成模块，页面 1697→1608 行（G2/T8）
+- 相机/镜头映射页收敛 (refactor, 88ad503)：CsvMappingPage 基类单点化约 250 行重复骨架，扩展点显式参数化；初始化顺序统一为先 UI 后数据，hasattr 守卫根治（G7/T8）
+- 样式枚举收编 (refactor, b2fb919)：StyleManager 新增 list_style_files/resolve_style_file，样式编辑器删除自建扫描器（G9/T9）
+- 四组样板收敛 (refactor, b2fb919)：pil_to_qimage（4 处）、横向滚轮过滤器（2 处）、比例 spinbox 工厂（6 处，canvas/padding/corner 精度随 G16 升四位）、胶片栏尺寸计算（3 处）（G8/T9）
+
+### 🧹 清理
+
+- YAML 导出临时文件往返删除（不再向内置样式目录写 `__temp_preview__.yaml`）、全局 yaml.Dumper 污染隔离（专用 _FlowListDumper）、ProcessingConfig 死代码删除、冗余 hasattr 防御清理（G4/G5/G6/G11/G12，d83922a）
+- 作者名清空显式写空（决策 D6）：清空输入框保存后旧值不再残留
+
+### ✅ 验证
+
+- T0 基线存档于 docs/review_evidence/t0_baseline/（源码指纹、14 样式原文、三层往返、四卡几何、双主题截图）；修复后 14 内置样式模型+控件往返对比基线差异只减不增，合成样本（相对 line_alignment/实例字号/logo 透传键）三层往返零丢失
+- 真实图片渲染管线冒烟（加载→生成→JPEG 导出→PNG 扩展名契约拒绝）；四张折叠卡 dump_expand_card + 子控件几何检查；主窗口/样式编辑器构造与双主题切换；py_compile 全过；debug_log 无 ERROR/TRACEBACK
+- offscreen 自动化验收覆盖几何与数据往返；真实窗口的卡片展开动画目测与打包冒烟建议在发行打包时补做
+
 ## v2.7.1-dev (2026-09-30)
 
 > 核心渲染管线质量审计落地：两项正确性修复（效果栈矩形回流 legacy、文字依赖环）、Logo 匹配三态与上下文收敛，以及矩形/布局子系统的等价重构与合成性能优化（全部经逐像素等价验证）。

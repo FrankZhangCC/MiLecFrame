@@ -11,6 +11,8 @@ from qfluentwidgets import (
     DoubleSpinBox, SwitchButton, FluentIcon, BodyLabel,
 )
 
+from ..spinbox_factory import make_spinbox
+
 
 class CanvasSection(ExpandGroupSettingCard):
     """画布扩展配置区块"""
@@ -57,12 +59,9 @@ class CanvasSection(ExpandGroupSettingCard):
         if parent is None:
             parent = self
         grid.addWidget(BodyLabel(label, parent), row, col)
-        sb = DoubleSpinBox(parent)
-        sb.setRange(0.0, 1.0)
-        sb.setDecimals(3)
-        sb.setSingleStep(0.005)
-        sb.setValue(default)
-        sb.valueChanged.connect(self._on_changed)
+        # G8：构造单点在 spinbox_factory（decimals=4 随 G16 同步）
+        sb = make_spinbox(parent, default=default,
+                          on_changed=self._on_changed)
         grid.addWidget(sb, row, col + 1)
         return sb
 
