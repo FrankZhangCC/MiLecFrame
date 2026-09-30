@@ -915,17 +915,25 @@ class FrameRenderer:
         
         # Logo 后处理（可依赖文字层已注册的坐标）
         if logo_config.get('enabled', False):
-            if options.logo_filename is None:
+            # 自动匹配结果只在本帧内有效（审计 Q5）：写入局部变量，
+            # 绝不回写 options.logo_filename——本对象可被 GUI/批处理
+            # 跨多次渲染复用，回写会让后续帧沿用上一帧按旧品牌/旧背景
+            # 匹配的结果，跳过应有的自动重选。三态语义保持不变：
+            # None=自动、""=禁用、非空=固定文件。
+            effective_logo_filename = options.logo_filename
+            if effective_logo_filename is None:
                 camera_brand = context.get_text('camera_make')
                 if camera_brand:
                     logo_selector_instance = self._get_logo_selector()
                     is_dark_bg = BackgroundFillManager.is_dark_bg(effective_bg_type)
-                    options.logo_filename = logo_selector_instance.auto_match_logo(
+                    effective_logo_filename = logo_selector_instance.auto_match_logo(
                         camera_brand.lower(), is_dark_bg=is_dark_bg
                     )
 
-            if options.logo_filename:
-                image_with_text = self._add_logo(image_with_text, options.logo_filename, logo_config, layout_engine)
+            if effective_logo_filename:
+                image_with_text = self._add_logo(
+                    image_with_text, effective_logo_filename,
+                    logo_config, layout_engine)
 
         # ── 方向适配·还原（方案 §5.1） ─────────────────────────────
         # 整帧渲染完成后执行反向转置；仅在前置旋转真实应用过时生效，
