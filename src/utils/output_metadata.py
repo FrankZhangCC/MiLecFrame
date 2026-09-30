@@ -701,6 +701,38 @@ def _verify_png_text(text_value: Any, expected: str) -> str:
     return text_value
 
 
+def read_output_branding(path: str) -> Tuple[str, str]:
+    """只读读取图像的实际编码格式与 EXIF Software（一次打开同时取两项）
+
+    与 verify_output_metadata 一样是严格只读：不补值、不修复，缺失即抛错。
+    导出路径用它取期望基准：副本是源结果的字节拷贝，期望编码必须取
+    源文件实际编码，而不是目标路径后缀（G13：'.part' 临时后缀曾被当作
+    格式判断依据，导致 PNG 导出必然按 JPEG 验证而失败）。
+
+    Args:
+        path: 已存在的图像文件路径
+
+    Returns:
+        (software_text, actual_format) 二元组；actual_format 为 Pillow
+        实际编码的大写形式（'JPEG' / 'PNG'）
+
+    Raises:
+        OutputMetadataError: 字段缺失、类型非法或编码不符
+    """
+    try:
+        with Image.open(path) as img:
+            actual_format = (img.format or "").upper()
+            exif = img.getexif()
+            raw_value = exif.get(SOFTWARE_TAG) if exif is not None else None
+    except OutputMetadataError:
+        raise
+    except Exception as e:  # noqa: BLE001
+        raise OutputMetadataError(f"读取 Software 失败: {e}") from e
+    if raw_value is None:
+        raise OutputMetadataError("文件缺少 EXIF Software 字段")
+    return decode_stored_software(raw_value), actual_format
+
+
 def read_output_software(path: str) -> str:
     """只读读取文件中的 EXIF Software（用于导出副本与源文件的同源比较）
 
@@ -715,17 +747,10 @@ def read_output_software(path: str) -> str:
     Raises:
         OutputMetadataError: 字段缺失、类型非法或编码不符
     """
-    try:
-        with Image.open(path) as img:
-            exif = img.getexif()
-            raw_value = exif.get(SOFTWARE_TAG) if exif is not None else None
-    except OutputMetadataError:
-        raise
-    except Exception as e:  # noqa: BLE001
-        raise OutputMetadataError(f"读取 Software 失败: {e}") from e
-    if raw_value is None:
-        raise OutputMetadataError("文件缺少 EXIF Software 字段")
-    return decode_stored_software(raw_value)
+    # 复用 read_output_branding 的单次打开逻辑，只取软件文本；
+    # 实际编码格式对该调用方无意义，丢弃即可。
+    software_text, _ = read_output_branding(path)
+    return software_text
 
 
 def verify_output_metadata(path: str, expected_format: str,
