@@ -803,11 +803,19 @@ class FrameRenderer:
         context = RenderContext(image.size, metadata.exif_data, metadata.author, metadata.location, metadata.lens_display_mode, metadata.use_short_lens, custom_text=metadata.custom_text, timestamp_display_mode=metadata.timestamp_display_mode)
 
         # ── 矩形需求分析（背景渲染前：模糊需求须参与统一判定）──────
-        # stack_specs 为效果栈矩形（原图上方）；旧式矩形仍由
-        # _draw_rectangles 原路径绘制，保证历史输出不变
+        # stack_specs 为三层有效的效果栈矩形（原图上方）；旧式矩形仍由
+        # _draw_rectangles 原路径绘制，保证历史输出不变。
+        # legacy 排除名单必须按"配置分流身份"（_rect_is_effect_stack）生成，
+        # 不能只取分析阶段保留的 spec：三层无效或完全在画布外的效果栈矩形
+        # 会被 _analyze_rectangles 丢弃，若名单仅含保留 spec，它们将回流
+        # legacy 路径被错误绘制到边框上（审计 Q3）。
         stack_specs = self._analyze_rectangles(
             style_config, layout_engine, effective_bg_type)
-        stack_names = {spec.name for spec in stack_specs}
+        rectangles_cfg = layout.get('rectangles')
+        stack_names = {
+            name for name, rect_cfg in (rectangles_cfg or {}).items()
+            if isinstance(rect_cfg, dict) and _rect_is_effect_stack(rect_cfg)
+        }
 
         # ── 全图高斯需求统一判定（设计文档 §5.4） ──────────────────
         # rect_consumers：启用模糊的效果栈矩形需求 [(source_kind, radius), ...]

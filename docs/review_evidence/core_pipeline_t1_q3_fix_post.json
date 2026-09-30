@@ -1,0 +1,101 @@
+{
+  "keep": {
+    "legacy_border": {
+      "pixel_50_110": [
+        255,
+        0,
+        0
+      ],
+      "digest": "217c81c0feb53c8154d71773704bf45bf163325f840a216518df1c88b3f2dd70"
+    },
+    "effect_stack_border": {
+      "pixel_50_110": [
+        255,
+        0,
+        0
+      ],
+      "digest": "217c81c0feb53c8154d71773704bf45bf163325f840a216518df1c88b3f2dd70"
+    },
+    "effect_stack_in_photo": {
+      "pixel_50_50": [
+        255,
+        0,
+        0
+      ],
+      "digest": "0ee322bc2b38fc2f867a2981519684b17c109f5d2692055eaa81109f6a2cf917"
+    },
+    "effect_stack_straddle": {
+      "pixel_50_95": [
+        255,
+        0,
+        0
+      ],
+      "pixel_50_105": [
+        255,
+        0,
+        0
+      ],
+      "digest": "8c6e0d679d74925d6f4df79fb5bf4d21e027d58fa0b99ddbee3964cdf8c9f2be"
+    },
+    "gaussian_shortcircuit": {
+      "digest": "76e6078b97c71367a9db06a3a3e0bb75eba649a62aa775f52015c3a341297ae7"
+    }
+  },
+  "fix": {
+    "three_layers_off_border": {
+      "pixel_50_110": [
+        255,
+        255,
+        255
+      ]
+    },
+    "three_layers_off_straddle": {
+      "pixel_50_95": [
+        0,
+        0,
+        255
+      ],
+      "pixel_50_105": [
+        255,
+        255,
+        255
+      ]
+    },
+    "three_layers_off_covered": {
+      "pixel_50_50": [
+        0,
+        0,
+        255
+      ]
+    },
+    "three_layers_off_outside": {
+      "pixel_50_110": [
+        255,
+        255,
+        255
+      ],
+      "digest": "4c2d86603ff04d6ac5a74ae2aae9cc84a1669b7a035d6d8a7e4c1543c1a6f894"
+    },
+    "transparent_fill": {
+      "pixel_50_110": [
+        255,
+        255,
+        255
+      ]
+    },
+    "fill_color_missing": {
+      "pixel_50_110": [
+        255,
+        255,
+        255
+      ]
+    },
+    "zero_width_no_crash": {
+      "pixel_50_110": [
+        255,
+        255,
+        255
+      ]
+    }
+  }
+}
