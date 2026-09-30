@@ -82,6 +82,73 @@ PORTRAIT_ADAPTATION_ITEMS = (
     ('逆时针适配', ADAPT_COUNTERCLOCKWISE),
 )
 
+# ── 下拉框选项（显示文本, 稳定内部值）─────────────────────
+# G3 修复：各下拉框 userData 绑定稳定枚举值而非中文文本，渲染映射
+# 与 config.json 持久化一律读写稳定 key（对齐 PORTRAIT_ADAPTATION_
+# ITEMS 的既有规范模式）；未来调整文案不再使渲染映射/配置恢复失效
+
+OUTPUT_FORMAT_ITEMS = (
+    ('JPEG', 'JPEG'),
+    ('PNG', 'PNG'),
+)
+
+FONT_WEIGHT_ITEMS = (
+    ('中等 (Medium)', 'medium'),
+    ('常规 (Regular)', 'regular'),
+    ('细体 (Light)', 'light'),
+)
+
+TIMESTAMP_DISPLAY_ITEMS = (
+    ('显示日期与时刻', 'full'),
+    ('只显示日期', 'date_only'),
+    ('不显示时间', 'hide'),
+)
+
+LENS_DISPLAY_ITEMS = (
+    ('相机+镜头', 'combined'),
+    ('只显示相机', 'camera_only'),
+    ('只显示镜头', 'lens_only'),
+)
+
+WATERMARK_POSITION_ITEMS = (
+    ('左上', 'top-left'),
+    ('顶部居中', 'top-center'),
+    ('右上', 'top-right'),
+    ('左下', 'bottom-left'),
+    ('底部居中', 'bottom-center'),
+    ('右下', 'bottom-right'),
+)
+
+# 水印颜色 key → RGB（userData 存 JSON 可序列化的稳定 key，
+# 不直接存 tuple：QVariant 往返对 tuple 的还原不可靠）
+WATERMARK_COLOR_ITEMS = (
+    ('白色', 'white'),
+    ('黑色', 'black'),
+)
+_WM_COLOR_RGB = {'white': (255, 255, 255), 'black': (0, 0, 0)}
+
+# Logo 下拉哨兵稳定 key（G3：哨兵文案"自动匹配"/"无"此前被当作
+# 渲染分支判断依据，文案一改映射静默失效）；动态 logo 项的
+# userData 为 logo 文件名本身（文件名即稳定 key）
+LOGO_AUTO = 'auto'
+LOGO_NONE = 'none'
+
+# ── 历史文本 → 稳定 key 别名表（D5 决策：长期保留）────────
+# 修复前的 config.json 以中文显示文本为值；加载恢复时 findData 失败
+# 后查此表迁移到稳定 key，仍失败回退默认项。别名表长期保留不随版本
+# 移除：findText 式一次性兼容只在"文案未变"时有效，恰好漏掉本条
+# 要防的"文案已变"场景；bg_fill 的历史 label 来自
+# BackgroundFillManager 注册表，加载时与静态表合并（见 __init__）。
+_LEGACY_TEXT_ALIASES = {
+    **{text: key for text, key in FONT_WEIGHT_ITEMS},
+    **{text: key for text, key in TIMESTAMP_DISPLAY_ITEMS},
+    **{text: key for text, key in LENS_DISPLAY_ITEMS},
+    **{text: key for text, key in WATERMARK_POSITION_ITEMS},
+    **{text: key for text, key in WATERMARK_COLOR_ITEMS},
+    '自动匹配': LOGO_AUTO,
+    '无': LOGO_NONE,
+}
+
 
 class FilmStripWheelFilter(QObject):
     """将垂直滚轮事件转为水平滚动（用于胶片栏横向滚动）"""
@@ -168,6 +235,14 @@ class ImageProcessingPage(QWidget):
         self._processor: ImageProcessor = None
         # 页面级 LRU：按 nbytes 预算（默认 64 MiB）缓存工作分辨率卷积
         self._blur_lru = PreparedBlurLRU()
+        # G3/D5：历史文本别名表 = 静态表 ∪ bg_fill 注册表反查
+        # （get_choices 返回 {label: key}，旧 config 的 bg label
+        # 正好可经此迁移；注册表 label 文案调整后需把旧 label
+        # 追加进 _LEGACY_TEXT_ALIASES）
+        self._legacy_aliases = {
+            **_LEGACY_TEXT_ALIASES,
+            **BackgroundFillManager.get_choices(),
+        }
 
         # ── 数据 ──
         self.file_items: list[FileItem] = []  # 胶片栏中的所有文件
@@ -528,9 +603,10 @@ class ImageProcessingPage(QWidget):
         """Tab 1: 输出设置"""
         card = ExpandGroupSettingCard(FluentIcon.DOWNLOAD, "输出设置", "选择输出文件格式")
 
-        # 输出格式
+        # 输出格式（G3：userData 绑定稳定 key）
         self.combo_output_format = ComboBox()
-        self.combo_output_format.addItems(["JPEG", "PNG"])
+        for _text, _key in OUTPUT_FORMAT_ITEMS:
+            self.combo_output_format.addItem(_text, userData=_key)
         self.combo_output_format.setCurrentIndex(0)
         card.addGroup(FluentIcon.DOWNLOAD, "输出格式", "JPEG 适合照片，PNG 适合透明背景", self.combo_output_format, 1)
 
@@ -555,14 +631,14 @@ class ImageProcessingPage(QWidget):
         """Tab 3: 相框配置（背景、字体等，样式选择已独立为 Tab 2）"""
         card = ExpandGroupSettingCard(FluentIcon.PHOTO, "相框配置", "背景填充、字体字重等设置")
 
-        # 背景填充
+        # 背景填充（G3：userData 绑定稳定 fill key，显示 label 仅作文案；
+        # 旧代码的 bg_fill_keys 反查表由 userData 取代）
         bg_choices = BackgroundFillManager.get_choices()
-        self.bg_fill_keys = {v: k for k, v in bg_choices.items()}  # label -> key
         self.combo_bg_fill = ComboBox()
-        self.combo_bg_fill.addItems(list(bg_choices.keys()))
-        default_bg_label = BackgroundFillManager.get_label(BackgroundFillManager.DEFAULT_FILL)
-        if default_bg_label in bg_choices:
-            self.combo_bg_fill.setCurrentText(default_bg_label)
+        for _label, _key in bg_choices.items():
+            self.combo_bg_fill.addItem(_label, userData=_key)
+        self.combo_bg_fill.setCurrentIndex(
+            self.combo_bg_fill.findData(BackgroundFillManager.DEFAULT_FILL))
         # 相框配置卡三个下拉框统一双端宽度约束（200–260）：上限容纳最长
         # 选项"模糊背景 (深色 65%)"文本 182px + 箭头与内边距；下限保持原
         # 可收缩性——窄侧边栏下收缩回原基线，避免硬性宽度过高时整组
@@ -604,9 +680,10 @@ class ImageProcessingPage(QWidget):
         self.combo_portrait_adaptation.setToolTip(_adapt_tip)
         self.portrait_adaptation_group.setToolTip(_adapt_tip)
 
-        # 字重
+        # 字重（G3：userData 绑定稳定 key）
         self.combo_font_weight = ComboBox()
-        self.combo_font_weight.addItems(["中等 (Medium)", "常规 (Regular)", "细体 (Light)"])
+        for _text, _key in FONT_WEIGHT_ITEMS:
+            self.combo_font_weight.addItem(_text, userData=_key)
         self.combo_font_weight.setCurrentIndex(0)
         self.combo_font_weight.setMinimumWidth(200)
         self.combo_font_weight.setMaximumWidth(260)
@@ -659,15 +736,17 @@ class ImageProcessingPage(QWidget):
         """Tab 4: 拍摄信息配置"""
         card = ExpandGroupSettingCard(FluentIcon.CAMERA, "拍摄信息配置", "拍摄时间、镜头和 LOGO 设置")
 
-        # 拍摄时间
+        # 拍摄时间（G3：userData 绑定稳定 key）
         self.combo_timestamp = ComboBox()
-        self.combo_timestamp.addItems(["显示日期与时刻", "只显示日期", "不显示时间"])
+        for _text, _key in TIMESTAMP_DISPLAY_ITEMS:
+            self.combo_timestamp.addItem(_text, userData=_key)
         self.combo_timestamp.setCurrentIndex(0)
         card.addGroup(FluentIcon.DATE_TIME, "拍摄时间", "控制相框中显示的拍摄时间信息", self.combo_timestamp, 1)
 
-        # 镜头显示
+        # 镜头显示（G3：userData 绑定稳定 key）
         self.combo_lens_display = ComboBox()
-        self.combo_lens_display.addItems(["相机+镜头", "只显示相机", "只显示镜头"])
+        for _text, _key in LENS_DISPLAY_ITEMS:
+            self.combo_lens_display.addItem(_text, userData=_key)
         self.combo_lens_display.setCurrentIndex(0)
         card.addGroup(FluentIcon.CAMERA, "镜头显示", "控制相框中显示的设备信息", self.combo_lens_display, 1)
 
@@ -675,12 +754,15 @@ class ImageProcessingPage(QWidget):
         self.chk_short_lens = SwitchButton()
         card.addGroup(FluentIcon.CHECKBOX, "短版镜头名", "使用简洁的镜头名称", self.chk_short_lens)
 
-        # LOGO
+        # LOGO（G3：哨兵文案改 userData 稳定 key，动态 logo 项以文件名
+        # 为 userData——文案调整不再使渲染分支静默失效）
         self.combo_logo = ComboBox()
-        self.combo_logo.addItems(["自动匹配", "无"])
+        self.combo_logo.addItem('自动匹配', userData=LOGO_AUTO)
+        self.combo_logo.addItem('无', userData=LOGO_NONE)
         # 读取 assets/logos/ 目录下的实际 logo 文件
         logos = self.logo_selector.scan_logos()
-        self.combo_logo.addItems(logos)
+        for _logo in logos:
+            self.combo_logo.addItem(_logo, userData=_logo)
         card.addGroup(FluentIcon.IMAGE_EXPORT, "LOGO", "根据相机品牌自动匹配", self.combo_logo, 3)
 
         return card
@@ -698,12 +780,10 @@ class ImageProcessingPage(QWidget):
         self.edit_watermark_text.setPlaceholderText("输入水印文字...")
         card.addGroup(FluentIcon.EDIT, "水印内容", "输入要显示的文字", self.edit_watermark_text, 3)
 
-        # 水印位置
+        # 水印位置（G3：userData 绑定稳定 key）
         self.combo_wm_position = ComboBox()
-        self.combo_wm_position.addItems([
-            "左上", "顶部居中", "右上",
-            "左下", "底部居中", "右下",
-        ])
+        for _text, _key in WATERMARK_POSITION_ITEMS:
+            self.combo_wm_position.addItem(_text, userData=_key)
         self.combo_wm_position.setCurrentIndex(4)  # 默认底部居中
         card.addGroup(FluentIcon.MARKET, "水印位置", "选择水印显示位置", self.combo_wm_position, 1)
 
@@ -713,9 +793,10 @@ class ImageProcessingPage(QWidget):
         self.slider_opacity.setValue(50)
         card.addGroup(FluentIcon.ZOOM, "不透明度", "调节水印透明程度", self.slider_opacity)
 
-        # 颜色
+        # 颜色（G3：userData 绑定稳定 key，渲染时经 _WM_COLOR_RGB 取 RGB）
         self.combo_wm_color = ComboBox()
-        self.combo_wm_color.addItems(["白色", "黑色"])
+        for _text, _key in WATERMARK_COLOR_ITEMS:
+            self.combo_wm_color.addItem(_text, userData=_key)
         card.addGroup(FluentIcon.PALETTE, "水印颜色", "选择水印文字颜色", self.combo_wm_color, 1)
 
         return card
@@ -1380,27 +1461,24 @@ class ImageProcessingPage(QWidget):
         try:
             item = self.file_items[self.current_index]
 
-            # 1. 从 GUI 控件收集配置
-            bg_options = BackgroundFillManager.get_choices()
-            bg_key = bg_options.get(self.combo_bg_fill.currentText(), BackgroundFillManager.DEFAULT_FILL)
-            fw_map = {"中等 (Medium)": "medium", "常规 (Regular)": "regular", "细体 (Light)": "light"}
-            fw_key = fw_map.get(self.combo_font_weight.currentText(), "medium")
-            lens_map = {"相机+镜头": "combined", "只显示相机": "camera_only", "只显示镜头": "lens_only"}
-            lens_key = lens_map.get(self.combo_lens_display.currentText(), "combined")
-            ts_map = {"显示日期与时刻": "full", "只显示日期": "date_only", "不显示时间": "hide"}
-            ts_mode = ts_map.get(self.combo_timestamp.currentText(), "full")
+            # 1. 从 GUI 控件收集配置（G3：下拉框 userData 即稳定 key，
+            # 直接读 currentData()，不再用中文 currentText 反查内联 map）
+            bg_key = self.combo_bg_fill.currentData() or BackgroundFillManager.DEFAULT_FILL
+            fw_key = self.combo_font_weight.currentData() or 'medium'
+            lens_key = self.combo_lens_display.currentData() or 'combined'
+            ts_mode = self.combo_timestamp.currentData() or 'full'
 
             # GPS 替换逻辑
             gps_on = self.chk_use_gps.isChecked()
             gps_str = item.exif_data.get('gps', '') if item.exif_data else ''
             location = gps_str if (gps_on and gps_str) else self.edit_location.text()
 
-            # LOGO 选择逻辑
-            logo_opt = self.combo_logo.currentText()
+            # LOGO 选择逻辑（userData：LOGO_AUTO / LOGO_NONE / 文件名）
+            logo_opt = self.combo_logo.currentData()
             logo_filename = None
-            if logo_opt == "无":
+            if logo_opt == LOGO_NONE:
                 logo_filename = ""
-            elif logo_opt != "自动匹配":
+            elif logo_opt not in (LOGO_AUTO, None):
                 logo_filename = logo_opt
             # "自动匹配"保持 None：由 render_frame 在样式背景覆盖解析之后，
             # 按最终背景与显示品牌统一匹配（审计 Q6 决策收敛），此处不再
@@ -1409,23 +1487,22 @@ class ImageProcessingPage(QWidget):
             # 水印装饰
             decorations = []
             if self.chk_watermark.isChecked() and self.edit_watermark_text.text():
-                pos_map = {"左上": "top-left", "右上": "top-right", "左下": "bottom-left",
-                           "右下": "bottom-right", "顶部居中": "top-center", "底部居中": "bottom-center"}
-                col_map = {"白色": (255, 255, 255), "黑色": (0, 0, 0)}
                 decorations.append({
                     'type': 'watermark',
                     'params': {
                         'text': self.edit_watermark_text.text(),
-                        'position': pos_map.get(self.combo_wm_position.currentText(), 'bottom-right'),
+                        'position': self.combo_wm_position.currentData() or 'bottom-right',
                         'opacity': self.slider_opacity.value(),
-                        'color': col_map.get(self.combo_wm_color.currentText(), (255, 255, 255))
+                        'color': _WM_COLOR_RGB.get(
+                            self.combo_wm_color.currentData() or 'white',
+                            (255, 255, 255))
                     }
                 })
 
             # 2. 创建临时文件并调用 ImageProcessor
             suffix = os.path.splitext(item.file_name)[1]
             input_path = self.temp_manager.create_temp_file(suffix=suffix)
-            output_ext = ".jpg" if self.combo_output_format.currentText() == "JPEG" else ".png"
+            output_ext = ".jpg" if self.combo_output_format.currentData() == "JPEG" else ".png"
             output_path = self.temp_manager.create_temp_file(suffix=output_ext)
 
             # 写入输入文件
@@ -1633,19 +1710,35 @@ class ImageProcessingPage(QWidget):
         self.temp_manager.cleanup()
         logger.debug("图像处理页面资源已清理")
 
+    def _restore_combo_value(self, combo, saved_value):
+        """按 config.json 存储值恢复下拉选中项（G3/D5）
+
+        恢复顺序：稳定 key（findData）→ 历史文本别名表迁移（覆盖
+        修复前以中文文本持久化的旧配置）→ 都失败保持默认项。
+        """
+        if saved_value is None:
+            return
+        idx = combo.findData(saved_value)
+        if idx < 0:
+            key = self._legacy_aliases.get(str(saved_value))
+            if key is not None:
+                idx = combo.findData(key)
+        if idx >= 0:
+            combo.setCurrentIndex(idx)
+
     def save_config(self):
         """收集当前控件值并保存到 ConfigManager（由 MainWindow.closeEvent 调用）"""
         # 作者名（D6 决策：显式写空——用户清空输入框后旧值不再残留，
         # ConfigManager 对空串正常存取，加载端空串不回填、控件默认即空）
         default_config_manager.save_user_author(self.edit_author.text())
-        # 最近使用配置
+        # 最近使用配置（G3：下拉框一律写稳定 key，不写中文显示文本）
         default_config_manager.save_last_used_settings({
             'style_name': self.style_selector_card.current_style or "底部信息条 Bottom Bars",
-            'output_format': self.combo_output_format.currentText(),
-            'bg_fill': self.combo_bg_fill.currentText(),
+            'output_format': self.combo_output_format.currentData(),
+            'bg_fill': self.combo_bg_fill.currentData(),
             'enhance_background': self.chk_enhance.isChecked(),
-            'font_weight': self.combo_font_weight.currentText(),
-            'timestamp_display': self.combo_timestamp.currentText(),
+            'font_weight': self.combo_font_weight.currentData(),
+            'timestamp_display': self.combo_timestamp.currentData(),
             # 旋转适配：保存稳定内部值（非中文显示文本），
             # 未来调整文案不影响已有 config.json 的恢复（方案 §6.6）
             'portrait_adaptation': self._get_portrait_adaptation(),
@@ -1665,24 +1758,21 @@ class ImageProcessingPage(QWidget):
         # 先恢复样式（可能触发 _on_style_changed 更新自定义文本/LOGO 启用状态）
         if 'style_name' in saved:
             self.style_selector_card.set_current_style(saved['style_name'])
+        # G3/D5：恢复顺序 = 稳定 key（findData）→ 历史文本别名表迁移 →
+        # 回退默认项。旧 config 存中文文本，经 _legacy_aliases 迁移。
         if 'output_format' in saved:
-            idx = self.combo_output_format.findText(saved['output_format'])
-            if idx >= 0:
-                self.combo_output_format.setCurrentIndex(idx)
+            self._restore_combo_value(self.combo_output_format,
+                                      saved['output_format'])
         if 'bg_fill' in saved:
-            items = [self.combo_bg_fill.itemText(i) for i in range(self.combo_bg_fill.count())]
-            if saved['bg_fill'] in items:
-                self.combo_bg_fill.setCurrentText(saved['bg_fill'])
+            self._restore_combo_value(self.combo_bg_fill, saved['bg_fill'])
         if 'enhance_background' in saved:
             self.chk_enhance.setChecked(saved['enhance_background'])
         if 'font_weight' in saved:
-            idx = self.combo_font_weight.findText(saved['font_weight'])
-            if idx >= 0:
-                self.combo_font_weight.setCurrentIndex(idx)
+            self._restore_combo_value(self.combo_font_weight,
+                                      saved['font_weight'])
         if 'timestamp_display' in saved:
-            idx = self.combo_timestamp.findText(saved['timestamp_display'])
-            if idx >= 0:
-                self.combo_timestamp.setCurrentIndex(idx)
+            self._restore_combo_value(self.combo_timestamp,
+                                      saved['timestamp_display'])
         # 旋转适配：按 userData 恢复稳定内部值（方案 §6.6）；
         # 缺失/旧版本配置/非法值均经 findData<0 回退 default
         if 'portrait_adaptation' in saved:
