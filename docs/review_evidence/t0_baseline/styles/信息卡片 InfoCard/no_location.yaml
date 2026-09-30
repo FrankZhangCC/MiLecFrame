@@ -1,0 +1,212 @@
+# ============================================================
+# 信息卡片 InfoCard
+# - 不扩展画布，卡片叠在照片内部右下角
+# - 卡片：2.25:1 圆角矩形，磨砂模糊（radius 100）+ 55% 黑/白覆盖
+# - 卡片内曝光参数采用两行排版：上行为标签，下行为对应数值
+# - 标签列（表头小标题）金黄色，明暗背景自适应
+# - 全部使用绝对定位（无 relative_to）
+# - 本变体布局：Camera/Lens 整体上移一行（0.151/0.131），
+#   原 lens 行（0.111）改放 Author（标签 "Author" + author 值），
+#   卡片高度同步扩张 0.13→0.15 以保持与原始样式相同的卡片内边距
+#
+# 布局基准：3:2 横图（如 6000×4000）。所有 margin 相对原图短边
+# （reference_side）。position=bottom-right 选择照片右下角参考点并
+# 结合 margin 得到元素锚点；alignment=bottom-left 表示文字布局盒的
+# 左下角贴到该锚点——即整列文字共享同一左边缘（列锚点），alignment
+# 描述布局盒相对锚点的方位，与文字内部排版对齐（line_alignment）无关。
+# 标签/值列的 margin_right 从照片右边缘起算，竖图（照片变窄）时需
+# 自行增大这两个值，否则列会漂出卡片。
+# ============================================================
+
+name: 信息卡片 InfoCard
+
+colors:
+  text: '#000000'
+  # 磨砂卡片覆盖色：深色背景方案叠黑、浅色背景方案叠白（55% 不透明度
+  # 由 rect_01 的 opacity 控制）
+  custom_rect_01_light_color: [255, 255, 255]
+  custom_rect_01_dark_color: [0, 0, 0]
+  # ── 表头小标题（标签列）金黄色，明暗背景自适应 ──
+  # 深色磨砂 → 金黄；浅色磨砂 → 深金黄（保证对比度）
+  # 编号与 defined_texts 条目一一对应（01 Camera、02 Lens、03 Author、
+  # 04 FL、05 AP、06 ST、07 ISO），共 7 个标签
+  custom_defined_text_01_light_color: [112, 60, 4]
+  custom_defined_text_01_dark_color: [239, 195, 84]
+  custom_defined_text_02_light_color: [112, 60, 4]
+  custom_defined_text_02_dark_color: [239, 195, 84]
+  custom_defined_text_03_light_color: [112, 60, 4]
+  custom_defined_text_03_dark_color: [239, 195, 84]
+  custom_defined_text_04_light_color: [112, 60, 4]
+  custom_defined_text_04_dark_color: [239, 195, 84]
+  custom_defined_text_05_light_color: [112, 60, 4]
+  custom_defined_text_05_dark_color: [239, 195, 84]
+  custom_defined_text_06_light_color: [112, 60, 4]
+  custom_defined_text_06_dark_color: [239, 195, 84]
+  custom_defined_text_07_light_color: [112, 60, 4]
+  custom_defined_text_07_dark_color: [239, 195, 84]
+
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  size_ratio: 0.0125
+  line_spacing_ratio: 0.008
+
+layout:
+  # 不扩展画布
+  expand_canvas:
+    enabled: false
+  padding:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+  # ── 磨砂信息卡片（照片内部右下角） ──
+  rectangles:
+    rect_01:
+      # 向右延长卡片，并保留四列文本的左右内边距
+      width_ratio: 0.35
+      # 本变体 Camera/Lens 行整体上移 0.02，卡片高度同步 +0.02（0.13→0.15）：
+      # 底边由 margin_bottom 0.04 锚定不动（底部曝光行未变，下内边距不变），
+      # 高度增加全部向上扩张，顶边 0.17→0.19，上内边距与原始样式保持一致
+      height_ratio: 0.15
+      opacity: 0.65                # 覆盖 55% 黑/白（只作用于填充层，
+                                   #   下层模糊保持 100% 不透明）
+      placement: inside
+      position: bottom-right
+      alignment: bottom-right
+      margin_right: 0.04
+      margin_bottom: 0.04
+      corner_radius:               # 圆角（短边的 2.5%，约为卡片高的 16.7%）
+        top_left: 0.025
+        top_right: 0.025
+        bottom_left: 0.025
+        bottom_right: 0.025
+
+      fill:                        # 显式写出 → 效果栈（原图上方，照片内可见）
+        enabled: true
+      gaussian_blur:               # 卡片底层磨砂
+        enabled: true
+        radius: 50
+
+  # ── EXIF 数据（绝对定位，左对齐） ──
+  # Camera/Lens 整体上移一行（0.151/0.131），腾出的原 lens 行（0.111）
+  # 改放 Author；标签与 FL 共用第一列，数值与 AP 共用第二列。
+  # 四列横向锚点以 0.08×短边等距排布，并随卡片整体向右平移。
+  # 行底边高度：camera 0.151 → lens 0.131 → author 0.111 →
+  #             曝光标签 0.08 → 曝光数值 0.06（行距 0.02 保持不变）。
+  info_position:
+    camera:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.286
+      margin_bottom: 0.151
+    lens:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.286
+      margin_bottom: 0.131
+    # Author 数值与 camera/lens 同列（第二列），占据原 lens 行高度
+    author:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.286
+      margin_bottom: 0.111
+    focal_length_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.366
+      margin_bottom: 0.06
+    aperture_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.286
+      margin_bottom: 0.06
+    shutter_speed_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.206
+      margin_bottom: 0.06
+    iso_formatted:
+      placement: "inside"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.126
+      margin_bottom: 0.06
+
+  # ── 标签行（固定文案，绝对定位，左对齐） ──
+  # Camera/Lens/Author/FL 共用第一列；四个曝光标签处于同一高度，
+  # 每个标签的横向锚点与下方数值一致，列距固定为 0.08×短边。
+  # Author 标签占据原 Lens 行高度（0.111），Lens 随 Camera 上移至 0.131。
+  defined_texts:
+    defined_text_01:
+      placement: "inside"
+      content: "Camera"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.366
+      margin_bottom: 0.151
+    defined_text_02:
+      placement: "inside"
+      content: "Lens"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.366
+      margin_bottom: 0.131
+    # 原 lens 行（0.111）改放 Author 标签，数值在 info_position.author
+    defined_text_03:
+      placement: "inside"
+      content: "Author"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.366
+      margin_bottom: 0.111
+    defined_text_04:
+      placement: "inside"
+      content: "FL"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.366
+      margin_bottom: 0.08
+    defined_text_05:
+      placement: "inside"
+      content: "AP"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.286
+      margin_bottom: 0.08
+    defined_text_06:
+      placement: "inside"
+      content: "ST"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.206
+      margin_bottom: 0.08
+    defined_text_07:
+      placement: "inside"
+      content: "ISO"
+      position: "bottom-right"
+      alignment: "bottom-left"
+      margin_right: 0.126
+      margin_bottom: 0.08
+
+logo:
+  enabled: false
