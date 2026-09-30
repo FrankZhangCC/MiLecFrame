@@ -144,32 +144,51 @@ def rounded_corner_mask(w, h, r_tl, r_tr, r_bl, r_br):
     return Image.fromarray(mask.astype(np.uint8))
 
 
-def draw_single_rectangle(
-    background,
-    rect_w: int,
-    rect_h: int,
-    position: Tuple[int, int],
-    color: Tuple[int, int, int],
-    opacity: float,
-    corner_radius: Optional[Dict] = None,
-    reference_side: float = 1.0,
-):
+def draw_legacy_rectangles(background, specs: List[RectangleSpec],
+                           reference_side: float):
     """
-    在背景上绘制单个矩形（RGBA 合成，支持透明度和圆角）
+    在背景上绘制全部 legacy 矩形（背景层之上，原图层之下）
 
-    Args:
-        background: 背景图像（RGB 模式）
-        rect_w, rect_h: 矩形像素尺寸
-        position: 左上角坐标 (x, y)
-        color: RGB 颜色元组
-        opacity: 透明度 0.0-1.0
-        corner_radius: 圆角配置 {'top_left': ratio, ...} 或 None（直角）
-        reference_side: 参照边长度，用于将圆角 ratio 转为像素
+    specs 已按 key 排序：后画覆盖先画。几何与颜色均来自分析阶段，
+    绘制端不做任何配置解释。
+
+    合成开销（审计 Q15）：全画布 RGBA 转换只做一次，逐矩形按原顺序
+    合成后末尾一次转回 RGB。逐次合成语义保持——半透明矩形的叠加
+    结果依赖合成顺序的 8-bit 舍入，不得改为"先合组再合背景"
+    （1×1 反例见审计报告 Q15，两种顺序结果不同）。
     """
-    alpha_val = int(round(255 * opacity))
-    rect_layer = Image.new('RGBA', background.size, (0, 0, 0, 0))
-    rect_img = Image.new('RGBA', (rect_w, rect_h), (*color, alpha_val))
+    if not specs:
+        return background
+    result = background.convert('RGBA')
+    for spec in specs:
+        logger.debug("绘制矩形 %s: %dx%d @ (%d,%d), color=%s, opacity=%.2f",
+                     spec.name, spec.box[2], spec.box[3],
+                     spec.box[0], spec.box[1],
+                     spec.legacy_color, spec.legacy_opacity)
+        result = _composite_legacy_rectangle(result, spec, reference_side)
+    return result.convert('RGB')
 
+
+def _composite_legacy_rectangle(result_rgba, spec: RectangleSpec,
+                                reference_side: float):
+    """
+    构造单矩形小层并合成到 RGBA 结果上（审计 Q15）。
+
+    等价性说明：不透明背景（alpha=255）上 alpha_composite 后结果仍
+    不透明，与旧的"每矩形全画布建层 → convert → composite → convert"
+    路径逐像素一致（旧路径的 RGBA→RGB→RGBA 往返无损）。矩形层只建
+    rect_w×rect_h 的小图，越界部分手动裁剪（alpha_composite 的 dest
+    不接受负坐标；被裁部分在画布外，合成结果不变）。
+    """
+    x, y, rect_w, rect_h = spec.box
+    if rect_w <= 0 or rect_h <= 0:
+        # 不足 1px 的矩形无可见合成（与旧全画布建层零效果一致）
+        return result_rgba
+    alpha_val = int(round(255 * spec.legacy_opacity))
+    rect_img = Image.new(
+        'RGBA', (rect_w, rect_h), (*spec.legacy_color, alpha_val))
+
+    corner_radius = spec.legacy_corner_radius
     if corner_radius and isinstance(corner_radius, dict):
         r_tl = int(reference_side * corner_radius.get('top_left', 0))
         r_tr = int(reference_side * corner_radius.get('top_right', 0))
@@ -177,13 +196,18 @@ def draw_single_rectangle(
         r_br = int(reference_side * corner_radius.get('bottom_right', 0))
         if any(r > 0 for r in [r_tl, r_tr, r_bl, r_br]):
             mask = rounded_corner_mask(rect_w, rect_h, r_tl, r_tr, r_bl, r_br)
-            mask_array = np.array(mask, dtype=np.float32) * opacity
+            mask_array = np.array(mask, dtype=np.float32) * spec.legacy_opacity
             rect_img.putalpha(Image.fromarray(mask_array.astype(np.uint8)))
 
-    rect_layer.paste(rect_img, position)
-    result = background.convert('RGBA')
-    result = Image.alpha_composite(result, rect_layer)
-    return result.convert('RGB')
+    # 越界裁剪到画布交集；完全在画布外时无可见合成
+    cx0, cy0 = max(x, 0), max(y, 0)
+    cx1 = min(x + rect_w, result_rgba.width)
+    cy1 = min(y + rect_h, result_rgba.height)
+    if cx1 <= cx0 or cy1 <= cy0:
+        return result_rgba
+    rect_img = rect_img.crop((cx0 - x, cy0 - y, cx1 - x, cy1 - y))
+    result_rgba.alpha_composite(rect_img, dest=(cx0, cy0))
+    return result_rgba
 
 
 def _resolve_fill_color(colors_cfg: Dict, rect_name: str,
@@ -445,27 +469,6 @@ def analyze_rectangles(
         effect_specs.append(spec)
 
     return legacy_specs, effect_specs
-
-
-def draw_legacy_rectangles(background, specs: List[RectangleSpec],
-                           reference_side: float):
-    """
-    在背景上绘制全部 legacy 矩形（背景层之上，原图层之下）
-
-    specs 已按 key 排序：后画覆盖先画。几何与颜色均来自分析阶段，
-    绘制端不做任何配置解释。
-    """
-    result = background
-    for spec in specs:
-        logger.debug("绘制矩形 %s: %dx%d @ (%d,%d), color=%s, opacity=%.2f",
-                     spec.name, spec.box[2], spec.box[3],
-                     spec.box[0], spec.box[1],
-                     spec.legacy_color, spec.legacy_opacity)
-        result = draw_single_rectangle(
-            result, spec.box[2], spec.box[3], (spec.box[0], spec.box[1]),
-            spec.legacy_color, spec.legacy_opacity,
-            spec.legacy_corner_radius, reference_side)
-    return result
 
 
 def draw_effect_stacks(output, specs: List[RectangleSpec],

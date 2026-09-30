@@ -1,0 +1,29 @@
+{
+  "equivalence": {
+    "fuzz_cases": 60,
+    "sequential_pixel": [
+      11,
+      151,
+      146
+    ],
+    "grouped_pixel": [
+      10,
+      151,
+      145
+    ],
+    "rects_match_sequential": true
+  },
+  "benchmark": {
+    "canvas": [
+      3000,
+      2000
+    ],
+    "rect_count": 12,
+    "old_seconds": 0.2844,
+    "new_seconds": 0.0365,
+    "speedup": 7.79,
+    "old_peak_mib": 5.6,
+    "new_peak_mib": 5.6,
+    "peak_reduction_mib": -0.0
+  }
+}
