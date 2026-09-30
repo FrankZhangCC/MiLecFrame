@@ -366,7 +366,7 @@ class TextRenderer:
                 ref_cfg = all_positions[ref]
                 if not ref_cfg.get('relative_to'):
                     rx, ry = self.layout_engine.calculate_position(0, 0, ref_cfg)
-                    self.layout_engine.register_element(ref, rx, ry, 0, 0, ascent=0)
+                    self.layout_engine.register_element(ref, rx, ry, 0, 0)
 
         ordered_names = self._resolve_element_order(text_elements, all_positions)
 
@@ -440,7 +440,7 @@ class TextRenderer:
                 # 多行文本：行内对齐只读专用 line_alignment 字段，
                 # 与元素布局盒相对元素锚点的 alignment 完全分离
                 positions = self.layout_engine.layout_multiline_lines(
-                    block_x=x, block_y=y, block_w=w, block_h=h,
+                    block_x=x, block_y=y, block_w=w,
                     lines=item['lines'],
                     line_spacing=item['line_spacing'],
                     line_alignment=self._resolve_line_alignment(cfg),

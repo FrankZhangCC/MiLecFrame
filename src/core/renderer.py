@@ -111,27 +111,27 @@ class FrameRenderer:
         effective_bg_type: str,
         layout_engine: LayoutEngine,
         image: Image.Image,
-        rect_consumers: List,
+        rect_needs_blur: bool,
     ):
         """
         全图高斯需求统一判定（设计文档 §5.4）
 
         短路条件位于整帧渲染级，而不是绑定在背景分支上：
             gaussian_required = background_blur or 矩形有模糊需求
-        背景是否可见只判断背景是不是有效消费者，不能覆盖矩形需求
-        （矩形需求由 rect_consumers 携带，Phase 3 起填充）。
+        背景是否可见只判断背景是不是有效消费者，不能覆盖矩形需求。
 
         Args:
             effective_bg_type: 有效背景填充类型 key
             layout_engine: 布局引擎（含画布/原图几何与 layout 配置）
             image: 原始图像（用于 RGBA 保守判定）
-            rect_consumers: 矩形模糊需求列表 [(source_kind, radius), ...]
+            rect_needs_blur: 任一效果栈矩形启用模糊（审计 Q14-10：
+                本判定只消费布尔，需求详情由持有它的 rectangle_layer 表达）
 
         Returns:
-            (gaussian_required, background_blur, bg_is_gaussian, bg_cfg) 四元组
+            (gaussian_required, background_blur, bg_is_gaussian) 三元组
         """
-        cfg = BackgroundFillManager.FILL_TYPES.get(effective_bg_type) or {}
-        bg_is_gaussian = cfg.get('method') == 'gaussian'
+        # 背景语义通过管理器接口获取（审计 Q7），不直读注册表 schema
+        bg_is_gaussian = BackgroundFillManager.is_gaussian(effective_bg_type)
 
         # "背景可见"几何判定（比较最终几何而非 expand_canvas 开关，
         # 因为开关为 true 但四边扩展均为 0 时画布实际没有扩展）：
@@ -154,8 +154,8 @@ class FrameRenderer:
             background_visible = True
 
         background_blur = bg_is_gaussian and background_visible
-        gaussian_required = background_blur or len(rect_consumers) > 0
-        return gaussian_required, background_blur, bg_is_gaussian, cfg
+        gaussian_required = background_blur or rect_needs_blur
+        return gaussian_required, background_blur, bg_is_gaussian
 
     def render_frame(
         self,
@@ -242,17 +242,16 @@ class FrameRenderer:
             style_config, layout_engine, effective_bg_type)
 
         # ── 全图高斯需求统一判定（设计文档 §5.4） ──────────────────
-        # rect_consumers：启用模糊的效果栈矩形需求 [(source_kind, radius), ...]
-        # （分析阶段已完成画布相交/覆盖降级等短路过滤）
-        rect_consumers = [(spec.source_kind, spec.blur.radius)
-                          for spec in effect_rects if spec.blur is not None]
+        # 矩形模糊需求详情由 rectangle_layer 持有；本判定只消费布尔
+        rect_needs_blur = any(spec.blur is not None for spec in effect_rects)
         (gaussian_required, background_blur,
-         bg_is_gaussian, bg_cfg) = self._compute_gaussian_required(
-            effective_bg_type, layout_engine, image, rect_consumers)
-        photo_radii = sorted({r for (_kind, r) in rect_consumers})
+         bg_is_gaussian) = self._compute_gaussian_required(
+            effective_bg_type, layout_engine, image, rect_needs_blur)
+        photo_radii = sorted({spec.blur.radius for spec in effect_rects
+                              if spec.blur is not None})
         logger.debug(
             "blur plan: gaussian_required=%s, background_blur=%s, "
-            "photo_radii=%s, scene_radii=[]",
+            "photo_radii=%s",
             gaussian_required, background_blur, photo_radii)
 
         blur_cache = None
@@ -274,7 +273,10 @@ class FrameRenderer:
             # 输出（被原图全覆盖），但 is_dark_bg 仍驱动文字/Logo/矩形
             # 配色，替代色必须与原背景的明暗方案一致，保证输出像素不变。
             # 顺带修复既有浪费：高斯背景+无画布扩展不再全量模糊。
-            fallback_color = ((0, 0, 0) if bg_cfg.get('text_scheme') == 'dark'
+            # fallback 画布是后续复制/粘贴的承载画布，不能删除（审计 Q7）
+            fallback_color = ((0, 0, 0)
+                              if BackgroundFillManager.get_text_scheme(
+                                  effective_bg_type) == 'dark'
                               else (255, 255, 255))
             background = Image.new('RGB', (canvas_width, canvas_height),
                                    fallback_color)
@@ -323,8 +325,7 @@ class FrameRenderer:
             decorated_image = self.decorator.apply_decorations(
                 positioned_image,
                 options.decorations,
-                layout_engine.original_image_size,
-                layout_engine.layout_config
+                layout_engine.original_bounds
             )
         else:
             decorated_image = positioned_image
@@ -419,11 +420,9 @@ class FrameRenderer:
         x, y = layout_engine.calculate_position(new_logo_width, new_logo_height, logo_config)
 
         result = image.copy()
-        if logo.mode == 'RGBA':
-            result.paste(logo, (x, y), logo)
-        else:
-            result.paste(logo, (x, y))
+        # 加载阶段已强制转换为 RGBA（审计 Q14-5：mode 分支恒真，删除）
+        result.paste(logo, (x, y), logo)
 
-        layout_engine.register_element('logo', x, y, new_logo_width, new_logo_height, ascent=0)
+        layout_engine.register_element('logo', x, y, new_logo_width, new_logo_height)
         
         return result

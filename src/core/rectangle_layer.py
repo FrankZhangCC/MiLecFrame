@@ -415,6 +415,13 @@ def analyze_rectangles(
             corner_px = tuple(
                 int(ref * corner_cfg.get(k, 0))
                 for k in ('top_left', 'top_right', 'bottom_left', 'bottom_right'))
+            # 超大半径诊断（审计 Q14 参数校验补充）：蒙版实现会把超过
+            # 矩形边长的半径静默保留为直角，这里显式告警而非默默变形
+            side = min(rect_w, rect_h)
+            if side > 0 and any(r > side for r in corner_px):
+                logger.warning(
+                    "矩形 %s 圆角半径 %s 超过短边 %dpx，超出部分将呈现为直角",
+                    rect_name, corner_px, side)
 
         spec = RectangleSpec(
             name=rect_name,
@@ -491,26 +498,25 @@ def _draw_effect_stack_rectangle(output, spec: RectangleSpec,
     # ── 1. 内容底图：模糊 patch 或 underlay patch ──────────
     blur_patch = None
     if spec.blur is not None and blur_cache is not None:
-        try:
-            if spec.source_kind == 'photo':
-                # 照片尺寸模糊层按 box-orig 偏移取局部裁切区域
-                orig_x, orig_y = layout_engine.original_bounds[0], \
-                    layout_engine.original_bounds[1]
-                photo_blur = blur_cache.get_photo_size_blur(
-                    spec.blur.radius, saturation=1.0)
-                blur_patch = photo_blur.crop((
-                    cx - orig_x, cy - orig_y,
-                    cx - orig_x + clip_w, cy - orig_y + clip_h))
-            else:
-                # 跨界/照片外：画布尺寸模糊层按画布坐标裁切
-                # （延续背景"原图拉伸到画布"的模糊语义，§4.1）
-                canvas_blur = blur_cache.get_canvas_size_blur(
-                    spec.blur.radius, saturation=1.0,
-                    canvas_size=layout_engine.canvas_size)
-                blur_patch = canvas_blur.crop((cx, cy, cx + clip_w, cy + clip_h))
-        except NotImplementedError:
-            # 方案 B 接口位防御：source_kind 异常时回退 underlay
-            blur_patch = None
+        # 两个取样 API 都固定 photo 源（审计 Q14-4：source_kind 只能是
+        # 'photo'/'canvas'，不存在会抛 NotImplementedError 的回退位），
+        # 异常直接传播，不吞掉
+        if spec.source_kind == 'photo':
+            # 照片尺寸模糊层按 box-orig 偏移取局部裁切区域
+            orig_x, orig_y = layout_engine.original_bounds[0], \
+                layout_engine.original_bounds[1]
+            photo_blur = blur_cache.get_photo_size_blur(
+                spec.blur.radius, saturation=1.0)
+            blur_patch = photo_blur.crop((
+                cx - orig_x, cy - orig_y,
+                cx - orig_x + clip_w, cy - orig_y + clip_h))
+        else:
+            # 跨界/照片外：画布尺寸模糊层按画布坐标裁切
+            # （延续背景"原图拉伸到画布"的模糊语义，§4.1）
+            canvas_blur = blur_cache.get_canvas_size_blur(
+                spec.blur.radius, saturation=1.0,
+                canvas_size=layout_engine.canvas_size)
+            blur_patch = canvas_blur.crop((cx, cy, cx + clip_w, cy + clip_h))
     if blur_patch is not None:
         patch_arr = np.array(blur_patch, dtype=np.float32)
     else:

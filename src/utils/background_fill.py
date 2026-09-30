@@ -98,6 +98,20 @@ class BackgroundFillManager:
         cfg = cls.FILL_TYPES.get(fill_type)
         return cfg['text_scheme'] == 'dark' if cfg else False
 
+    @classmethod
+    def is_gaussian(cls, fill_type: str) -> bool:
+        """判断背景类型是否为高斯模糊渲染（审计 Q7：渲染器的短路判定
+        通过本接口获取语义，不直读 FILL_TYPES 注册表 schema）"""
+        cfg = cls.FILL_TYPES.get(fill_type)
+        return cfg.get('method') == 'gaussian' if cfg else False
+
+    @classmethod
+    def get_text_scheme(cls, fill_type: str) -> str:
+        """获取背景类型的明暗方案（'dark' / 'light'；未知类型回退
+        'light'，与旧的缺字段回退行为一致）"""
+        cfg = cls.FILL_TYPES.get(fill_type)
+        return cfg.get('text_scheme', 'light') if cfg else 'light'
+
     # ── 渲染接口 ──────────────────────────────────────
 
     @classmethod

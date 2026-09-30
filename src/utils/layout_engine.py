@@ -194,8 +194,10 @@ class LayoutEngine:
 
     # ── 元素位置注册表 ──────────────────────────────────────
 
-    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None, ascent: int = None):
-        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height, 'ascent': ascent}
+    def register_element(self, name: str, x: int, y: int, width: int, height: int, relative_to: str = None):
+        # ascent 字段已删除（审计 Q14-1）：注册表只承载布局盒几何，
+        # 字体度量由 TextRenderer 在测量阶段自行持有
+        self.positions[name] = {'x': x, 'y': y, 'width': width, 'height': height}
         if relative_to:
             if relative_to not in self._dependents:
                 self._dependents[relative_to] = []
@@ -804,12 +806,14 @@ class LayoutEngine:
 
     # ── 多行文本行内对齐 ────────────────────────────────────
 
+    # 行内对齐合法值（审计 Q14-8：提取为常量，替代函数内局部三值元组）
+    LINE_ALIGNMENTS = frozenset({'left', 'center', 'right'})
+
     def layout_multiline_lines(
         self,
         block_x: int,
         block_y: int,
         block_w: int,
-        block_h: int,
         lines: list,
         line_spacing: int,
         line_alignment: str = 'left',
@@ -825,7 +829,6 @@ class LayoutEngine:
         Args:
             block_x, block_y: 文本块包围盒左上角（来自 calculate_position）
             block_w: 块宽度（用于行内对齐偏移）
-            block_h: 块高度（保留参数，行位置由行高与行间距递推）
             lines: 每行信息，每项含 height / width / baseline_offset
             line_spacing: 行间距（像素）
             line_alignment: 行内水平对齐 left / center / right（缺省 left）
@@ -833,10 +836,10 @@ class LayoutEngine:
         Returns:
             [(line_x, baseline_y), ...] 每行的绘制起始坐标
         """
-        if line_alignment not in ('left', 'center', 'right'):
+        if line_alignment not in self.LINE_ALIGNMENTS:
             raise ValueError(
                 f"line_alignment 值非法: {line_alignment!r}；"
-                f"合法值为 ['center', 'left', 'right']")
+                f"合法值为 {sorted(self.LINE_ALIGNMENTS)}")
 
         # 空列表是合法的空块；调用方仍负责保留显式空行对应的行槽字典。
         if not lines:

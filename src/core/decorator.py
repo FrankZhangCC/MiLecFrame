@@ -5,8 +5,11 @@
 装饰元素处理模块
 负责处理相框中的装饰元素，如水印等
 """
+import logging
 from typing import Tuple, Dict, Optional, List
 from PIL import Image, ImageDraw, ImageFont
+
+logger = logging.getLogger(__name__)
 
 
 class Decorator:
@@ -21,18 +24,19 @@ class Decorator:
         self.font_manager = font_manager
 
     def add_watermark(
-        self, 
-        image: Image.Image, 
-        text: str, 
+        self,
+        image: Image.Image,
+        text: str,
         position: str = 'bottom-right',
         opacity: int = 50,
         color: Tuple[int, int, int] = (255, 255, 255),
         original_image_size: Optional[Tuple[int, int]] = None,  # 原始图像尺寸
-        layout_config: Optional[Dict] = None  # 布局配置，用于计算扩展画布偏移
+        original_bounds: Optional[Tuple[int, int, int, int]] = None
+    # 原图在画布上的 bounds (x, y, w, h)，与 LayoutEngine 共享同一几何
     ) -> Image.Image:
         """
         为图像添加文字水印
-        
+
         Args:
             image: 输入图像
             text: 水印文字
@@ -40,8 +44,11 @@ class Decorator:
             opacity: 透明度 (0-100)
             color: 字体颜色
             original_image_size: 原始图像尺寸，用于计算字体大小和margin
-            layout_config: 布局配置，用于计算扩展画布的偏移量
-            
+            original_bounds: 原图在画布上的偏移与尺寸（审计 Q14-13：与
+                LayoutEngine.original_bounds 共享同一几何，水印定位不再
+                根据 layout_config 重新推算偏移；水印定位保持独立于文字
+                定位，不套用 padding）
+
         Returns:
             添加水印后的图像
         """
@@ -81,43 +88,13 @@ class Decorator:
         margin = int(reference_side * 0.02)
 
         img_width, img_height = image.size
-        
-        # 获取当前图像与原始图像的尺寸差，用于调整边距计算
-        # 如果有布局配置，使用FrameRenderer的计算方式
-        if layout_config and original_image_size:
-            # 获取扩展画布配置
-            expand_config = layout_config.get('expand_canvas', {})
-            if expand_config.get('enabled', False):
-                # 计算扩展比例
-                top_exp = expand_config.get('top', 0)
-                left_exp = expand_config.get('left', 0)
-                
-                # 使用参照边作为计算基准，以保持一致的扩展效果
-                orig_width, orig_height = original_image_size
-                reference_side_orig = min(orig_width, orig_height)
-                
-                # 根据扩展比例计算位置
-                top_offset = int(reference_side_orig * top_exp)
-                left_offset = int(reference_side_orig * left_exp)
-                
-                offset_x = left_offset
-                offset_y = top_offset
-            else:
-                # 如果没有启用扩展画布，图像在画布中央
-                orig_width, orig_height = original_image_size
-                offset_x = (img_width - orig_width) // 2
-                offset_y = (img_height - orig_height) // 2
-        elif original_image_size:
-            # 如果没有布局配置但有原始图像尺寸，则假设图像在画布中央
-            orig_width, orig_height = original_image_size
-            offset_x = (img_width - orig_width) // 2
-            offset_y = (img_height - orig_height) // 2
+
+        # 原图在画布上的偏移直接取共享几何（审计 Q14-13）；
+        # 未提供 bounds 时视为画布与原图重合（offset 0）
+        if original_bounds:
+            offset_x, offset_y = original_bounds[0], original_bounds[1]
         else:
-            # 如果没有原始图像尺寸，则认为当前图像就是原始图像
-            offset_x = 0
-            offset_y = 0
-            # 为了后续计算不报错，设置一个默认值，虽然这种情况下通常不会进入下面的original_image_size分支
-            orig_width, orig_height = img_width, img_height
+            offset_x, offset_y = 0, 0
         
         # 支持的位置: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
         # 所有位置都相对于原始图像边缘计算，保持一致的margin
@@ -150,13 +127,9 @@ class Decorator:
             x = offset_x + orig_w - text_width - margin  # 从原始图像右边减去宽度和margin
             y = offset_y + orig_h - text_height - margin  # 从原始图像底边减去高度和margin
 
-        # 根据位置决定对齐方式
-        if 'left' in position:
-            align_x = x
-        elif 'right' in position:
-            align_x = x
-        else:  # center
-            align_x = x
+        # 水印 x 坐标在三个分支下取值相同（审计 Q14-6：原 if/elif 三分支
+        # 均为 align_x = x，属重复决策，直接使用绘制坐标）
+        align_x = x
 
         # 绘制水印文本
         draw.text((align_x, y), text, fill=(*color, int(255 * opacity / 100)), font=font)
@@ -169,38 +142,35 @@ class Decorator:
         return background
 
     def apply_decorations(
-        self, 
-        image: Image.Image, 
+        self,
+        image: Image.Image,
         decorations: List[Dict],
-        original_image_size: Optional[Tuple[int, int]] = None,  # 新增参数
-        layout_config: Optional[Dict] = None  # 新增参数：布局配置
+        original_bounds: Optional[Tuple[int, int, int, int]] = None
+    # 原图在画布上的 bounds，与 LayoutEngine 共享同一几何
     ) -> Image.Image:
         """
         应用多个装饰元素
-        
+
         Args:
             image: 输入图像
             decorations: 装饰元素列表
-            original_image_size: 原始图像尺寸，用于计算字体大小和margin
-            layout_config: 布局配置，用于计算扩展画布的偏移量
-            
-        Returns:
-            应用装饰后的图像
+            original_bounds: 原图在画布上的偏移与尺寸，水印定位直接消费，
+                不再根据 layout_config 重算偏移
         """
         result_img = image.copy()
-        
+
         for decoration in decorations:
             decor_type = decoration.get('type')
             params = decoration.get('params', {})
-            
+
             if decor_type == 'watermark':
                 result_img = self.add_watermark(
-                    result_img, 
-                    original_image_size=original_image_size, 
-                    layout_config=layout_config,
+                    result_img,
+                    original_bounds=original_bounds,
                     **params
                 )
             else:
-                print(f"未知的装饰类型: {decor_type}")
-        
+                # 未知装饰类型：告警并跳过（审计 Q14-13：print 改 logger）
+                logger.warning("未知的装饰类型: %s，已跳过", decor_type)
+
         return result_img
