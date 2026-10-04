@@ -132,7 +132,7 @@ MiLecFrame/
 **④ 路由层 —— `RenderContext.get_text(key)`**
 
 - 按样式 YAML `info_position` 声明的 key 分发最终显示文本，渲染器零改动
-- 条件逻辑全部在此闭环：`lens_display_mode`（镜头显示模式）、`use_short_lens`（短版开关）、`timestamp_display_mode`（时间显示模式）、`timestamp_author`（时间+作者拼接）
+- 条件逻辑全部在此闭环：`lens_display_mode`（镜头显示模式）、`lens_name_mode`（镜头名三态 default/full/short）、`timestamp_display_mode`（时间显示模式）、`timestamp_author`（时间+作者拼接）
 - 曝光四元素键（`*_formatted`）直接转发 `ExifHelper` 共享格式化方法（同源约定见 [§7.7 渲染文本同源模式](#77-渲染文本同源模式)）
 
 ### 3.3 渲染管线（五阶段）
@@ -566,10 +566,11 @@ FILL_TYPES = {
 | `exif` | `display_data['exif_formatted']`（由共享格式化方法组装） | — |
 | `timestamp` | `exif_data['datetime_original']` | `timestamp_display_mode`: `full` → 完整时间，`date_only` → `[:10]` 切片，`hide` → `None` |
 | `timestamp_author` | datetime + author | 三段 fallback：时间+作者 / 仅时间 / 仅作者 / None |
-| `camera_lens` | `camera_lens_combined` / `camera_lens_combined_short` / `camera_combined` | 由 lens_display_mode + use_short_lens 控制 |
+| `camera_lens` | `camera_lens_combined` / `camera_lens_combined_short` / `camera_combined` | 由 lens_display_mode + lens_name_mode 控制（short → 短版组合名） |
 | `camera` | `display_data['camera_combined']` | — |
 | `camera_make` | `display_data['camera_make']` | — |
-| `lens` | `lens_model` / `short_lens` | use_short_lens 控制 |
+| `lens` | `lens_model` / `short_lens` | lens_name_mode 控制（short → 短版名） |
+| `short_lens` | `display_data['short_lens']` / `lens_model` | lens_name_mode 控制（full → 输出完整名） |
 | `focal_length_formatted` | `ExifHelper.format_focal_length()`：35mm 等效优先 → 物理焦距取整个位数（`'70.0'`→`'70mm'`） | — |
 | `aperture_formatted` | `ExifHelper.format_aperture()` → `f/5.6` | — |
 | `shutter_speed_formatted` | `ExifHelper.format_shutter_speed_text()` → `1/800s` | — |

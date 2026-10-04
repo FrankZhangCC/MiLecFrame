@@ -658,7 +658,8 @@ defined_texts:
 | `timestamp_author` | `2025.01.15 14:30:00 by Frank` | 时间 + 作者合并 |
 | `camera` | `Leica Q3` | 相机品牌 + 型号 |
 | `camera_make` | `Leica` | 仅相机品牌 |
-| `lens` | `Summilux 28mm f/1.7` / `28mm` | 镜头型号（受短版开关控制） |
+| `lens` | `Summilux 28mm f/1.7` / `28mm` | 镜头型号（受镜头名三态控制：short 模式下输出短版名） |
+| `short_lens` | `28mm` | 短版镜头名（受镜头名三态控制：full 模式下输出完整镜头名） |
 | `camera_lens` | `Leica Q3 \| Summilux 28mm` | 品牌 + 型号 + 镜头（由镜头显示模式控制） |
 | `author` | `Frank` | 用户输入 |
 | `location` | `Shanghai` | 用户输入 |
@@ -668,7 +669,7 @@ defined_texts:
 | `shutter_speed_formatted` | `1/125s` | 快门速度（已格式化） |
 | `iso_formatted` | `200` | 感光度裸值；`ISO` 前缀由固定标签或 `exif` 组合文本提供 |
 
-**镜头显示模式** 和 **使用短版镜头名** 这两个选项在 GUI 中控制，影响 `camera_lens` 和 `lens` 的输出格式。详见 [GUI 功能指南](../README.md#镜头显示控制)。
+**镜头显示模式**（决定显示哪些设备）和 **镜头名**三态下拉（默认 / 完整镜头名 / 短版镜头名，决定长短名的替代关系）这两个选项在 GUI 中控制，影响 `camera_lens`、`lens` 和 `short_lens` 的输出格式。详见 [GUI 功能指南](../README.md#镜头显示控制)。
 
 ### 5.2 defined_texts — 固定文字
 
@@ -795,7 +796,7 @@ colors:
   custom_defined_text_01_dark_color: "#AAAAAA"
 ```
 
-- 支持的 info_position 元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`、`focal_length_formatted`、`aperture_formatted`、`shutter_speed_formatted`、`iso_formatted`
+- 支持的 info_position 元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`short_lens`、`camera_lens`、`author`、`location`、`gps`、`focal_length_formatted`、`aperture_formatted`、`shutter_speed_formatted`、`iso_formatted`
 - `defined_texts` 中的条目同样支持按 key 独立覆盖：如 `custom_defined_text_01_dark_color`
 - `custom_text` 条目对应 key 为 `custom_custom_text_dark_color` / `custom_custom_text_light_color`
 - 每种元素类型只需要配置实际使用的亮侧和暗侧之一，无需成对
