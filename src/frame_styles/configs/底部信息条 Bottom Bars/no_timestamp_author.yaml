@@ -1,18 +1,22 @@
 # ============================================================
-# 底部信息条 Bottom Bars — no_author 变体
+# 底部信息条 Bottom Bars — no_timestamp_author 变体
 #
-# 变体条件：作者（author）缺失而地点（location）有值时自动选用。
+# 变体条件：timestamp_author 组合字段无值（拍摄时间与作者均缺失，
+# 即组合字段三段 fallback 的"情况4：两者都没有"），而地点（location）
+# 有值时自动选用。
 #
 # 布局基于 no_location 变体：
 # - 左列 camera_lens 单行，margin_bottom 0.044（沿用 no_location 的
 #   下沉值，与右列两行形成视觉配平）；
-# - 右列 exif 上行（margin_bottom 0.028），第二行原 timestamp_author
-#   条目换为 location 字段（relative_to exif、在其下方、左缘对齐、
-#   相对间距 0.010，位置参数与 default 中 location 完全一致）。
+# - 右列 exif 上行（margin_bottom 0.028），第二行为 location 字段
+#   （relative_to exif、在其下方、左缘对齐、相对间距 0.010）。
 #
-# 作者缺失时 timestamp_author 组合字段不再有布局条目 → 整行不渲染，
-# 该位置由 location 接管。按变体精简规范，author 相关的
-# custom_timestamp_author_* 颜色与 fonts.sizes.timestamp_author 已移除。
+# 时间与作者均缺失时 timestamp_author 组合字段无内容可渲染 → 整行
+# 不渲染，该位置由 location 接管。注意：仅作者缺失或仅时间缺失时
+# 不匹配本变体——组合字段的 fallback 会自动降级为纯时间 / "Shot by
+# 作者"，行结构与 default 一致，无需换布局（fallback 归一设计）。
+# 按变体精简规范，author 相关的 custom_timestamp_author_* 颜色与
+# fonts.sizes.timestamp_author 已移除。
 # ============================================================
 colors:
   text: '#000000'

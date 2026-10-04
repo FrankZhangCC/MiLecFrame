@@ -1,8 +1,9 @@
 # ============================================================
-# 底部信息条 Bottom Bars — no_location_no_author 变体
+# 底部信息条 Bottom Bars — no_location_no_timestamp_author 变体
 #
-# 变体条件：地点（location）与作者（author）同时缺失时自动选用
-# （变体匹配中优先级高于单字段变体）。
+# 变体条件：地点（location）缺失，且 timestamp_author 组合字段无值
+# （拍摄时间与作者均缺失）时自动选用（变体匹配中优先级高于
+# 单字段变体）。
 #
 # 布局基于 no_location 变体：
 # - 移除 timestamp_author 条目（右列第二行不再渲染）；
@@ -11,6 +12,10 @@
 #   越靠下），两列各一行水平对齐；
 # - logo 以 exif 为参照（left-of），随 exif 一并下移；
 # - 左列 camera_lens 保持 no_location 的 margin_bottom 0.044 不变。
+#
+# 注意：仅作者缺失或仅时间缺失时不变到本文件——组合字段 fallback
+# 会自动降级为纯时间 / "Shot by 作者"，行结构与 no_location 一致
+# （fallback 归一设计）。
 #
 # 按变体精简规范，location 与 author 相关的
 # custom_location_* / custom_timestamp_author_* 颜色、
