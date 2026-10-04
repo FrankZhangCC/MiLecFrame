@@ -1,0 +1,83 @@
+# ============================================================
+# 底部信息条 Bottom Bars — no_location_no_author 变体
+#
+# 变体条件：地点（location）与作者（author）同时缺失时自动选用
+# （变体匹配中优先级高于单字段变体）。
+#
+# 布局基于 no_location 变体：
+# - 移除 timestamp_author 条目（右列第二行不再渲染）；
+# - exif 的 margin_bottom 从 0.028 调为 0.044，向下平移至与左列
+#   camera_lens 同一 y 轴高度（outside 布局 margin_bottom 越大锚点
+#   越靠下），两列各一行水平对齐；
+# - logo 以 exif 为参照（left-of），随 exif 一并下移；
+# - 左列 camera_lens 保持 no_location 的 margin_bottom 0.044 不变。
+#
+# 按变体精简规范，location 与 author 相关的
+# custom_location_* / custom_timestamp_author_* 颜色、
+# fonts.sizes.location / fonts.sizes.timestamp_author 已全部移除。
+# ============================================================
+colors:
+  text: '#000000'
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  size_ratio: 0.02
+  sizes:
+    camera_lens: 0.019
+    exif: 0.019
+layout:
+  expand_canvas:
+    enabled: true
+    top: 0.0
+    bottom: 0.105
+    left: 0.00
+    right: 0.00
+  padding:
+    left: 0.04
+    right: 0.04
+    top: 0.00
+    bottom: 0.00
+  info_position:
+    camera_lens:
+      placement: outside
+      position: "bottom-left"
+      alignment: "top-left"
+      margin_top: 0.01
+      margin_bottom: 0.044
+      margin_left: 0.02
+      margin_right: 0.01
+    # 0.028 → 0.044：从 no_location 的位置向下平移，
+    # 与左列 camera_lens 对齐到同一 y 轴高度
+    exif:
+      placement: outside
+      position: "bottom-right"
+      alignment: "top-right"
+      margin_top: 0.01
+      margin_bottom: 0.044
+      margin_left: 0.01
+      margin_right: 0.02
+logo:
+  enabled: true
+  relative_to: "exif"
+  relative_position: "left-of"
+  cross_alignment: "center"
+  relative_margin: 0.016
+  size_ratio: 0.048
+  # 负值=向上微调：exif 下移至 0.044 后 logo 随之降低，实测 logo 墨迹
+  # 中心比 exif 文字中心低 16.5px（4000 短边），-0.004×4000=-16px 上移
+  # 补偿，使 logo 与右侧 exif 文字的水平中轴线视觉对齐
+  offset_y_ratio: -0.004
+  max_dim_limit_ratio: 2.5
+name: 底部信息条 BottomBars
