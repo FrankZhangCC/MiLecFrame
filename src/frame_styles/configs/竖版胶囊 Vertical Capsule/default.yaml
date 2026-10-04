@@ -51,11 +51,11 @@ name: 竖版胶囊 Vertical Capsule
 
 # ── 颜色配置（明暗背景自适应，全部按元素类型显式声明） ──
 colors:
-  # 主体文字：camera / lens / 四个参数值 —— 暗底纯白 / 亮底纯黑
+  # 主体文字：camera / short_lens / 四个参数值 —— 暗底纯白 / 亮底纯黑
   custom_camera_dark_color: [255, 255, 255]
   custom_camera_light_color: [0, 0, 0]
-  custom_lens_dark_color: [255, 255, 255]
-  custom_lens_light_color: [0, 0, 0]
+  custom_short_lens_dark_color: [255, 255, 255]
+  custom_short_lens_light_color: [0, 0, 0]
   custom_focal_length_formatted_dark_color: [255, 255, 255]
   custom_focal_length_formatted_light_color: [0, 0, 0]
   custom_aperture_formatted_dark_color: [255, 255, 255]
@@ -116,9 +116,9 @@ fonts:
   # 默认字号 = 参照边 × 2.4%（camera / lens 使用）
   size_ratio: 0.024
   sizes:
-    # camera 与 lens 两行同字号（由原 camera_lens 拆分而来，缩至 0.0192）
+    # camera 与 short_lens 两行同字号（由原 camera_lens 拆分而来，缩至 0.0192）
     camera: 0.0192
-    lens: 0.0192
+    short_lens: 0.0192
     # 四个参数值缩至 0.0192（基础样式第三轮调整值）
     focal_length_formatted: 0.0192
     aperture_formatted: 0.0192
@@ -245,8 +245,8 @@ layout:
       margin_right: 0.14
       margin_bottom: 0.391        # 中心 = CY - 0.391
 
-    # ② lens：镜头型号，位于 camera 下方（行距 0.040）
-    lens:
+    # ② short_lens：短版镜头名，位于 camera 下方（行距 0.040）
+    short_lens:
       placement: outside
       position: "center-right"
       alignment: "center"

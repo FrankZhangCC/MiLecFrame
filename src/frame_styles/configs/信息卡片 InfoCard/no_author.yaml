@@ -114,7 +114,8 @@ layout:
       alignment: "bottom-left"
       margin_right: 0.286
       margin_bottom: 0.151
-    lens:
+    # 短版镜头名（short_lens 键）：受 GUI"镜头名"下拉三态控制
+    short_lens:
       placement: "inside"
       position: "bottom-right"
       alignment: "bottom-left"
