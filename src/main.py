@@ -74,7 +74,8 @@ def main():
     parser.add_argument("--logo", default="auto", help="Logo选择：auto(自动匹配) / none(无) / 文件名")
     parser.add_argument("--lens-display", choices=['combined', 'camera_only', 'lens_only'],
                         default='combined', help="镜头显示模式")
-    parser.add_argument("--use-short-lens", action="store_true", help="使用短版镜头名")
+    parser.add_argument("--lens-name", choices=['default', 'full', 'short'], default='default',
+                        help="镜头名模式：default=键归位(各键按语义取值) / full=强制完整镜头名(short_lens键也输出完整名) / short=强制短版镜头名(lens键也输出短版名)")
     parser.add_argument("--timestamp-display", choices=['full', 'date_only', 'hide'],
                         default='full', help="拍摄时间显示模式：full=日期与时刻, date_only=仅日期, hide=不显示")
     parser.add_argument("--no-enhance", action="store_true", help="关闭背景增强")
@@ -123,7 +124,7 @@ def main():
                 output_format=args.output_format,
                 logo=args.logo,
                 lens_display=args.lens_display,
-                use_short_lens=args.use_short_lens,
+                lens_name_mode=args.lens_name,
                 timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 skip_existing=args.skip_existing,
@@ -152,7 +153,7 @@ def main():
                 font_weight=args.font_weight,
                 logo=args.logo,
                 lens_display=args.lens_display,
-                use_short_lens=args.use_short_lens,
+                lens_name_mode=args.lens_name,
                 timestamp_display=args.timestamp_display,
                 no_enhance=args.no_enhance,
                 output_format=args.output_format,
@@ -183,7 +184,7 @@ def launch_pyside_gui():
 
 def process_image(input_path, output_path, style=None, author=None, location=None, bg_fill=None,
                   font_weight='medium', logo="auto", lens_display='combined',
-                  use_short_lens=False, timestamp_display='full', no_enhance=False, output_format="JPEG",
+                  lens_name_mode='default', timestamp_display='full', no_enhance=False, output_format="JPEG",
                   skip_existing=True, watermark_text=None, watermark_position='bottom-right',
                   watermark_opacity=50, watermark_color='white', custom_text=None):
     """
@@ -199,7 +200,7 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
         font_weight: 字体字重 (light/regular/medium)
         logo: Logo选择：auto(自动匹配) / none(无) / 文件名
         lens_display: 镜头显示模式 (combined/camera_only/lens_only)
-        use_short_lens: 是否使用短版镜头名
+        lens_name_mode: 镜头名模式 default/full/short（含义见 RenderContext.lens_name_mode）
         no_enhance: 关闭背景增强
         output_format: 输出格式 (JPEG/PNG)
         skip_existing: 跳过已存在的输出文件
@@ -258,7 +259,7 @@ def process_image(input_path, output_path, style=None, author=None, location=Non
 
     metadata = RenderMetadata(
         author=author, location=location, custom_text=custom_text,
-        lens_display_mode=lens_display, use_short_lens=use_short_lens,
+        lens_display_mode=lens_display, lens_name_mode=lens_name_mode,
         timestamp_display_mode=timestamp_display)
     options = RenderOptions(
         bg_fill_type=bg_fill, decorations=decorations,
@@ -287,7 +288,7 @@ def batch_process_images(
     output_format="JPEG",
     logo="auto",
     lens_display='combined',
-    use_short_lens=False,
+    lens_name_mode='default',
     timestamp_display='full',
     no_enhance=False,
     skip_existing=True,
@@ -313,7 +314,7 @@ def batch_process_images(
         output_format: 输出格式 (JPEG/PNG)
         logo: Logo选择策略 (auto/none/文件名)
         lens_display: 镜头显示模式 (combined/camera_only/lens_only)
-        use_short_lens: 是否使用短版镜头名
+        lens_name_mode: 镜头名模式 default/full/short（含义见 RenderContext.lens_name_mode）
         no_enhance: 关闭背景增强
         skip_existing: 跳过已存在的输出文件
         use_gps_location: 使用GPS坐标替换手动拍摄地点
@@ -372,7 +373,7 @@ def batch_process_images(
         font_weight=font_weight,
         logo_selection=logo,
         lens_display_mode=lens_display,
-        use_short_lens=use_short_lens,
+        lens_name_mode=lens_name_mode,
         saturation_override=saturation_override,
         progress_callback=cli_progress,
         skip_existing=skip_existing,

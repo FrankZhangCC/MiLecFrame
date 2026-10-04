@@ -18,7 +18,7 @@ class RenderContext:
 
     def __init__(self, image_size: Tuple[int, int], exif_data: Optional[Dict] = None,
                  author: Optional[str] = None, location: Optional[str] = None,
-                 lens_display_mode: str = 'combined', use_short_lens: bool = False,
+                 lens_display_mode: str = 'combined', lens_name_mode: str = 'default',
                  custom_text: Optional[str] = None,
                  timestamp_display_mode: str = 'full'):
         self.image_size = image_size
@@ -26,7 +26,10 @@ class RenderContext:
         self.author = author
         self.location = location
         self.lens_display_mode = lens_display_mode
-        self.use_short_lens = use_short_lens
+        # 镜头名模式（三态）：default=键归位（lens 出完整名、short_lens 出短版名）/
+        # full=强制完整镜头名（short_lens 键的输出被 lens_model 替代）/
+        # short=强制短版镜头名（lens、camera_lens 键的输出被短版名替代）
+        self.lens_name_mode = lens_name_mode
         self.custom_text = custom_text
         self.timestamp_display_mode = timestamp_display_mode
 
@@ -39,8 +42,11 @@ class RenderContext:
         """根据 key 返回对应的显示文本，无数据时返回 None
 
         支持的 key:
-            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, author, location, gps, custom_text,
+            exif, timestamp, timestamp_author, camera_lens, camera, camera_make, lens, short_lens, author, location, gps, custom_text,
             focal_length_formatted, aperture_formatted, shutter_speed_formatted, iso_formatted
+
+        lens_name_mode（default/full/short）控制镜头长短名的替代关系：
+        short_lens 键在 full 下输出 lens_model；lens、camera_lens 键在 short 下输出短版名。
         """
         if key == 'exif':
             return self._display_data.get('exif_formatted') or None
@@ -71,19 +77,31 @@ class RenderContext:
             if self.lens_display_mode == 'camera_only':
                 return self._display_data.get('camera_combined')
             elif self.lens_display_mode == 'lens_only':
-                if self.use_short_lens:
+                # "短版镜头名"模式下输出短版名，否则完整镜头名
+                if self.lens_name_mode == 'short':
                     return self._display_data.get('short_lens')
                 return self._display_data.get('lens_model')
             else:
-                if self.use_short_lens:
+                # "短版镜头名"模式下输出短版组合名，否则完整组合名
+                if self.lens_name_mode == 'short':
                     return self._display_data.get('camera_lens_combined_short')
                 return self._display_data.get('camera_lens_combined')
         elif key == 'camera':
             return self._display_data.get('camera_combined') or None
         elif key == 'camera_make':
             return self._display_data.get('camera_make') or None
+        elif key == 'short_lens':
+            # 短版镜头名（键归位：默认输出短版名）。
+            # 三态"完整镜头名"（'full'）下被完整镜头名替代——
+            # 即用户强制统一为完整名时，样式里的 short_lens 行也显示完整名。
+            if self.lens_name_mode == 'full':
+                return self._display_data.get('lens_model') or None
+            return self._display_data.get('short_lens') or None
         elif key == 'lens':
-            if self.use_short_lens:
+            # 镜头型号（键归位：默认输出完整镜头名）。
+            # 三态"短版镜头名"（'short'）下被短版名替代——
+            # 保留 short_lens 作为 lens 替代的能力，GUI 下拉照常生效。
+            if self.lens_name_mode == 'short':
                 return self._display_data.get('short_lens') or None
             return self._display_data.get('lens_model') or None
         elif key == 'author':

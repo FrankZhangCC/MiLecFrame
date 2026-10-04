@@ -58,7 +58,7 @@ class RenderMetadata:
     location: Optional[str] = None              # 拍摄地点
     custom_text: Optional[str] = None           # 自定义文本（样式 custom_text.enabled 时生效）
     lens_display_mode: str = 'combined'         # 镜头显示模式 combined/camera_only/lens_only
-    use_short_lens: bool = False                # 是否使用短版镜头名
+    lens_name_mode: str = 'default'             # 镜头名模式：default(键归位)/full(强制完整名)/short(强制短版名)
     timestamp_display_mode: str = 'full'        # 拍摄时间显示模式 full/date_only/hide
 
 
@@ -231,7 +231,7 @@ class FrameRenderer:
         layout_engine = LayoutEngine(image.size, layout)
         canvas_width, canvas_height = layout_engine.canvas_size
 
-        context = RenderContext(image.size, metadata.exif_data, metadata.author, metadata.location, metadata.lens_display_mode, metadata.use_short_lens, custom_text=metadata.custom_text, timestamp_display_mode=metadata.timestamp_display_mode)
+        context = RenderContext(image.size, metadata.exif_data, metadata.author, metadata.location, metadata.lens_display_mode, metadata.lens_name_mode, custom_text=metadata.custom_text, timestamp_display_mode=metadata.timestamp_display_mode)
 
         # ── 矩形需求分析（背景渲染前：模糊需求须参与统一判定）──────
         # 矩形子系统的分类、几何与颜色决策全部收敛在 rectangle_layer

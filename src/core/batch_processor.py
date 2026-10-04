@@ -98,7 +98,7 @@ class BatchProcessor:
         font_weight: str = 'medium',
         logo_selection: str = 'auto',
         lens_display_mode: str = 'combined',
-        use_short_lens: bool = False,
+        lens_name_mode: str = 'default',
         saturation_override: Optional[float] = None,
         use_gps_location: bool = False,
         progress_callback: Optional[Callable[[int, int, str, str], None]] = None,
@@ -124,7 +124,7 @@ class BatchProcessor:
                 - 'none' → 所有图片不使用 Logo
                 - '<filename>' → 所有图片统一使用指定 Logo 文件
             lens_display_mode: 镜头显示模式 ('combined' / 'camera_only' / 'lens_only')
-            use_short_lens: 是否使用短版镜头名
+            lens_name_mode: 镜头名模式 ('default'=键归位 / 'full'=强制完整镜头名 / 'short'=强制短版镜头名)
             saturation_override: 饱和度覆盖 (None=默认, 1.0=不做增强)
             use_gps_location: 是否使用 GPS 数据替换手动输入的地点
             progress_callback: 进度回调函数
@@ -157,7 +157,7 @@ class BatchProcessor:
             author=author, location=location,
             custom_text=custom_text,
             lens_display_mode=lens_display_mode,
-            use_short_lens=use_short_lens,
+            lens_name_mode=lens_name_mode,
             timestamp_display_mode=timestamp_display_mode)
         options = RenderOptions(
             bg_fill_type=bg_fill_type,

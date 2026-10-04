@@ -60,6 +60,16 @@ LENS_DISPLAY_ITEMS = (
     ('只显示镜头', 'lens_only'),
 )
 
+# 镜头名模式三态选项（GUI 文案 → 稳定内部值，与 CLI --lens-name 对齐）。
+# 默认 = 键归位（lens 出完整名、short_lens 出短版名）；
+# 完整镜头名 = short_lens 键的输出被 lens_model 替代；
+# 短版镜头名 = lens / camera_lens 键的输出被短版名替代。
+LENS_NAME_ITEMS = (
+    ('默认', 'default'),
+    ('完整镜头名', 'full'),
+    ('短版镜头名', 'short'),
+)
+
 WATERMARK_POSITION_ITEMS = (
     ('左上', 'top-left'),
     ('顶部居中', 'top-center'),
@@ -254,8 +264,12 @@ def create_shot_info_card(page) -> ExpandGroupSettingCard:
     card.addGroup(FluentIcon.CAMERA, "镜头显示", "控制相框中显示的设备信息", page.combo_lens_display, 1)
 
     # 短版镜头名
-    page.chk_short_lens = SwitchButton()
-    card.addGroup(FluentIcon.CHECKBOX, "短版镜头名", "使用简洁的镜头名称", page.chk_short_lens)
+    # 镜头名（三态下拉，G3：userData 绑定稳定 key，与 combo_lens_display 同构）
+    page.combo_lens_name = ComboBox()
+    for _text, _key in LENS_NAME_ITEMS:
+        page.combo_lens_name.addItem(_text, userData=_key)
+    page.combo_lens_name.setCurrentIndex(0)
+    card.addGroup(FluentIcon.CAMERA, "镜头名", "默认按样式键取值；可强制完整名或短版名", page.combo_lens_name, 1)
 
     # LOGO（G3：哨兵文案改 userData 稳定 key，动态 logo 项以文件名
     # 为 userData——文案调整不再使渲染分支静默失效）
@@ -356,7 +370,7 @@ def collect_render_options(page, item):
         location=location or None,
         custom_text=page.edit_custom_text.text() or None,
         lens_display_mode=lens_key,
-        use_short_lens=page.chk_short_lens.isChecked(),
+        lens_name_mode=page.combo_lens_name.currentData() or 'default',
         timestamp_display_mode=ts_mode,
     )
     options = RenderOptions(
