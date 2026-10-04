@@ -286,11 +286,24 @@ class StyleManager:
                     i += 1
             return fields
         
+        # 组合字段缺失蕴含其组成部分全部缺失（如 timestamp_author 缺失 ⟹
+        # timestamp 与 author 均缺失）。评分时展开组合字段，使更严格的组合变体
+        # （no_timestamp_author）在与单字段变体（no_author）同时匹配
+        # （"时间与作者均无值"场景）时凭更高分胜出，避免同分取舍不确定。
+        IMPLIED_MISSING = {'timestamp_author': ('timestamp', 'author')}
+
+        def expand_missing(fields: set) -> set:
+            expanded = set(fields)
+            for field in fields:
+                expanded.update(IMPLIED_MISSING.get(field, ()))
+            return expanded
+        
         # 按匹配精确度排序：匹配字段数越多越优先（更具体）
         best_file = None
         best_score = -1
         
-        for fname in config_files:
+        # 排序遍历保证同分时取舍确定（os.listdir 顺序不保证）
+        for fname in sorted(config_files):
             required_missing = parse_missing_set(fname)
             
             if required_missing == set():
@@ -299,7 +312,7 @@ class StyleManager:
             
             # 变体文件的缺失集合必须是实际缺失集合的子集
             if required_missing.issubset(missing_fields):
-                score = len(required_missing)
+                score = len(expand_missing(required_missing))
                 if score > best_score:
                     best_score = score
                     best_file = fname
