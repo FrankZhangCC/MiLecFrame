@@ -40,7 +40,30 @@ def _ensure_console_output():
     必须在 setup_logging() 之前调用（其 console handler 依赖 sys.stderr）。
     """
     if sys.stdout is not None and sys.stderr is not None:
-        return  # 开发环境或控制台版，无需处理
+        # ===== 控制台编码容错（修复 GBK 控制台 emoji 打印崩溃）=====
+        # 背景：中文 Windows 的 PowerShell 5.1 默认控制台编码为 GBK（cp936），
+        # 而 CLI 输出中含有 emoji——单张模式的跳过提示 ⏭（main.py
+        # process_image）、批量模式的进度/统计消息 ✅ / ❌（batch_processor
+        # progress_callback）。GBK 无法编码这些字符，print() 会抛
+        # UnicodeEncodeError：单张重跑（输出文件已存在、走 --skip-existing
+        # 跳过分支）与批量处理在 GBK 控制台下必然以 exit=1 崩溃退出
+        # （历史缺陷，自 v2.6.0 引入）。
+        # 修复策略：将 stdout/stderr 的编码错误策略改为 'replace'——无法用
+        # 当前控制台编码表示的字符输出为 '?'，中文与 ASCII 原样保留；在
+        # UTF-8 控制台（Windows Terminal / chcp 65001）下 emoji 本身可编码，
+        # 该策略无任何副作用。此修改对 print() 与 logging 的 console handler
+        # 同时生效：两者引用同一流对象，reconfigure 直接修改流内部编码器，
+        # 且本函数在 setup_logging() 之前执行。
+        for _stream in (sys.stdout, sys.stderr):
+            try:
+                # reconfigure 为 TextIOWrapper 专有 API；errors 单独指定时
+                # 保持原编码（cp936/utf-8）不变，只放宽无法编码时的行为
+                _stream.reconfigure(errors='replace')
+            except (AttributeError, ValueError, OSError):
+                # 非标准文本流（被包装、只读或不支持重配置）时保持原行为，
+                # 绝不因容错处理本身阻断程序启动
+                pass
+        return  # 开发环境或控制台版，无需重定向
 
     from src.utils.app_paths import get_app_dir
     _log_path = get_app_dir() / 'MiLecFrame_console.log'
