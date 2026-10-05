@@ -10,9 +10,9 @@
 #    ② 四个细描边圆角胶囊框（rectangles 描边层，0.106×0.046），
 #       中心距照片底边 0.155，框内参数值（字号 0.0192）两轴居中（需求 3）；
 #    ③ FL / AP / ST / ISO 四个小标签（defined_texts 固定文字，需求 4，
-#       按用户要求调换至胶囊下方），中心距照片底边 0.210，字号 0.018
+#       按用户要求调换至胶囊下方），中心距照片底边 0.199，字号 0.018
 #       不随胶囊缩小。
-#    行距（中心距）：相机→胶囊 0.075、胶囊→标签 0.055。
+#    行距（中心距）：相机→胶囊 0.075、胶囊→标签 0.044。
 # 3. 四列等距：胶囊宽 0.106、间距 0.032 → 列距 d = 0.138，
 #    四列中心相对照片中心偏移 ±0.5d / ±1.5d（整组水平居中）。
 # 4. 颜色明暗自适应（需求 5）：暗色背景下文字与描边纯白、小标签
@@ -278,28 +278,28 @@ layout:
       placement: outside
       position: "bottom-center"
       alignment: "center"
-      margin_bottom: 0.210       # 标签中心距照片底边 0.210×参照边
+      margin_bottom: 0.199       # 标签中心距照片底边 0.199×参照边
       margin_right: 0.207        # 与 rect_01 同列
     defined_text_02:
       content: "AP"
       placement: outside
       position: "bottom-center"
       alignment: "center"
-      margin_bottom: 0.210
+      margin_bottom: 0.199
       margin_right: 0.069        # 与 rect_02 同列
     defined_text_03:
       content: "ST"
       placement: outside
       position: "bottom-center"
       alignment: "center"
-      margin_bottom: 0.210
+      margin_bottom: 0.199
       margin_left: 0.069          # 与 rect_03 同列
     defined_text_04:
       content: "ISO"
       placement: outside
       position: "bottom-center"
       alignment: "center"
-      margin_bottom: 0.210
+      margin_bottom: 0.199
       margin_left: 0.207          # 与 rect_04 同列
 
 # ── Logo 配置：参考图无 Logo，关闭 ──
