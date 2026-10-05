@@ -67,6 +67,7 @@
       timestamp_author: [________]
       camera: [________]
       lens: [________]
+      short_lens: [________]
       camera_lens: [________]
       author: [________]
       location: [________]
@@ -90,7 +91,7 @@
   绝对定位元素 = 填写 position / alignment / margin_*
   相对定位元素 = 填写 relative_to / relative_position / cross_alignment /
                  relative_margin（相对节点禁止出现 alignment 字段）
-   系统支持的 key: exif, timestamp, timestamp_author, camera, lens, camera_lens, author, location
+   系统支持的 key: exif, timestamp, timestamp_author, camera, lens, short_lens, camera_lens, author, location
 
   九点值表（position 与 alignment 使用同一组值，但语义分属照片与元素）:
     top-left       top-center       top-right
@@ -167,6 +168,7 @@
   │   custom_timestamp_author_light_color: [____]   dark: [____]        │
   │   custom_camera_light_color: [____]   dark: [____]                  │
   │   custom_lens_light_color: [____]   dark: [____]                    │
+
   │   custom_camera_lens_light_color: [____]   dark: [____]             │
   │   custom_author_light_color: [____]   dark: [____]                  │
   │   custom_location_light_color: [____]   dark: [____]                │

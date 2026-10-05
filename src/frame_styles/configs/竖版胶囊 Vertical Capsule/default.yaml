@@ -1,0 +1,318 @@
+# ============================================================
+# 竖版胶囊 Vertical Capsule
+# ------------------------------------------------------------
+# 以「参数胶囊 ParamCapsule」为基础的竖版变体：信息区从照片底部
+# 挪到右侧扩展栏，四个参数胶囊竖向排列。适用竖拍构图（照片高 >
+# 宽），横图亦可渲染但构图为竖版设计。
+#
+# 设计要点：
+# 1. 画布扩展：上/下/左三边等距 0.038×参照边，右侧扩展 0.28×参照边
+#    承载信息栏（栏宽结合胶囊 0.106 与文字尺寸综合定，视觉检查
+#    左右留白均匀后确认）。
+# 2. 信息栏内容自上而下（水平共用一条中线 = 照片右缘 + 0.14×参照边）：
+#    ① camera（品牌+型号，字号 0.0192）；
+#    ② lens（镜头型号，字号 0.0192）—— 原 camera_lens 拆分两行；
+#    ③ 四组「胶囊 + 标签」竖向排列：胶囊 0.106×0.046 描边圆角框
+#       （参数值字号 0.0192 两轴居中），标签 FL/AP/ST/ISO（字号 0.018）
+#       保持在各自胶囊正下方。
+# 3. 垂直居中（视觉检查基准）：可见墨迹盒关于照片垂直中心（CY）
+#    对称 → 上下留白相同。无框文字（camera/lens/标签）墨迹相对布局盒
+#    偏上，对称轴已按墨迹盒重算（相机行半高/偏移与标签端差 0.0087，
+#    已折入下述序列）。相对 CY 的中心偏移序列：
+#      camera -0.391 / lens -0.351
+#      胶囊1 -0.150 / 标签1 -0.095 / 胶囊2 +0.015 / 标签2 +0.070
+#      胶囊3 +0.180 / 标签3 +0.235 / 胶囊4 +0.345 / 标签4 +0.400
+#    行距（中心距）：camera→lens 0.040、lens→胶囊1 0.201
+#    （首行与胶囊区的分隔间隙，为原 0.067 的三倍）、
+#    胶囊↔标签 0.055（组内不变）、标签→下一组胶囊 0.110 ——
+#    胶囊列距 0.110 → 0.165（扩大 50%）。
+#
+# 定位实现说明：
+# - 全部元素使用 position: center-right（照片右缘中点）+
+#   placement: outside + alignment: center（布局盒中心贴锚点）：
+#   · 水平：锚点 x = 照片右缘 + margin_right，统一 margin_right
+#     0.14（= 右栏宽 0.28 之半）→ 所有元素共用同一条垂直中线；
+#   · 垂直：锚点 y = 照片垂直中心 + margin_top - margin_bottom，
+#     上方元素写 margin_bottom（向上偏移）、下方元素写 margin_top
+#     （向下偏移），序列整体关于 CY 对称；
+# - 参数文字相对对应胶囊做 0.0044 视觉补偿（抵消文字墨迹视觉中心
+#   相对布局盒偏上），方向随 margin 键而异：上半区元素用
+#   margin_bottom（ay = CY + mt - mb，mb 越小越靠下 → 胶囊 mb −
+#   0.0044），下半区用 margin_top（mt 越大越靠下 → 胶囊 mt +
+#   0.0044）；
+# - 标签与胶囊共享水平 margin → 标签中心 x = 胶囊中心 x，且
+#   margin 差值使其位于胶囊正下方。
+#
+# 布局基准：参照边 = 原图短边（竖图 = 照片宽度）。
+# 本样式不渲染 custom_text / author / location / timestamp。
+# ============================================================
+
+name: 竖版胶囊 Vertical Capsule
+
+# ── 颜色配置（明暗背景自适应，全部按元素类型显式声明） ──
+colors:
+  # 主体文字：camera / short_lens / 四个参数值 —— 暗底纯白 / 亮底纯黑
+  custom_camera_dark_color: [255, 255, 255]
+  custom_camera_light_color: [0, 0, 0]
+  custom_short_lens_dark_color: [255, 255, 255]
+  custom_short_lens_light_color: [0, 0, 0]
+  custom_focal_length_formatted_dark_color: [255, 255, 255]
+  custom_focal_length_formatted_light_color: [0, 0, 0]
+  custom_aperture_formatted_dark_color: [255, 255, 255]
+  custom_aperture_formatted_light_color: [0, 0, 0]
+  custom_shutter_speed_formatted_dark_color: [255, 255, 255]
+  custom_shutter_speed_formatted_light_color: [0, 0, 0]
+  custom_iso_formatted_dark_color: [255, 255, 255]
+  custom_iso_formatted_light_color: [0, 0, 0]
+
+  # 小标签（defined_text_01..04 = FL / AP / ST / ISO）：
+  # 暗底 90% 灰（255×0.9 ≈ 230）/ 亮底 10% 灰（255×0.1 ≈ 26）
+  custom_defined_text_01_dark_color: [230, 230, 230]
+  custom_defined_text_01_light_color: [26, 26, 26]
+  custom_defined_text_02_dark_color: [230, 230, 230]
+  custom_defined_text_02_light_color: [26, 26, 26]
+  custom_defined_text_03_dark_color: [230, 230, 230]
+  custom_defined_text_03_light_color: [26, 26, 26]
+  custom_defined_text_04_dark_color: [230, 230, 230]
+  custom_defined_text_04_light_color: [26, 26, 26]
+
+  # 胶囊描边色（stroke 专用明暗键）—— 暗底纯白 / 亮底纯黑
+  custom_rect_01_stroke_dark_color: [255, 255, 255]
+  custom_rect_01_stroke_light_color: [0, 0, 0]
+  custom_rect_02_stroke_dark_color: [255, 255, 255]
+  custom_rect_02_stroke_light_color: [0, 0, 0]
+  custom_rect_03_stroke_dark_color: [255, 255, 255]
+  custom_rect_03_stroke_light_color: [0, 0, 0]
+  custom_rect_04_stroke_dark_color: [255, 255, 255]
+  custom_rect_04_stroke_light_color: [0, 0, 0]
+
+  # 填充色与描边同色：fill.enabled 已关闭不会绘制，
+  # 仅作为描边颜色四级回退链的兜底，避免描边色意外缺失
+  custom_rect_01_dark_color: [255, 255, 255]
+  custom_rect_01_light_color: [0, 0, 0]
+  custom_rect_02_dark_color: [255, 255, 255]
+  custom_rect_02_light_color: [0, 0, 0]
+  custom_rect_03_dark_color: [255, 255, 255]
+  custom_rect_03_light_color: [0, 0, 0]
+  custom_rect_04_dark_color: [255, 255, 255]
+  custom_rect_04_light_color: [0, 0, 0]
+
+# ── 字体配置（沿用基础样式参数胶囊） ──
+fonts:
+  latin:
+    family: Gotham
+    weight: medium
+    weights:
+      light: Light
+      regular: Book
+      medium: Medium
+  cjk:
+    family: GlowSansSC-Normal
+    weight: medium
+    weights:
+      light: Light
+      regular: Regular
+      medium: Medium
+  # 默认字号 = 参照边 × 2.4%（camera / lens 使用）
+  size_ratio: 0.024
+  sizes:
+    # camera 与 short_lens 两行同字号（由原 camera_lens 拆分而来，缩至 0.0192）
+    camera: 0.0192
+    short_lens: 0.0192
+    # 四个参数值缩至 0.0192（基础样式第三轮调整值）
+    focal_length_formatted: 0.0192
+    aperture_formatted: 0.0192
+    shutter_speed_formatted: 0.0192
+    iso_formatted: 0.0192
+    # 小标签字号 0.018（较 0.020 缩 10%），不随胶囊缩小
+    defined_text_01: 0.018
+    defined_text_02: 0.018
+    defined_text_03: 0.018
+    defined_text_04: 0.018
+  line_spacing_ratio: 0.005
+
+# ── 布局配置 ──
+layout:
+  # 画布扩展：三边等距 0.038，右侧 0.28 承载竖排信息栏
+  #（右栏宽结合胶囊宽 0.106 与 lens 文字宽度留白确认，见文件头）
+  expand_canvas:
+    enabled: true
+    top: 0.038
+    bottom: 0.038
+    left: 0.038
+    right: 0.28
+
+  # 安全区域：信息栏位于右扩展区内且四周留有余量，不额外收缩
+  padding:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+  # ── 四个细描边圆角胶囊（竖向排列） ──
+  # 描边环效果栈（fill 关闭），尺寸与基础样式一致（0.106×0.046、
+  # 圆角 0.012、描边 0.001）。水平：margin_right 0.14 = 右栏中线；
+  # 垂直：margin_bottom 表示照片中心上方偏移、margin_top 表示下方偏移。
+  rectangles:
+    rect_01:
+      # FL 胶囊（第一组，CY 上方 0.150）
+      width_ratio: 0.106
+      height_ratio: 0.046
+      placement: outside
+      position: "center-right"
+      alignment: "center"        # 布局盒中心贴锚点 → 胶囊中心定位
+      margin_right: 0.14          # 照片右缘外 0.14×参照边（右栏中线）
+      margin_bottom: 0.150        # 中心 = CY - 0.150
+      corner_radius:              # 圆角 = 参照边 × 0.012（约胶囊高的 26%）
+        top_left: 0.012
+        top_right: 0.012
+        bottom_left: 0.012
+        bottom_right: 0.012
+      fill:
+        enabled: false            # 只留描边环，内部透出背景
+      stroke:
+        enabled: true
+        radius_ratio: 0.001       # 细描边 = 参照边 × 0.10%
+        opacity: 1.0
+    rect_02:
+      # AP 胶囊（第二组，跨过 CY 移至下方 0.015）
+      width_ratio: 0.106
+      height_ratio: 0.046
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.015           # 中心 = CY + 0.015（列距扩大后跨过 CY）
+      corner_radius:
+        top_left: 0.012
+        top_right: 0.012
+        bottom_left: 0.012
+        bottom_right: 0.012
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+    rect_03:
+      # ST 胶囊（第三组，CY 下方 0.180）
+      width_ratio: 0.106
+      height_ratio: 0.046
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.180           # 中心 = CY + 0.180
+      corner_radius:
+        top_left: 0.012
+        top_right: 0.012
+        bottom_left: 0.012
+        bottom_right: 0.012
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+    rect_04:
+      # ISO 胶囊（第四组，CY 下方 0.345）
+      width_ratio: 0.106
+      height_ratio: 0.046
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.345           # 中心 = CY + 0.345
+      corner_radius:
+        top_left: 0.012
+        top_right: 0.012
+        bottom_left: 0.012
+        bottom_right: 0.012
+      fill:
+        enabled: false
+      stroke:
+        enabled: true
+        radius_ratio: 0.001
+        opacity: 1.0
+
+  # ── 信息文字 ──
+  info_position:
+    # ① camera：品牌+型号，CY 上方 0.391（墨迹盒对称，见文件头序列）
+    camera:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_bottom: 0.391        # 中心 = CY - 0.391
+
+    # ② short_lens：短版镜头名，位于 camera 下方（行距 0.040）
+    short_lens:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_bottom: 0.351        # 中心 = CY - 0.351
+
+    # ③ 四个参数值：与各自胶囊 margin 相同（含 +0.0044 视觉补偿），
+    #    两轴中心对齐胶囊（补偿原因见文件头）
+    focal_length_formatted:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_bottom: 0.1456       # rect_01 的 0.150 - 0.0044 视觉补偿
+      # 注：center-right 下 ay = CY + mt - mb，mb 越小越靠下 →
+      #     补偿墨迹偏上需减小 mb（与 bottom 语义相反）
+    aperture_formatted:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.0194          # rect_02 的 0.015 + 0.0044 视觉补偿
+    shutter_speed_formatted:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.1844          # rect_03 的 0.180 + 0.0044 视觉补偿
+    iso_formatted:
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.3494          # rect_04 的 0.345 + 0.0044 视觉补偿
+
+  # ── 参数标签：保持在各自胶囊正下方（行距 0.055） ──
+  defined_texts:
+    defined_text_01:
+      content: "FL"
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_bottom: 0.095        # 中心 = CY - 0.095（rect_01 下方）
+    defined_text_02:
+      content: "AP"
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.070           # 中心 = CY + 0.070（rect_02 下方）
+    defined_text_03:
+      content: "ST"
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.235           # 中心 = CY + 0.235（rect_03 下方）
+    defined_text_04:
+      content: "ISO"
+      placement: outside
+      position: "center-right"
+      alignment: "center"
+      margin_right: 0.14
+      margin_top: 0.400           # 中心 = CY + 0.400（rect_04 下方）
+
+# ── Logo 配置：关闭 ──
+logo:
+  enabled: false

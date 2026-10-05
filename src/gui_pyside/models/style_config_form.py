@@ -23,7 +23,7 @@ from src.utils.orientation_adaptation import (
 # ── 常量 ────────────────────────────────────────────────────
 
 ELEMENT_KEYS = [
-    'exif', 'timestamp', 'timestamp_author', 'camera', 'lens',
+    'exif', 'timestamp', 'timestamp_author', 'camera', 'lens', 'short_lens',
     'camera_lens', 'camera_make', 'author', 'location', 'gps',
     'focal_length_formatted', 'aperture_formatted',
     'shutter_speed_formatted', 'iso_formatted',
@@ -59,7 +59,7 @@ WEIGHT_OPTIONS = ['medium', 'regular', 'light']
 
 COLOR_ELEMENT_KEYS = [
     'exif', 'timestamp', 'timestamp_author', 'camera', 'camera_make',
-    'lens', 'camera_lens', 'author', 'location', 'gps',
+    'lens', 'short_lens', 'camera_lens', 'author', 'location', 'gps',
     'focal_length_formatted', 'aperture_formatted',
     'shutter_speed_formatted', 'iso_formatted', 'custom_text',
 ]

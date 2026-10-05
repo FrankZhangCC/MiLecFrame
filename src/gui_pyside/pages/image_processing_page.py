@@ -50,6 +50,7 @@ from .image_processing_config_cards import (
     create_frame_config_card, create_personalization_card,
     create_shot_info_card, create_watermark_card,
     collect_render_options, PORTRAIT_ADAPTATION_ITEMS,
+    LENS_NAME_ITEMS,
     _LEGACY_TEXT_ALIASES,
 )
 from src.utils.exif_helper import ExifHelper
@@ -724,9 +725,14 @@ class ImageProcessingPage(QWidget):
         self.combo_lens_display.setCurrentIndex(0)
         card.addGroup(FluentIcon.CAMERA, "镜头显示", "控制相框中显示的设备信息", self.combo_lens_display, 1)
 
-        # 短版镜头名
-        self.chk_short_lens = SwitchButton()
-        card.addGroup(FluentIcon.CHECKBOX, "短版镜头名", "使用简洁的镜头名称", self.chk_short_lens)
+        # 镜头名（三态下拉；注意：本方法当前无调用点——实际卡片由
+        # image_processing_config_cards.create_shot_info_card 构建，
+        # 此处构造保持与其一致，避免残留旧控件名误导后续维护）
+        self.combo_lens_name = ComboBox()
+        for _text, _key in LENS_NAME_ITEMS:
+            self.combo_lens_name.addItem(_text, userData=_key)
+        self.combo_lens_name.setCurrentIndex(0)
+        card.addGroup(FluentIcon.CAMERA, "镜头名", "默认按样式键取值；可强制完整名或短版名", self.combo_lens_name, 1)
 
         # LOGO（G3：哨兵文案改 userData 稳定 key，动态 logo 项以文件名
         # 为 userData——文案调整不再使渲染分支静默失效）
@@ -948,13 +954,15 @@ class ImageProcessingPage(QWidget):
             # 新图时设置一次，之后尊重用户手动修改，切换胶片栏选中图时不
             # 重复覆盖。item.width/height 为 EXIF 转正后的真实方向，佳能等
             # 竖拍照片（横向存储+旋转标记）的判断因此可靠。）
+            # 三态映射（勾选框升级为下拉后沿用原方向判定）：竖幅/方形 →
+            # "短版镜头名"(short)，横幅 → "默认"(default)。
             if first_new_index < len(self.file_items):
                 first_item = self.file_items[first_new_index]
-                auto_short_lens = first_item.height >= first_item.width
-                self.chk_short_lens.setChecked(auto_short_lens)
+                auto_name_mode = 'short' if first_item.height >= first_item.width else 'default'
+                self.combo_lens_name.setCurrentIndex(self.combo_lens_name.findData(auto_name_mode))
                 logger.info(
-                    f"按首图方向自动设置短版镜头名: {first_item.file_name} "
-                    f"({first_item.width}x{first_item.height}) -> {auto_short_lens}"
+                    f"按首图方向自动设置镜头名模式: {first_item.file_name} "
+                    f"({first_item.width}x{first_item.height}) -> {auto_name_mode}"
                 )
 
             self._update_button_states()

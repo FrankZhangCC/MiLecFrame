@@ -148,21 +148,23 @@ src/frame_styles/configs/样式名称/
 | `no_{field}.yaml` | 当 `{field}` 的值为空时匹配 |
 | `no_{field1}_no_{field2}.yaml` | 多个字段同时为空时匹配，优先级高于单字段变体 |
 
-当前渲染入口会传入四种可用性条件：`location`、`author`、`custom_text`、`timestamp`。变体文件名中的字段应从这四项中选择。
+当前渲染入口会传入五种可用性条件：`location`、`author`、`custom_text`、`timestamp`、`timestamp_author`。变体文件名中的字段应从这五项中选择。
+
+其中 `timestamp_author` 是**组合字段**：拍摄时间或作者任一有值即视为有值（对应渲染侧的三段 fallback：`"时间 by 作者"` / 仅时间 / `"Shot by 作者"`）。其缺失蕴含时间与作者均缺失——若某样式同时存在 `no_author` 与 `no_timestamp_author` 变体且两者同时匹配，更严格的 `no_timestamp_author` 优先。
 
 #### 示例
 
 ```
 底部信息条 Bottom Bars/
-├── default.yaml                  # 所有字段都有数据时使用
-├── no_location.yaml              # 没有拍摄地点时使用
-├── no_author.yaml                # 没有作者时使用
-└── no_location_no_author.yaml    # 两者都没有时使用（优先级最高）
+├── default.yaml                            # 时间或作者任一有值时使用（组合行 fallback 降级仍沿用本布局）
+├── no_location.yaml                        # 没有拍摄地点，但时间或作者有值时使用
+├── no_timestamp_author.yaml                # 时间与作者均无值时使用（组合行整行不渲染）
+└── no_location_no_timestamp_author.yaml    # 时间、作者、地点均无值时使用（优先级最高）
 ```
 
 #### 匹配算法（通俗解释）
 
-程序会检查你当前处理的照片有没有"地点""作者"等数据。如果"地点"和"作者"都有，用 `default.yaml`；如果只有"地点"没有"作者"，用 `no_author.yaml`；两者都没有，用 `no_location_no_author.yaml`。
+程序会检查你当前处理的照片有没有"地点""作者""拍摄时间"等数据。时间或作者**任一有值**时，组合行 `timestamp_author` 就有内容可渲染（作者缺则自动降级为纯时间、时间缺则降级为 `"Shot by 作者"`），布局不变：地点有值用 `default.yaml`、地点缺失用 `no_location.yaml`。只有**时间与作者都没有**时组合行整行不渲染，才换用 `no_timestamp_author.yaml`；若地点也缺失，则用 `no_location_no_timestamp_author.yaml`。
 
 #### 精简规范
 
@@ -656,7 +658,8 @@ defined_texts:
 | `timestamp_author` | `2025.01.15 14:30:00 by Frank` | 时间 + 作者合并 |
 | `camera` | `Leica Q3` | 相机品牌 + 型号 |
 | `camera_make` | `Leica` | 仅相机品牌 |
-| `lens` | `Summilux 28mm f/1.7` / `28mm` | 镜头型号（受短版开关控制） |
+| `lens` | `Summilux 28mm f/1.7` / `28mm` | 镜头型号（受镜头名三态控制：short 模式下输出短版名） |
+| `short_lens` | `28mm` | 短版镜头名（受镜头名三态控制：full 模式下输出完整镜头名） |
 | `camera_lens` | `Leica Q3 \| Summilux 28mm` | 品牌 + 型号 + 镜头（由镜头显示模式控制） |
 | `author` | `Frank` | 用户输入 |
 | `location` | `Shanghai` | 用户输入 |
@@ -666,7 +669,7 @@ defined_texts:
 | `shutter_speed_formatted` | `1/125s` | 快门速度（已格式化） |
 | `iso_formatted` | `200` | 感光度裸值；`ISO` 前缀由固定标签或 `exif` 组合文本提供 |
 
-**镜头显示模式** 和 **使用短版镜头名** 这两个选项在 GUI 中控制，影响 `camera_lens` 和 `lens` 的输出格式。详见 [GUI 功能指南](../README.md#镜头显示控制)。
+**镜头显示模式**（决定显示哪些设备）和 **镜头名**三态下拉（默认 / 完整镜头名 / 短版镜头名，决定长短名的替代关系）这两个选项在 GUI 中控制，影响 `camera_lens`、`lens` 和 `short_lens` 的输出格式。详见 [GUI 功能指南](../README.md#镜头显示控制)。
 
 ### 5.2 defined_texts — 固定文字
 
@@ -793,7 +796,7 @@ colors:
   custom_defined_text_01_dark_color: "#AAAAAA"
 ```
 
-- 支持的 info_position 元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`camera_lens`、`author`、`location`、`gps`、`focal_length_formatted`、`aperture_formatted`、`shutter_speed_formatted`、`iso_formatted`
+- 支持的 info_position 元素类型：`exif`、`timestamp`、`timestamp_author`、`camera`、`camera_make`、`lens`、`short_lens`、`camera_lens`、`author`、`location`、`gps`、`focal_length_formatted`、`aperture_formatted`、`shutter_speed_formatted`、`iso_formatted`
 - `defined_texts` 中的条目同样支持按 key 独立覆盖：如 `custom_defined_text_01_dark_color`
 - `custom_text` 条目对应 key 为 `custom_custom_text_dark_color` / `custom_custom_text_light_color`
 - 每种元素类型只需要配置实际使用的亮侧和暗侧之一，无需成对

@@ -1,6 +1,6 @@
 ![Features introduction](docs/v1.0_features_vertical.png)
 
-# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.7.2--dev-blue)
+# MiLecFrame - 照片相框水印工具 ![Version](https://img.shields.io/badge/version-2.7.3--dev-blue)
 
 > ©FrankZhangCC 2026 · 基于 GPLv3 许可证发布 · 由 DeepSeek V4 辅助开发
 
@@ -84,7 +84,7 @@ python src/main.py
 | 输出设置 | 选择输出格式（JPEG / PNG） |
 | 相框配置 | 切换样式、选择背景填充类型、调整字重 |
 | 个性化配置 | 填写作者姓名、拍摄地点、自定义寄语文字 |
-| 拍摄信息配置 | 控制镜头显示方式、短版镜头名、时间显示模式、Logo 来源 |
+| 拍摄信息配置 | 控制镜头显示方式、镜头名（默认/完整/短版三态）、时间显示模式、Logo 来源 |
 | 文本水印 | 添加文字水印（内容、位置、透明度、颜色） |
 
 **底部胶片栏**：多张照片以缩略图排队显示，蓝色边框 = 当前选中，绿色边框 = 已处理。支持右键移除、Delete 键删除。
@@ -154,7 +154,7 @@ Logo 文件放在 `assets/logos/` 目录中。在「拍摄信息配置」标签�
 |------|------|
 | `original_lens` | EXIF LensModel 原始值 |
 | `mapped_lens` | 完整显示名 |
-| `short_lens` | 短版名（GUI 勾选"使用短版镜头名"时生效） |
+| `short_lens` | 短版名（样式 `short_lens` 键的默认输出源；GUI"镜头名"下拉选"完整镜头名"时改输出完整名） |
 
 **短版名规则**：
 
@@ -253,7 +253,7 @@ python src/main.py --batch -i ./photos -o ./output -s "底部信息条 Bottom Ba
 | `--logo` | | `auto` / `none` / 文件名 |
 | `--lens-display` | | `combined` / `camera_only` / `lens_only` |
 | `--timestamp-display` | | `full` / `date_only` / `hide` |
-| `--use-short-lens` | | 使用短版镜头名 |
+| `--lens-name` | | 镜头名模式：`default` / `full` / `short` |
 | `--no-enhance` | | 关闭背景增强 |
 | `--skip-existing` | | 跳过已存在文件（默认启用） |
 | `--use-gps-location` | | 用 GPS 坐标替换拍摄地点 |
