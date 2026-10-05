@@ -7,6 +7,7 @@
 """
 import os
 import json
+import copy
 import yaml
 import toml
 from pathlib import Path
@@ -19,39 +20,18 @@ import logging
 from src.utils.app_paths import get_resource_root, get_app_dir, is_frozen
 # 竖图旋转适配样式默认值校验（可选顶层字段，方案 §5.5 双层校验的第 1 层）
 from src.utils.orientation_adaptation import validate_style_default
-# 定位语义九点/交叉轴枚举（与 LayoutEngine 单一来源保持一致）
-from src.utils.layout_engine import (
-    ABSOLUTE_POSITIONS,
-    ABSOLUTE_ALIGNMENTS,
-    HORIZONTAL_CROSS_ALIGNMENTS,
-    VERTICAL_CROSS_ALIGNMENTS,
-    RELATIVE_POSITIONS,
-    resolve_relative_chain,
+# 定位语义校验已拆分至独立纯函数模块（计划 §4.0：StyleManager 只保留
+# 薄包装做日志输出；本文件不再直接依赖 layout_engine 定位枚举）
+from src.frame_styles import style_validator
+from src.frame_styles import style_rules
+# 共享变体规则与数据结构（计划 §4.1/§4.2：来源定位结果与选择逻辑的
+# 单一实现；GUI 能力查询与渲染加载共用同一套候选与选择规则）
+from src.frame_styles.style_rules import (
+    VariantCandidate,
+    StyleSource,
+    parse_missing_fields,
+    select_variant_candidate,
 )
-
-# 旧 position 单轴别名 → 新九点迁移建议（唯一映射，直接给出目标值）
-_POSITION_OLD_ALIAS_HINT = {
-    'top': 'top-center',
-    'tc': 'top-center',
-    'bottom': 'bottom-center',
-    'bc': 'bottom-center',
-    'left': 'center-left',
-    'right': 'center-right',
-    'tl': 'top-left',
-    'tr': 'top-right',
-    'bl': 'bottom-left',
-    'br': 'bottom-right',
-}
-
-# 旧 alignment 单轴值 → 新九点候选（单轴值无法唯一决定迁移结果，
-# 只给候选集，由用户结合元素实际位置选择）
-_ALIGNMENT_OLD_ALIAS_HINT = {
-    'left': 'top-left / center-left / bottom-left',
-    'right': 'top-right / center-right / bottom-right',
-    'top': 'top-left / top-center / top-right',
-    'bottom': 'bottom-left / bottom-center / bottom-right',
-    'both-center': 'center',
-}
 
 
 class StyleManager:
@@ -77,6 +57,19 @@ class StyleManager:
                 self.extra_dirs.append(str(get_app_dir() / 'styles'))
         
         self.logger = logging.getLogger(__name__)
+
+        # ── 文件级加载缓存（计划 §4.4：减少重复 parse 与重复调用）──
+        # 键 = os.path.normcase 规范化的绝对路径（Windows 大小写不敏感，
+        # 防止同一文件产生两个缓存键）；值 = 已校验且已注入默认值的配置。
+        # 读取一律返回 deepcopy：ImageProcessor 会修改本次配置的
+        # fonts.weight，返回缓存对象本身会被跨调用污染（C16 断言）。
+        # 当前全部调用方为单线程（GUI 主线程 / CLI 串行批量），不加锁；
+        # 若未来引入后台线程访问，必须先补并发评估。
+        self._config_cache: Dict[str, Dict] = {}
+        # 来源与候选枚举缓存：键 = (样式名, extra_dirs 序列, config_dir)。
+        # extra_dirs 参与键构造：测试/运行期动态调整目录列表时自动失效，
+        # 不依赖调用方记得清缓存（防脏缓存的防御性设计）。
+        self._source_cache: Dict[tuple, StyleSource] = {}
 
     def _iter_style_dirs(self, style_name: str):
         """
@@ -203,7 +196,23 @@ class StyleManager:
         return str(Path(bases[0]) / rel_path)
 
     def _load_config_file(self, config_path: str) -> Optional[Dict]:
-        """加载单个配置文件"""
+        """加载单个配置文件（带文件级缓存，计划 §4.4）
+
+        实测（T6 记录）：加载成本 99.8% 在文件读取 + parse，校验仅 0.01 ms；
+        缓存命中返回 deepcopy（0.03 ms）替代重复 parse（4.2 ms），约百倍。
+        必须深拷贝：ImageProcessor 会修改本次配置的 fonts.weight，返回
+        缓存对象本身会被跨调用污染（C16 断言）。
+        加载失败（语法错误/校验拒绝）不缓存：坏文件修复后无需显式失效
+        即恢复，且每次重读持续暴露错误日志便于定位。
+
+        Returns:
+            已通过校验并注入默认字段的配置深拷贝；失败返回 None
+        """
+        cache_key = os.path.normcase(os.path.abspath(config_path))
+        cached = self._config_cache.get(cache_key)
+        if cached is not None:
+            return copy.deepcopy(cached)
+
         ext = os.path.splitext(config_path)[1].lower()
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -215,331 +224,203 @@ class StyleManager:
                     config = toml.load(f)
                 else:
                     return None
-            
+
             if not isinstance(config, dict):
                 self.logger.error(f"配置文件格式错误，应为字典类型: {config_path}")
                 return None
-            
+
             if self._validate_config(config, config_path):
-                return config
+                # 注入默认字段后的配置进入缓存；返回深拷贝隔离本次调用
+                self._config_cache[cache_key] = config
+                return copy.deepcopy(config)
             else:
                 self.logger.error(f"样式配置无效: {config_path}")
                 return None
-                
+
         except Exception as e:
             self.logger.error(f"读取样式配置失败 {config_path}: {str(e)}")
             return None
 
-    def _resolve_style_variant(self, style_dir: str, context: Optional[Dict]) -> Optional[str]:
-        """
-        根据上下文从文件夹中选取最佳变体配置文件
-        
-        命名规则（片段，无特定顺序）：
-          default.yaml              → 默认配置（兜底）
-          no_{field}.yaml            → 当 {field} 缺失时匹配
-          no_{field1}_no_{field2}.yaml → 当多个字段同时缺失时匹配（更具体优先）
-        
+    def invalidate(self, path: Optional[str] = None) -> None:
+        """失效缓存（计划 §4.4：新鲜度由显式失效点保证，不做 mtime/监听）
+
         Args:
-            style_dir: 样式文件夹路径
-            context: 上下文字典 {'location': ..., 'author': ...}，None 表示无上下文
-        
-        Returns:
-            匹配的配置文件路径，未找到则返回 None
+            path: 给定文件路径时仅失效该文件的配置缓存；因同目录内容
+                  可能已变化，来源枚举缓存一并整体失效。None（或缺省）
+                  时全部失效。
+        """
+        if path is None:
+            self._config_cache.clear()
+            self._source_cache.clear()
+            return
+        self._config_cache.pop(os.path.normcase(os.path.abspath(path)), None)
+        self._source_cache.clear()
+
+    def invalidate_all(self) -> None:
+        """失效全部文件与来源缓存（GUI refresh/showEvent/生成前调用）"""
+        self.invalidate(None)
+
+    def _scan_directory_candidates(self, style_dir: str, style_name: str) -> StyleSource:
+        """枚举目录内配置文件候选（计划 §4.1/§4.2）
+
+        保持拆分前行为：四种小写后缀（.json/.yaml/.yml/.toml，大小写
+        敏感的 endswith）、不递归、不过滤 '_' 前缀隐藏文件、保持原始
+        listdir 顺序（default 兜底与首文件兜底都依赖该顺序）。
+        空目录产出空候选序列并给出诊断。
+        """
+        names = [f for f in os.listdir(style_dir)
+                 if f.endswith(('.json', '.yaml', '.yml', '.toml'))]
+        diagnostics = []
+        if not names:
+            diagnostics.append(f"样式文件夹内无有效配置文件: {style_name}")
+        candidates = tuple(
+            VariantCandidate(
+                path=os.path.join(style_dir, fname),
+                filename=fname,
+                ordinal=ordinal,
+                required_missing=parse_missing_fields(fname),
+            )
+            for ordinal, fname in enumerate(names)
+        )
+        return StyleSource(kind='directory', path=style_dir,
+                           candidates=candidates, diagnostics=tuple(diagnostics))
+
+    def resolve_style_source(self, style_name: str) -> StyleSource:
+        """定位样式的最终配置来源（计划 §4.1：能力查询与加载共用同一位置）
+
+        查找顺序与拆分前 get_style_config 逐字一致：
+        1. 目录样式优先：按 extra_dirs 现有顺序检查，再查 config_dir；
+           高优先级目录一旦存在即采用——目录为空或选中的文件损坏也
+           不转向其他同名来源；
+        2. 无目录样式才查单文件：每个目录内按 .json/.yaml/.yml/.toml
+           顺序查找；
+        3. 都不存在 → kind='missing'。
+
+        只分析最终来源，不合并其他目录或同名单文件的能力。结果缓存：
+        键含 (extra_dirs 序列, config_dir)，目录列表动态变化时自动
+        失效（防脏缓存的防御性设计）；显式失效走 invalidate/invalidate_all。
+        """
+        cache_key = (style_name, tuple(self.extra_dirs), self.config_dir)
+        cached = self._source_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        # 1. 目录样式（用户目录优先于内置目录）
+        for base in [*self.extra_dirs, self.config_dir]:
+            style_dir = os.path.join(base, style_name)
+            if os.path.isdir(style_dir):
+                source = self._scan_directory_candidates(style_dir, style_name)
+                self._source_cache[cache_key] = source
+                return source
+
+        # 2. 单文件样式（向后兼容，用户目录优先）
+        for base in [*self.extra_dirs, self.config_dir]:
+            for ext in ('.json', '.yaml', '.yml', '.toml'):
+                config_path = os.path.join(base, f"{style_name}{ext}")
+                if os.path.exists(config_path):
+                    source = StyleSource(kind='single_file', path=config_path)
+                    self._source_cache[cache_key] = source
+                    return source
+
+        source = StyleSource(
+            kind='missing', path='',
+            diagnostics=(f"样式配置文件不存在: {style_name}",))
+        self._source_cache[cache_key] = source
+        return source
+
+    def _resolve_style_variant(self, style_dir: str, context: Optional[Dict]) -> Optional[str]:
+        """（兼容包装）根据上下文从文件夹中选取最佳变体配置文件
+
+        选择逻辑已收敛至 style_rules.select_variant_candidate（计划 §4.2
+        单一实现：条件候选按文件名排序、同分取排序后首个；default 兜底
+        与首文件兜底均按原始枚举顺序；组合条件评分展开见 IMPLIED_MISSING）。
+        本包装每次独立扫描目录（不走路由缓存），供既有调用方与 T0 基线
+        比对使用；渲染加载路径经 get_style_config → resolve_style_source。
         """
         if not os.path.isdir(style_dir):
             return None
-        
-        # 收集文件夹内的所有配置文件
-        config_files = []
-        for fname in os.listdir(style_dir):
-            if fname.endswith(('.json', '.yaml', '.yml', '.toml')):
-                config_files.append(fname)
-        
-        if not config_files:
-            return None
-        
-        # 确定缺失的字段集合
-        missing_fields = set()
-        if context:
-            for field, value in context.items():
-                if value is None or value == '':
-                    missing_fields.add(field)
-        
-        # 从文件名解析匹配条件：no_{field}_.yaml → {field}
-        def parse_missing_set(filename: str) -> set:
-            name = os.path.splitext(filename)[0]
-            if name.lower() == 'default':
-                return set()
-            parts = name.split('_')
-            fields = set()
-            i = 0
-            while i < len(parts):
-                if parts[i].lower() == 'no' and i + 1 < len(parts):
-                    i += 1
-                    field_parts = []
-                    while i < len(parts) and parts[i].lower() != 'no':
-                        field_parts.append(parts[i])
-                        i += 1
-                    if field_parts:
-                        fields.add('_'.join(field_parts))
-                else:
-                    i += 1
-            return fields
-        
-        # 组合字段缺失蕴含其组成部分全部缺失（如 timestamp_author 缺失 ⟹
-        # timestamp 与 author 均缺失）。评分时展开组合字段，使更严格的组合变体
-        # （no_timestamp_author）在与单字段变体（no_author）同时匹配
-        # （"时间与作者均无值"场景）时凭更高分胜出，避免同分取舍不确定。
-        IMPLIED_MISSING = {'timestamp_author': ('timestamp', 'author')}
-
-        def expand_missing(fields: set) -> set:
-            expanded = set(fields)
-            for field in fields:
-                expanded.update(IMPLIED_MISSING.get(field, ()))
-            return expanded
-        
-        # 按匹配精确度排序：匹配字段数越多越优先（更具体）
-        best_file = None
-        best_score = -1
-        
-        # 排序遍历保证同分时取舍确定（os.listdir 顺序不保证）
-        for fname in sorted(config_files):
-            required_missing = parse_missing_set(fname)
-            
-            if required_missing == set():
-                # default.yaml — 最低优先级，只在无更好选择时使用
-                continue
-            
-            # 变体文件的缺失集合必须是实际缺失集合的子集
-            if required_missing.issubset(missing_fields):
-                score = len(expand_missing(required_missing))
-                if score > best_score:
-                    best_score = score
-                    best_file = fname
-        
-        if best_file:
-            return os.path.join(style_dir, best_file)
-        
-        # 兜底：查找 default.*
-        for fname in config_files:
-            if os.path.splitext(fname)[0].lower() == 'default':
-                return os.path.join(style_dir, fname)
-        
-        # 无 default 文件时，返回第一个配置文件
-        return os.path.join(style_dir, config_files[0])
+        source = self._scan_directory_candidates(
+            style_dir, style_name=os.path.basename(style_dir))
+        picked = select_variant_candidate(source.candidates, context)
+        return picked.path if picked else None
 
     def get_style_config(self, style_name: str, context: Optional[Dict] = None) -> Optional[Dict]:
-        """
-        获取指定样式的配置，支持文件夹变体选择
-        
+        """获取指定样式的配置，支持文件夹变体选择（共享来源与选择规则）
+
         Args:
             style_name: 样式名称
             context: 上下文信息，如 {'location': '北京', 'author': '张三'}
                      用于从文件夹样式中选取最佳变体配置
-            
+
         Returns:
-            样式配置字典，如果不存在则返回None
+            样式配置字典，如果不存在则返回 None
         """
-        # 1. 尝试作为文件夹样式加载（文件夹优先，用户目录优先于内置目录）
-        for style_dir in self._iter_style_dirs(style_name):
-            config_path = self._resolve_style_variant(style_dir, context)
-            if config_path:
-                return self._load_config_file(config_path)
-            self.logger.error(f"样式文件夹内无有效配置文件: {style_name}")
-            return None
-        
-        # 2. 尝试作为单文件样式加载（向后兼容，用户目录优先）
-        for base in [*self.extra_dirs, self.config_dir]:
-            for ext in ['.json', '.yaml', '.yml', '.toml']:
-                config_path = os.path.join(base, f"{style_name}{ext}")
-                if os.path.exists(config_path):
-                    return self._load_config_file(config_path)
-        
+        source = self.resolve_style_source(style_name)
+        if source.kind == 'directory':
+            if not source.candidates:
+                # 高优先级目录存在但为空：与拆分前一致，报错且不跨来源回退
+                for diag in source.diagnostics:
+                    self.logger.error(diag)
+                return None
+            picked = select_variant_candidate(source.candidates, context)
+            return self._load_config_file(picked.path)
+        if source.kind == 'single_file':
+            return self._load_config_file(source.path)
+        # missing
         self.logger.error(f"样式配置文件不存在: {style_name}")
         return None
-    
-    # ── 定位语义校验（position / alignment / cross_alignment） ──
 
-    def _iter_positioned_elements(self, config: Dict):
+    def get_style_capabilities(self, style_name: str):
+        """获取样式家族能力快照（计划 §5.1；GUI 选项启禁的数据来源）
+
+        由门面层负责取得来源、逐候选调用现有 _load_config_file（命中
+        4.4 缓存时为深拷贝、无重复 parse），再交给 style_rules 能力分析
+        区提取结果——分析区不反向导入本类，也不接触 GUI。加载失败的
+        候选仍保留身份与文件名条件（§5.3），让共享选择器照常选择。
+
+        Returns:
+            StyleCapabilitySnapshot（不可变）；样式不存在时 candidates
+            为空、diagnostics 说明原因
         """
-        统一遍历五类定位元素，产出 (字段路径, 定位配置) 元组。
+        source = self.resolve_style_source(style_name)
+        facts_seq = []
+        extra_diags = list(source.diagnostics)
+        if source.kind == 'missing':
+            extra_diags.append(f"样式配置文件不存在: {style_name}")
+        else:
+            facts_iter = source.candidates if source.kind == 'directory' else (
+                # 单文件样式：构造单候选（无文件名条件）
+                (VariantCandidate(
+                    path=source.path,
+                    filename=os.path.basename(source.path),
+                    ordinal=0,
+                    required_missing=parse_missing_fields(
+                        os.path.basename(source.path)),
+                ),)
+            )
+            for cand in facts_iter:
+                config = self._load_config_file(cand.path)
+                load_diag = () if config is not None else (
+                    f'配置加载失败（语法或校验错误）: {cand.filename}，'
+                    '详见 debug 日志',)
+                facts_seq.append(
+                    style_rules.analyze_variant(config, cand, load_diag))
+        return style_rules.build_capability_snapshot(
+            style_name, source, tuple(facts_seq), tuple(extra_diags))
 
-        覆盖：layout.info_position.* / layout.defined_texts.* /
-        layout.custom_text / layout.rectangles.* / 顶层 logo。
-        未启用的 custom_text / logo（enabled: false）不参与渲染，跳过校验。
-        """
-        layout = config.get('layout', {})
-        if not isinstance(layout, dict):
-            return
+    # ── 定位语义校验（position / alignment / cross_alignment）──
+    # 校验逻辑已拆分至 style_validator（计划 §4.0：纯函数、无日志副作用）；
+    # 此处只保留薄包装：输出 `[StyleValidation]` 前缀日志并返回布尔值，
+    # 错误文本与顺序与拆分前逐字一致（T0 基线逐条比对验收）。
 
-        info_positions = layout.get('info_position', {})
-        if isinstance(info_positions, dict):
-            for key, cfg in info_positions.items():
-                if isinstance(cfg, dict):
-                    yield f"layout.info_position.{key}", cfg
-
-        defined_texts = layout.get('defined_texts', {})
-        if isinstance(defined_texts, dict):
-            for key, cfg in defined_texts.items():
-                if isinstance(cfg, dict):
-                    yield f"layout.defined_texts.{key}", cfg
-
-        custom_text = layout.get('custom_text', {})
-        if isinstance(custom_text, dict) and custom_text.get('enabled', False):
-            yield 'layout.custom_text', custom_text
-
-        rectangles = layout.get('rectangles', {})
-        if isinstance(rectangles, dict):
-            for key, cfg in rectangles.items():
-                if isinstance(cfg, dict):
-                    yield f"layout.rectangles.{key}", cfg
-
-        logo = config.get('logo', {})
-        if isinstance(logo, dict) and logo.get('enabled', False):
-            yield 'logo', logo
-
-    def _validate_absolute_position_config(self, path: str, cfg: Dict) -> list:
-        """
-        绝对定位节点校验：必须显式提供九点 position 与九点 alignment，
-        拒绝一切旧单轴别名 / both-center（返回错误信息列表）。
-        """
-        errors = []
-
-        position = cfg.get('position', None)
-        if position is None:
-            errors.append(
-                f"{path}.position 缺失：绝对定位节点必须显式提供九点 position"
-                f"（{sorted(ABSOLUTE_POSITIONS)}）")
-        elif position not in ABSOLUTE_POSITIONS:
-            hint = _POSITION_OLD_ALIAS_HINT.get(str(position))
-            extra = f"；建议迁移为 {hint}" if hint else ""
-            errors.append(
-                f"{path}.position 值非法: {position!r}{extra}。"
-                f"合法九点值为 {sorted(ABSOLUTE_POSITIONS)}")
-
-        alignment = cfg.get('alignment', None)
-        if alignment is None:
-            errors.append(
-                f"{path}.alignment 缺失：绝对定位节点必须显式提供九点 alignment"
-                f"（{sorted(ABSOLUTE_ALIGNMENTS)}）")
-        elif alignment not in ABSOLUTE_ALIGNMENTS:
-            hint = _ALIGNMENT_OLD_ALIAS_HINT.get(str(alignment))
-            extra = f"；单轴旧值无法唯一迁移，请结合元素实际位置选择：{hint}" if hint else ""
-            errors.append(
-                f"{path}.alignment 值非法: {alignment!r}{extra}。"
-                f"合法九点值为 {sorted(ABSOLUTE_ALIGNMENTS)}")
-
-        return errors
-
-    def _validate_relative_position_config(self, path: str, cfg: Dict) -> list:
-        """
-        相对定位节点校验：只接受 relative_to + relative_position +
-        cross_alignment；出现旧 alignment 字段直接报错并提示改名为
-        cross_alignment；cross_alignment 与方向轴必须匹配。
-        """
-        errors = []
-
-        if 'alignment' in cfg:
-            errors.append(
-                f"{path}.alignment: 相对定位节点不允许使用 alignment 字段"
-                f"（当前值: {cfg['alignment']!r}），请将该字段改名为 "
-                f"cross_alignment（三值交叉轴对齐）")
-
-        relative_position = cfg.get('relative_position', None)
-        if relative_position is None:
-            errors.append(
-                f"{path}.relative_position 缺失：相对定位节点必须显式提供"
-                f"（{sorted(RELATIVE_POSITIONS)}）")
-        elif relative_position not in RELATIVE_POSITIONS:
-            hint = {'after': 'below', 'before': 'above'}.get(
-                str(relative_position))
-            extra = f"；建议迁移为 {hint}" if hint else ""
-            errors.append(
-                f"{path}.relative_position 值非法: {relative_position!r}{extra}。"
-                f"合法值为 {sorted(RELATIVE_POSITIONS)}")
-
-        cross_alignment = cfg.get('cross_alignment', None)
-        if cross_alignment is None:
-            errors.append(
-                f"{path}.cross_alignment 缺失：相对定位节点必须显式提供交叉轴"
-                f"对齐（above/below → left/center/right；"
-                f"left-of/right-of → top/center/bottom）")
-        elif relative_position in ('above', 'below'):
-            if cross_alignment not in HORIZONTAL_CROSS_ALIGNMENTS:
-                errors.append(
-                    f"{path}.cross_alignment 值非法: {cross_alignment!r} 与 "
-                    f"relative_position={relative_position!r} 轴向不匹配；"
-                    f"合法值为 {sorted(HORIZONTAL_CROSS_ALIGNMENTS)}")
-        elif relative_position in ('left-of', 'right-of'):
-            if cross_alignment not in VERTICAL_CROSS_ALIGNMENTS:
-                errors.append(
-                    f"{path}.cross_alignment 值非法: {cross_alignment!r} 与 "
-                    f"relative_position={relative_position!r} 轴向不匹配；"
-                    f"合法值为 {sorted(VERTICAL_CROSS_ALIGNMENTS)}")
-
-        if cfg.get('tree_align', False):
-            errors.append(
-                f"{path}.tree_align: 相对定位节点不允许声明 tree_align"
-                f"（tree_align 只属于绝对定位的树根节点）")
-
-        return errors
-
-    def _detect_relative_cycles(self, positioned: Dict[str, Dict]) -> list:
-        """
-        相对定位依赖环检测（审计 Q14-12）：单节点字段校验无法发现成环的
-        relative_to 链，而渲染端向上找根的遍历遇环无法结束，必须在样式
-        加载阶段拒绝。
-
-        链遍历复用 layout_engine.resolve_relative_chain（审计 Q4：根查找
-        与环检测同一实现）。每个节点至多声明一个 relative_to（函数图）；
-        错误信息给出完整环链，已报告环的成员不再作为起点重复报告。
-        """
-        errors = []
-        reported = set()
-        for start_name in positioned:
-            if start_name in reported:
-                continue
-            _chain, _terminal, cycle = resolve_relative_chain(
-                positioned, start_name)
-            if cycle:
-                errors.append(
-                    f"layout.{cycle[0]}.relative_to: 定位依赖存在环"
-                    f"（{' → '.join(cycle)}）；相对定位链必须终止于"
-                    f"绝对定位元素，请修正 relative_to 配置")
-                reported.update(cycle[:-1])
-        return errors
-
-    def _validate_positioning(self, config: Dict, source: str = '') -> bool:
-        """
-        遍历五类定位元素执行新语义校验。
-
-        错误策略：任何旧别名、未知枚举、绝对/相对字段混用、轴向不匹配、
-        relative_to 依赖环均视为样式加载失败；错误信息包含样式源文件、
-        字段路径、错误值和人工迁移建议。返回 True 表示全部通过。
-        """
-        all_errors = []
-
-        # 裸名 → 配置：与渲染端 all_positions 的合并键一致（后写覆盖），
-        # relative_to 引用的就是这一命名空间的名字
-        positioned: Dict[str, Dict] = {}
-        for path, cfg in self._iter_positioned_elements(config):
-            if cfg.get('relative_to'):
-                all_errors.extend(
-                    self._validate_relative_position_config(path, cfg))
-            else:
-                all_errors.extend(
-                    self._validate_absolute_position_config(path, cfg))
-            positioned[path.rsplit('.', 1)[-1]] = cfg
-
-        # 依赖环检测（Q14-12）：无论环节点是否有实际文本，配置边界一律
-        # 拒绝；渲染端另有直调路径的运行时有界防御兜底
-        all_errors.extend(self._detect_relative_cycles(positioned))
-
+    def _validate_positioning(self, config: Dict, source: str = "") -> bool:
+        """遍历五类定位元素执行新语义校验（委托 style_validator 共享实现）"""
+        all_errors = style_validator.validate_positioning(config, source)
         for err in all_errors:
             src = f"[{source}] " if source else ""
             self.logger.error(f"[StyleValidation] {src}{err}")
-
         return not all_errors
+
 
     def _validate_config(self, config: Dict, source: str = '') -> bool:
         """

@@ -16,6 +16,47 @@ from .exif_helper import ExifHelper
 class RenderContext:
     """渲染上下文，统一管理所有可显示文本信息"""
 
+    # ── 文本键 → 用户选项依赖注册表（计划 §5.2，只读）──────────
+    # 回答"这个文本键受哪些用户选项影响"：键为 get_text 支持的全部
+    # 文本键，值为选项 ID 集合（与 GUI RawOptionValues 字段名对齐）。
+    # 空集 = 已知文本键但无输入依赖（属于相框文字，如 exif/camera）；
+    # 未注册的键 = 未知键（不提供输入能力，也不能据此认定有文字）。
+    # 新增文本键时必须同步更新此表，并用真实 get_text 输出验证关系
+    # （C08/C12 据此断言）。
+    _OPTION_DEPENDENCIES = {
+        'author': frozenset({'author'}),
+        'location': frozenset({'location'}),
+        'custom_text': frozenset({'custom_text'}),
+        'timestamp': frozenset({'timestamp_display_mode'}),
+        'timestamp_author': frozenset({'author', 'timestamp_display_mode'}),
+        'camera_lens': frozenset({'lens_display_mode', 'lens_name_mode'}),
+        'lens': frozenset({'lens_name_mode'}),
+        'short_lens': frozenset({'lens_name_mode'}),
+        # 以下为相框文字：无本次用户选项依赖
+        'exif': frozenset(),
+        'camera': frozenset(),
+        'camera_make': frozenset(),
+        'gps': frozenset(),
+        'focal_length_formatted': frozenset(),
+        'aperture_formatted': frozenset(),
+        'shutter_speed_formatted': frozenset(),
+        'iso_formatted': frozenset(),
+    }
+
+    @classmethod
+    def get_option_dependencies(cls, key: str) -> frozenset:
+        """查询文本键受哪些用户选项影响（类级只读，无需实例化）
+
+        未知键返回空集——与"已知但无输入依赖"的键返回值相同，区分
+        二者请用 supports_text_key。
+        """
+        return cls._OPTION_DEPENDENCIES.get(key, frozenset())
+
+    @classmethod
+    def supports_text_key(cls, key: str) -> bool:
+        """区分"已知文本键（含无输入依赖的相框文字）"与未知键"""
+        return key in cls._OPTION_DEPENDENCIES
+
     def __init__(self, image_size: Tuple[int, int], exif_data: Optional[Dict] = None,
                  author: Optional[str] = None, location: Optional[str] = None,
                  lens_display_mode: str = 'combined', lens_name_mode: str = 'default',

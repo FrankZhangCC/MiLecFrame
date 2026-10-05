@@ -17,15 +17,14 @@
 #       保持在各自胶囊正下方。
 # 3. 垂直居中（视觉检查基准）：可见墨迹盒关于照片垂直中心（CY）
 #    对称 → 上下留白相同。无框文字（camera/lens/标签）墨迹相对布局盒
-#    偏上，对称轴已按墨迹盒重算（相机行半高/偏移与标签端差 0.0087，
+#    偏上，对称轴已按墨迹盒重算（相机行半高/偏移与标签端差 0.009，
 #    已折入下述序列）。相对 CY 的中心偏移序列：
-#      camera -0.391 / lens -0.351
-#      胶囊1 -0.150 / 标签1 -0.095 / 胶囊2 +0.015 / 标签2 +0.070
-#      胶囊3 +0.180 / 标签3 +0.235 / 胶囊4 +0.345 / 标签4 +0.400
-#    行距（中心距）：camera→lens 0.040、lens→胶囊1 0.201
-#    （首行与胶囊区的分隔间隙，为原 0.067 的三倍）、
-#    胶囊↔标签 0.055（组内不变）、标签→下一组胶囊 0.110 ——
-#    胶囊列距 0.110 → 0.165（扩大 50%）。
+#      camera -0.296 / lens -0.256
+#      胶囊1 -0.135 / 标签1 -0.091 / 胶囊2 -0.003 / 标签2 +0.041
+#      胶囊3 +0.129 / 标签3 +0.173 / 胶囊4 +0.261 / 标签4 +0.305
+#    行距（中心距）：camera→lens 0.040、lens→胶囊1 0.121、
+#    胶囊↔标签 0.044（较 0.055 缩小 20%）、标签→下一组胶囊 0.088
+#    （较 0.110 缩小 20%）—— 胶囊列距 0.165 → 0.132（缩小 20%）。
 #
 # 定位实现说明：
 # - 全部元素使用 position: center-right（照片右缘中点）+
@@ -155,14 +154,14 @@ layout:
   # 垂直：margin_bottom 表示照片中心上方偏移、margin_top 表示下方偏移。
   rectangles:
     rect_01:
-      # FL 胶囊（第一组，CY 上方 0.150）
+      # FL 胶囊（第一组，CY 上方 0.135）
       width_ratio: 0.106
       height_ratio: 0.046
       placement: outside
       position: "center-right"
       alignment: "center"        # 布局盒中心贴锚点 → 胶囊中心定位
       margin_right: 0.14          # 照片右缘外 0.14×参照边（右栏中线）
-      margin_bottom: 0.150        # 中心 = CY - 0.150
+      margin_bottom: 0.135        # 中心 = CY - 0.135
       corner_radius:              # 圆角 = 参照边 × 0.012（约胶囊高的 26%）
         top_left: 0.012
         top_right: 0.012
@@ -175,14 +174,14 @@ layout:
         radius_ratio: 0.001       # 细描边 = 参照边 × 0.10%
         opacity: 1.0
     rect_02:
-      # AP 胶囊（第二组，跨过 CY 移至下方 0.015）
+      # AP 胶囊（第二组，CY 上方 0.003）
       width_ratio: 0.106
       height_ratio: 0.046
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.015           # 中心 = CY + 0.015（列距扩大后跨过 CY）
+      margin_bottom: 0.003        # 中心 = CY - 0.003
       corner_radius:
         top_left: 0.012
         top_right: 0.012
@@ -195,14 +194,14 @@ layout:
         radius_ratio: 0.001
         opacity: 1.0
     rect_03:
-      # ST 胶囊（第三组，CY 下方 0.180）
+      # ST 胶囊（第三组，CY 下方 0.129）
       width_ratio: 0.106
       height_ratio: 0.046
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.180           # 中心 = CY + 0.180
+      margin_top: 0.129           # 中心 = CY + 0.129
       corner_radius:
         top_left: 0.012
         top_right: 0.012
@@ -215,14 +214,14 @@ layout:
         radius_ratio: 0.001
         opacity: 1.0
     rect_04:
-      # ISO 胶囊（第四组，CY 下方 0.345）
+      # ISO 胶囊（第四组，CY 下方 0.261）
       width_ratio: 0.106
       height_ratio: 0.046
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.345           # 中心 = CY + 0.345
+      margin_top: 0.261           # 中心 = CY + 0.261
       corner_radius:
         top_left: 0.012
         top_right: 0.012
@@ -237,13 +236,13 @@ layout:
 
   # ── 信息文字 ──
   info_position:
-    # ① camera：品牌+型号，CY 上方 0.391（墨迹盒对称，见文件头序列）
+    # ① camera：品牌+型号，CY 上方 0.351（墨迹盒对称，见文件头序列）
     camera:
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_bottom: 0.391        # 中心 = CY - 0.391
+      margin_bottom: 0.296        # 中心 = CY - 0.296
 
     # ② short_lens：短版镜头名，位于 camera 下方（行距 0.040）
     short_lens:
@@ -251,7 +250,7 @@ layout:
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_bottom: 0.351        # 中心 = CY - 0.351
+      margin_bottom: 0.256        # 中心 = CY - 0.256
 
     # ③ 四个参数值：与各自胶囊 margin 相同（含 +0.0044 视觉补偿），
     #    两轴中心对齐胶囊（补偿原因见文件头）
@@ -260,7 +259,7 @@ layout:
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_bottom: 0.1456       # rect_01 的 0.150 - 0.0044 视觉补偿
+      margin_bottom: 0.1306       # rect_01 的 0.135 - 0.0044 视觉补偿
       # 注：center-right 下 ay = CY + mt - mb，mb 越小越靠下 →
       #     补偿墨迹偏上需减小 mb（与 bottom 语义相反）
     aperture_formatted:
@@ -268,19 +267,19 @@ layout:
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.0194          # rect_02 的 0.015 + 0.0044 视觉补偿
+      margin_top: 0.0014          # rect_02 中心 CY-0.003 + 0.0044 补偿 → 跨轴用 mt
     shutter_speed_formatted:
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.1844          # rect_03 的 0.180 + 0.0044 视觉补偿
+      margin_top: 0.1334          # rect_03 的 0.129 + 0.0044 视觉补偿
     iso_formatted:
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.3494          # rect_04 的 0.345 + 0.0044 视觉补偿
+      margin_top: 0.2654          # rect_04 的 0.261 + 0.0044 视觉补偿
 
   # ── 参数标签：保持在各自胶囊正下方（行距 0.055） ──
   defined_texts:
@@ -290,28 +289,28 @@ layout:
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_bottom: 0.095        # 中心 = CY - 0.095（rect_01 下方）
+      margin_bottom: 0.091        # 中心 = CY - 0.091（rect_01 下方）
     defined_text_02:
       content: "AP"
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.070           # 中心 = CY + 0.070（rect_02 下方）
+      margin_top: 0.041           # 中心 = CY + 0.041（rect_02 下方）
     defined_text_03:
       content: "ST"
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.235           # 中心 = CY + 0.235（rect_03 下方）
+      margin_top: 0.173           # 中心 = CY + 0.173（rect_03 下方）
     defined_text_04:
       content: "ISO"
       placement: outside
       position: "center-right"
       alignment: "center"
       margin_right: 0.14
-      margin_top: 0.400           # 中心 = CY + 0.400（rect_04 下方）
+      margin_top: 0.305           # 中心 = CY + 0.305（rect_04 下方）
 
 # ── Logo 配置：关闭 ──
 logo:

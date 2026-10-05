@@ -1,709 +1,576 @@
-# GUI 选项随样式支持能力联动：评估与智能体执行方案
+# 样式加载层重构与 GUI 选项能力方案
 
-> 日期：2026-09-25  
-> 状态：方案待实施；修订为可交接给其他智能体的执行任务书，本轮只修改文档。  
-> 修订：v3，2026-09-25。已根据评审复核补齐加载器默认值、空样式持久化、单变体覆盖及 T5 独立门禁。§9–§15 为执行契约。  
-> 核查基线：dev `c220897`；ParamCapsule 已随 `da87145` 提交。当前既有数据修改为相机/镜头 CSV，执行前仍须重新核查，不以旧行号定位。  
-> 目标：右侧配置项随所选样式的全部变体调整可编辑性；保留用户输入，并说明不可用或暂不生效的原因。
+> v14 · 2026-10-05 · 实施中（阶段一/二已交付）
+>
+>
+>
+> v14 按用户验收反馈追加：**11 项选项控件统一 setFixedWidth(200)**（SwitchButton 保持固有尺寸）——实测 qfw ComboBox 的 minimumSizeHint 随当前项文字变化（镜头名 72→114px），动态 logo 长文件名把行最小需求推到 886px ≫ 侧边栏最窄 350px 造成整体溢出；固定宽度后多样式/多选项/长文件名场景几何零漂移、三档侧边栏宽度横向滚动条均无。备注说明静态文案同步精简（最长 19 字→11 字，语义修正「样式启用时可输入」→「布局使用该行时可输入」）；**跨卡对齐（normalize_option_rows）**：五张配置卡的全部选项行统一标签列宽（动态取 max sizeHint，setFixedWidth）与行边距（hBoxLayout.setContentsMargins(24,12,24,12)——注意必须设布局而非 widget 的margins），消除各行 GroupWidget 宽度差（实测 432/454/465px）导致的右侧裁剪溢出；水印卡输入框/下拉/滑条同步统一 200px。全局坐标验证：13 行跨 5 卡控件宽 {200}、右缘距卡片右缘 {25px}、左缘同一像素位置。v13 裁定选项切换不修改分组说明；v12 完成方案重定位。技术行为延续重构后的方案。
 
-评审参考：[STYLE_OPTION_CAPABILITIES_REVIEW.md](STYLE_OPTION_CAPABILITIES_REVIEW.md)。执行以本版契约为准；默认值注入造成的漏判方向、非法恢复名称的实际处理、未知条件的兜底行为均已按源码澄清。评审中的实现与 GUI 验证建议已转换为下文的具体任务和断言，不视为功能已验收。
+## 1. 目标、范围和复杂度
 
-## 1. 结论与复杂度
+本方案的主线是一次**样式加载层的结构性重构**：把 StyleManager 中混合的四类职责（来源定位、加载校验、变体选择、能力查询）拆分为分层清晰、依赖方向固定的加载管线，让 GUI 与处理器共享同一套规则，消除重复解析，并把"样式能力"提升为可独立消费的一等数据。在此地基上交付功能目标：选择相框样式后，GUI 右侧只允许用户修改这个样式支持的选项。不可用项保留在原位置，变为不可编辑，并说明原因。
 
-**需求可行，建议实施，完整方案复杂度为中等。** 当前架构已经提供样式选择事件、统一样式加载器、集中渲染文本入口，以及部分控件禁用逻辑，无需重构 GUI 或改写渲染算法。QFluentWidgets 具备所需接口，无需更换组件库或升级依赖。
+判断时必须读取一个样式的全部变体。以 ParamCapsule 为例：空文本会选择 no_custom_text，填写文字后才会选择 default。如果只根据当前变体禁用文字输入，用户就无法再填写文字，也无法切回 default。
 
-主要难点不是调用 `setEnabled()`，而是准确识别所有变体支持的参数，处理组合字段，保持界面状态与生成参数一致，以及避免变体切换造成输入框无法再次启用。
+因此实现必须同时记录两件事：**全部有效变体决定选项能否编辑；当前变体决定本次是否使用该选项，以及应该显示什么说明。** 背景固定色按当前变体限制，因为背景选择不会触发变体切换。
 
-| 工作包 | 复杂度 | 主要风险 |
-| --- | --- | --- |
-| 变体来源、匹配与能力分析 | 中 | 同名来源优先级、复合字段、损坏配置与能力漏判 |
-| GUI 状态、刷新与参数收集 | 中 | 变体自锁、旧值丢失、信号循环、状态与渲染不一致 |
-| 背景、字重及完整回归 | 中 | 颜色解析偏差、旧渲染行为回归、布局与焦点问题 |
+还要把用户输入和生成参数分开。用户填写作者后切到不支持作者的样式，内容保留在输入框中，但本次生成的 author 参数应为 None。切回支持的样式后，原值继续可用。
 
-本文面向执行智能体，不以人日作为执行预算。预计新增 3 个、修改 7 个生产代码文件，以及指南和验证记录；具体清单见 §10。按任务包逐项验收，不以“已改成灰色”作为完成标准。
+需求可行。这是一次**中等偏大规模的重构加功能**：阶段一重构样式加载层（拆分校验子系统、共享规则、能力分析、加载缓存），阶段二在其上接入 GUI 选项能力。无需重做渲染算法。预计新增 4 个、修改 6 个生产代码文件（新增中 style_validator.py 为纯搬运拆分，不新增行为；变体规则与能力分析合并为单一 style_rules.py），另更新指南和验证记录。
 
-固定交付范围：个性化四项、拍摄信息四项、背景填充、背景增强、字重全部纳入；输出格式、旋转适配、水印保持其独立语义。背景/字重不再是执行时自行决定的可选阶段。右栏布局重做、每样式独立偏好、能力 YAML 新字段、自动渲染与发行不在本次范围内。
+本次覆盖 11 项 GUI 选项：作者、拍摄地点、GPS 替换、自定义文本、拍摄时间、镜头显示、镜头名、LOGO、背景填充、背景增强、字重。输出格式、竖图旋转适配、水印保持现有独立规则。不新增样式能力字段，不修改内置样式，不扩大为完整配置校验、像素可见性分析、每样式偏好或自动生成。
 
-## 2. 已核实的现状
+## 2. 架构总览、代码入口和实施顺序
 
-| 位置 | 当前行为与影响 |
-| --- | --- |
-| `src/gui_pyside/pages/image_processing_page.py::_update_style_dependent_controls()` | 无上下文调用 `get_style_config()`，通常只拿到 default；只实际调整自定义文本和背景相关控件。计算了 `logo_enabled`，但没有调用 LOGO 控件的 `setEnabled()`。 |
-| 同文件 `_create_personalization_card()` / `_create_shot_info_card()` | 控件均由 QFluentWidgets 构建，使用 `ExpandGroupSettingCard.addGroup()`；多数分组返回值未保存，补保存引用即可更新说明文案。 |
-| 同文件 `_on_generate_frame()` | 直接读取文本、下拉值和开关状态构造 `RenderMetadata` / `RenderOptions`；控件禁用不会阻止其残留值进入渲染。 |
-| 同文件 `_on_generate_frame()` / `save_config()` | 两处都存在 `current_style or "底部信息条 Bottom Bars"` 兜底；本次分别改成禁止无选择生成、保存真实名称或 null。 |
-| 同文件 `_create_style_selection_card()` | 样式列表为空时会自动调用 create_sample_styles；本次移除 GUI 的自动创建调用，以保证无样式→保存→重启仍能真实表达空状态。 |
-| 同文件初始化、配置恢复与 `refresh_style_list()` | UI 构建末尾已有一次状态刷新；恢复配置可能再触发。列表刷新本身没有统一重算能力，同名样式修改后可能保留旧状态。 |
-| `src/gui_pyside/widgets/style_selector_card.py::refresh_styles()` | 恢复或自动选择样式不会发射 `style_selected`；列表为空时还可能保留旧的 `_current_style`。不能仅依赖用户点击事件刷新。 |
-| `src/frame_styles/style_manager.py` | 支持 YAML/YML/JSON/TOML、单文件和目录变体；每个变体都是完整配置，不继承 default。尚无“全变体能力”接口。 |
-| 同文件 `_validate_config()` | 会修改传入配置：缺少或非字典的 info_position 注入 exif/author/location；空字典不注入。能力必须基于校验后的结果。 |
-| `src/core/image_processor.py::process()` | 按作者、地点、自定义文本、时间隐藏状态构建变体上下文，然后选择配置。 |
-| `src/utils/render_context.py::get_text()` | `timestamp_author` 同时消费作者与时间；`camera_lens` 消费镜头显示模式；独立 `lens` 也消费短版镜头名。 |
-| `src/core/text_renderer.py::render()` | `info_position` 按字段消费文本；`defined_texts` 是固定文字；专用 `layout.custom_text` 需要 `enabled: true`。 |
+### 2.1 重构后的分层架构
 
-`ProcessingConfig` 虽然声明了相关字段，但当前生成路径直接读取控件并构造渲染参数。因此只修改此 dataclass 不会完成联动或过滤。
-
-仓库指引中的 GUI 重构文档现实际位于 `docs/docs_legacy/GUI_REFACTORING_PLAN.md`。继续遵守其 QFluentWidgets 组件约定；其中“核心层完全不修改”属于旧重构范围，本方案需要在现有 StyleManager 上增加查询能力，不改变渲染结果规则。
-
-### 2.1 真实样式对照
-
-以下覆盖本次基线的全部 8 个内置样式，结果基于 StyleManager 加载并校验后的配置。“支持”表示全变体并集，不表示每个变体都显示。
-
-| 样式 | 作者 / 地点 | 自定义文本 | 时间 | 镜头模式 / 短名 | LOGO | 关键差异 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 信息卡片 InfoCard | 支持 / 支持 | 不支持 | 不支持 | 不支持 / 支持 | 不支持 | 使用独立 `camera`、`lens`；不能把“存在镜头文字”等同于支持镜头显示模式。 |
-| 胶片夹风格 FilmClip | 不支持 / 不支持 | 支持 | 不支持 | 支持 / 支持 | 支持 | default 启用自定义文本、关闭 LOGO；`no_custom_text` 关闭自定义文本、启用 LOGO。 |
-| 参数胶囊 ParamCapsule | 不支持 / 不支持 | 支持 | 不支持 | 支持 / 支持 | 不支持 | `camera_lens` 只在 `no_custom_text` 中出现；只读 default 会漏判镜头选项。 |
-| 底部信息条 Bottom Bars | 支持 / 支持 | 不支持 | 支持 | 支持 / 支持 | 支持 | 作者通过 `timestamp_author` 表达，不能仅查 `author` key。 |
-| 宝丽来风格 Polaroid | 支持 / 支持 | 不支持 | 支持 | 支持 / 支持 | 不支持 | 同样依赖 `timestamp_author`。 |
-| 裁剪胶片 FilmCut | 支持 / 支持 | 不支持 | 支持 | 支持 / 支持 | 支持 | 配置了固定背景色，背景选项需保留现有约束。 |
-| 简洁信息 SimpleInfo | 支持 / 支持 | 不支持 | 支持 | 支持 / 支持 | 支持 | 仅 default；作者来自 timestamp_author，设备信息来自 camera_lens。 |
-| 边框信息条 FrameBar | 支持 / 支持 | 不支持 | 支持 | 支持 / 支持 | 不支持 | 仅 default；作者来自 timestamp_author，设备信息来自 camera_lens。 |
-
-SimpleInfo、FrameBar、Polaroid、FilmCut 均为仅含 default 的目录样式。它们的家族能力与该变体能力相同，不应出现 other_variant_only；背景锁定、短名依赖等局部禁用仍可出现。
-
-## 3. 交互规则
-
-### 3.1 样式能力与当前生效状态分开
-
-**默认以整个样式的全部有效变体的能力并集决定能否编辑，以当前命中变体决定提示是否生效。**
-
-- 全变体均不支持：控件保持可见，禁用编辑或选择，说明“当前样式不支持”。
-- 至少一个变体支持且当前变体也支持：正常可用。
-- 至少一个变体支持，但当前变体不支持：仍可编辑，说明“部分布局支持”；可在完整提示中写“当前布局未使用此项”。
-- 缺少照片、EXIF 或品牌数据：不等于样式不支持，优先说明数据条件，不把所有预设入口锁死。
-- 输入框变灰时保留原值；切回支持的样式后恢复编辑。不自动清空作者、地点、文本或取消用户开关。
-- 保留卡片展开按钮和说明文字可用，不禁用整个 `ExpandGroupSettingCard`。
-
-例如 FilmClip 初始自定义文本为空会命中 `no_custom_text`。若按当前变体禁用输入框，用户永远无法输入文本切回 default。因此不能使用“当前变体不画此字段 → 禁用输入框”的单层规则。LOGO 即使当前未显示，也可保留选择，提示其在部分布局生效。
-
-本方案不新增“每个样式记忆一套用户值”；沿用当前共享输入与已有配置持久化行为，避免扩大范围。
-
-### 3.2 参数支持规则
-
-下表中的“存在字段”指有效配置中的实际 `layout.info_position` 消费项；不能通过搜索 YAML 文本、字体/颜色 key 或固定文字内容判断支持。
-
-| GUI 选项 | 单个变体支持条件 | 额外说明 |
-| --- | --- | --- |
-| 作者姓名 | 存在 `author` 或 `timestamp_author` | 时间设为隐藏后，`timestamp_author` 仍可单独显示作者。 |
-| 拍摄地点 | 存在 `location` | `gps` 是 EXIF 坐标的独立字段，不能据此认定手工地点有效。 |
-| GPS 替换 | 支持 `location` 输入 | 此开关把 GPS 送入 location，不能控制直接显示的 `gps` 字段。 |
-| 自定义文本 | `layout.custom_text.enabled` 为真 | 兼容现有运行时可消费的 `info_position.custom_text`，但它不是当前指南主推配置方式，应附兼容诊断，避免静默误判。 |
-| 拍摄时间 | 存在 `timestamp` 或 `timestamp_author` | 没有 EXIF 时间只影响显示，不影响用户选择隐藏模式。 |
-| 镜头显示模式 | 存在 `camera_lens` | 只有独立 `camera` / `lens` 时，此三选项无效。 |
-| 短版镜头名 | 存在 `lens` 或 `camera_lens` | 若全变体只有 `camera_lens`，且用户选择只显示相机，可暂时禁用；存在独立 `lens` 时仍可用。 |
-| LOGO | `logo.enabled` 为真 | 不能从 assets 中存在 LOGO 或相机品牌字段推断支持。 |
-| 背景填充 | 当前变体没有可成功解析的固定背景色 | 与渲染器使用相同解析器，不能只看字段非空。 |
-| 背景增强 | 当前实际背景类型使用高斯背景 | 通过 BackgroundFillManager 注册表查询，不硬编码背景名称；不要把矩形自身磨砂效果误认为此开关控制。 |
-| 字重 | 至少一个变体消费受全局字重影响的文字 | 包括固定文字；不能仅以作者/地点缺失禁用。字体是否有某个文件不是样式能力。 |
-| 输出格式、旋转适配、水印 | 独立于样式文本能力 | 不因缺少 `custom_text` 或 LOGO 禁用；水印是独立装饰功能。 |
-
-`info_position` 当前没有统一的 `enabled` 消费逻辑，不应自行假定 `info_position.author.enabled: false` 会停止渲染。分析器需遵守真实渲染语义；专用 custom_text 与 logo 的 enabled 才有既定含义。
-
-### 3.3 GPS 与字段依赖
-
-- 无 `location` 显示或变体控制能力时，禁用地点及 GPS 替换，并在生成时不应用 GPS 替换。
-- 支持地点时，即使当前照片无 GPS，仍可预设开关；提示“无 GPS 时使用手工地点”，保留现有回退逻辑。
-- 当 GPS 已启用且当前照片有坐标时，保留手工地点可编辑，说明“当前使用 GPS，手工地点作备用”。这是备用输入，不是无效输入。
-- 切换照片后刷新 GPS 提示，不把上一张照片的坐标或能力结论带入下一张。
-
-### 3.4 只影响变体选择的参数
-
-现有命名规则允许 `no_author` 等条件，即使该字段未被任何文本节点显示，它也可能影响布局选择。此情况应区分 `display_support` 与 `variant_control_support`：
-
-- GUI 的变体控制条件限于当前处理器提供的四项：author、location、custom_text、timestamp；通用匹配器仍保留现有任意上下文字段匹配语义。
-- 某参数只用于选择变体时，保持可编辑，提示“用于切换布局”；不能因为不直接绘制就过滤掉。
-- 条件来源单独记录，不能把任意文件名或未知 `no_xxx` 都算成显示支持。
-- 非规范名称、同等匹配优先级、缺少 default 等情况记录诊断；沿用当前解析顺序，不在本任务中静默改变变体排序。
-
-未知条件如 no_iso 不会通过当前 ImageProcessor 的四字段上下文匹配；但无匹配且无 default 时，它仍可能作为第一个文件被兜底选中。不能删去未知候选，也不能把它描述为“永远不会使用”。若通用调用者显式传入 iso=None，既有匹配器仍应允许条件命中。
-
-这项防护兼容用户自建样式，避免参数过滤改变原本有效的布局切换。
-
-## 4. 实现结构
+样式加载按数据流分四层，每层单一职责、依赖方向固定：
 
 ```text
-StyleManager：确定样式来源，枚举并加载变体，复用变体选择规则
-    ↓
-能力分析：逐变体消费字段 + 条件字段 → 样式能力并集及来源
-    ↓
-页面：共享输入 + 当前照片 → 有效元数据 → 当前变体 → 控件状态/提示
-    ↓
-同一份有效元数据 → RenderMetadata / RenderOptions → 现有处理器
+┌─ 消费层 ─────────────────────────────────────────────┐
+│  gui_pyside（页面 / 绑定 / 状态计算）   core（处理器） │
+└───────────────┬──────────────────────────────────────┘
+                │ 只经 StyleManager 公开 API 访问
+┌─ 门面层 ──────▼──────────────────────────────────────┐
+│ StyleManager：来源定位 + 加载 + 文件缓存               │
+│   get_style_config / get_style_capabilities           │
+│   invalidate / invalidate_all（4.4）                  │
+└──┬──────────────────────────────┬────────────────────┘
+   │ 校验（纯函数）                │ 规则与分析（纯函数）
+┌──▼──────────────┐    ┌──────────▼──────────────────┐
+│ style_validator  │    │ style_rules                 │
+│ 定位枚举/旧别名/环│    │ 变体规则区 + 能力分析区       │
+└─────────────────┘    └──────────┬──────────────────┘
+                                  │ 唯一例外依赖（4.3 防护）
+                          ┌───────▼────────┐
+                          │ render_context │ 选项依赖表（类级查询）
+                          └────────────────┘
 ```
 
-### 4.1 样式加载层
+**依赖方向不变式**：frame_styles 包不依赖 core 与 gui_pyside；style_rules → render_context 是唯一例外，且仅限能力分析区使用（4.3）。文件 IO、缓存、失效只存在于门面层；校验、规则、分析三层全部为纯函数——无文件 IO、无 Qt、无全局可变状态，可独立测试。
 
-在 StyleManager 增加公开的变体快照查询接口，纯计算放在新增的 `src/frame_styles/style_capabilities.py`。本节接口描述为架构概览，最终命名和签名统一以 §9 为准：
-
-| 接口或结构 | 职责 |
-| --- | --- |
-| `StyleManager.get_style_snapshot(style_name)` | 返回完整候选、实际来源、能力并集和加载诊断，兼容单文件。 |
-| `analyze_style_capabilities(candidates, source_kind)` | 返回不可变能力结果：支持选项、条件输入及诊断；不接触 Qt。 |
-| `evaluate_style_options(snapshot, raw, gps_text, background_method)` | 根据快照和当前输入一次性计算控件状态、有效参数与当前变体。 |
-| `build_style_variant_context(...)` | 从渲染元数据构造上下文，供 GUI 提示与 ImageProcessor 共用。 |
-
-必须与现有 `get_style_config()` 使用相同的样式来源选择。当前实现是“目录样式优先，再查单文件；各自用户目录优先”，并不完全等同于跨类型无条件用户覆盖。特别是“用户单文件与内置同名目录”这一组合，能力查询必须与真正加载结果一致。可提取共用来源定位助手；修正覆盖优先级是另一项兼容行为变更，不应顺带实施。
-
-只聚合实际选中来源中的变体，禁止把用户目录样式与已被遮蔽的内置同名样式混为一体。扩展名、校验和异常处理复用现有加载器。新增路径继续遵守 `app_paths.py`，GUI 不自行拼资源目录。
-
-所有配置都无效、样式不存在或没有选择时，返回明确的不可用状态并清除旧能力。部分变体失效时只从有效配置聚合显示能力；条件输入仍保留实际候选文件名提供的合法条件，以便用户切换离开损坏变体。若实际选择命中无效变体，只阻止本次生成，保留已知可编辑入口，不静默换成别的变体。具体状态优先级见 §11。
-
-#### 4.1.1 校验后的配置才是能力依据
-
-固定数据流为“解析文件 → 既有 `_validate_config()` 注入/校验 → 提取 VariantFacts”，渲染加载和能力加载都经 `_load_config_file()`。不得直接读取原始 YAML 推断能力，也不得在提取 facts 前另设严格校验，拒绝既有加载器会归一化的字段。
-
-| 原配置 layout.info_position | 既有校验后的实际字段 | 作者/地点能力 |
-| --- | --- | --- |
-| 字段缺失 | exif、author、location | 均支持 |
-| null 或其他非字典值 | exif、author、location | 均支持 |
-| 显式空字典 `{}` | 空字典，不注入 | 若无其他消费或条件控制则不支持 |
-| 有效字典 | 保留现有条目，不补齐其他字段 | 按实际条目分析 |
-
-忽略此规则会把真实支持作者/地点的缺省配置误判为“不支持”。colors/fonts 的默认注入也必须先于 facts 提取；仅在既有加载器处理完毕后仍有无法分析的结构异常，才按 §9.4 标记候选不可用。C06/C07/C08 等“没有动态文本”的测试夹具必须显式写 `info_position: {}`，不能用省略字段代替。
-
-### 4.2 能力与选择结果不要共用可变配置缓存
-
-在样式切换、进入页面、编辑后刷新时重建小型能力快照，不增加后台线程或持久缓存。当前工作区最大样式只有 4 个配置文件；实际响应耗时应在实施阶段测量并记录。
-
-文本输入时只使用页面当前持有的快照计算能力和状态，避免每个字符重新加载全部文件。本次不添加管理器级缓存；每次规定的重载事件都替换快照，不按样式名称长期复用旧结果。
-
-ImageProcessor 会修改加载到的 `fonts.weight`。能力快照应不可变，或与渲染配置独立复制，不能把一份可变字典同时交给 UI 和渲染器。变体名称解析和匹配逻辑保持单一来源，避免 GUI 复制出第二套匹配算法。
-
-### 4.3 界面状态集中更新
-
-保留 `_update_style_dependent_controls()` 作为统一入口，内部按“能力 → 依赖 → 控件与文案”顺序计算。保存作者、地点、自定义文本、时间、镜头与 LOGO 的 GroupWidget 引用，统一设置简短说明和完整 tooltip。
-
-需要覆盖的刷新时机：
-
-1. 所有控件创建完成、所有已保存配置恢复完成后，统一重算一次。
-2. 用户切换样式。
-3. 同名样式重新保存、返回图片处理页、列表刷新、当前样式被删除或列表变空。
-4. 作者、地点、自定义文本、时间模式变化：重算当前变体提示；可用 QTimer 合并连续输入事件，不触发图像渲染。
-5. GPS、镜头模式、背景类型变化，以及当前照片切换或删除：刷新相应依赖。
-6. 点击生成前重新核查样式状态，防止外部修改后仍使用旧能力。
-
-配置恢复期间允许用恢复标记抑制中间刷新，最后显式刷新。状态刷新不调用 `setText('')`、不重置下拉选项、不保存 config、不自动生成图片。若确需程序性改值，使用信号阻断并确保恢复原信号状态。
-
-### 4.4 控件值、有效参数与变体选择
-
-**禁用只限制交互，并不会清空值。** 使用统一的 `_read_raw_option_values()` → `evaluate_style_options()` 出口，由生成流程和当前变体提示共用：
-
-1. 读取并保留全部用户原值。
-2. 依据“全变体显示支持或变体控制支持”过滤：完全无关的 author/location/custom_text 传 `None`，GPS 替换仅在地点输入受支持时应用。
-3. 对完全无关的时间、镜头模式、短名使用现有默认语义；不要把“禁用时间”自动转换成 hide，以免误触发 `no_timestamp`。
-4. 用有效元数据构造变体上下文，解析当前变体。当前实现中，时间条件只在用户选择 hide 时标记缺失，不因为照片没有 EXIF 时间就自动标记；共享助手必须保持此行为。
-5. 对仅在其他变体支持的参数保留用户选择，不再按当前变体过滤第二次，避免反馈循环。渲染器继续按实际配置消费。
-6. 全样式无 LOGO 支持时跳过 GUI 自动匹配并传“无 LOGO”的既有值；支持时保留选择，并由实际变体的 enabled 决定是否绘制。
-7. 保存用户偏好时保存原始输入，不把为本次生成过滤后的空值写回控件或配置文件。
-
-提取 ImageProcessor 的上下文构造助手供 GUI 复用，不把 GUI 禁用策略强加给 CLI；CLI 仍按既有参数与样式规则运行。提取助手后需要单张和批量 CLI 回归。
-
-## 5. QFluentWidgets 适配与官方 API 核查
-
-本机实际版本：**PySide6-Fluent-Widgets 1.11.2 / PySide6 6.11.1**。官方在线文档的部分类签名基于 PyQt5，因此同时核对了本地 PySide6 包实现，并运行了一次离屏 API 探针。
-
-| 需求 | 使用方式 | 约束 |
-| --- | --- | --- |
-| 禁用编辑或选择 | 对 Fluent `LineEdit` / `ComboBox` / `SwitchButton` 调用继承的 `setEnabled(False)` | 保留值；禁用对象是交互控件，行与卡片保持启用。Qt 官方说明禁用父控件会影响子控件。[Qt QWidget](https://doc.qt.io/qtforpython-6/PySide6/QtWidgets/QWidget.html#PySide6.QtWidgets.QWidget.setEnabled) |
-| 显示原因 | 保存 `addGroup()` 返回的 GroupWidget，并调用 `setContent()` | 官方接口已支持；完整说明放 tooltip，短文案避免撑宽右栏。[分组设置卡 API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/settings/expand_setting_card/index.html) |
-| 单独禁用下拉选项 | `ComboBox.setItemEnabled(index, bool)` | 初版以整个选项控件为粒度即可；未来细化时使用 Fluent 接口，不套用原生 QComboBox 的 model/item 操作。[ComboBox API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/widgets/combo_box/index.html) |
-| 输入框行为 | 使用现有 Fluent LineEdit | 推荐 disabled 表达不支持；若将来要求能复制但不能编辑，再单独设计只读交互。[LineEdit API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/widgets/line_edit/index.html) |
-| 开关依赖 | SwitchButton 的 `checkedChanged` 与 `setEnabled()` | 禁用不等于取消勾选，参数收集时仍须判定能力。[SwitchButton API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/widgets/switch_button/index.html) |
-| 避免信号递归 | Qt `QSignalBlocker` | 属于信号管理工具，不是替换 Fluent 界面组件。[QSignalBlocker](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QSignalBlocker.html) |
-
-组件清单亦已参照：[QFluentWidgets 官方组件列表](https://qfluentwidgets.com/zh/pages/componentlist/)。该页面本次网页工具未提取到正文，具体接口结论以官方 API 页和本地包为准。
-
-离屏探针已通过：禁用输入保留文字且不触发 textChanged；禁用开关保留勾选；GroupWidget 描述可更新；行与展开按钮仍启用；单项禁用接口存在且有效；QSignalBlocker 能抑制程序性选项切换信号。**这不是完整 GUI 视觉验收**，浅色/深色主题、键盘焦点与禁用后菜单行为仍需实际窗口操作确认。
-
-布局沿用 addGroup/addGroupWidget，禁止直接向 viewLayout 塞控件。仅改变 enabled 不需要重建布局或新增高度覆盖；若动态改变内容高度、增加行，再调用延迟 `_adjustViewSize()`。保留简短非空说明，避免频繁显隐引发布局抖动。实施完成仍须按项目规定调用 `layout_debug.dump_expand_card()` 检查展开/收起尺寸。
-
-不依赖禁用控件能否触发 tooltip 来解释原因：GroupWidget 本身保持启用，并显示说明。避免每次输入或切换样式弹出 InfoBar。
-
-## 6. 实施拆分与修改文件
-
-| 阶段 | 修改位置 | 完成标准 |
-| --- | --- | --- |
-| A：能力层 | `style_manager.py`；新增 `style_capabilities.py` | 单文件/目录/多格式/实际来源一致；全变体并集与条件输入正确；无效配置有诊断。 |
-| B：共享上下文与参数出口 | `image_processor.py`；能力模块或单独纯函数模块；`image_processing_page.py` | GUI 提示与生成使用同一份有效元数据，保持现有变体上下文语义。 |
-| C：GUI 联动 | `image_processing_page.py`；必要时 `style_selector_card.py` | 个性化、拍摄信息与 LOGO 联动，保值、提示、初始化/刷新/删除/空列表均正确。 |
-| D：背景/字重精细化 | 页面、能力层、背景颜色解析工具 | 复用既有颜色解析结果再锁定背景；增强依赖实际背景；不误伤固定文字与独立装饰。本次必须完成。 |
-| E：验证与说明 | `docs/STYLE_GUIDE.md`、本文实施记录 | 指南解释全变体能力，不让样式作者重复手填一套 GUI 开关。通过下节验收后才合入版本。 |
-
-不推荐新增必须填写的 YAML `capabilities` 清单：已有布局声明足够推导，重复声明容易与真实渲染脱节。今后若引入不能自动推导的新消费方式，再讨论可选覆盖字段和校验规则。
-
-执行顺序与逐文件验收以 §10 为准，A–E 全部在本次交付范围内。用户要求的作者、地点、自定义文本，以及同类的时间、镜头、LOGO 一并覆盖；背景和字重按限定规则实现，不延伸到像素级可见性分析。
-
-## 7. 验收清单与风险控制
-
-项目没有测试框架，不运行 pytest 或 unittest。实现阶段可使用临时断言脚本、CLI 实测和实际 GUI 操作，不引入新框架。
-
-| 场景 | 预期结果 |
-| --- | --- |
-| 只有非 default 变体支持某参数 | 并集检测为支持；输入入口仍可用。使用 ParamCapsule 镜头字段与 FilmClip LOGO 验证。 |
-| FilmClip 自定义文本从空 → 有 → 空 | 始终能输入；变体与提示切换正常；无自锁，无反复切换。 |
-| InfoCard 作者/地点四种空值组合 | 按现有解析器切换四个布局；不能因当前布局移除了字段而锁死输入。 |
-| Bottom Bars 的 timestamp_author | 作者可编辑；隐藏时间后作者仍可出现；没有作者时日期仍可显示。 |
-| InfoCard 独立 camera/lens | 镜头模式禁用，短名可用；“只显示相机”的旧残留值不影响独立 lens。 |
-| GPS 有/无、切换照片、直接 gps 字段 | 地点替换与备用值准确；只有 gps 字段的样式不会错误启用手工地点替换。 |
-| 支持样式 A → 不支持 B → A | 作者、地点、文本、下拉值与开关原值保留；B 不消费无关残留值。 |
-| 仅作 no_author 等变体条件 | 字段可控制布局且不会被过滤，说明与直接显示支持有所区分。 |
-| 首次启动、配置恢复、同名保存后返回 | 所有控件状态及时重算，恢复不触发渲染或覆盖用户值。 |
-| 当前样式删除、全部样式为空 | 不保留上一个样式的能力/选中名；生成入口给出明确不可用状态。 |
-| JSON/YML/TOML、用户与内置同名 | 能力与处理器加载同一来源，不误合并被覆盖配置；单文件视为一个变体。 |
-| 非法或部分损坏变体、未知字段 | 明确诊断；不延用旧状态、不崩溃、不静默绕过当前配置错误。 |
-| 背景固定色与无效色 | 解析成功的固定色禁用背景设置；解析失败不能误判为有效锁定。另测纯色/高斯切换与增强。颜色解析兼容边界见 §10。 |
-| 键盘与鼠标 | 禁用项不能输入/点击/切换；Tab 焦点合理，打开下拉菜单时切换状态无残留交互。 |
-| 浅色/深色、窄右栏、卡片展开/收起 | 禁用外观清晰、提示可读；无新增横向溢出，dump_expand_card 符合项目约定。 |
-| CLI 单张 + 批量 | 若提取共享上下文，结果与变体选择保持一致；GUI 策略不改变 CLI 原有规则。 |
-
-实施完成后，对所有新增/修改 `.py` 在激活 venv 后执行 `python -m py_compile <各文件绝对路径>`；检查本次运行新增的 debug_log ERROR/TRACEBACK。日志记录样式、变体、能力集合及状态原因，不额外记录作者姓名、地点、自定义文本内容。异常配置用例允许产生预期诊断，应与正常路径错误分开检查。
-
-只有涉及打包路径、资源或依赖变动时才执行打包冒烟；普通状态联动无需扩大到全量发行工作。开发和验证均留在 dev；所有门禁通过后再按 release_sync 流程合入 mainline、赋版本，不在本方案阶段改版本或 tag。
-
-## 8. 本轮评估的验证边界
-
-已完成源代码追踪、现有样式全变体配置加载校验、官方 API 查阅、本机依赖版本确认及离屏控件 API 断言验证。未实施能力分析器、未启动完整应用做人工 GUI 验收、未实测新方案的渲染输出或性能。
-
-本轮仅新增/修订 Markdown 文档，无新增或修改 `.py` 文件，因此没有适用的 py_compile 目标。以下接口与行为是供执行智能体实现的契约，尚未成为功能代码，也不代表已通过合入门禁。
-
-## 9. 执行契约：数据结构、公共接口与依赖方向
-
-本节名称固定，执行者不要在 GUI 再写一套样式解析器。可以调整私有函数拆分，但不得改变以下输入输出含义。以下是接口规格，不是要求原样粘贴的实现代码；新增代码须按 AGENTS.md 保留中文说明和边界注释。
-
-### 9.1 模块依赖
+**四级数据流水线**（逐级只增不改，全部不可变）：
 
 ```text
-utils/color_utils.py                    utils/render_context.py
-          ↓                                      ↓
-frame_styles/style_capabilities.py ← 字段到用户选项的依赖常量
-          ↑
-frame_styles/style_manager.py ← 文件来源与加载
-          ↓
-gui_pyside/models/style_option_state.py ← 纯数据与状态计算，无 Qt import
-          ↓
-gui_pyside/pages/image_processing_page.py ← 控件、信号、参数对象构造
-
-core/image_processor.py → 复用 build_style_variant_context()
-core/renderer.py → 复用 color_utils.parse_hex_or_rgb()
+VariantCandidate（文件身份 + 文件名条件）
+  → 加载校验（style_validator + 加载器注入）
+  → VariantFacts（单候选能力事实）
+  → StyleCapabilitySnapshot（家族能力快照）
+  → OptionEvaluation（界面状态 + 有效参数）
 ```
 
-能力模块不得 import GUI、ImageProcessor 或 FrameRenderer；GUI 纯状态模块不得实例化 QWidget、写配置、读文件或发起渲染。
+**设计原则**（优雅与健壮的验收口径，各条对应检查项）：
 
-### 9.2 固定选项标识
+1. 单一职责：一个模块一个变化理由，新文件职责边界见 2.3 任务表。
+2. 纯函数内核：规则区与分析区给定输入得确定输出（C01–C11 可脱离 GUI 独立验证）。
+3. 不可变数据：四级流水线用 frozenset / tuple / 冻结 dataclass，跨层无共享可变状态（C16）。
+4. 防御边界：外部 YAML 是不可信输入，全部经加载校验；坏候选保留在选择序列、给出诊断、绝不静默回退或跨来源补救（C10/C11/G12）。
+5. 缓存透明：命中与未命中语义一致（深拷贝返回），失效显式可枚举，不做隐式新鲜度假设（C18）。
+6. 行为保持：重构部分与 T0 基线逐条一致，不改变任何既有选择与校验结果。
 
-使用稳定字符串，不使用中文显示名作判断：
+### 2.2 当前代码入口
 
-`author`、`location`、`use_gps_location`、`custom_text`、`timestamp_display_mode`、`lens_display_mode`、`use_short_lens`、`logo_selection`、`bg_fill_type`、`enhance_background`、`font_weight`。
+代码核查基线为 dev `7bb1aa3`。执行时必须重新记录 HEAD 和工作区状态，以方法名定位，不能使用历史行号。
 
-变体条件名与选项名分开映射：`timestamp` → `timestamp_display_mode`；`author/location/custom_text` → 同名选项。GPS 是 location 输入来源，不是第五种变体条件。
+重构后的实际入口是：
 
-### 9.3 能力层数据对象
+```text
+ImageProcessingPage._create_config_panel
+  → image_processing_config_cards.create_*_card(page)
+ImageProcessingPage._on_generate_frame
+  → image_processing_config_cards.collect_render_options(page, item)
+  → ImageProcessor.process(metadata, options, font_weight)
+  → _build_style_context(metadata, exif_data)
+  → StyleManager.get_style_config(style_name, context)
+  → FrameRenderer → RenderContext / TextRenderer
+```
 
-在 `style_capabilities.py` 定义以下对象，优先使用 frozen dataclass、tuple、frozenset。frozen dataclass 并不会冻结内部 dict，不能借此宣称嵌套字典不可变。
+配置卡已经迁入 `src/gui_pyside/pages/image_processing_config_cards.py`。页面内仍有旧的 `_create_*_card` 方法，但当前面板不调用它们，实施不能改到这些旧方法中。当前 collect_render_options 虽然注释称为纯函数，实际仍读取页面控件；本次保留它作为参数组装入口，将判断逻辑放到独立模块。
 
-| 对象 | 必须包含的字段 | 契约 |
-| --- | --- | --- |
-| `VariantFacts` | `info_keys`、`display_options`、`custom_text_enabled`、`logo_enabled`、`has_weighted_text`、`fixed_background_rgb`、`diagnostics` | 从单份有效配置提取；不保存可被渲染器改写的完整配置字典。`fixed_background_rgb` 为 RGB tuple 或 None。 |
-| `VariantCandidate` | `path`、`filename`、`required_missing`、`is_default`、`facts`、`diagnostics` | path 为实际来源中的绝对路径；加载失败时 facts=None，候选仍保留，以免改变匹配结果。 |
-| `StyleCapabilities` | `display_options`、`control_options`、`has_weighted_text`、`has_independent_lens`、`diagnostics` | 前两项各自为 frozenset；显示能力只聚合 facts 有效的候选；来源说明从候选列表追溯。 |
-| `StyleSnapshot` | `style_name`、`source_path`、`source_kind`、`candidates`、`capabilities`、`status`、`diagnostics` | source_kind 为 directory/single_file/none；candidates 保留原枚举顺序；status 为 ready/partial/invalid/missing/empty。 |
+整体数据流如下。界面显示与生成参数来自同一次计算，从而避免两套判断不一致。
 
-状态定义：所有候选有效为 ready；有效/无效混合为 partial；有候选但无有效配置为 invalid；名称无对应来源为 missing；目录无候选或未选择为 empty。诊断使用 code/path/detail；detail 描述配置问题，不带用户输入内容。
+```mermaid
+flowchart LR
+    A[StyleManager 读取全部变体] --> B[提取能力记录]
+    B --> C[结合用户输入与照片计算]
+    C --> D[更新控件和说明]
+    C --> E[组装有效渲染参数]
+```
 
-`info_keys` 仅含 RenderContext 认识、且节点结构可供渲染的字段。未知字段记录诊断，不视为任何个性化选项的支持，也不据此启用字重。输入已经通过既有加载器归一化；只有归一化后仍存在的非字典容器等异常才标记候选不可用，GUI 不继续生成该候选。不得拒绝会被加载器正常注入默认值的原始 info_position/colors/fonts，也不要将这些防护改成全仓库 schema 重写。
+### 2.3 实施顺序
 
-### 9.4 公共接口签名与副作用
+按三个阶段实施：**阶段一重构样式加载层**（地基），**阶段二在其上接入 GUI 选项能力**（消费），**阶段三统一验收交付**。后续各节直接解释每项任务的接口、规则和完成条件：
 
-| 位置与接口 | 输入 → 输出 | 约束 |
-| --- | --- | --- |
-| `style_capabilities.parse_variant_missing_fields(filename)` | str → frozenset[str] | 从现有内嵌 parse_missing_set 原样提取；保留 custom_text 复合字段、no 分隔、大小写规则。通用解析不做四字段白名单过滤。 |
-| `style_capabilities.select_variant_candidate(candidates, context)` | 顺序候选 + dict/None → 候选/None | 缺失条件子集匹配、更多字段优先、同分保留先遇到者；其次第一个 default；最后第一个候选。无文件 I/O。无效候选也参与选中，之后再报告失败。 |
-| `style_capabilities.build_style_variant_context(*, author, location, custom_text, timestamp_display_mode)` | 四个标量 → dict | 总含 author/location；custom_text 假值时加入 None，非空时不加入；时间 hide 时加入 timestamp=None，其余不加入。不要 strip 用户文本，也不要根据 EXIF 推导时间缺失。 |
-| `style_capabilities.analyze_variant_config(config)` | 已加载配置 → VariantFacts | 纯计算；复用字段依赖常量与公共颜色解析。不可分析的结构异常抛带字段路径的 ValueError，由 manager 转换为候选诊断和 facts=None；未知字段等非阻断信息放 facts.diagnostics。 |
-| `style_capabilities.analyze_style_capabilities(candidates, source_kind)` | 候选 → StyleCapabilities | 单文件名不解释为 no_x 条件；目录中合法条件可形成 control_options。 |
-| `StyleManager.get_style_snapshot(style_name)` | str/None → StyleSnapshot | 同步扫描一次当前来源，逐候选校验；无缓存、无配置写入。 |
-| `style_option_state.evaluate_style_options(snapshot, raw, gps_text, background_method)` | 快照 + 原值 + 当前 GPS + 所选背景类型的方法 → OptionEvaluation | 不访问控件；无文件读取；一次性得到有效值、当前变体、所有控件状态、是否可生成。 |
+| 阶段 | 任务 | 工作 | 新增或修改的文件 |
+| --- | --- | --- | --- |
+| 一：加载层重构 | T0 | 记录现有行为基线 | 无生产代码修改 |
+| 一：加载层重构 | T1 | 校验拆分；共享来源、上下文和变体选择；加载与校验缓存 | 新增 frame_styles/style_validator.py、frame_styles/style_rules.py；修改 style_manager.py、core/image_processor.py |
+| 一：加载层重构 | T2 | 能力分析区：从全部变体识别能力 | 扩展 frame_styles/style_rules.py（能力分析区）；修改 utils/render_context.py、style_manager.py |
+| 二：选项能力接入 | T3 | 计算控件状态与有效参数 | 新增 gui_pyside/models/style_option_state.py |
+| 二：选项能力接入 | T4 | 接入控件与参数收集 | 新增 gui_pyside/utils/style_option_bindings.py；修改 pages/image_processing_config_cards.py |
+| 二：选项能力接入 | T5 | 完成刷新、恢复和生成守卫 | 修改 pages/image_processing_page.py、widgets/style_selector_card.py |
+| 三：交付 | T6 | 验证并交付 | 更新 docs/STYLE_GUIDE.md，增加验证记录 |
 
-`background_method` 是通过 BackgroundFillManager 查询所得的选中背景方法，纯状态函数再根据当前变体固定色覆盖判定；不要让模型直接修改 FILL_TYPES 或调用注册自定义背景的方法。
+表中代码路径相对于 src。颜色解析、背景类型判断、LOGO 自动匹配已经有统一实现，直接复用。color_utils、background_fill、renderer、text_renderer、rectangle_layer、batch_processor 不属于计划修改范围；若实测证明必须调整，先说明具体原因。
 
-StyleManager 增加私有来源枚举助手，供 `get_style_config()`、`_resolve_style_variant()` 和 `get_style_snapshot()` 共用；具体拆分可按现有结构调整。**get_style_config 仍只加载选中的一个配置，不得为了新 UI 能力变成每张照片加载全部变体。** 快照是页面专用查询，渲染不复用它的配置对象。
+每个阶段末尾列出的 C/G 编号表示关联检查。阶段执行时验证已经实现的部分；完整业务和 GUI 用例在 T6 统一验收，不能因后续模块尚未完成而要求前一阶段提前通过整套检查。
 
-匹配只调用同一个 select_variant_candidate；生成当前变体诊断时复用候选 path，不能凭文件名重新猜测。保留 `_resolve_style_variant(style_dir, context)` 现有入口作为适配层，避免顺带破坏内部调用或已有脚本。
+## 3. T0：记录修改前的行为
 
-### 9.5 字段依赖常量
+先阅读 AGENTS.md，记录实际分支、HEAD、git status 和依赖版本，确认第 2 节入口仍有效。保留已有用户修改，不通过 reset 或 stash 清理工作区。
 
-在 `render_context.py` 的模块层新增 `TEXT_OPTION_DEPENDENCIES`，给每个已支持的 get_text key 注册它消费的选项。它是能力判定的声明来源，本次不改 get_text 分支行为。
+用临时配置记录变体选择结果，至少覆盖：作者与时间组合、同分条件、多个 default、没有 default，以及同名多来源。后续抽取代码要与这些结果比较，保证只共享逻辑，没有顺带改变选择规则。
 
-| get_text 字段 | 消费选项 |
+同时记录定位校验基线：现有 9 个样式 17 份配置全部通过校验；另构造旧 position/alignment 别名、非法九点枚举、相对定位环、cross_alignment 轴向不匹配等非法样例，记录其拒绝结果与错误信息文本。供 4.0 的纯搬运拆分逐条比对。
+
+**完成条件：** 有可复核的来源和选择基线，能够指出实际运行入口。此阶段不改生产代码。
+
+## 4. T1：样式加载层重构——校验拆分、共享规则与加载缓存
+
+### 4.0 拆出定位校验子系统（style_validator.py）
+
+style_manager.py 当前约 735 行，其中定位校验子系统（五类定位元素的枚举校验、旧别名拒绝、相对定位环检测与迁移建议）约占 300 行，是最大的职责块。在叠加来源解析与能力查询之前先把它拆出，避免该类在 T1/T2 继续膨胀。
+
+拆分边界是**纯搬运，不改任何行为**：
+
+搬入 `src/frame_styles/style_validator.py`（模块级函数，不依赖 StyleManager）：
+
+- 旧别名迁移建议表 `_POSITION_OLD_ALIAS_HINT`、`_ALIGNMENT_OLD_ALIAS_HINT`；
+- `iter_positioned_elements(config)`：原 `_iter_positioned_elements`；
+- `validate_absolute_position_config(path, cfg)`：原 `_validate_absolute_position_config`；
+- `validate_relative_position_config(path, cfg)`：原 `_validate_relative_position_config`；
+- `detect_relative_cycles(positioned)`：原 `_detect_relative_cycles`；
+- `validate_positioning(config, source)`：原 `_validate_positioning`，返回错误列表，`[StyleValidation] [source] ...` 日志格式与文本保持不变；
+- layout_engine 的枚举导入（ABSOLUTE_POSITIONS、RELATIVE_POSITIONS、交叉轴集合、resolve_relative_chain）随迁。
+
+留在 style_manager.py：
+
+- `_load_config_file` 与 `_validate_config`：默认字段注入（expand_canvas / info_position / colors / fonts）是加载器职责，T2 能力分析依赖注入后的结果，必须留在加载入口；
+- `_validate_config` 末尾的定位校验调用改为 `style_validator.validate_positioning(config, source)`（薄转发，返回语义与错误输出不变）；
+- 来源定位、变体选择、缩略图、默认样式、示例创建全部保持原位。
+
+style_validator 不导入 GUI、不导入 utils 渲染语义（render_context 等），只依赖 layout_engine 的定位枚举，保持 frame_styles 包现有的依赖方向。
+
+**拆分验收：** T0 记录的校验基线（17 份配置全部通过 + 非法样例的错误信息）在拆分后逐条一致，错误日志文本与顺序不变；`python -m py_compile` 覆盖两个文件。
+
+### 4.1 共用样式来源定位
+
+在 `src/frame_styles/style_manager.py` 提取 `resolve_style_source(style_name)`，让 get_style_config 和后续能力查询都调用它。这样分析的配置与最终渲染采用的配置来自同一位置。
+
+保持现有查找顺序：
+
+1. 先查目录样式，按 extra_dirs 的现有顺序检查，再查 config_dir。
+2. 高优先级目录存在时就采用它。目录为空或选中的文件损坏，也不转向其他同名来源。
+3. 没有目录样式才查单文件。每个目录内按 .json、.yaml、.yml、.toml 顺序查找。
+4. 只分析最终来源，不能合并其他目录或同名单文件的能力。
+
+例如，用户目录有 X.yaml，内置目录有 X/，现有渲染仍采用目录样式。界面名称或缩略图不能证明实际来源，本次保持这个既有行为。修复覆盖优先级是另一个任务。
+
+目录候选仅包含现有实现接受的四种小写后缀，不递归，不让其他变体继承 default，也不改变隐藏文件和后缀大小写规则。list_style_files 默认只列 YAML，并有编辑器专用排序；resolve_style_file 用于定位单个文件，二者不能直接替代本次来源解析。
+
+结果用 StyleSource 表达来源类型、绝对路径和诊断。每个 VariantCandidate 保存 path、filename、原始序号和 required_missing，原始顺序必须保留给兜底逻辑使用。
+
+### 4.2 抽取选择函数，保留两套顺序
+
+新增 `src/frame_styles/style_rules.py`（本节为变体规则区；§5 在同文件增设能力分析区，两区分区组织、各自注释标明边界），提供：
+
+```text
+parse_missing_fields(filename)
+select_variant_candidate(candidates, context)
+```
+
+context 是字段可用性字典。显式值为 None 或空字符串的字段才算缺失，未出现的字段不算缺失。例如 context 没有 iso，不能自动选择 no_iso；显式 iso=None 时可以匹配。
+
+文件名继续按现有 no 片段解析，保留 custom_text、timestamp_author 等含下划线的字段名。default 名不区分大小写，不作为条件候选。某候选要求的全部缺失字段都出现在 context 的缺失集合中，才算命中。
+
+命中后采用现有评分：把条件与组合字段蕴含项合并、去重，再计数。timestamp_author 缺失蕴含 timestamp 和 author 缺失，因此 no_timestamp_author 得 3 分，no_author 得 1 分。两者同时命中时，前者优先。
+
+这里的展开只用于评分，不合成命中条件。如果 context 只显式包含 author=None、timestamp=None，没有 timestamp_author，不能自动让 no_timestamp_author 命中。
+
+选择顺序必须分别处理：
+
+- 条件候选按文件名排序，同分取排序后的首个。
+- 没有条件命中，按原始枚举顺序取首个 default。
+- 没有 default，按原始枚举顺序取首文件。
+
+不能把整个列表排序后再兜底。选择时也不检查配置是否有效：选到损坏文件就报告不可用，不能偷偷跳到另一个有效配置。保留未知 no_x 条件和普通文件的兜底能力。
+
+原 `_resolve_style_variant` 保留为包装方法，调用共享函数。GUI 不再实现第二份选择器。
+
+### 4.3 共用字段可用性判断
+
+同一模块提供：
+
+```text
+build_style_variant_context(
+    *, author, location, custom_text, timestamp_display_mode, exif_data
+)
+```
+
+它保持 ImageProcessor._build_style_context 的当前行为：
+
+```text
+context 初始包含有效 location、author
+custom_text 为空时加入 custom_text=None；非空时不加入
+时间可用 = 时间模式不是 hide，且 EXIF 的 datetime_original 有值
+时间不可用时加入 timestamp=None
+时间不可用且作者无值时，加入 timestamp_author=None
+```
+
+作者和时间是组合行，不能只看“隐藏时间”开关，也不能把作者为空等同于组合行为空。有作者、无时间时仍可显示作者；有时间、无作者时仍可显示时间。
+
+原 `_build_style_context` 解包 metadata 后调用共享函数，保留原入口。style_rules 不导入 RenderMetadata、Qt、core 或 StyleManager，不读取文件。模块顶部允许的唯一渲染语义依赖是 utils/render_context 的类级查询入口（§5.2 依赖表，仅供能力分析区使用；已核实 render_context → exif_helper 无回边，无循环）——core 经 `_build_style_context` 高频导入本模块会连带这条 import，因此**变体规则区严禁引用 render_context 或任何渲染语义**，防止依赖继续扩散。处理器仍从输入文件提取 EXIF，GUI 使用 FileItem.exif_data 预估，不能覆盖处理器提取的数据。
+
+文本保持 `value or None` 的现有处理，不增加 trim；空格与空字符串仍有区别。
+
+### 4.4 加载与校验缓存：减少重复 parse 与重复调用
+
+实测开销（17 份内置配置，venv 内 perf_counter 计 50 轮均值）：完整加载 4.21 ms/份，其中文件读取 + YAML parse 占 4.20 ms（99.8%），校验 + 默认注入仅 0.01 ms；deepcopy 已加载配置 0.03 ms/份，os.listdir 目录枚举 0.011 ms。结论：**校验本身近乎免费，真正的开销是重复 parse**——优化靶点是"同一文件被反复加载"，不是校验逻辑，不为此削弱任何校验。
+
+在 StyleManager 增加文件级缓存：
+
+- `_config_cache: Dict[绝对路径, 已校验且已注入默认值的配置]`。`_load_config_file` 命中时返回 `copy.deepcopy(缓存值)`——必须深拷贝：ImageProcessor 会修改本次配置的 fonts.weight（见 5.4），返回同一对象会被跨调用污染（C16 断言）。
+- 候选枚举缓存：resolve_style_source 的目录候选文件列表随同一失效钩子清理，变体选择不再重复 listdir。
+- 失效接口 `invalidate(path)` / `invalidate_all()`。调用点：GUI 的 refresh_style_list、showEvent 与生成前（8.1/8.4）先 invalidate_all 再重读；CLI 批量全程不失效——同一批次内同一文件视为同一配置，这正是批量吞吐的收益来源（100 张批量解析开销从约 421 ms 降至约 4 ms）。
+- 缓存键用 `os.path.normcase` 规范化的绝对路径（Windows 文件系统大小写不敏感，防止同一文件产生两个缓存键）；当前全部调用方为单线程（GUI 主线程 / CLI 串行批量），不加锁，若未来引入后台线程访问，必须先补并发评估再加缓存。
+- 不做 mtime 检查、不做磁盘监听、不设容量上限（样式文件数天然有限，单份 dict 数 KB），新鲜度完全由显式失效点保证。
+
+与 5.4 的页面能力快照缓存是两层：快照缓存管语义层（能力记录，输入变化不重读），本缓存管物理层（文件内容 → 配置）；叠加后"切回访问过的样式 / 生成前重读"退化为候选枚举命中 + N 次 deepcopy。
+
+**收益验收：** 命中路径不再执行 open/parse（可用计数器或日志证明）；批量 CLI（9.4.3）记录同一样式多次加载只 parse 一次；GUI 正常操作路径行为与无缓存时一致，失效钩子后不返回旧配置（C18）。
+
+**完成条件：** 4.0 拆分前后，T0 基线（变体选择结果与定位校验错误信息）逐条一致；C03–C06、C09–C10 的共享规则验证通过；4.4 缓存命中时无重复 parse、深拷贝隔离与失效钩子行为正确；后续 GUI 可以直接使用这些函数。
+
+## 5. T2：从全部配置中识别能力
+
+### 5.1 用加载后的配置分析
+
+在 `src/frame_styles/style_rules.py` 增设能力分析区（与 4.2 变体规则区同文件分区），由 StyleManager 的 `get_style_capabilities(style_name)` 负责取得来源、逐候选调用现有 `_load_config_file`（命中 4.4 文件缓存时为深拷贝，无重复 parse），再交给分析区提取结果。分析区不反向导入 StyleManager，也不接触 GUI。
+
+必须先经过现有加载器，因为它会注入默认字段并校验定位（定位校验自 4.0 起由 style_validator.py 承载，加载入口与注入行为不变）。如果 info_position 缺失、为 null 或非字典，加载器会补入 exif、author、location，因此分析结果应支持作者和地点。显式空字典则不补字段，不能把这两种情况当成一样。
+
+colors、fonts 也使用现有归一结果。每个变体是独立完整配置，不继承 default。旧定位枚举、相对定位环、非法方向默认值按当前加载器拒绝，不在分析器中自动迁移。
+
+### 5.2 文本键与选项的关系在 RenderContext 定义
+
+在 `src/utils/render_context.py` 增加只读注册表，以及两个类级查询入口：
+
+```text
+get_option_dependencies(key) → frozenset
+supports_text_key(key) → bool
+```
+
+第一个回答“这个文本键受哪些用户选项影响”，第二个区分“已知但没有输入依赖的键”和未知键。查询能力不需要实例化 RenderContext 或提取 EXIF；get_text 原实现保留。以后新增文本键时，两处一起更新，并用真实 get_text 输出验证关系。
+
+| 配置中的文本键 | 影响它的选项 |
 | --- | --- |
-| author | author |
-| location | location |
-| custom_text | custom_text |
+| author、location、custom_text | 各自对应的输入 |
 | timestamp | timestamp_display_mode |
-| timestamp_author | author、timestamp_display_mode |
-| camera_lens | lens_display_mode、use_short_lens |
-| lens | use_short_lens |
-| exif、camera、camera_make、gps、focal_length_formatted、aperture_formatted、shutter_speed_formatted、iso_formatted | 空集合，仍为可绘制且受字重影响的文字 |
+| timestamp_author | author 和 timestamp_display_mode |
+| camera_lens | lens_display_mode 和 lens_name_mode |
+| lens、short_lens | lens_name_mode |
+| exif、camera、camera_make、gps | 无本次用户选项依赖，但属于相框文字 |
+| focal_length_formatted、aperture_formatted、shutter_speed_formatted、iso_formatted | 无本次用户选项依赖，但属于相框文字 |
+| 未知键 | 不提供输入能力，也不能据此认定有文字 |
 
-注册表值用 frozenset。说明新增 get_text 字段时同步登记依赖；用临时断言覆盖组合字段映射，防止后续遗漏。字体颜色、fonts.sizes、defined_texts 中的 key 都不是用户输入依赖来源。
+分析 layout.info_position 的实际键，不通过字体字号、颜色名或全文搜索猜测。例如固定文字中写了“作者”，不代表作者输入会被使用。
 
-### 9.6 GUI 纯状态模型
+专用 layout.custom_text 为字典且 enabled 真时，支持自定义文本；info_position.custom_text 则通过依赖表支持，不要求专用 enabled。合法非空 defined_texts 是固定文字，支持字重；logo 为字典且 enabled 真时支持 LOGO。
 
-在 `src/gui_pyside/models/style_option_state.py` 定义：
+条件支持另外从文件名提取。author、location、custom_text 对应各自输入，timestamp 对应时间模式，timestamp_author 同时对应作者和时间模式。GPS 是地点输入来源，不是另一种缺失条件。未知条件仍留在通用选择器中，但不创建新的 GUI 控件。
 
-- `RawOptionValues`：保存 §9.2 的 11 项原始选择；作者/地点/文本为空时可用空字符串，枚举使用内部稳定值。
-- `EffectiveOptionValues`：同样的选项，但不支持的值按 §11.2 归一化；额外保存实际 location。不得回写 RawOptionValues。
-- `OptionState`：`enabled`、`reason_code`、`content`、`tooltip`。控件启用状态不能反过来作为业务能力来源。
-- `OptionEvaluation`：`effective_values`、`active_variant_path`、`active_variant_valid`、`states`、`can_render_style`、`diagnostics`。每次必须覆盖全部 11 项，不能只返回有变化的部分。
+### 5.3 保留坏候选，不能让分析结果替换选择结果
 
-初始化、照片为空和异常分支都要生成完整结果。can_render_style 只判断样式可生成；页面再与“当前选中照片有效”合并，不能混淆两种状态。
+某配置加载失败时，仍保留它的路径、文件名条件和诊断，让共享选择器照常选择。它不贡献显示能力。有其他有效变体时，所有候选的已知输入条件可以贡献条件支持，用户才能通过修改输入避开坏布局；全部配置都无效时，关闭相关输入。
 
-## 10. 逐文件执行任务
+补充检查那些加载器可能接受、但当前渲染会出错的结构：
 
-### T0：记录基线与保护工作区
+- info_position 子项不是字典时，将整份候选标为不可用，不静默删除字段。
+- defined_texts 整体不是字典时，标为不可用。内部非字典项按 TextRenderer 现有规则跳过，不能误判整份失败。
+- 实际参与渲染的非空固定 content 必须是字符串，否则标为不可用。
+- 非字典专用 custom_text 按现有渲染行为视为未启用。其他容器若会使当前渲染代码失败，记录结构诊断并补相应用例。
 
-1. 在 venv 中执行 git status，记录分支与 HEAD，阅读当时有效的 AGENTS.md。
-2. 核对本文列出的函数、依赖版本和样式是否仍存在；按函数名定位，不按本文评估时行号改文件。
-3. 本次基线中既有用户修改为 data/camera_map.csv、data/lens_map.csv；ParamCapsule、AGENTS.md、缩略图及 FilmClip Frost 删除已入库。方案与评审文档目前为未跟踪文件。执行者仍以启动时 git status 为准，保护届时所有既有修改，不恢复、不清理、不自动纳入提交。
-4. 记录 debug_log 起始文件大小或时间；准备独立临时目录存放验证输出。严禁用 reset --hard、清理用户未跟踪文件或覆盖 config.json 来制造干净环境。
-5. 在修改生产代码之前，按 §13.3 保存固定输入的 CLI 基线输出、关键参数、选中变体和颜色解析结果。不要到实现结束后才发现无法做前后比较。
+valid 只表示通过现有加载器和上述已知结构检查，不是完整渲染成功保证；不扩大为所有数值、几何和资源校验。
 
-完成证据：验证记录写明 HEAD、工作区基线与依赖版本。若执行时基线已变，先适配真实代码；只有产品规则与新实现冲突时才向用户提问。
+用 VariantFacts 保存单候选的分析结果，字段按用途组织：
 
-### T1：共享颜色解析与背景类型查询
+- 身份与诊断：path、valid、diagnostics。
+- 文本与输入：info_keys、display_options、has_weighted_text。
+- 镜头与 LOGO：has_independent_lens、has_camera_lens、logo_enabled。
+- 背景：fixed_background_rgb。
+- 旋转适配：portrait_adaptation_default（本候选声明的默认值，取自 validate_style_default；供页面提示复用快照、省去一次单独加载，见 8.1）。
 
-文件：新增 `src/utils/color_utils.py`；修改 `src/core/renderer.py`、`src/utils/background_fill.py`。
+用 StyleCapabilitySnapshot 保存 style_name、source、ordered_candidates、各候选 facts、family_display_options、family_condition_options 和 diagnostics。这里的 family 表示这个样式的全部变体。
 
-1. 将 renderer._parse_hex_or_rgb 的函数体原样迁入公共 `parse_hex_or_rgb(value)`；原私有函数保留为带说明的薄包装，以保持内部/外部引用兼容。
-2. 能力分析调用公共函数，渲染器仍通过包装调用同一函数。本任务不收紧颜色语法，不增加范围截断，不修改 RGB 转换行为。
-3. 在 BackgroundFillManager 增加只读 `get_fill_method(fill_type) -> Optional[str]`，返回注册项的 method；未知键返回 None，由 GUI 原值收集回退 DEFAULT_FILL 后再查询。
+### 5.4 只保存能力记录，控制读取时机
 
-特别注意：现有颜色解析器对长度、尾部字符、通道范围的校验较宽松。本文“颜色有效”仅指与现有解析器的成功/失败结果一致，不代表此次补全颜色验证。为修正这一历史问题改变颜色语义需另立任务，避免 GUI 功能夹带渲染变化。
+结果用 tuple、frozenset、冻结 dataclass 保存，不暴露嵌套可变字典。ImageProcessor 仍会修改本次配置的 fonts.weight，能力记录不能与它共享完整配置。
 
-完成证据：迁移前后对 None、空字符串、标准 HEX、解析失败字符串、三元列表/元组、非三元列表，以及现有宽松边界输入的结果一致；对每个现有背景注册项查询结果正确。这里只需临时断言，不改渲染样式文件。
+固定背景色直接调用现有 parse_color_value，非 None 才记录。保持它接受宽松短 HEX、把序列项转为 int、不检查通道范围的现有行为，不自行收紧校验。分析不能调用 register_custom_solid 或修改 FILL_TYPES，固定色注册仍由 renderer 完成。
 
-### T2：能力数据与字段映射
+页面缓存当前能力记录：切样式、刷新列表、返回页面、生成前重新读；输入或照片改变只重新计算。保存同名文件也必须刷新，不能只按名称判断缓存仍有效。第一版不做磁盘监听或全局 mtime 缓存。
 
-文件：新增 `src/frame_styles/style_capabilities.py`；修改 `src/utils/render_context.py`。
+缓存架构决策：启动时全量预计算全部样式能力、或把分析逻辑并入 StyleManager 的方案已评估并否决——分析代码总量不变只是搬家，style_manager 反而膨胀；样式编辑器保存后处理页唯一可靠的失效钩子是切页触发的 showEvent（编辑器只刷新自身列表），启动快照必须依赖这条隐式链路失效，缓存一致性复杂度净增。v11 引入的是另一层次的机制：4.4 的文件级加载缓存（path→配置，物理层）与本节的页面能力快照（语义层，输入变化不重读）分层共存，新鲜度统一由显式失效点保证（refresh_style_list / showEvent / 生成前 invalidate_all）；仍不做磁盘监听与 mtime 检查。v10 决策：变体规则与能力分析合并为 style_rules.py 单文件（用户裁定，减少文件数量），已接受 frame_styles → render_context 的单边依赖（已核实无循环），防护约束见 4.3。
 
-1. 实现 §9 的数据结构、纯解析/选择/上下文函数与字段映射。
-2. 按 §3.2 推导 display_options；GPS 能力由 location 显示或条件支持派生，不由直接 gps 字段派生。
-3. 字重支持为：至少一个已知 info_position 字段，或非空固定文字，或启用的专用 custom_text。custom_text 当前为空不影响能力；只有字体配置而无文字消费节点不算支持。
-4. `has_independent_lens` 判断所有有效候选的 info_keys 是否含 lens；不能只看当前候选。
-5. control_options 从目录候选的非空 required_missing 推导；仅当整组条件均属于 author/location/custom_text/timestamp 时纳入 GUI 控制。未知条件只诊断，通用解析器仍照旧处理。
-6. 显示支持只统计有效候选；条件支持包含可解析名称的损坏候选，以保留逃离错误变体的入口。全部候选损坏时则进入整体 invalid 状态，能力入口禁用。
+### 5.5 用现有样式核对，不按名称硬编码
 
-完成证据：最小配置字典断言覆盖组合字段、专用 custom_text、兼容 info_position.custom_text、独立 gps、固定文字、未知字段、条件专用输入、损坏候选。更复杂结构不能直接调用 `.get()` 假设类型正确。
+本次代码核查已通过加载器检查 9 个样式的 17 份配置，均能加载。以下是全部有效变体的支持汇总，不保证当前布局显示每一项。
 
-### T3：StyleManager 接入与变体匹配保持兼容
-
-文件：修改 `src/frame_styles/style_manager.py`。
-
-1. 抽出实际来源与候选路径枚举；保留目录优先、用户目录优先以及单文件扩展名 json/yaml/yml/toml 顺序。
-2. 目录候选保留 os.listdir 原有顺序；能力报告可以另行排序展示，但匹配输入不得排序。
-3. `_resolve_style_variant()` 改为调用共享解析/选择；保留 default、同分和无 default 的旧行为。
-4. `get_style_snapshot()` 对当前来源全部候选调用既有 `_load_config_file()`，再从其返回的校验后配置提取 facts。缺失/非字典 info_position 注入默认字段与显式空字典不注入的区别必须保留；colors/fonts 同理。错误候选保留 path/条件/诊断，不进入显示并集。
-5. `get_style_config()` 保持“选路径 → 只加载此路径”，不因选中配置损坏而改选其他候选。
-6. 同名目录空、候选全损坏时不能回退到内置同名来源；这与当前优先级一致。禁止从缩略图查找结果推导配置来源。
-
-完成证据：四种格式、单文件与目录、默认与组合变体、同分顺序、无 default、目录/文件交叉同名、空目录和损坏命中全部通过断言。另必须通过 C19 默认值注入、C20 单变体目录、C21 未知条件兜底中的加载/能力部分；涉及 GUI 纯状态的断言在 T4 完成。每种用例同时比较 get_style_config 的实际返回配置和快照选中候选的事实数据；路径可用临时探针记录，不只测新 API 自身。
-
-### T4：GUI 纯状态与有效参数
-
-文件：新增 `src/gui_pyside/models/style_option_state.py`。
-
-按 §11 精确实现求值次序、所有值的回退及原因优先级。模块仅接收数据，避免把 enable 判断散落在生成函数、样式切换和信号回调中。不得使用控件的 isEnabled() 过滤参数，因为禁用父容器、窗口忙碌等 UI 状态与样式能力不是同一件事。
-
-完成证据：同一个 snapshot/raw/gps 输入求值两次相等；raw 不变；求值无文件 I/O；FilmClip 空→有→空可逆；固定色与镜头模式依赖不影响其他选项；当前候选损坏时保留已知输入可编辑。
-
-### T5：GUI 控件绑定与刷新
-
-文件：修改 `src/gui_pyside/pages/image_processing_page.py`、`src/gui_pyside/widgets/style_selector_card.py`。
-
-1. 保存 §12.1 列出的全部 GroupWidget 返回值，建立内部选项到控件/行的绑定表。
-2. 构造函数在 `_setup_ui()` 前设置 `_restoring_config=True`、`_style_snapshot=None`、`_option_evaluation=None`、`_updating_option_states=False`；创建归属于页面的 singleShot QTimer。
-3. 移除 `_setup_ui()` 末尾那次过早刷新，改为 UI 和保存配置恢复完成、信号连接完成之后统一首次刷新。用 try/finally 复原恢复标记，处理 `_load_saved_config()` 中无配置提前 return。
-4. `_reload_style_snapshot()` 只负责当前名称的一次加载；无选择也要替换旧快照。`_update_style_dependent_controls()` 只求值与应用，不重新遍历目录。
-5. `_read_raw_option_values()` 集中完成中文选项到内部值的映射；复用现有字重/时间/镜头映射，不趁机改 config.json 存储格式。
-6. `_apply_option_states()` 只 setEnabled、setContent、setToolTip/AccessibleDescription；不改值、不发起渲染、不保存配置、不重建卡片。仅值确实变化时调用 UI setter。
-7. 样式列表 refresh 后始终显式重载当前快照并刷新状态。selector.refresh_styles([]) 必须设置 `_current_style=None`；不新增依赖字符串空值的伪 style_selected 事件。
-8. `_update_button_states()` 的生成按钮条件改为“合法选中索引且 can_render_style”；导出按钮仍只依赖已有结果，不因当前样式错误而禁用旧结果导出。
-9. 保留独立旋转适配提示的现有机制；本任务不借机重做其默认值展示。删除/清空照片时清除 GPS 提示，保留用户参数和样式预设能力。
-10. 移除 `_create_style_selection_card()` 中“无样式则调用 create_sample_styles”的 GUI 启动逻辑；保留 StyleManager.create_sample_styles 方法本身供显式调用。无样式时展示空选择器和说明，不自动创建配置、不借重启修复空列表。这是空状态产品规则的必要配套，不改变 CLI 的默认行为。
-11. 实现下方 T5-P 的保存/恢复契约，不能等到 T6 才处理 save_config。让空列表、持久化和重启作为 T5 的独立闭环验收。
-
-完成证据：§12 的非生成事件逐项触发；所有选项未被意外重置；初始化无 AttributeError、无重复信号连接；同名编辑生效；G06 保存/重启闭环、G07 快速输入/切样式必过。T5 验收独立于 T6 的生成参数验收，具体分工见 §14.1。
-
-#### T5-P：样式选择的保存与恢复契约
-
-save_config、_load_saved_config 与 selector 使用同一规则，其他用户参数仍按原格式保存。无需修改 ConfigManager 或 config.json schema；其现有 JSON 保存支持 null。
-
-| 情况 | 保存 style_name | 下次启动/刷新 |
-| --- | --- | --- |
-| 有真实选中项，名称仍在当前选择器列表中 | 该名称字符串 | 名称仍在新列表则恢复；允许配置暂时损坏的真实条目保留选择，生成另行校验。 |
-| 列表为空或没有真实选中项 | null，覆盖旧值 | 列表仍空时 current_style=None，不创建示例、不注入 Bottom Bars。 |
-| 保存值为 null、缺失、空字符串或非字符串 | 由本次实际选择决定后续保存 | 不调用 set_current_style 恢复该值；沿用刷新后自动选择的第一项，若列表空则 None。 |
-| 保存名称已删除或不存在 | 不恢复不存在的名称 | 沿用刷新后的第一项，若无条目则 None；下次保存实际选择或 null。 |
-
-具体实施：
-
-1. 删除 save_config 中 `current_style or "底部信息条 Bottom Bars"`。样式名只从当前选择器的真实状态取值；null 必须显式写入，不能省略字段后让旧值残留。
-2. 恢复时只对非空字符串尝试 set_current_style；该方法已有列表成员检查，保留“未知名称不改变选择、不发信号”的行为。不存在的名称原本就不会被恢复成本地非法选中态，本次不要绕开检查。
-3. 保存和恢复不修改其他输入，不触发生成；恢复完成后统一加载快照并求值。
-4. 空→重启仍空、空→加入样式→重启、旧名称删除→其他样式仍存在，这三条链路都要测。使用临时配置文件与临时样式目录，不删除或重命名真实内置样式来测试。
-
-### T6：生成参数与处理器共享上下文
-
-文件：修改 `image_processing_page.py`、`src/core/image_processor.py`。
-
-1. 把 ImageProcessor.process 中原有 context 拼装替换为 build_style_variant_context 调用。保留传入原 metadata、加载 EXIF、font_weight 覆盖、失败处理和函数公开签名。
-2. 在 GUI `_on_generate_frame()` 开头，合法图片检查之后、创建进度提示和临时文件之前：停止待处理的状态计时器，重新加载快照、读取原值、求值一次。
-3. 若当前候选不可用，展示一次现有 Fluent InfoBar 警告并 return；不创建处理器、不写临时文件、不调用默认样式兜底。删除 process 调用处 `current_style or "底部信息条 Bottom Bars"`，仅传此次重载和求值所对应的真实样式名；与 T5-P 的保存规则一致。
-4. 用此次 evaluation 的 effective_values 构造 RenderMetadata、选项和 font_weight。删除生成路径中重复的 GPS 替换/时间/镜头映射和直接读取三个文本框的逻辑。
-5. LOGO 全样式不支持时传空字符串并跳过自动匹配；支持时保持现有 auto/none/文件名语义。本任务不改变自动匹配算法。
-6. 字重不支持时向 process 传 None；支持时传用户映射值。背景填充始终传用户原选择的合法 key，固定色由渲染器覆盖；不得把自定义背景动态 key 写回控件。
-7. 饱和度覆盖仅在 enhance_background 状态可用时采用用户开关：勾选→None，未勾选→1.0；不可用→None。水印、方向适配、LRU 与图像输出路径保留现有流程。
-8. save_config 对用户选项保持原值持久化：读取原控件，不读取 effective_values。style_name 单独遵守 T5-P 的真实名称/null 契约。对于目前未保存的地点、文本等，不新增持久化行为。
-
-生成前重载可防止一般外部文件编辑造成陈旧状态，不承诺快照与处理器重新读盘之间的原子一致性；本次不新增配置锁、文件监控或向渲染器注入快照的 API。极短时间并发修改仍由既有处理器报错处理，并在验证记录注明此边界。
-
-既有 LOGO 边界：GUI 自动预匹配使用用户所选 bg_key 的明暗，而固定背景色样式可能使用另一明暗方案；若 GUI 已得到具体 logo_filename，渲染器不会再次自动匹配，只有该值为 None 时才走其内部分支。本次保留算法并在验证记录标明，不把现有明暗版差异归为能力联动失败，也不借本任务修改匹配算法。
-
-完成证据：拦截/记录 process 调用参数验证原值与有效值分离，再实际渲染验证。不能只检查界面变灰就声称残留值不会进入生成。
-
-### T7：文档与验证交付
-
-文件：修改 `docs/STYLE_GUIDE.md` 中自定义文本可用性说明；更新本文末尾的实施记录；新增 `docs/plans/STYLE_OPTION_CAPABILITIES_VALIDATION.md` 保存验证证据。
-
-指南解释“全部变体能力并集、保留输入、当前变体可能不使用某项”，同步说明组合字段、GPS 替换与直接 gps 的差异，以及整个 info_position 缺省会注入默认字段、显式空字典才表示无信息字段。不新增样式 YAML 能力开关，不改现有样式以迎合能力分析器。
-
-完成证据：§13、§14 全部执行或明确记录未执行原因。功能缺口、GUI 无法验证等不得写成通过。仅按用户实际授权提交；若要求提交，只提交本任务文件至 dev，不合并、不推送、不升级版本。
-
-## 11. 状态求值：确定顺序和所有回退值
-
-### 11.1 一次求值的固定顺序
-
-1. 从快照读 family display/control 并集；生成 author/location/custom_text/time 等选项的支持谓词。
-2. 不参考当前变体，按全家族支持计算有效参数。location 先判支持，再按 GPS 开关与当前 gps_text 决定实际值。
-3. 用有效参数构造上下文，并从完整候选列表选择当前变体；不要剔除损坏候选后再匹配。
-4. 计算当前变体是否消费各选项，只用于文案。**不得把当前变体结果再回灌第 2 步重新过滤。**
-5. 计算局部依赖：短镜头名与镜头显示模式、背景固定色与背景方法、字重。不得因当前文本为空而取消样式声明能力。
-6. 生成所有 OptionState 和 can_render_style；一次应用，更新生成按钮。若状态正在应用，用 guard 防重入；恢复标记只延迟刷新，不能遗失最终刷新。
-
-背景是明确例外：固定背景色由当前变体决定是否允许修改。背景选择不参与变体匹配，因此此例外不会造成作者/文本输入的自锁。
-
-### 11.2 参数值回退表
-
-| 项 | 支持时的有效值 | 不支持或依赖关闭时的有效值 | 原控件值 |
+| 样式 | 配置数 | 支持的文字和拍摄选项 | 补充说明 |
 | --- | --- | --- | --- |
-| author | 原值或 None | None | 保留 |
-| location | GPS 开且有 GPS→GPS；否则手工原值或 None | None，忽略 GPS 开关 | 保留 |
-| custom_text | 原值或 None | None | 保留 |
-| timestamp_display_mode | full/date_only/hide 原选择 | full | 保留 |
-| lens_display_mode | combined/camera_only/lens_only 原选择 | combined | 保留 |
-| use_short_lens | 原开关 | False | 保留 |
-| logo_selection | 原 auto/none/文件名，经现有逻辑转换 | none，对应 logo_filename="" | 保留 |
-| bg_fill_type | 原合法 key；未知 key 回退 DEFAULT_FILL | 固定色时仍传原合法 key，由渲染覆盖 | 保留 |
-| enhance_background | 原开关决定 saturation_override | saturation_override=None | 保留 |
-| font_weight | 原 light/regular/medium | 传给 process 的 font_weight=None | 保留 |
+| InfoCard | 4 | 作者、地点、GPS 替换、镜头名 | 使用独立 camera 和 short_lens；不支持镜头显示菜单、时间、自定义文本或 LOGO |
+| ParamCapsule | 2 | 自定义文本、镜头显示、镜头名 | camera_lens 出现在 no_custom_text；不支持作者、地点、时间或 LOGO |
+| Polaroid | 1 | 作者、地点、GPS 替换、时间、镜头显示、镜头名 | 作者与时间使用 timestamp_author；不支持自定义文本或 LOGO |
+| Bottom Bars | 4 | 作者、地点、GPS 替换、时间、镜头显示、镜头名、LOGO | 包含 no_timestamp_author 及地点组合变体；不支持自定义文本 |
+| Vertical Capsule | 1 | 镜头名 | 使用独立 camera 和 short_lens；不支持作者、地点、时间、自定义文本、镜头显示菜单或 LOGO |
+| SimpleInfo | 1 | 作者、地点、GPS 替换、时间、镜头显示、镜头名、LOGO | 使用 timestamp_author；不支持自定义文本 |
+| FilmClip | 2 | 自定义文本、镜头显示、镜头名、LOGO | 文本与设备行、LOGO 位于不同布局；不支持作者、地点或时间 |
+| FilmCut | 1 | 作者、地点、GPS 替换、时间、镜头显示、镜头名、LOGO | 当前变体指定固定背景色；不支持自定义文本 |
+| FrameBar | 1 | 作者、地点、GPS 替换、时间、镜头显示、镜头名 | 使用 timestamp_author；不支持自定义文本或 LOGO |
 
-author/location/custom_text 仍使用现有 `value or None` 规则，不 trim；空格字符串与空字符串语义保持不同。RawOptionValues 内部已规范为合法枚举，异常恢复值用既有默认项回退，不能把空背景 key 传到 BackgroundFillManager。
+这些样式均有受全局字重控制的文字。FilmCut 固定色生效时禁用背景选择和增强，其他样式按实际配置与用户背景判断。表格只用于基线核对，不能成为代码中的样式名白名单。
 
-短名启用公式：`family_has_independent_lens OR (family_supports_camera_lens AND effective_lens_mode != camera_only)`。再与全家族 use_short_lens 支持及快照整体可用性相交。只在其他变体有独立 lens 时也应保持可用，并说明当前布局未使用。
+**完成条件：** C01、C07–C11、C16、C18 通过；非 default 能力能识别，加载后默认值正确，坏候选与共享配置不会造成误判。
 
-### 11.3 reason_code 与文案优先级
+## 6. T3：一次算出界面状态和生成参数
 
-从上到下选择首个适用主原因，其他信息放 tooltip；不要同时显示互相矛盾的原因。
+### 6.1 输入与输出各自负责什么
 
-| 优先级 / code | enabled | 简短说明 | 适用条件 |
-| --- | --- | --- | --- |
-| 1 no_style / invalid_style | False | 未选择样式 / 样式配置不可用 | empty/missing/invalid，作用于本次 11 项；输出、旋转和水印不受此规则限制。 |
-| 2 unsupported | False | 当前样式不支持 | 全家族既无显示消费也无相关条件控制。 |
-| 3 current_variant_invalid | 按全家族支持保留 | 当前布局配置有误 | partial 且选中候选损坏；保留能切换布局的已知输入。背景和增强因当前配置未知暂禁用；can_render_style=False。 |
-| 4 fixed_background | False | 背景由样式指定 | 背景相关控件；仅当当前变体解析固定色成功。 |
-| 5 dependency_inactive | False | 仅显示相机时无效 / 仅模糊背景有效 | 短名或增强的局部依赖未满足。 |
-| 6 variant_control_only | True | 用于切换布局 | 参数仅有控制支持，无显示支持。 |
-| 7 other_variant_only | True | 部分布局支持 | 家族支持，当前候选不消费该项。 |
-| 8 gps_override / gps_fallback | True | 当前使用 GPS / 无 GPS，使用手工地点 | 地点/GPS 的状态说明；缺照片时说明可预设 GPS。 |
-| 9 supported | True | 使用该行原有说明 | 其余正常支持状态。 |
+新增 `src/gui_pyside/models/style_option_state.py`，提供：
 
-背景、增强没有普通 display_options 时不能套用 unsupported；它们使用专门规则。字重依据 has_weighted_text。GPS 的 control_only/other_variant_only 由 location 能力及当前用途派生。生成的“supported”只表示样式有消费入口，不保证照片 EXIF 齐全或画面每一项都可见。
-
-对 unsupported 与 other_variant_only 的 tooltip 说明原值已保留；后者可附支持变体文件名和当前文件名。GUI 不暴露本地绝对资源路径，完整路径仅用于 debug 日志与配置错误诊断。
-
-## 12. GUI 绑定表、事件表与框架操作边界
-
-### 12.1 控件与 GroupWidget 引用
-
-| option_id | 现有控件 | 保存的行引用 |
-| --- | --- | --- |
-| author | edit_author | author_group |
-| location | edit_location | location_group |
-| use_gps_location | chk_use_gps | gps_group |
-| custom_text | edit_custom_text | custom_text_group |
-| timestamp_display_mode | combo_timestamp | timestamp_group |
-| lens_display_mode | combo_lens_display | lens_display_group |
-| use_short_lens | chk_short_lens | short_lens_group |
-| logo_selection | combo_logo | logo_group |
-| bg_fill_type | combo_bg_fill | bg_fill_group |
-| enhance_background | chk_enhance | enhance_group |
-| font_weight | combo_font_weight | font_weight_group |
-
-现有 bg_group/fw_group 的局部引用改为对应成员后，保持三列宽度对齐逻辑引用正确。每行保留原基础说明作为恢复文案；不能首次设为“不支持”后失去正常说明。
-
-### 12.2 事件与刷新动作
-
-| 事件 | 重载快照 | 重算 evaluation | 触发渲染 |
-| --- | --- | --- | --- |
-| 初始化完成、恢复完成 | 是，一次 | 是，同步 | 否 |
-| style_selected | 是 | 是，同步 | 否 |
-| refresh_style_list / showEvent 返回页面 | 是，即使名称未变 | 是，同步 | 否 |
-| 三个 LineEdit.textChanged | 否 | 150ms singleShot 合并 | 否 |
-| 时间、镜头模式、背景 ComboBox.currentIndexChanged | 否 | 是，同步 | 否 |
-| GPS、短名、增强 SwitchButton.checkedChanged | 否 | 是，同步 | 否 |
-| LOGO、字重 ComboBox.currentIndexChanged | 否 | 是，同步 | 否 |
-| _select_item / _remove_filmstrip_item / _on_clear_all | 否 | 是，读取最新 current_index | 否 |
-| 生成按钮 | 是，同步 | 是，取消待执行 timer 后重算 | 通过样式与照片检查后执行一次 |
-
-信号连接统一放在所有控件构造后，连接一次。回调接收并忽略 Qt 传入的 index/bool/text，统一调度求值；不要把 bool 信号误绑定到 reload 参数。刷新不能递归调用 refresh_style_list。
-
-`showEvent()` 目前会重建样式列表，本次不优化为文件监控；不在 textChanged 中调用它。无照片仍应允许编辑受支持的预设，只有生成按钮不可用。
-
-### 12.3 QFluentWidgets 的实施要求
-
-- 使用实际 `LineEdit`、`ComboBox`、`SwitchButton`；不替换成 Qt 原生交互控件。
-- 只禁用绑定表中的控件，不调用 card.setEnabled(False) 或 group.setEnabled(False)。
-- 使用 GroupWidget.setContent 保留可读原因；短说明不主动换行，不新增固定高度。不用颜色 CSS 代替实际禁用。
-- 这次按控件粒度禁用，不改动下拉选项列表；setItemEnabled 仅作为已有能力参考，本任务无需引入单项禁用状态机。
-- 默认不需改值，因此不必为每次 setEnabled 包裹 QSignalBlocker；只有配置恢复的程序性改值使用 blocker，并在结束统一刷新。
-- 若实测打开的 ComboBox 菜单不会随控件禁用关闭，只在集中应用器中收拢该菜单；核对本地 dropMenu 的实际类型及公开关闭接口后实现，避免散落私有方法调用。
-- 需要验证浅色/深色主题中灰态和文字对比度；不要为本任务全局覆盖 Fluent QSS。
-
-## 13. 可复现验证用例与精确断言
-
-验证临时脚本放在项目现有忽略的 `test_images/style_option_capabilities/` 下，使用 Python assert，不加入测试框架，不提交生成图片。临时 `.py` 同样执行 py_compile。验证配置用临时目录和 StyleManager(config_dir=...)，不覆盖真实内置样式、字体、CSV 或 config.json。
-
-### 13.1 能力、匹配与纯状态验证
-
-夹具约定：除专测默认值注入的 C19 外，最小配置显式包含 `name`、`layout.info_position: {}`；需要动态字段的用例在此字典中加入节点。固定文字节点及已知信息节点须使用现有合法定位字段（例如 position=bottom-center、alignment=top-center、placement=outside）。所有磁盘集成用例先经 `_load_config_file()`，再分析返回结果；纯函数用例使用等价的校验后配置。不得通过绕开加载器制造与实际渲染不同的预期。
-
-| 编号 | 输入构造 | 必须断言 |
-| --- | --- | --- |
-| C01 | default 无 custom_text，no_location 有启用 custom_text | 家族支持 custom_text；default 下输入仍 enabled；当前提示 other_variant_only。 |
-| C02 | 只有 timestamp_author | author 和 timestamp_display_mode 均启用；hide 不取消作者能力。 |
-| C03 | 只有 camera、lens | lens_display_mode disabled，短名 enabled；残留 camera_only 被归一为 combined。 |
-| C04 | 只有 camera_lens | camera_only 下短名 disabled，原勾选保留；回 combined 后 enabled 并恢复有效勾选。 |
-| C05 | 只有 gps | location/GPS 替换 disabled；EXIF gps 字段本身的显示不受开关影响。 |
-| C06 | 显式 info_position={}，只有非空 defined_texts，无条件变体 | 字重 enabled；作者/地点/custom_text disabled。固定文本 key 叫 author 也不能启用作者输入。 |
-| C07 | 两个独立夹具：info_position={} + fonts.sizes.author；info_position 只含合法定位的未知 key | 两者均不启用作者或字重；后者含未知字段诊断。不能省略 info_position 导致默认条目注入。 |
-| C08 | default 与 no_author 均显式 info_position={}；no_author 使用不同背景 | author 为 variant_control_only；空/非空选择相应布局，参数不被过滤。 |
-| C09 | 候选 no_custom_text 与 no_author_no_custom_text | custom_text 是一个字段；后者条件数 2，不拆成 custom/text。 |
-| C10 | 固定顺序的同分候选；再测试无 default | 同分取第一个；无匹配无 default 时仍取第一个；不依赖真实系统目录排序作断言。 |
-| C11 | 用户目录同名样式 + 内置目录；用户单文件 + 内置目录 | 与当前 get_style_config 优先级相同；不把两个来源能力做并集。 |
-| C12 | 当前命中损坏 no_author，default 有效 | 不回退 default；can_render_style=False；作者入口仍能编辑使其离开损坏变体。 |
-| C13 | 所有候选损坏、空目录、未知样式、无选择 | 输出完整 11 项 disabled 状态，无上一个样式残留；生成不可用。 |
-| C14 | 单文件名 no_author.yaml | 作为单文件样式不产生作者条件控制能力。 |
-| C15 | 同一最小合法配置分别保存为 yaml/yml/json/toml | 四种格式能力相同；变体识别与单文件兼容。 |
-| C16 | 传入作者/地点/文本为空、空格、普通文字；时间 full/date_only/hide | 上下文键集合与旧 ImageProcessor 逻辑逐项相等，不能因为 trim 或 EXIF 缺失改变匹配。 |
-| C17 | 合法固定色、明确解析失败颜色、无固定色；所选 pure/gaussian | 解析成功锁定背景+增强；解析失败按用户背景；纯色仅增强禁用；高斯增强可用。 |
-| C18 | 多次求值、A→B→A、克隆后的渲染配置改 font weight | raw 不变、结果稳定；快照能力不被渲染配置修改污染。 |
-| C19 | info_position 分别缺失、null、列表、空字典及只含合法 timestamp 节点；另将 colors/fonts 设为缺失或非字典值 | 前三种经加载后为 exif/author/location，作者/地点/字重支持；空字典不注入且无其他文字时三者不支持；timestamp 字典不补作者/地点。colors/fonts 先按既有校验归一化，不能被能力分析预先拒绝；事实数据与 get_style_config 返回配置一致。 |
-| C20 | 仅 default 的目录夹具，并核对 SimpleInfo、FrameBar、Polaroid、FilmCut | 只有一个候选，家族显示能力等于该候选能力；不同用户输入不产生 other_variant_only。短名依赖/固定背景等局部禁用仍按规则；四个内置样式均记录结果。 |
-| C21 | 候选 no_iso：有 default、无 default 且列首两组；再由通用调用者传 iso=None | GUI 四字段上下文不按 iso 条件命中：有 default 选 default，无 default 可按首文件兜底选 no_iso；不得删候选或虚构 GUI iso 选项。通用上下文显式给 iso=None 时仍可按条件命中。 |
-
-使用通用选择函数的受控候选序列验证顺序，再验证 StyleManager 把真实枚举结果原序传入；不要通过给新旧结果都排序来掩盖变化。
-
-### 13.2 GUI 与生成参数验证
-
-GUI 探针必须使用临时 ConfigManager 或在探针内临时替换页面引用，保持生产默认行为不变，避免关闭窗口时覆盖用户 config。无窗口的纯函数验证不能代替下面的真实窗口验证。
-
-| 编号 | 实际操作 | 通过条件 |
-| --- | --- | --- |
-| G01 | 启动应用、无照片依次切换 §2.1 的全部 8 个样式 | 选项与能力表一致、允许预设，生成按钮禁用；标题和说明可读；四个单变体目录不出现 other_variant_only。 |
-| G02 | FilmClip 输入空→文字→空并生成样张 | 输入从不被锁死；LOGO 为家族可选；default/无文本变体提示与实际渲染相符。 |
-| G03 | InfoCard 作者/地点四种空值组合 | 四变体均能达到；输入不被清空；组合文件匹配正确。 |
-| G04 | A 输入作者等→B 不支持→A | 文本/开关/下拉选择均恢复原值，B 的 process 元数据已过滤。 |
-| G05 | 有 GPS 图片↔无 GPS 图片↔删当前图片 | GPS 提示和 effective location 更新，无上一张坐标残留；手工地点可作备用。 |
-| G06 | 临时样式目录和临时配置中依次完成：同名保存返回、删除当前项、清空列表并保存重启、加入新样式再重启、旧名称不存在但另有样式 | 同名能力重载；空列表 current_style=None 且保存 style_name=null；重启仍空、不创建示例文件；新列表非空时选第一项，有效已存名称优先恢复；未知/空/null/非字符串保存值不会形成非法选中态。 |
-| G07 | a：恢复配置、快速输入、连续切样式并等待 pending timer；b：有 pending timer 时立即生成 | a 在 T5 必测：无重复连接/自动渲染/控件不存在，最终 evaluation 属于最后样式和输入；b 在 T6 必测：取消或吸收 pending timer，生成恰一次并使用最后一次完整求值。 |
-| G08 | 给 process 加临时捕获包装，分别生成支持/不支持样式 | author/location/custom_text、时间、镜头、logo_filename、font_weight、saturation_override 与 §11.2 完全一致；原控件值不变。 |
-| G09 | 当前损坏变体，已有可导出结果 | 生成不可用且说明明确；已有结果仍可导出；填写条件参数可恢复其他有效变体。 |
-| G10 | 浅/深主题，窄右栏，Tab 键，已打开下拉菜单后禁用 | 不支持项不能被修改；说明可读，无横向溢出；没有可操作的残留菜单。 |
-| G11 | 相关卡片先展开再收起，待动画结束后 dump_expand_card | 收起总高度等于标题高度；展开 spaceWidget.h≥view.h；两种状态都有日志证据。 |
-
-G08 的捕获包装仅限临时脚本；验完移除，不把拦截或测试按钮留在生产 GUI。不要仅通过 disabled 属性断言替代键鼠与图像样张验证。
-
-G06 必须用真实的临时 ConfigManager 文件完成保存→销毁页面→创建新页面→恢复，不以手工赋值模拟重启。在临时样式根目录记录前后文件列表，证明空列表重启没有隐式创建示例。探针既覆盖生产的 save_config/_load_saved_config，也隔离用户真实配置；可在构造页面前替换依赖引用，禁止为测试跳过本次要验证的恢复函数。
-
-### 13.3 CLI 与渲染回归
-
-由于本方案提取了变体上下文、选择逻辑和颜色解析，本次单张与批量实测均为必做。执行前对受控测试输入保存基线输出；实施后用相同输入和参数生成新输出，比较解码后的尺寸、像素及选中变体。输出路径必须分开，避免 skip-existing 跳过处理。
-
-最小命令模板（尖括号先替换为独立验证目录中的实际绝对路径，不得原样执行）：
-
-```powershell
-.\venv\Scripts\activate
-python D:\Coding\MiLecFrame\src\main.py -i "<测试输入绝对路径>" -o "<新单张输出绝对路径>" -s "底部信息条 Bottom Bars" --author "Probe" --location "Probe" --logo none
-python D:\Coding\MiLecFrame\src\main.py --batch -i "<仅含测试图的绝对目录>" -o "<独立批量输出绝对目录>" -s "底部信息条 Bottom Bars" --author "Probe" --logo none
+```text
+evaluate_style_options(
+    snapshot, raw, photo, *, selected_bg_is_gaussian
+) → OptionEvaluation
 ```
 
-再用 FilmClip 的 custom_text 空/非空各生成一张，覆盖 no_custom_text 与 default；用 FilmCut 覆盖固定背景色。批量目录至少两张不同尺寸图片。返回码之外，还要检查输出存在且能解码、数量和日志；CLI 当前异常捕获方式可能使返回码不足以说明成功。
+snapshot 是上一步的能力记录。raw 使用 RawOptionValues 保存用户原值：author、location、custom_text，use_gps，timestamp_display_mode、lens_display_mode、lens_name_mode，以及 logo_filename 三态、bg_fill_type、enhance_background、font_weight。photo 使用 PhotoFacts 保存 has_photo、只读 exif_data、gps_text，区分“没有照片”和“照片没有 EXIF”。
 
-输出像素应保持一致的范围是“共享函数提取前后、相同显式 CLI 参数”。GUI 对无关残留参数过滤属于预期行为变化，应比较有效参数与预期图像，不把其差异误报为 CLI 回归。
+函数不读取文件或控件，不修改输入、metadata、options 或全局表。背景是否高斯由调用方通过 BackgroundFillManager.is_gaussian 查询后传入，函数本身不修改背景注册表。
 
-## 14. 任务顺序、完成门禁与证据格式
+输出 OptionEvaluation 包含：
 
-执行顺序固定为 **T0 → T1 → T2 → T3 → T4 → T5 → T6 → T7**。同一智能体可以顺序完成全部工作；本文件不要求创建额外智能体或 Codex 任务。若用户另行安排多人协作，按文件归属交接，避免两个执行者同时编辑 image_processing_page.py。
+- effective_values：EffectiveOptionValues，本次使用的文本、模式、LOGO、背景、饱和度和字重。
+- states：完整 11 项 OptionState，每项有 option_id、enabled、reason_code、content、tooltip。
+- active_variant_path、active_variant_valid：当前选到哪个配置，它是否可用。
+- can_render_style、diagnostics、is_provisional：样式可否生成、错误诊断、是否为无照片时的预估。
 
-### 14.1 逐阶段门禁
+states 每次完整返回，不仅返回变化项，否则旧样式的禁用或说明可能残留。
 
-| 门禁 | 必须提供的证据 | 未通过时 |
+### 6.2 为什么按这个顺序计算
+
+1. 汇总全部有效变体的显示支持和条件支持，先决定哪些用户输入与这个样式有关。
+2. 对无关输入使用默认值或 None；地点先判断支持，再处理 GPS 替换。
+3. 将这些有效值和照片信息交给共享上下文函数。
+4. 从完整候选列表选择当前变体，不跳过坏候选。
+5. 计算镜头名、背景、字重的局部限制，形成当前布局说明。
+6. 返回状态与参数。can_render_style 只表示样式可用，页面还要检查当前照片和索引才能生成。
+
+这个过程只计算一次。驱动布局的输入根据全部变体处理，不随当前布局撤销，因此不会出现“禁用输入改变条件，条件又反过来禁用输入”的循环。LOGO、镜头与背景不参与当前作者、地点、文本和时间这四类缺失条件。
+
+### 6.3 编辑能力、当前使用和数据缺失分别表达
+
+作者、地点、文本、时间只要具有显示支持或条件支持，就允许编辑。当前布局不用而其他布局支持时，说明“其他布局支持，当前布局未使用”；只影响选择时说明“用于选择布局，不直接显示”。
+
+如果当前候选损坏，禁止生成，背景项暂时禁用，但保留有效家族支持的条件输入，让用户可以调整布局。没有任何有效候选则禁用相关项。
+
+没有照片时按无 EXIF 数据预估，并设 is_provisional，说明“待加载照片确认”。照片没有时间、GPS 或镜头数据时，也不取消样式能力，只补数据缺失说明。
+
+GPS 替换只由 location 的显示或条件支持启用。开关打开且有 GPS 时使用坐标，否则使用手工地点。手工地点保持可编辑，坐标生效时说明它作为备用。直接 info_position.gps 不受这些选项控制，不能据此启用手工地点和替换开关。
+
+### 6.4 镜头的两个菜单必须分别判断
+
+| 文本键 | 镜头显示模式 | 镜头名模式 |
 | --- | --- | --- |
-| T1/T2/T3 结束 | 相关新增/修改 py_compile；C01–C21 中适用的加载/能力断言，特别是 C19–C21；颜色兼容对照 | 留在当前任务包修复，不能以 GUI 灰态掩盖解析错误。 |
-| T4 结束 | C01–C21 全部逻辑断言，含无 I/O、原值保留、损坏变体可退出、注入后能力一致 | 不开始宣称生成参数一致。 |
-| T5 独立门禁 | §12.2 全部非生成事件逐行记录；G01/G03/G05/G06/G07a/G10/G11，加 G04 的保值和 G09 的状态部分；GUI 文件 py_compile | G06 持久化闭环或 G07a 时序冒烟失败则 T5 未通过。实际 GUI 无法验证时记录待验，不与 T6 合并宣称通过。 |
-| T6 独立门禁 | G02/G07b/G08，G04 的有效参数及 G09 的导出行为；CLI 单张+批量、FilmClip 与固定色样张；受本阶段修改影响的 T5 用例重验 | 参数、实际渲染或 CLI 回归失败则 T6 未通过，不能用 T5 灰态证明代替。 |
-| T7 结束 | 全部修改文件清单、最终语法检查、增量日志检查、指南与结果记录 | 任何必做项未通过都不得合入 mainline。 |
+| camera_lens | combined、camera_only、lens_only | 非 camera_only 时三态有意义 |
+| lens | 不受这个菜单控制 | default/full 完整名，short 短名 |
+| short_lens | 不受这个菜单控制 | default/short 短名，full 完整名 |
+| camera、camera_make | 不受这个菜单控制 | 不受这个菜单控制 |
 
-检查命令在 venv 内执行，Python 脚本使用绝对路径。最终 py_compile 列表依据实际改动收集，包含新增未跟踪 `.py` 与临时验证脚本，不能只靠 git diff 找到已跟踪文件。无需添加 pytest、lint 或类型检查工具。
+镜头名启用条件是：存在独立 lens 或 short_lens；或者存在 camera_lens 且有效显示模式不是 camera_only。同时要求样式有有效配置。
 
-仅在新增资源/依赖/打包路径改变时触发 build_release 打包门禁。本方案预期只新增可被正常 import 的 Python 模块、不新增资源；执行者仍需确认没有动态导入导致 PyInstaller 漏包，不能仅因新增了 `.py` 就宣称已完成打包验证。
+独立镜头键在其他变体中也保留可编辑，并解释当前未使用。只启禁整个三态菜单，不逐项关闭 default、full、short；某两个模式对当前键产生相同结果，不代表其中一个非法。InfoCard、Vertical Capsule 应禁用镜头显示、启用镜头名。
 
-### 14.2 验证记录模板
+### 6.5 背景与字重的局部规则
 
-`STYLE_OPTION_CAPABILITIES_VALIDATION.md` 至少记录：
+当前候选的 fixed_background_rgb 非 None 时，禁用背景选择和增强；背景不影响变体条件，所以这个限制不会造成文字自锁。没有固定色时，只有用户选择高斯背景才允许增强。
 
-1. 执行日期、基线 HEAD、实际依赖版本、任务相关文件列表。
-2. T0–T7 状态：完成 / 未完成 / 阻塞；每项附实际证据，不写笼统“全部测试通过”。
-3. C01–C21、G01–G11 的通过/失败/未执行及原因；G07a/b、G04/G09 的阶段子项分开记录；临时脚本路径和关键断言输出。
-4. CLI 输入与输出路径、处理数量、选中变体、尺寸与像素比较结果。
-5. GUI 截图或可复现操作记录，以及两种卡片状态的布局日志。
-6. py_compile 的实际文件列表与结果；新增 ERROR/TRACEBACK 的数量；负面用例的预期诊断单列。
-7. 对用户工作区既有修改的保护情况；剩余限制和未解决事项。
-8. T5 与 T6 的独立门禁结果；G06 临时配置中的 style_name 实际保存值、重启后的选中项及目录无新增文件证据；固定背景色下 LOGO 预匹配的既有明暗边界单列。
+磨砂矩形或效果栈也可能用高斯模糊，但它们不属于背景增强开关，不能因为这些效果存在就启用开关。
 
-日志只记录样式名、变体名、选项 enabled/reason_code，以及必要的资源定位错误。连续相同状态不重复打印，切换/失效/错误时输出 DEBUG 摘要。不要为了调试把用户作者名、地点、文字内容写入新日志。
+字重取全部有效变体的已知动态文字、合法非空固定文字、启用的专用文本并集。当前文本为空不撤销能力；独立水印不贡献字重支持，因为这个选项不控制水印。
 
-### 14.3 最终完成定义
+### 6.6 生成参数怎样处理
 
-必须同时满足：所有 11 项按约定联动；能力以校验后配置为准且并集不漏非 default 能力；当前变体不会锁死输入；原值不丢失；有效参数与提示一致；同名更新与空列表无残留，空状态保存/重启不伪造样式或创建示例；QFluentWidgets 外观及布局可用；T5/T6 各自通过；共享逻辑 CLI 无回归；文档与证据齐全。
+| 参数 | 支持时使用 | 不支持或局部条件不满足时 |
+| --- | --- | --- |
+| author、custom_text | 原值 or None，其他变体支持也保留 | None |
+| location | GPS 开且有坐标时用 GPS，否则手工原值 or None | None，忽略 GPS 开关 |
+| timestamp_display_mode | 用户的 full/date_only/hide | full |
+| lens_display_mode | 用户的 combined/camera_only/lens_only | combined |
+| lens_name_mode | 用户的 default/full/short | default |
+| logo_filename | None 自动、空字符串禁用、文件名指定 | 空字符串，不能变为自动 |
+| bg_fill_type | 合法用户原选择，固定色由 renderer 覆盖 | 样式不可用不生成，不保存动态固定色 key |
+| saturation_override | 高斯且增强开时 None，否则 1.0 | 1.0，不修改矩形效果栈自己的饱和度 |
+| font_weight | 样式有受控制文字时的用户值 | None，不覆盖样式字体配置 |
 
-不把“代码已写完”“离屏 API 能调用”或“语法检查通过”等同于功能完成。无法完成实际 GUI 验证时，交付状态写“实现完成，GUI 验收待完成”，留在 dev，不擅自升级版本或合入。
+控件仍保留原值，保存偏好也读原值。非法枚举恢复沿用 findData→历史别名→默认项，不能把空背景 key 传给核心。
 
-## 15. 可直接交给执行智能体的任务提示词
+**完成条件：** C02–C04、C12–C17 通过；状态计算无副作用，不支持值被过滤，布局条件输入仍能改变变体。
 
-> 请在 D:\Coding\MiLecFrame 的 dev 工作区实施 GUI 选项随样式能力联动功能。先阅读 AGENTS.md 和 docs/plans/STYLE_OPTION_CAPABILITIES_PLAN.md，按其中 v3 执行契约完成 T0–T7。实现范围包含作者、地点、GPS 替换、自定义文本、拍摄时间、镜头模式、短镜头名、LOGO、背景填充、背景增强和字重。以校验后配置的全部变体显示/控制能力决定可编辑性，以当前变体决定生效提示；保留用户原值，统一构造有效渲染参数，避免输入自锁。特别遵守 info_position 缺省注入与显式空字典的区别，以及 T5-P 的真实样式名称/null 保存恢复规则，移除 GUI 无样式时自动创建示例的调用。遵循文档指定的模块边界、公共接口、来源优先级和 QFluentWidgets 约束，完成 C01–C21、G01–G11，分别通过 T5/T6 门禁，并完成语法检查、CLI 单张/批量与日志检查，将实际证据写入 docs/plans/STYLE_OPTION_CAPABILITIES_VALIDATION.md。保护工作区已有改动，不修改版本、tag、发行分支或推送。只执行功能实现与验证，未获提交指令时不自动提交。若执行环境无法进行实际 GUI 验收，明确记录未完成项，不冒称全部通过。遇到基线差异先核查并适配，遇到真正的产品规则冲突再提出具体问题。
+## 7. T4：把计算结果接到 QFluentWidgets
 
-### 实施记录（由执行者填写）
+### 7.1 保存控件与说明分组的对应关系
 
-- [ ] T0 基线记录
-- [ ] T1 颜色解析与背景查询
-- [ ] T2 字段映射与能力纯函数
-- [ ] T3 样式快照及兼容匹配
-- [ ] T4 选项求值和有效参数
-- [ ] T5 GUI 控件、信号和刷新
-- [ ] T6 生成链路与共享上下文
-- [ ] T7 文档与完整验证证据
+新增 `src/gui_pyside/utils/style_option_bindings.py`，维护 11 项控件与 GroupWidget 的绑定，负责读取 RawOptionValues、应用 OptionState。LOGO userData 在此转换成 None、空字符串或文件名，业务层不判断中文显示文案。
 
-当前以上任务均未执行；本轮交付物为方案文档。
+修改实际入口 `src/gui_pyside/pages/image_processing_config_cards.py`，保存 addGroup 的返回对象到页面属性（供绑定表按名引用）。**说明行保持构建时的初始文案，运行期不 setContent**（v13 用户裁定：说明文字长度变化会牵动同行控件几何，见 apply_states 注释）。
+
+只对 LineEdit、SwitchButton、ComboBox 调 setEnabled。不能禁用整个 GroupWidget 或折叠卡，否则说明与展开交互也会失效。状态应用只改变启用和说明，不清空原值。
+
+此前环境核查为 PySide6 6.11.1、PySide6-Fluent-Widgets 1.11.2。setEnabled、addGroup、GroupWidget.setContent、ComboBox.setItemEnabled 已确认存在；执行时重新核对版本。
+
+接口依据：[Qt 控件启禁](https://doc.qt.io/qt-6/qwidget.html#enabled-prop)、[QFluentWidgets 分组卡 API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/settings/expand_setting_card/index.html)、[ComboBox API](https://pyqt-fluent-widgets.readthedocs.io/zh-cn/latest/autoapi/qfluentwidgets/components/widgets/combo_box/index.html)、[官方组件列表](https://qfluentwidgets.com/zh/pages/componentlist/)。网页部分签名标为 PyQt5，实际使用项目 PySide6 包，不替换依赖。
+
+统一宽度策略（v14）：9 个 ComboBox/LineEdit 一律 setFixedWidth(200)（SwitchButton 保持固有尺寸）。动机与实测依据：qfw ComboBox 的 minimumSizeHint 随当前项文字长度变化（镜头名 72→114px），不同行宽度天然参差且切换选项即漂移；动态 logo 长文件名把 group_logo 行最小需求推至 886px，远超侧边栏最窄 350px（页面 splitter min 350/max 800），直接造成整体横向溢出。固定宽度后宽度集合恒为 {200}，行最小需求可预算，三档侧边栏宽度探针均无横向滚动。
+
+本任务启禁整个菜单即可，不需要 setItemEnabled，也不直接修改内部 action。v13 裁定：禁用原因不通过行内说明显示，由样式卡诊断说明（坏变体/无样式时）与生成禁用兜底；OptionState.content/tooltip 保留在数据结构中供未来使用，应用端不消费。
+
+### 7.2 同时出现多个原因时，先显示哪个
+reason_code 是内部标识，用于状态计算与调试日志（§8.4）。v13 裁定：行内不显示动态说明，原因的优先级只影响**样式卡诊断说明**（set_page_style_hint 取首条诊断，坏变体/无样式时展示）与生成禁用提示：no_style、invalid_family、variant_unavailable 的诊断优先展示；时间与作者共用行、无照片预估不产生行内文案。坏变体的全局错误放在样式说明处，不能因某输入正常而被掩盖，也不能在每次打字时弹 InfoBar。
+
+### 7.3 参数收集使用同一次计算结果
+
+修改入口为 `collect_render_options(page, item, evaluation)`。作者、地点、文本、时间、镜头、LOGO、背景和字重使用 evaluation.effective_values，不再自行重复 GPS 替换或直接读取残留文本。
+
+水印、输出格式、portrait_adaptation、source_cache_key、prepared_blur_cache 仍走各自现有入口，不能因为过滤参数而丢失。LOGO 自动匹配保持 None，禁用保持空字符串，最终背景确定后的匹配仍由 renderer 完成。
+
+### 7.4 更新说明不能破坏卡片布局
+保留 addGroup/addGroupWidget 的添加方式，不直接操作 viewLayout。v13 起运行期不再 setContent（说明行恒定），几何稳定性由探针保证：多样式来回切换后11 项控件 x/width/height 必须逐项不变。唯一允许的动态文案是样式卡诊断说明（整卡副标题，不在选项行内），仍受单行宽度约束（超长截断）。
+
+保留 StyleSelectorCard 已有高度覆盖。新增特殊高度、滚动或 FlowLayout 内容时遵守 AGENTS.md；完成后用 layout_debug.dump_expand_card 验证收起无间隙、展开内容容纳完整。
+
+**完成条件：** C15 及 G02、G04–G06、G11 的对应检查通过；控件和参数一致，多样式切换后 11 项控件几何恒定（探针验证）、启禁计数符合 §5.5 基线，原值、独立选项和缓存参数保留。
+
+## 8. T5：统一刷新、恢复和生成入口
+
+### 8.1 页面只保留一个刷新入口
+
+修改 `src/gui_pyside/pages/image_processing_page.py`，用 `_refresh_style_option_state(reload_capabilities=False)` 完成读取原值、按需重载能力、计算 evaluation、更新控件和按钮。
+
+旧 `_update_style_dependent_controls` 删除旧业务判断或只转调新入口，不能两套联动并存。`_update_button_states` 使用当前 evaluation，不反向触发完整刷新，否则容易递归。旋转适配提示（`_update_portrait_adaptation_hint`）是本计划 11 项之外的独立规则，现在挂在 `_on_style_changed` 尾部随样式切换刷新；合并刷新入口时必须保留这条调用链，清理旧联动时不得误删，也不把它并入 reason 体系。其读取样式声明的数据源改为复用当前能力快照（VariantFacts.portrait_adaptation_default，见 5.3）：省去每次切换单独调用 get_style_config 的一次加载（实测约 4 ms），提示从"读 default 变体声明"升级为"读当前（预估）变体声明"——各变体声明一致时无差异，不一致时新行为更准确，旋转适配的渲染行为本身不变；无快照（空列表/无样式）时回退现有通用文案。
+
+| 事件 | 是否重读配置 | 必须更新的结果 |
+| --- | --- | --- |
+| 全部控件创建并恢复配置完成 | 是 | 全部状态和按钮 |
+| 点击或编程切样式、refresh_style_list、showEvent | 是，同名也读取；refresh_style_list 与 showEvent 先 invalidate_all（4.4） | 能力、当前变体、说明和按钮 |
+| 文本、时间、GPS、镜头、LOGO、背景、增强、字重变化 | 否 | 状态和有效参数 |
+| 导入、选择、删除、清空照片 | 否 | 照片信息、GPS、时间、状态和按钮 |
+| 点击生成 | 是 | 最终可用性和本次有效参数 |
+
+输入事件不读取磁盘，也不自动生成。照片事件先重算，再更新按钮，避免使用上一张照片的状态。
+
+### 8.2 初始化和恢复要等所有控件就绪
+
+全部卡片创建后再连接和刷新。恢复配置期间用 `_restoring_config` 暂缓中间响应，结束后统一重算，包括没有 saved 配置的路径。需要程序化改值时可用 QSignalBlocker；应用 enabled 与说明本身不修改值。
+
+保留导入首张新照片时按方向设置 default/short 的既有镜头名行为，设置后重算；切换照片不重复覆盖用户选择，样式不支持也不抹除这个原值。
+
+### 8.3 空列表与无效名称必须真实表达
+
+修改 `src/gui_pyside/widgets/style_selector_card.py`：refresh_styles([]) 清除 current_style；非空时恢复仍存在的选择，否则选择首项。恢复保存的过期、非法或 null 名称时，不能构造不存在的选择，非空列表保留合法首选。
+
+在实际 create_style_selection_card 中移除自动创建示例调用，显示“暂无可用样式，请在样式管理中创建或导入”。示例工具方法可以保留。
+
+save_config 保存真实样式名称或 null，移除硬编码 Bottom Bars 兜底；其他现有偏好读取原控件，不新增目前未保存的地点、文本或镜头偏好。
+
+### 8.4 生成前再次检查，并保留旧结果
+
+生成按钮条件为：当前照片及索引有效，且 evaluation.can_render_style 为真。导出已有结果仍按原规则，切到坏样式不撤销上次成功结果。
+
+`_on_generate_frame` 取得当前照片后先 invalidate_all（4.4）再重新读取能力、计算 evaluation，在状态提示和临时文件创建前检查。函数级守卫必须存在，防止直接调用绕过禁用按钮。移除生成中的硬编码样式兜底，再把本次 evaluation 传给参数收集入口。
+
+调试日志在状态实际改变时记录来源、所选变体、缺失字段名称和 reason_code。处理器侧渲染时实际选中的变体路径同样记入 debug 日志（在共享选择函数或 get_style_config 成功路径单点记录），供 C17 与 GUI 预估比对。不要输出作者、地点或文字全文；错误包含候选路径与失败阶段。
+
+**完成条件：** C17–C18、G07–G10、G12 通过；恢复和刷新不保留旧状态，无效选择不能生成，已有结果和导出仍可用。
+
+## 9. T6：验证、说明和交付
+
+### 9.1 准备隔离的验证环境
+
+更新 docs/STYLE_GUIDE.md，解释全部变体支持、原值保留、当前布局提示、组合时间与作者，以及两种镜头选项。验证记录写清输入、预期和实测结果，未完成项标为待验证。
+
+仓库没有 pytest/unittest 框架，使用临时目录和独立 assert，再实际启动 GUI。所有命令先在项目目录执行 `.\venv\Scripts\activate`；Python 脚本和校验目标使用绝对路径。
+
+普通夹具用 StyleManager(config_dir=临时绝对目录)，采用当前九点定位规则。旧字段仅用于拒绝测试。双来源构造后设置 sm.extra_dirs 为另一临时目录，因为显式 config_dir 会清空该列表，不为测试改生产构造器。
+
+顺序测试向选择器传明确候选顺序，并控制目录枚举检查包装方法，不依赖文件系统偶然顺序。保存测试隔离 ConfigManager 写目标，不覆盖真实 config.json、CSV、字体或样式。无界面/API 探针与真实交互分别记录。
+
+### 9.2 业务检查 C01–C18
+
+每项记录测试输入、预期结果和实际结果。下面的编号用于交付记录，执行者不能仅写“测试通过”而没有对应证据。
+
+**全部变体与匹配规则**
+
+- **C01：能力只在其他变体中。** 构造 default 不支持、其他变体支持某项的样式，以及没有 default 的样式。分析结果必须包含所有有效变体的能力。
+- **C02：自定义文字可以往返。** ParamCapsule 从空文本变为有文本，再清空。no_custom_text 和 default 可以往返，输入框始终可以再次填写。
+- **C03：时间和作者的组合。** 对 Bottom Bars 验证时间、作者四种有无组合，再分别加入地点有无。任一有值时组合行可用；两者都无值才选择缺少组合行的变体，地点组合也正确。
+- **C04：组合条件评分。** no_author 与 no_timestamp_author 同时命中时，评分分别为 1 和 3，组合条件优先。如果上下文只显式给出 author、timestamp 缺失，没有 timestamp_author，则不能自动命中组合条件。
+- **C05：两套顺序规则。** 分别测试同分条件、多个 default、没有 default。条件匹配取文件名排序后的首个；兜底仍取原始枚举顺序中的首个。
+- **C06：通用条件和普通文件。** 用 no_iso 等未知 GUI 条件确认通用选择器仍可使用。上下文未出现 iso 时不视为缺失，显式 iso=None 时可命中；不带 no 片段的普通文件仍可作为最后兜底。
+
+**配置识别与异常处理**
+
+- **C07：默认字段注入。** info_position 缺失、为 null、为列表时，使用加载器注入的默认信息。显式空字典则没有这些能力。
+- **C08：识别真实文字来源。** 覆盖未知信息键、包含“作者”字样的固定文字、只有固定文字的样式，以及两种 custom_text 配置。不能错误启用作者输入；固定文字支持字重；两种动态文本都能识别。
+- **C09：来源和文件格式。** 分别覆盖 YAML、YML、JSON、TOML 的单文件与目录样式，以及同名双来源。能力查询与加载选择同一来源，不合并；用户单文件与内置目录同名时仍保持现有目录优先行为。
+- **C10：损坏和空来源。** 覆盖高优先级目录为空、坏 default 配合有效条件变体、全部配置损坏。不能跨来源回退或跳过选中的坏候选；有有效变体时允许通过条件输入离开坏布局，全坏时禁用并阻止生成。
+- **C11：错误的配置结构。** 覆盖相对定位环、旧定位枚举、info_position 子项不是字典、defined_texts 容器错误。错误配置标为不可用并给出诊断；TextRenderer 原本允许跳过的非字典固定文字项，不得使整份配置误判无效。
+
+**选项、参数与更新**
+
+- **C12：两种镜头选项。** 分别使用 camera、lens、short_lens、camera_lens，并把它们分布到不同变体中。菜单状态及三态输出与 get_text 一致；camera_only 不能关闭独立镜头行的名称控制。
+- **C13：GPS 替换。** 比较支持 location 与只使用 gps 字段的样式，分别使用有 GPS、无 GPS 的照片。替换、手工回退和备用输入正确，替换开关不控制直接显示的 gps 字段。
+- **C14：背景规则。** 覆盖合法颜色、非法颜色、现有解析器接受的宽松格式，以及高斯背景、纯色背景、磨砂矩形。与共享颜色解析一致，增强仅控制背景，分析过程不注册动态背景类型。
+- **C15：生成有效参数。** 预先留下不相关输入，选择只在另一变体使用的选项，并触发镜头局部限制。有效参数符合第 6 节；布局条件输入保留，LOGO 禁用的空字符串不能转成自动匹配的 None。
+- **C16：状态计算没有副作用。** 修改一次渲染配置中的 fonts.weight 后重用能力记录，并重复计算状态。能力记录、原输入和全局表保持不变，每次返回完整 11 项状态。4.4 缓存命中路径返回深拷贝：修改本次配置不污染缓存，后续同文件读取仍得到原始值。
+- **C17：照片信息变化。** 覆盖无照片、无 EXIF、无拍摄时间、隐藏时间及切换照片。样式支持能力保持，预估与实际上下文正确，GPS 不使用上一张照片的值。生成后比对 evaluation.active_variant_path 与渲染管线实际加载的配置路径一致（用 §8.4 的变体日志或测试钩子捕获），确保 GUI 预估（FileItem.exif_data）与处理器二次选择（从输入文件重新提取）不分叉。
+- **C18：同名配置更新。** 保存或删除同名配置后刷新（触发 4.4 失效钩子）。能力记录、说明、启用状态与文件缓存都更新，不保留旧结果。
+### 9.3 GUI 检查 G01–G12
+
+这些项目必须实际启动应用操作。无界面测试和 API 属性检查可以提供辅助证据，不能替代下列交互检查。
+
+- **G01：遍历 9 个内置样式。** 结果符合第 5.5 节，禁用原因可读，输出格式、旋转适配、水印保持现有行为。
+- **G02：填写和清空自定义文字。** 在 ParamCapsule、FilmClip 中反复操作，布局能够往返，设备和 LOGO 提示更新，用户选择仍保留。
+- **G03：操作时间与作者。** 在 Bottom Bars 中验证四种组合，并切换有、无拍摄时间的照片。界面选择与最终图片一致，共用一行的关系清楚。
+- **G04：操作三态镜头名。** 在 InfoCard、Vertical Capsule 中切换默认、完整、短名称。镜头显示菜单禁用，镜头名有效，full 可以覆盖 short_lens。
+- **G05：解除镜头局部限制。** 先选 camera_only，再切到含独立镜头行的样式。相关禁用解除，保留的镜头名选择恢复作用。
+- **G06：来回切换支持能力。** 对文本、开关、LOGO、背景分别执行“支持→不支持→支持”。原值不丢，生成不使用无关残留，偏好仍保存原值。
+- **G07：恢复保存配置。** 覆盖旧中文值、新内部值、没有保存配置、非法或 null 样式名。恢复完成后状态正确，不访问未创建的控件。
+- **G08：保存空样式状态。** 清空列表后保存、重启，再测试删除当前样式。没有自动创建示例，保存 null，空说明可读；列表非空时保持合法首选。
+- **G09：保存同名样式。** 在编辑器中保存后返回处理页面，不改名称、不重启也能更新支持能力。
+- **G10：管理照片。** 切换、删除、清空照片，再导入横幅和竖幅图片。时间与 GPS 更新；保留首张新图的方向默认逻辑，切图不再次重设镜头名。
+- **G11：检查界面布局。** 展开、收起、调整窗口、切换浅深主题并用 Tab 操作。控件不越界、不留间隙，**多样式切换后选框/输入框尺寸与位置保持固定（v13 验收核心）**，**切换下拉长短选项与选择长 logo 文件名后宽度不变（v14）**，**五张配置卡全部行控件宽度 {200}、左右缘跨卡逐像素对齐（v14 跨卡对齐）**，禁用项不能编辑且保持视觉稳定，布局诊断符合要求。
+- **G12：处理坏变体。** 选择坏布局后修改输入恢复，并直接调用生成入口测试守卫。坏配置不进入临时生成流程，上次有效结果与导出能力保留。
+### 9.4 最终检查要求
+
+1. 每次代码任务后，在 venv 中用绝对路径执行 `python -m py_compile`，覆盖新增或修改的所有 .py，包括交付脚本。仅编辑 Markdown 时没有 Python 校验目标。
+2. 完成 C01–C18 并记录证据。
+3. 共享规则抽取后，CLI 单张与批量各实测一次，覆盖时间或作者缺失和变体选择，记录选中文件及成功输出。批量路径记录 4.4 缓存证据：同一样式多张图只 parse 一次（日志或计数器），全部输出仍正确。有效参数过滤仅进入 GUI 路径，不改变 CLI 参数含义。
+4. 启动 `python D:\Coding\MiLecFrame\src\main.py` 完成 G01–G12。未实测项目标为待验证。
+5. 使用 dump_expand_card 检查：收起时 `card.height() == card.card.height()`；展开时 `spaceWidget.height() >= view.height()`。
+6. 从本次操作起点检查 debug_log：正常启动和生成不得新增 ERROR 或 TRACEBACK。故意损坏配置产生的预期错误单独隔离记录。
+7. 本方案没有资源、路径或依赖变化，默认不要求打包；实施如果引入这些变化，补做 AGENTS.md 要求的打包冒烟。
+## 10. 交付要求与执行说明
+
+实施全部留在 dev，保留用户和其他任务的既有改动。新增代码写清中文注释，特别说明组合评分、混合排序、条件支持、快照隔离与原值/有效值；必要旧注释保留，失效注释随修改更新。
+
+交付为可审阅代码、使用说明与验证记录，按 2.3 的阶段划分分别审阅：阶段一（T0–T2）以重构质量与基线一致性为主，阶段二（T3–T5）以功能行为与 GUI 验证为主。不自动提交、不改版本或 tag、不发行、不推送。实际代码与本版关键事实不符时，指出方法、差异和影响，必要时向用户澄清，不扩大需求。
+
+可直接交给执行智能体：
+
+> 请实施 docs/plans/STYLE_OPTION_CAPABILITIES_PLAN.md v13。先读 AGENTS.md，核对当前代码和工作区，按 T0–T6 三个阶段执行（2.3）：阶段一是样式加载层重构——T0 基线，T1 完成校验拆分（纯搬运、基线逐条一致）、style_rules.py（变体规则区与能力分析区同文件分区，依赖约束见 4.3）与 4.4 加载缓存（深拷贝返回、显式失效）；阶段二在其上接入 GUI 选项能力（§7.1 注意 v13 裁定：apply_states 只调 setEnabled、不修改说明行）；每项任务的规则、接口和完成条件都在对应章节，遵守 2.1 的分层架构与设计原则。
+>
+> 全部有效变体决定可编辑性，当前变体决定提示和背景限制。保留原值，独立计算有效参数；复用颜色、背景和 LOGO 逻辑，保持现有来源、评分和兜底行为。完成 C01–C18、G01–G12、语法、CLI 和日志验证，记录证据，未实测项明确说明。仅交付本任务修改，不自动提交、修改版本、发行或推送，不触碰既有用户改动。
+
+v14 追加宽度稳定化与说明文案优化：11 项控件统一 setFixedWidth(200)，消除 ComboBox 当前项文字驱动的宽度变化（72→114px 实测）与 logo 长文件名溢出（行需求 886px）；静态备注文案精简并修正过时语义；新增 normalize_option_rows 跨卡对齐（统一标签列宽 110px + 行边距 24px，行宽恒 432 ≤ 卡宽 434，全部行右缘距卡片右缘 25px 逐像素一致）。v13 按用户验收反馈裁定 apply_states 只调 setEnabled、不修改分组说明行；v12 完成方案重定位（重构主线 + 三阶段 + 架构原则）；v11 引入加载缓存（parse 占 99.8%、批量 421ms→4ms）；v10 合并 style_rules.py；v9 拆分 style_validator.py。代码事实核查结论同 v7：基线 dev `7bb1aa3`，9 样式 17 配置与 §5.5 基线表吻合，依赖版本 PySide6 6.11.1、PySide6-Fluent-Widgets 1.11.2。
+v13 按用户验收反馈修订：apply_states 只调 setEnabled、不再修改分组说明行——已实测复现 setContent 改变 contentLabel 宽度牵动同行控件几何（4 控件漂移），修复后多样式切换 11 项控件几何恒定（探针验证，启禁计数符合 §5.5）。§7.1/§7.2/§7.4/G11 同步简化，禁用原因由样式卡诊断与生成禁用兜底。v12 完成方案重定位（重构主线 + 三阶段 + 架构原则）；v11 引入加载缓存（parse 占 99.8%、批量 421ms→4ms）；v10 合并 style_rules.py；v9 拆分 style_validator.py。代码事实核查结论同 v7：基线 dev `7bb1aa3`，9 样式 17 配置与 §5.5 基线表吻合，依赖版本 PySide6 6.11.1、PySide6-Fluent-Widgets 1.11.2。

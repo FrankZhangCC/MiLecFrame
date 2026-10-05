@@ -49,10 +49,15 @@ from .image_processing_config_cards import (
     create_output_settings_card, create_style_selection_card,
     create_frame_config_card, create_personalization_card,
     create_shot_info_card, create_watermark_card,
-    collect_render_options, PORTRAIT_ADAPTATION_ITEMS,
+    collect_render_options, normalize_option_rows, PORTRAIT_ADAPTATION_ITEMS,
     LENS_NAME_ITEMS,
     _LEGACY_TEXT_ALIASES,
 )
+# 样式选项能力（计划 T3/T4）：状态评估模型与控件绑定
+from ..models.style_option_state import (
+    PhotoFacts, evaluate_style_options,
+)
+from ..utils import style_option_bindings
 from src.utils.exif_helper import ExifHelper
 from src.utils.logo_selector import LogoSelector
 from src.utils.background_fill import BackgroundFillManager
@@ -166,11 +171,29 @@ class ImageProcessingPage(QWidget):
         self.filmstrip_labels: list[QLabel] = []  # 胶片栏缩略图标签（用于动态缩放）
         self.state_tooltip = None  # 处理状态提示
 
+        # ── 样式选项状态（计划 §8.1/§8.2：单一刷新入口的工作集）──
+        # 页面缓存的能力快照：输入/照片变化不重读（§5.4，零 IO）；
+        # 切样式 / refresh / showEvent / 生成前才重读
+        self._style_capabilities = None        # StyleCapabilitySnapshot
+        self._style_capabilities_for = None    # 快照对应的样式名
+        self._style_evaluation = None          # 最近一次 OptionEvaluation
+        # 恢复配置期间暂缓中间响应（§8.2：全部卡片创建后再连接和刷新）
+        self._restoring_config = False
+
         # ── 初始化 UI ──
         self._setup_ui()
 
-        # 加载已保存的作者名和配置
-        self._load_saved_config()
+        # 全部卡片创建完成后连接选项信号（§8.2：信号必须等控件就绪）
+        self._connect_option_signals()
+
+        # 加载已保存的作者名和配置（restoring 包裹：暂缓中间响应，
+        # 结束后统一重算，含无 saved 配置的路径）
+        self._restoring_config = True
+        try:
+            self._load_saved_config()
+        finally:
+            self._restoring_config = False
+        self._refresh_style_option_state(reload_snapshot=True)
 
         # ── 拖放支持 ──
         self.setAcceptDrops(True)
@@ -451,6 +474,10 @@ class ImageProcessingPage(QWidget):
         self.watermark_card = create_watermark_card(self)
         self.watermark_card.setParent(config_container)
         card_layout.addWidget(self.watermark_card)
+
+        # 跨卡片对齐（计划 v14）：全部卡片创建完成后统一标签列宽与
+        # 行边距，使各行控件左缘/右缘跨卡逐像素对齐
+        normalize_option_rows(self)
 
         panel.setWidget(config_container)
 
@@ -785,46 +812,108 @@ class ImageProcessingPage(QWidget):
     #  样式变更响应
     # ════════════════════════════════════════════════════════
 
-    def _on_style_changed(self, style_name: str):
-        """相框样式下拉框变化时，更新依赖样式的控件"""
-        self._update_style_dependent_controls()
-        # 旋转适配提示跟随样式刷新；不修改菜单当前选项：
-        # default 在渲染时解析新样式默认值，显式覆盖值继续生效（方案 §6.5）
+    # ════════════════════════════════════════════════════════
+    #  样式选项单一刷新入口（计划 §8.1，T5）
+    # ════════════════════════════════════════════════════════
+
+    def _connect_option_signals(self):
+        """连接 11 项选项控件的输入信号（§8.2：全部卡片创建后调用）
+
+        输入变化只重算状态与有效参数（零 IO，§5.4），不重读能力快照。
+        """
+        for attr, sig_name in (
+                ("edit_author", "textChanged"),
+                ("edit_location", "textChanged"),
+                ("edit_custom_text", "textChanged"),
+                ("chk_use_gps", "checkedChanged"),
+                ("combo_timestamp", "currentIndexChanged"),
+                ("combo_lens_display", "currentIndexChanged"),
+                ("combo_lens_name", "currentIndexChanged"),
+                ("combo_logo", "currentIndexChanged"),
+                ("combo_bg_fill", "currentIndexChanged"),
+                ("chk_enhance", "checkedChanged"),
+                ("combo_font_weight", "currentIndexChanged"),
+        ):
+            widget = getattr(self, attr, None)
+            if widget is None:
+                continue
+            signal = getattr(widget, sig_name, None)
+            if signal is None:
+                logger.warning(f"选项控件缺少信号: {attr}.{sig_name}（跳过）")
+                continue
+            signal.connect(self._on_option_input_changed)
+
+    def _on_option_input_changed(self, *_args):
+        """输入变化 → 只重算状态与有效参数（§8.1 事件表：不读磁盘）"""
+        if self._restoring_config:
+            return  # 恢复配置期间暂缓中间响应（§8.2）
+        self._refresh_style_option_state()
+
+    def _refresh_style_option_state(self, invalidate_files: bool = False,
+                                    reload_snapshot: bool = False):
+        """样式选项单一刷新入口（计划 §8.1：读取原值→按需重载能力→
+        计算 evaluation→更新控件与按钮；页面唯一联动路径，无第二套）
+
+        Args:
+            invalidate_files: 先失效文件与来源缓存（refresh_style_list /
+                showEvent / 生成前为 True，§4.4 显式失效点）
+            reload_snapshot: 强制重读能力快照。切样式、refresh、showEvent、
+                生成前为 True（同名也读取）；输入与照片变化为 False——
+                复用页面缓存的快照重算，输入变化零 IO（§5.4）。
+
+        不自动生成；旋转适配提示调用链在此保留（§8.1：独立规则不并入
+        reason 体系），数据源复用当前评估的当前变体声明。
+        """
+        style_name = self.style_selector_card.current_style
+        if invalidate_files:
+            self.style_manager.invalidate_all()
+        if reload_snapshot or self._style_capabilities_for != style_name:
+            self._style_capabilities = (
+                self.style_manager.get_style_capabilities(style_name)
+                if style_name else None)
+            self._style_capabilities_for = style_name
+
+        # 读取原值与照片事实（§6.1：区分没有照片与照片没有 EXIF）
+        raw = style_option_bindings.read_raw_values(self)
+        item = (self.file_items[self.current_index]
+                if 0 <= self.current_index < len(self.file_items) else None)
+        gps_text = (item.exif_data.get("gps", "") if item.exif_data
+                    else "") if item else ""
+        photo = PhotoFacts(
+            has_photo=item is not None,
+            exif_data=item.exif_data if item else None,
+            gps_text=gps_text,
+        )
+        is_gaussian = BackgroundFillManager.is_gaussian(raw.bg_fill_type)
+
+        self._style_evaluation = evaluate_style_options(
+            self._style_capabilities, raw, photo,
+            selected_bg_is_gaussian=is_gaussian)
+
+        # 应用控件状态与说明（只改启用与说明，不清空原值，§7.1）
+        style_option_bindings.apply_states(self, self._style_evaluation)
+        # 坏变体全局诊断放样式说明处（§7.2：不逐项掩盖、不弹 InfoBar）
+        if self._style_evaluation.can_render_style:
+            style_option_bindings.clear_page_style_hint(self)
+        else:
+            style_option_bindings.set_page_style_hint(self, self._style_evaluation)
+
+        # 旋转适配提示跟随刷新（§8.1：保留调用链）；不修改菜单当前选项：
+        # default 在渲染时解析样式默认值，显式覆盖值继续生效
         self._update_portrait_adaptation_hint()
 
+        # 更新按钮（使用当前 evaluation，不反向触发完整刷新，防递归）
+        self._update_button_states()
+
+    def _on_style_changed(self, style_name: str):
+        """样式选择变化 → 强制重读能力快照并刷新（§8.1 事件表：同名也读取）"""
+        if self._restoring_config:
+            return  # §8.2：恢复配置期间暂缓，__init__ 末尾统一重算
+        self._refresh_style_option_state(reload_snapshot=True)
+
     def _update_style_dependent_controls(self):
-        """根据当前选中的样式配置，更新自定义文本和LOGO的启用状态"""
-        style_name = self.style_selector_card.current_style
-        if not style_name:
-            return
-
-        config = self.style_manager.get_style_config(style_name)
-        if not config:
-            return
-
-        layout = config.get('layout', {})
-        custom_text_cfg = layout.get('custom_text', {})
-        logo_cfg = config.get('logo', {})
-
-        # 自定义文本：始终可见，仅控制启用状态
-        ct_enabled = isinstance(custom_text_cfg, dict) and custom_text_cfg.get('enabled', False)
-        self.edit_custom_text.setEnabled(ct_enabled)
-
-        # LOGO：始终可见，仅控制启用状态
-        logo_enabled = isinstance(logo_cfg, dict) and logo_cfg.get('enabled', False)
-
-        # 自定义背景填充色：若样式指定了背景色，禁用 GUI 的背景样式选择
-        custom_bg_color = config.get('colors', {}).get('custom_bg_color')
-        if custom_bg_color:
-            self.combo_bg_fill.setEnabled(False)
-            self.chk_enhance.setEnabled(False)
-            self.combo_bg_fill.setToolTip(f'背景颜色由样式配置指定: {custom_bg_color}')
-        else:
-            self.combo_bg_fill.setEnabled(True)
-            self.chk_enhance.setEnabled(True)
-            self.combo_bg_fill.setToolTip('')
-
-        logger.debug(f"样式变更: {style_name}, 自定义文本: {ct_enabled}, LOGO: {logo_enabled}")
+        """（兼容转调）旧入口只转发新刷新入口，§8.1：不能两套联动并存"""
+        self._refresh_style_option_state(reload_snapshot=True)
 
     # ── 旋转适配（方案 §6.4/§6.5） ──────────────────────
 
@@ -843,12 +932,13 @@ class ImageProcessingPage(QWidget):
         self._update_portrait_adaptation_hint()
 
     def _update_portrait_adaptation_hint(self):
-        """刷新旋转适配组的辅助文案（方案 §6.5）
+        """刷新旋转适配组的辅助文案（方案 §6.5；计划 §8.1 v11 数据源优化）
 
-        提示是显示性参考：无 context 读取样式配置，可能与实际渲染选中的
-        变体不同（FilmClip 两变体声明相同默认值时无偏差）；真实优先级
-        解析只发生在 FrameRenderer 内。读取失败时回退通用文案，
-        不中断样式切换流程。
+        数据源改为复用当前能力快照的**当前（预估）变体**声明
+        （VariantFacts.portrait_adaptation_default）：省去每次切换单独
+        get_style_config 的一次加载；各变体声明一致时与旧行为无差异，
+        不一致时新行为更准确。无快照（空列表/无样式/未刷新）时回退
+        通用文案，不中断样式切换流程。旋转适配的渲染行为本身不变。
         """
         suffix_map = {
             ADAPT_NONE: '不旋转',
@@ -857,15 +947,15 @@ class ImageProcessingPage(QWidget):
         }
         user_choice = self._get_portrait_adaptation()
         style_default = None
-        try:
-            style_name = self.style_selector_card.current_style
-            if style_name:
-                style_config = self.style_manager.get_style_config(style_name)
-                if style_config:
-                    style_default = validate_style_default(style_config)
-        except Exception as e:
-            logger.debug(f"读取样式旋转适配默认值失败，使用通用提示: {e}")
-            style_default = None
+        # 从当前评估的当前变体读取声明（复用快照，零额外加载）
+        evaluation = getattr(self, "_style_evaluation", None)
+        snapshot = getattr(self, "_style_capabilities", None)
+        if evaluation is not None and snapshot is not None \
+                and evaluation.active_variant_path:
+            for facts in snapshot.candidates:
+                if facts.path == evaluation.active_variant_path:
+                    style_default = facts.portrait_adaptation_default
+                    break
 
         if user_choice == ADAPT_DEFAULT:
             if style_default is not None:
@@ -968,6 +1058,10 @@ class ImageProcessingPage(QWidget):
             self._update_button_states()
             if self.file_items and self.current_index == -1:
                 self._select_item(0)
+            else:
+                # 照片导入事件：重算选项状态（§8.1 事件表；首图选中路径
+                # 已在 _select_item 内刷新，此处覆盖增量导入场景）
+                self._refresh_style_option_state()
 
             tip.setContent('加载完成')
             tip.setState(True)
@@ -1176,8 +1270,9 @@ class ImageProcessingPage(QWidget):
         # 更新 EXIF 信息
         self._update_exif_info(item)
 
-        # 更新按钮状态
-        self._update_button_states()
+        # 照片事件：先重算选项状态（GPS/时间/预估），再更新按钮（§8.1：
+        # 避免使用上一张照片的状态）
+        self._refresh_style_option_state()
 
         logger.debug(f"选中文件: {item.file_name}")
 
@@ -1287,7 +1382,8 @@ class ImageProcessingPage(QWidget):
         self.exif_iso.setText(f"ISO: <b>{iso}</b>" if iso else "ISO: <b>—</b>")
 
     def _update_button_states(self):
-        """根据当前状态更新按钮启用/禁用"""
+        """根据当前状态更新按钮启用/禁用（§8.1：只读当前 evaluation，
+        不反向触发完整刷新，防递归）"""
         has_items = len(self.file_items) > 0
         has_unprocessed = any(not item.is_processed for item in self.file_items)
         has_processed = any(item.is_processed for item in self.file_items)
@@ -1297,7 +1393,11 @@ class ImageProcessingPage(QWidget):
 
         self.btn_export_current.setEnabled(current_is_processed)
         self.btn_export_all.setEnabled(has_processed)
-        self.btn_generate.setEnabled(self.current_index >= 0)
+        # 生成按钮 = 当前照片及索引有效 且 样式可用（§8.4：evaluation
+        # 已在刷新入口算好，此处只读，不重算）
+        style_ok = (self._style_evaluation is not None
+                    and self._style_evaluation.can_render_style)
+        self.btn_generate.setEnabled(self.current_index >= 0 and style_ok)
         self.filmstrip_title.setText(
             f"胶片栏 — {len(self.file_items)} 张图片"
             if self.file_items else
@@ -1345,18 +1445,32 @@ class ImageProcessingPage(QWidget):
         return tip
 
     def _on_generate_frame(self):
-        """生成相框：处理当前选中图片"""
+        """生成相框：处理当前选中图片（§8.4：函数级守卫 + 生成前重读）"""
         if self.current_index < 0 or self.current_index >= len(self.file_items):
             return
 
-        # 显示处理状态提示
+        # §8.4：生成前失效文件缓存、重读能力、重算评估——在状态提示与
+        # 临时文件创建**之前**检查；函数级守卫必须存在，防止直接调用
+        # 绕过禁用按钮
+        self._refresh_style_option_state(invalidate_files=True,
+                                         reload_snapshot=True)
+        evaluation = self._style_evaluation
+        if not evaluation.can_render_style:
+            reason = (evaluation.diagnostics[0]
+                      if evaluation.diagnostics else "当前样式配置不可用")
+            InfoBar.warning(title="无法生成", content=reason, parent=self)
+            logger.warning(f"生成被守卫阻止: {reason}")
+            return
+
+        # 显示处理状态提示（守卫通过后才创建）
         self.state_tooltip = self._show_progress('处理中', '正在生成相框...')
 
         try:
             item = self.file_items[self.current_index]
 
-            # 1. 从 GUI 控件收集渲染配置（G2 拆分：纯函数单点实现）
-            metadata, options, fw_key = collect_render_options(self, item)
+            # 1. 从评估结果收集渲染配置（§7.3：同一次计算的有效参数）
+            metadata, options, fw_key = collect_render_options(self, item,
+                                                               evaluation)
 
             # 2. 创建临时文件并调用 ImageProcessor
             suffix = os.path.splitext(item.file_name)[1]
@@ -1375,7 +1489,9 @@ class ImageProcessingPage(QWidget):
             success = self._processor.process(
                 input_path=input_path,
                 output_path=output_path,
-                style_name=self.style_selector_card.current_style or "底部信息条 Bottom Bars",
+                # §8.3/§8.4：移除硬编码样式兜底——无样式时 evaluation.
+                # can_render_style 必为 False，守卫已在此前拦截
+                style_name=self.style_selector_card.current_style,
                 metadata=metadata,
                 options=options,
                 font_weight=fw_key,
@@ -1492,7 +1608,8 @@ class ImageProcessingPage(QWidget):
         self.exif_shutter.setText("快门: <b>—</b>")
         self.exif_iso.setText("ISO: —")
 
-        self._update_button_states()
+        # 清空照片事件：重算选项状态（§8.1：无照片时按无 EXIF 预估）
+        self._refresh_style_option_state()
         logger.info("已清空所有图片")
 
     def _show_filmstrip_context_menu(self, pos, label: QLabel):
@@ -1538,7 +1655,8 @@ class ImageProcessingPage(QWidget):
         elif self.current_index > index:
             self.current_index -= 1
 
-        self._update_button_states()
+        # 照片删除事件：重算选项状态（GPS 不使用已删除照片的值），再更新按钮
+        self._refresh_style_option_state()
         logger.debug(f"已移除图片: 索引 {index}")
 
     def cleanup(self):
@@ -1574,8 +1692,10 @@ class ImageProcessingPage(QWidget):
         # ConfigManager 对空串正常存取，加载端空串不回填、控件默认即空）
         default_config_manager.save_user_author(self.edit_author.text())
         # 最近使用配置（G3：下拉框一律写稳定 key，不写中文显示文本）
+        # §8.3：保存真实样式名称或 None（null）——移除硬编码
+        # "底部信息条 Bottom Bars" 兜底，不再保存幽灵样式
         default_config_manager.save_last_used_settings({
-            'style_name': self.style_selector_card.current_style or "底部信息条 Bottom Bars",
+            'style_name': self.style_selector_card.current_style,
             'output_format': self.combo_output_format.currentData(),
             'bg_fill': self.combo_bg_fill.currentData(),
             'enhance_background': self.chk_enhance.isChecked(),
@@ -1629,9 +1749,16 @@ class ImageProcessingPage(QWidget):
         self._update_portrait_adaptation_hint()
 
     def refresh_style_list(self):
-        """刷新样式网格（样式编辑器中新建/保存样式后调用）"""
+        """刷新样式网格（样式编辑器中新建/保存样式后调用）
+
+        §8.1/§4.4：先失效文件与来源缓存（同名配置更新必须重读），
+        再重建网格；随后强制重读能力快照——refresh_styles 恢复选中
+        不发信号（样式卡内部行为），此处显式触发刷新保证联动。
+        """
+        self.style_manager.invalidate_all()
         styles = self.style_manager.get_available_styles()
         self.style_selector_card.refresh_styles(styles, self.style_manager)
+        self._refresh_style_option_state(reload_snapshot=True)
 
     def showEvent(self, event):
         """页面显示时刷新样式列表"""

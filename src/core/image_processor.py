@@ -32,6 +32,7 @@ from src.utils.output_metadata import (
     verify_output_metadata,
 )
 from src.frame_styles.style_manager import StyleManager
+from src.frame_styles.style_rules import build_style_variant_context
 from src.core.renderer import FrameRenderer, RenderMetadata, RenderOptions
 from src.core.hdr_handler import HDRHandler
 
@@ -255,39 +256,24 @@ class ImageProcessor:
     
     def _build_style_context(self, metadata: RenderMetadata,
                              exif_data: Optional[Dict]) -> Dict:
-        """
-        构建样式变体匹配用的上下文（纯函数，便于独立测试）
+        """构建样式变体匹配用的上下文（委托共享实现，计划 §4.3）
+
+        字段可用性语义与实现细节见
+        style_rules.build_style_variant_context——单一实现点，GUI 预估
+        （FileItem.exif_data）与处理器提取共用同一函数，杜绝两套判断
+        漂移。本方法只保留 metadata 解包，行为与拆分前逐字一致
+        （T0 变体选择基线逐条比对验收）。
 
         上下文以"字段可用性"为语义：值为 None/'' 表示该字段无值，
-        进入变体缺失字段集合，驱动 StyleManager._resolve_style_variant
-        的 no_{field} 变体匹配。
-
-        各字段可用性定义：
-        - location / custom_text：用户输入可用性（沿用原行为）；
-        - author：作者可用性；
-        - timestamp：拍摄时间可用性——hide 模式或 EXIF 无拍摄时间为 None，
-          通知变体系统拍摄时间不可用（匹配 no_timestamp 类变体）；
-        - timestamp_author：组合字段可用性 = 拍摄时间或作者任一有值
-          （与 RenderContext.get_text('timestamp_author') 的三段 fallback
-          语义一致）。author 为空但时间有值（或时间不可用但作者有值）时
-          该字段仍有值——组合字段 fallback 会自动降级为纯时间 / "Shot by
-          作者"，行结构不变，沿用原布局；仅当时间与作者均无值时传 None，
-          匹配 no_timestamp_author 类变体（时间+作者整行不渲染）。
+        进入变体缺失字段集合，驱动 no_{field} 变体匹配。
         """
-        context = {'location': metadata.location, 'author': metadata.author}
-        if not metadata.custom_text:
-            context['custom_text'] = None
-        # 拍摄时间可用性：hide 模式或 EXIF 无拍摄时间时视为缺失
-        ts_available = (
-            metadata.timestamp_display_mode != 'hide'
-            and bool(exif_data and exif_data.get('datetime_original'))
+        return build_style_variant_context(
+            author=metadata.author,
+            location=metadata.location,
+            custom_text=metadata.custom_text,
+            timestamp_display_mode=metadata.timestamp_display_mode,
+            exif_data=exif_data,
         )
-        if not ts_available:
-            context['timestamp'] = None
-        # 组合字段可用性 = 时间或作者任一有值（fallback 归一设计的核心约定）
-        if not (ts_available or metadata.author):
-            context['timestamp_author'] = None
-        return context
 
     def _capture_source_metadata(
             self, image: Image.Image
