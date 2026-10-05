@@ -1,0 +1,69 @@
+========================================================================
+一、变体选择基线（_resolve_style_variant，临时目录构造）
+========================================================================
+
+[同名多来源] 用户目录 Dual.yaml（单文件） vs 内置 Dual/（目录）
+  实际加载 name 字段: t0 （预期目录样式优先 → t0，而非 dual-user-file）
+[Combo] 作者+时间+地点                                 ctx={'location': '北京', 'author': '张三'} -> default.yaml
+[Combo] 仅作者                                      ctx={'location': None, 'author': '张三', 'timestamp_author': None} -> no_location_no_timestamp_author.yaml
+[Combo] 仅时间                                      ctx={'location': None, 'author': None, 'timestamp': '2026.01.01', 'timestamp_author': '2026.01.01'} -> no_location.yaml
+[Combo] 全无                                       ctx={'location': None, 'author': None, 'timestamp': None, 'timestamp_author': None, 'custom_text': None} -> no_location_no_timestamp_author.yaml
+[Combo] 地点+全无作者时间                                ctx={'location': '上海', 'author': None, 'timestamp': None, 'timestamp_author': None} -> no_timestamp_author.yaml
+[SameScore] 同分条件（应取文件名排序后的首个 no_author.yaml）         ctx={'author': None, 'location': None} -> no_author.yaml
+[MultiDefault] 作者缺失（no_author 条件命中，1 分）                 ctx={'author': None} -> no_author.yaml
+[MultiDefault] 无缺失字段（default 兜底，取原始枚举顺序首个 default）      ctx={} -> default.json
+[NoDefault] 条件不命中且无 default（应取原始枚举顺序首文件 zeta.yaml）   ctx={'author': '张三'} -> alpha.yaml
+[UnknownCond] iso 未出现在 context（no_iso 不命中 → default 兜底） ctx={'author': '张三'} -> default.yaml
+[UnknownCond] 显式 iso=None（no_iso 命中）                   ctx={'author': '张三', 'iso': None} -> no_iso.yaml
+[Combo] 无 context 调用                             -> default.yaml
+[MultiDefault] 无 context 调用                             -> default.json
+[NoDefault] 无 context 调用                             -> alpha.yaml
+
+========================================================================
+二、定位校验基线（真实配置 + 非法样例，含错误信息全文）
+========================================================================
+内置样式数: 9
+  [通过] 信息卡片 InfoCard/default.yaml
+  [通过] 信息卡片 InfoCard/no_author.yaml
+  [通过] 信息卡片 InfoCard/no_author_no_location.yaml
+  [通过] 信息卡片 InfoCard/no_location.yaml
+    default 注入后 info_position 键: ['aperture_formatted', 'author', 'camera', 'focal_length_formatted', 'iso_formatted', 'location', 'short_lens', 'shutter_speed_formatted']
+  [通过] 参数胶囊 ParamCapsule/default.yaml
+  [通过] 参数胶囊 ParamCapsule/no_custom_text.yaml
+    default 注入后 info_position 键: ['aperture_formatted', 'focal_length_formatted', 'iso_formatted', 'shutter_speed_formatted']
+  [通过] 宝丽来风格 Polaroid/default.yaml
+    default 注入后 info_position 键: ['camera_lens', 'exif', 'location', 'timestamp_author']
+  [通过] 底部信息条 Bottom Bars/default.yaml
+  [通过] 底部信息条 Bottom Bars/no_location.yaml
+  [通过] 底部信息条 Bottom Bars/no_location_no_timestamp_author.yaml
+  [通过] 底部信息条 Bottom Bars/no_timestamp_author.yaml
+    default 注入后 info_position 键: ['camera_lens', 'exif', 'location', 'timestamp_author']
+  [通过] 竖版胶囊 Vertical Capsule/default.yaml
+    default 注入后 info_position 键: ['aperture_formatted', 'camera', 'focal_length_formatted', 'iso_formatted', 'short_lens', 'shutter_speed_formatted']
+  [通过] 简洁信息 SimpleInfo/default.yaml
+    default 注入后 info_position 键: ['camera_lens', 'exif', 'location', 'timestamp_author']
+  [通过] 胶片夹风格 FilmClip/default.yaml
+  [通过] 胶片夹风格 FilmClip/no_custom_text.yaml
+    default 注入后 info_position 键: ['aperture_formatted', 'camera_lens', 'focal_length_formatted', 'iso_formatted', 'shutter_speed_formatted']
+  [通过] 裁剪胶片 FilmCut/default.yaml
+    default 注入后 info_position 键: ['camera_lens', 'exif', 'location', 'timestamp_author']
+  [通过] 边框信息条 FrameBar/default.yaml
+    default 注入后 info_position 键: ['camera_lens', 'exif', 'location', 'timestamp_author']
+真实配置合计: 17 份, 拒绝 0 份 
+
+── 非法样例（预期全部拒绝，记录错误信息全文）──
+[拒绝] 旧 position 别名 tc
+    错误: [StyleValidation] [旧 position 别名 tc] layout.info_position.author.position 值非法: 'tc'；建议迁移为 top-center。合法九点值为 ['bottom-center', 'bottom-left', 'bottom-right', 'center', 'center-left', 'center-right', 'top-center', 'top-left', 'top-right']
+[拒绝] 非法九点枚举 position=middle
+    错误: [StyleValidation] [非法九点枚举 position=middle] layout.info_position.author.position 值非法: 'middle'。合法九点值为 ['bottom-center', 'bottom-left', 'bottom-right', 'center', 'center-left', 'center-right', 'top-center', 'top-left', 'top-right']
+[拒绝] 相对定位环 A<->B
+    错误: [StyleValidation] [相对定位环 A<->B] layout.author.relative_to: 定位依赖存在环（author → location → author）；相对定位链必须终止于绝对定位元素，请修正 relative_to 配置
+[拒绝] 相对节点使用旧 alignment 字段
+    错误: [StyleValidation] [相对节点使用旧 alignment 字段] layout.info_position.author.alignment: 相对定位节点不允许使用 alignment 字段（当前值: 'center'），请将该字段改名为 cross_alignment（三值交叉轴对齐）
+    错误: [StyleValidation] [相对节点使用旧 alignment 字段] layout.info_position.author.cross_alignment 缺失：相对定位节点必须显式提供交叉轴对齐（above/below → left/center/right；left-of/right-of → top/center/bottom）
+[拒绝] 交叉轴不匹配 above+top
+    错误: [StyleValidation] [交叉轴不匹配 above+top] layout.info_position.author.cross_alignment 值非法: 'top' 与 relative_position='above' 轴向不匹配；合法值为 ['center', 'left', 'right']
+[拒绝] 交叉轴不匹配 left-of+left
+    错误: [StyleValidation] [交叉轴不匹配 left-of+left] layout.info_position.author.cross_alignment 值非法: 'left' 与 relative_position='left-of' 轴向不匹配；合法值为 ['bottom', 'center', 'top']
+[拒绝] 已删除的 positioning_semantics 字段
+    错误: [StyleValidation] positioning_semantics='v2': 该语义版本开关字段已删除，运行时只有唯一一套定位算法；请删除此字段并按新 schema 迁移 position/alignment（参见 docs/plans/POSITION_ALIGNMENT_REPAIR_EXECUTION_PLAN.md §2）
