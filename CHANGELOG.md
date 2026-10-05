@@ -2,6 +2,33 @@
 
 > 本文件记录所有开发版本的详细变更。发布版本摘要见 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 
+## v2.7.3-dev (2026-10-05)
+
+> short_lens 渲染键注册与镜头名三态模式：样式配置可直接调用短版镜头名，GUI"短版镜头名"勾选升级为三态下拉；新增竖版胶囊样式；修复作者留空时拍摄时间不显示的问题。
+
+### ✨ 新功能
+
+- short_lens 渲染键注册与镜头名三态模式 (feat, bf63000)：样式配置 `info_position` 可直接声明 `short_lens` 输出短版镜头名；新增镜头名三态模式——`default`=键归位（lens 出完整名、short_lens 出短版名）/ `full`=强制完整镜头名（short_lens 键输出被 lens_model 替代）/ `short`=强制短版镜头名（lens、camera_lens 键输出被短版名替代）；RenderMetadata / RenderContext 的 `use_short_lens: bool` 参数升级为 `lens_name_mode: str`
+- GUI 镜头名三态下拉 (feat, bf63000)："短版镜头名"勾选框升级为"镜头名"下拉（默认/完整镜头名/短版镜头名）；导入新图按首图方向自动设置的行为保留并映射三态（竖幅/方形→短版镜头名、横幅→默认）；CLI 新增 `--lens-name` 三态参数，移除 `--use-short-lens`（一次性硬切换，不留兼容）
+- 样式编辑器支持 short_lens (feat, bf63000)：元素键下拉、颜色表、字号表白名单注册 short_lens，用户自建样式可选用
+
+### 🎨 相框样式
+
+- 新增竖版胶囊 Vertical Capsule 样式 (style, ada23a6)：右侧竖排信息栏布局，相机与镜头由原组合拆分两行，同步缩小两族标签字号
+- 参数胶囊字号与胶囊尺寸缩小约两成 (style, 40ae74d)
+- Bottom Bars 新增 no_author 与 no_location_no_author 变体 (style, 6eeac5c)
+- Bottom Bars no_author 变体重命名为 no_timestamp_author (style, aaf2d48)：文件名更准确表达"时间与作者均缺省"的匹配语义
+- InfoCard 与竖版胶囊镜头行改用 short_lens 键 (style, cabf933)：四个 InfoCard 变体的 `info_position.lens` 改为 `short_lens`；竖版胶囊的 info_position、fonts.sizes、colors 键同步改名，布局/字号/颜色数值不变
+
+### 🐛 缺陷修复
+
+- 修复作者留空时拍摄时间不显示的问题 (fix, 125fa96)
+
+### 📝 文档
+
+- STYLE_GUIDE 变体章节说明 fallback 归一与组合字段语义 (docs, 991fc31)
+- short_lens 键与镜头名三态文档同步 (docs, 7bb1aa3)：STYLE_GUIDE 输出表与元素类型列表、DEVELOPMENT 键路由表、README 字段表/GUI 功能表/CLI 参数表、_STYLE_TEMPLATE 填空模板；方案文档 docs/plans/SHORT_LENS_KEY_REGISTRATION_PLAN.md 入库
+
 ## v2.7.2-dev (2026-09-30)
 
 > GUI 代码质量审计落地：四项正确性修复（PNG 导出、样式数据完整性、relative_to 引用保留、定位编辑器布局）、配置持久化稳定 key 化、定位参数模型与控件层单点收敛、页面拆分与样板收敛（docs/CODE_QUALITY_AUDIT_GUI.md T0–T9 全部任务包）。
