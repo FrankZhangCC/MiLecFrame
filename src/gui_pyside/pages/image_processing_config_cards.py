@@ -112,12 +112,13 @@ def create_output_settings_card(page) -> ExpandGroupSettingCard:
     """Tab 1: 输出设置"""
     card = ExpandGroupSettingCard(FluentIcon.DOWNLOAD, "输出设置", "选择输出文件格式")
 
-    # 输出格式（G3：userData 绑定稳定 key）
+    # 输出格式（G3：userData 绑定稳定 key；宽度统一 200 与其他卡一致）
     page.combo_output_format = ComboBox()
     for _text, _key in OUTPUT_FORMAT_ITEMS:
         page.combo_output_format.addItem(_text, userData=_key)
     page.combo_output_format.setCurrentIndex(0)
-    card.addGroup(FluentIcon.DOWNLOAD, "输出格式", "JPEG 适合照片，PNG 适合透明背景", page.combo_output_format, 1)
+    page.combo_output_format.setFixedWidth(200)
+    card.addGroup(FluentIcon.DOWNLOAD, "输出格式", "JPEG 或 PNG", page.combo_output_format, 1)
 
     return card
 
@@ -126,10 +127,10 @@ def create_style_selection_card(page) -> ExpandGroupSettingCard:
     """Tab 2: 样式选择（缩略图网格）"""
     from src.frame_styles.style_manager import StyleManager
     page.style_manager = StyleManager()
+    # 计划 §8.3：移除自动创建示例样式——空列表时由 StyleSelectorCard
+    # 显示"暂无可用样式"空状态（create_sample_styles 工具方法保留），
+    # 不再静默向内置目录写入 Default_TestFrame.json
     available_styles = page.style_manager.get_available_styles()
-    if not available_styles:
-        page.style_manager.create_sample_styles()
-        available_styles = page.style_manager.get_available_styles()
 
     card = StyleSelectorCard()
     card.refresh_styles(available_styles, page.style_manager)
@@ -150,18 +151,21 @@ def create_frame_config_card(page) -> ExpandGroupSettingCard:
         page.combo_bg_fill.addItem(_label, userData=_key)
     page.combo_bg_fill.setCurrentIndex(
         page.combo_bg_fill.findData(BackgroundFillManager.DEFAULT_FILL))
-    # 相框配置卡三个下拉框统一双端宽度约束（200–260）：上限容纳最长
-    # 选项"模糊背景 (深色 65%)"文本 182px + 箭头与内边距；下限保持原
-    # 可收缩性——窄侧边栏下收缩回原基线，避免硬性宽度过高时整组
-    # 最小需求超过侧边栏宽度造成水平溢出
-    page.combo_bg_fill.setMinimumWidth(200)
-    page.combo_bg_fill.setMaximumWidth(260)
-    bg_group = card.addGroup(FluentIcon.CHECKBOX, "背景填充样式", "选择背景填充方式", page.combo_bg_fill, 2)
+    # 统一宽度策略（v2.8 几何稳定化）：setFixedWidth(200) 取代原
+    # min200/max260 弹性约束——弹性宽度随 contentLabel 残余空间伸缩，
+    # 且 minimumSizeHint 会随选项文字变化（背景填充"模糊背景 (深色
+    # 65%)"等长项 minHint=226 > 200，是最小需求预算的漏项）
+    page.combo_bg_fill.setFixedWidth(200)
+    # addGroup 返回对象存 page 属性（计划 §7.1：样式选项绑定表引用，
+    # 供 setContent 更新该行常驻说明）
+    page.group_bg_fill = card.addGroup(
+        FluentIcon.CHECKBOX, "背景填充样式", "选择背景填充方式", page.combo_bg_fill, 2)
 
     # 背景增强
     page.chk_enhance = SwitchButton()
     page.chk_enhance.setChecked(True)
-    card.addGroup(FluentIcon.CHECKBOX, "背景增强", "仅高斯模糊背景有效", page.chk_enhance)
+    page.group_enhance = card.addGroup(
+        FluentIcon.CHECKBOX, "背景增强", "仅高斯模糊背景有效", page.chk_enhance)
 
     # 旋转适配（方案 §6.2/§6.3）：渲染期整帧方向适配。默认模式
     # 跟随样式声明（预设仅对竖图生效）；显式选择顺/逆时针对所有
@@ -170,8 +174,7 @@ def create_frame_config_card(page) -> ExpandGroupSettingCard:
     page.combo_portrait_adaptation = ComboBox()
     for _text, _value in PORTRAIT_ADAPTATION_ITEMS:
         page.combo_portrait_adaptation.addItem(_text, userData=_value)
-    page.combo_portrait_adaptation.setMinimumWidth(200)
-    page.combo_portrait_adaptation.setMaximumWidth(260)
+    page.combo_portrait_adaptation.setFixedWidth(200)
     page.combo_portrait_adaptation.setCurrentIndex(
         page.combo_portrait_adaptation.findData(ADAPT_DEFAULT))
     page.combo_portrait_adaptation.currentIndexChanged.connect(
@@ -196,17 +199,19 @@ def create_frame_config_card(page) -> ExpandGroupSettingCard:
     for _text, _key in FONT_WEIGHT_ITEMS:
         page.combo_font_weight.addItem(_text, userData=_key)
     page.combo_font_weight.setCurrentIndex(0)
-    page.combo_font_weight.setMinimumWidth(200)
-    page.combo_font_weight.setMaximumWidth(260)
-    fw_group = card.addGroup(FluentIcon.FONT, "字重", "选择文字粗细", page.combo_font_weight, 2)
+    page.combo_font_weight.setFixedWidth(200)
+    # 字重组对象存 page 属性（样式选项绑定表引用）
+    page.group_font_weight = card.addGroup(
+        FluentIcon.FONT, "字重", "选择文字粗细", page.combo_font_weight, 2)
 
     # ── 三个带下拉框的组统一标签列宽 ─────────────────────────
-    # GroupWidget 按剩余空间拉伸 ComboBox，各标签列宽不同会导致
-    # 下拉框宽度/左缘参差（用户反馈"上下对齐"）。取三组标题与描述
-    # 理想宽度的最大值统一设为标签最小宽：三组标签列严格等宽后，
-    # 结构参数完全一致 → 任意容器宽度下三个下拉框宽度与边缘
-    # 必然对齐（分配规则无关性），且不抬高整组最小需求
-    combo_groups = (bg_group, page.portrait_adaptation_group, fw_group)
+    # 各标签列宽不同会导致下拉框左缘参差（用户反馈"上下对齐"）。
+    # 取三组标题与描述理想宽度的最大值统一设为标签最小宽：三组标签
+    # 列严格等宽后，三个下拉框（均已 setFixedWidth(200)）左缘与右缘
+    # 必然对齐。v13 起运行期不再 setContent（说明行恒定），该前提
+    # 天然成立。
+    combo_groups = (page.group_bg_fill, page.portrait_adaptation_group,
+                    page.group_font_weight)
     label_w = max(
         label.sizeHint().width()
         for group in combo_groups
@@ -223,24 +228,39 @@ def create_personalization_card(page) -> ExpandGroupSettingCard:
     """Tab 3: 个性化配置"""
     card = ExpandGroupSettingCard(FluentIcon.PEOPLE, "个性化配置", "作者、地点和自定义文本")
 
-    # 作者姓名
+    # 统一宽度策略（v2.8 GUI 选项几何稳定化）：输入框 setFixedWidth(200)。
+    # qfw ComboBox 的 minimumSizeHint 随当前项文字长度变化（实测
+    # lens_name "默认"72px → "短版镜头名"114px；logo 选长文件名后行
+    # 最小需求 886px ≫ 侧边栏最窄 350px，直接导致整体溢出），固定宽度
+    # 后：不同选项行宽度一致、切换下拉项不再漂移、行最小需求可预算。
+    OPTION_WIDGET_WIDTH = 200
+
+    # 作者姓名（组对象存 page 属性，供样式选项绑定表按名引用）
     page.edit_author = LineEdit()
     page.edit_author.setPlaceholderText("请输入作者姓名")
-    card.addGroup(FluentIcon.PEOPLE, "作者姓名", "将显示在相框中", page.edit_author, 3)
+    page.edit_author.setFixedWidth(OPTION_WIDGET_WIDTH)
+    page.group_author = card.addGroup(
+        FluentIcon.PEOPLE, "作者姓名", "相框中显示的作者名", page.edit_author, 3)
 
     # 拍摄地点
     page.edit_location = LineEdit()
     page.edit_location.setPlaceholderText("请输入拍摄地点")
-    card.addGroup(FluentIcon.HOME, "拍摄地点", "将显示在相框中", page.edit_location, 3)
+    page.edit_location.setFixedWidth(OPTION_WIDGET_WIDTH)
+    page.group_location = card.addGroup(
+        FluentIcon.HOME, "拍摄地点", "相框中显示的拍摄地点", page.edit_location, 3)
 
     # GPS 替换
     page.chk_use_gps = SwitchButton()
-    card.addGroup(FluentIcon.GLOBE, "GPS 替换", "使用 EXIF 中的 GPS 数据", page.chk_use_gps)
+    page.group_use_gps = card.addGroup(
+        FluentIcon.GLOBE, "GPS 替换", "优先使用照片坐标", page.chk_use_gps)
 
-    # 自定义文本（始终可见，由样式配置控制启用状态）
+    # 自定义文本（始终可见，可用性由样式家族能力决定——说明为静态
+    # 文案，运行期不随状态修改，v13 裁定）
     page.edit_custom_text = LineEdit()
     page.edit_custom_text.setPlaceholderText("输入自定义文本...")
-    card.addGroup(FluentIcon.EDIT, "自定义文本", "样式启用时可输入", page.edit_custom_text, 3)
+    page.edit_custom_text.setFixedWidth(OPTION_WIDGET_WIDTH)
+    page.group_custom_text = card.addGroup(
+        FluentIcon.EDIT, "自定义文本", "布局使用该行时可输入", page.edit_custom_text, 3)
 
     return card
 
@@ -249,19 +269,26 @@ def create_shot_info_card(page) -> ExpandGroupSettingCard:
     """Tab 4: 拍摄信息配置"""
     card = ExpandGroupSettingCard(FluentIcon.CAMERA, "拍摄信息配置", "拍摄时间、镜头和 LOGO 设置")
 
-    # 拍摄时间（G3：userData 绑定稳定 key）
+    # 拍摄时间（G3：userData 绑定稳定 key；组对象存 page 属性供绑定表用。
+    # 宽度统一 200：qfw ComboBox 宽度随当前项文字变化，固定后行几何稳定）
     page.combo_timestamp = ComboBox()
     for _text, _key in TIMESTAMP_DISPLAY_ITEMS:
         page.combo_timestamp.addItem(_text, userData=_key)
     page.combo_timestamp.setCurrentIndex(0)
-    card.addGroup(FluentIcon.DATE_TIME, "拍摄时间", "控制相框中显示的拍摄时间信息", page.combo_timestamp, 1)
+    page.combo_timestamp.setFixedWidth(200)
+    page.group_timestamp = card.addGroup(
+        FluentIcon.DATE_TIME, "拍摄时间", "拍摄时间的显示格式",
+        page.combo_timestamp, 1)
 
     # 镜头显示（G3：userData 绑定稳定 key）
     page.combo_lens_display = ComboBox()
     for _text, _key in LENS_DISPLAY_ITEMS:
         page.combo_lens_display.addItem(_text, userData=_key)
     page.combo_lens_display.setCurrentIndex(0)
-    card.addGroup(FluentIcon.CAMERA, "镜头显示", "控制相框中显示的设备信息", page.combo_lens_display, 1)
+    page.combo_lens_display.setFixedWidth(200)
+    page.group_lens_display = card.addGroup(
+        FluentIcon.CAMERA, "镜头显示", "组合设备行的显示内容",
+        page.combo_lens_display, 1)
 
     # 短版镜头名
     # 镜头名（三态下拉，G3：userData 绑定稳定 key，与 combo_lens_display 同构）
@@ -269,10 +296,15 @@ def create_shot_info_card(page) -> ExpandGroupSettingCard:
     for _text, _key in LENS_NAME_ITEMS:
         page.combo_lens_name.addItem(_text, userData=_key)
     page.combo_lens_name.setCurrentIndex(0)
-    card.addGroup(FluentIcon.CAMERA, "镜头名", "默认按样式键取值；可强制完整名或短版名", page.combo_lens_name, 1)
+    page.combo_lens_name.setFixedWidth(200)
+    page.group_lens_name = card.addGroup(
+        FluentIcon.CAMERA, "镜头名", "统一镜头名长短显示",
+        page.combo_lens_name, 1)
 
     # LOGO（G3：哨兵文案改 userData 稳定 key，动态 logo 项以文件名
-    # 为 userData——文案调整不再使渲染分支静默失效）
+    # 为 userData——文案调整不再使渲染分支静默失效。
+    # 固定宽度 200：动态 logo 文件名可能很长，弹性宽度会把整行撑出
+    # 侧边栏（实测行最小需求 886px）；超长文件名在框内截断显示）
     page.combo_logo = ComboBox()
     page.combo_logo.addItem('自动匹配', userData=LOGO_AUTO)
     page.combo_logo.addItem('无', userData=LOGO_NONE)
@@ -280,7 +312,9 @@ def create_shot_info_card(page) -> ExpandGroupSettingCard:
     logos = page.logo_selector.scan_logos()
     for _logo in logos:
         page.combo_logo.addItem(_logo, userData=_logo)
-    card.addGroup(FluentIcon.IMAGE_EXPORT, "LOGO", "根据相机品牌自动匹配", page.combo_logo, 3)
+    page.combo_logo.setFixedWidth(200)
+    page.group_logo = card.addGroup(
+        FluentIcon.IMAGE_EXPORT, "LOGO", "根据相机品牌自动匹配", page.combo_logo, 3)
 
     return card
 
@@ -289,13 +323,16 @@ def create_watermark_card(page) -> ExpandGroupSettingCard:
     """Tab 5: 文本水印"""
     card = ExpandGroupSettingCard(FluentIcon.EDIT, "文本水印", "添加自定义文字水印")
 
+    # 宽度统一 200（v14 跨卡对齐：与 11 项样式选项控件同一宽度基准，
+    # 使各卡片行内控件右缘/左缘视觉一致；开关保持固有尺寸）
     # 启用水印
     page.chk_watermark = SwitchButton()
-    card.addGroup(FluentIcon.CHECKBOX, "启用水印", "开启后可在图片上添加文字", page.chk_watermark)
+    card.addGroup(FluentIcon.CHECKBOX, "启用水印", "开启后添加文字水印", page.chk_watermark)
 
     # 水印内容
     page.edit_watermark_text = LineEdit()
     page.edit_watermark_text.setPlaceholderText("输入水印文字...")
+    page.edit_watermark_text.setFixedWidth(200)
     card.addGroup(FluentIcon.EDIT, "水印内容", "输入要显示的文字", page.edit_watermark_text, 3)
 
     # 水印位置（G3：userData 绑定稳定 key）
@@ -303,54 +340,108 @@ def create_watermark_card(page) -> ExpandGroupSettingCard:
     for _text, _key in WATERMARK_POSITION_ITEMS:
         page.combo_wm_position.addItem(_text, userData=_key)
     page.combo_wm_position.setCurrentIndex(4)  # 默认底部居中
+    page.combo_wm_position.setFixedWidth(200)
     card.addGroup(FluentIcon.MARKET, "水印位置", "选择水印显示位置", page.combo_wm_position, 1)
 
-    # 不透明度
+    # 不透明度（滑条同样固定 200：拖动行程与其他行控件等宽）
     page.slider_opacity = Slider(Qt.Orientation.Horizontal)
     page.slider_opacity.setRange(0, 100)
     page.slider_opacity.setValue(50)
+    page.slider_opacity.setFixedWidth(200)
     card.addGroup(FluentIcon.ZOOM, "不透明度", "调节水印透明程度", page.slider_opacity)
 
     # 颜色（G3：userData 绑定稳定 key，渲染时经 _WM_COLOR_RGB 取 RGB）
     page.combo_wm_color = ComboBox()
     for _text, _key in WATERMARK_COLOR_ITEMS:
         page.combo_wm_color.addItem(_text, userData=_key)
+    page.combo_wm_color.setFixedWidth(200)
     card.addGroup(FluentIcon.PALETTE, "水印颜色", "选择水印文字颜色", page.combo_wm_color, 1)
 
     return card
 
 
-def collect_render_options(page, item):
-    """从页面控件收集渲染元数据与选项（纯读控件，无副作用）
+def normalize_option_rows(page):
+    """跨卡片对齐（v14：统一全部选项行的标签列宽与行边距）
 
-    G2 拆分：原 _on_generate_frame 方法体中段的配置收集逻辑
-    （含 LOGO 选择语义与水印装饰拼装）收敛为纯函数，便于独立验证。
+    背景：qfw GroupWidget 的行宽由左块（titleLabel/contentLabel 垂直
+    堆叠）宽度决定，各卡说明文案长短不同 → 各卡行宽不同（实测
+    432/454/465px），超过卡片宽（434px）的行右侧被裁剪溢出。
+
+    本函数在全部卡片创建完成后调用一次：
+    1. 收集五张配置卡 viewLayout 内的全部选项行（含 titleLabel 的
+       GroupWidget；样式选择卡的滚动区无该属性自然跳过）；
+    2. 取全部行标题/说明理想宽度的最大值作为统一标签列宽 W
+       （setFixedWidth：说明为静态文案且已精简至 ≤11 字，不会被裁剪；
+       短文案留白对齐）；
+    3. 行边距统一 (24, 12, 24, 12)（qfw 默认左右各 48 过宽，压缩后
+       默认 450px 侧边栏下"边距 + 标签列 + 控件 200"恰好收进卡宽）。
+
+    效果：全部行的标签列、控件左缘/右缘跨卡逐像素对齐，行宽恒定。
+    拖窄侧边栏（<W+288px）时说明列被压缩截断，属 ScrollArea 正常语义，
+    控件本身不再被裁剪。
+    """
+    cards = (page.output_settings_card, page.frame_config_card,
+             page.personalization_card, page.shot_info_card,
+             page.watermark_card)
+    rows = []
+    for card in cards:
+        layout = card.viewLayout
+        for i in range(layout.count()):
+            row = layout.itemAt(i).widget()
+            if row is not None and hasattr(row, "titleLabel") \
+                    and hasattr(row, "contentLabel"):
+                rows.append(row)
+
+    if not rows:
+        return
+
+    # 统一标签列宽 = 全部行标题/说明理想宽度的最大值（动态计算，
+    # 不硬编码：文案调整后仍保持"不裁剪"）
+    w = max(label.sizeHint().width()
+            for row in rows
+            for label in (row.titleLabel, row.contentLabel))
+    for row in rows:
+        # 必须设置【布局】的 margins（qfw 在 GroupWidget.__init__ 里对 hBoxLayout 设 48/12/48/12；
+        # QWidget.setContentsMargins 与布局 margins 相互独立，改 widget 不生效）
+        row.hBoxLayout.setContentsMargins(24, 12, 24, 12)
+        row.titleLabel.setFixedWidth(w)
+        row.contentLabel.setFixedWidth(w)
+
+
+def collect_render_options(page, item, evaluation=None):
+    """从页面收集渲染元数据与选项（计划 §7.3：使用同一次评估结果）
+
+    §7.3 改造：作者、地点、文本、时间、镜头、LOGO、背景和字重一律取
+    evaluation.effective_values（T3 已按家族能力过滤），不再自行重复
+    GPS 替换或直接读取残留控件文本——控件原值与生成参数自此分离。
+    水印、输出格式、portrait_adaptation、source_cache_key、
+    prepared_blur_cache 仍走各自现有入口，不因参数过滤而丢失。
+    LOGO 自动匹配保持 None，禁用保持空字符串；最终背景确定后的匹配
+    仍由 renderer 完成。
+
+    Args:
+        page: 页面（读取水印与旋转适配等独立入口）
+        item: 当前 FileItem（source_cache_key 来源）
+        evaluation: T3 评估结果；None 时退回读取控件原值（仅限测试/
+            旧路径兼容，正常 GUI 流程必须传入）
 
     Returns:
         (metadata, options, fw_key) 三元组
     """
-    # 下拉框 userData 即稳定 key（G3），直接读 currentData()
-    bg_key = page.combo_bg_fill.currentData() or BackgroundFillManager.DEFAULT_FILL
-    fw_key = page.combo_font_weight.currentData() or 'medium'
-    lens_key = page.combo_lens_display.currentData() or 'combined'
-    ts_mode = page.combo_timestamp.currentData() or 'full'
+    from src.gui_pyside.models.style_option_state import RawOptionValues
+    if evaluation is None:
+        # 兼容兜底：无评估结果时按原值直传（不应出现在正常 GUI 流程）
+        from src.gui_pyside.utils.style_option_bindings import read_raw_values
+        from src.gui_pyside.models.style_option_state import evaluate_style_options
+        raw = read_raw_values(page)
+        evaluation = evaluate_style_options(
+            None, raw,
+            type('P', (), {'has_photo': True, 'exif_data': item.exif_data,
+                           'gps_text': ''})(),
+            selected_bg_is_gaussian=False)
+    eff = evaluation.effective_values
 
-    # GPS 替换逻辑
-    gps_on = page.chk_use_gps.isChecked()
-    gps_str = item.exif_data.get('gps', '') if item.exif_data else ''
-    location = gps_str if (gps_on and gps_str) else page.edit_location.text()
-
-    # LOGO 选择逻辑（userData：LOGO_AUTO / LOGO_NONE / 文件名）
-    logo_opt = page.combo_logo.currentData()
-    logo_filename = None
-    if logo_opt == LOGO_NONE:
-        logo_filename = ""
-    elif logo_opt not in (LOGO_AUTO, None):
-        logo_filename = logo_opt
-    # LOGO_AUTO 保持 None：由 render_frame 在样式背景覆盖解析之后，
-    # 按最终背景与显示品牌统一匹配，避免样式覆盖背景后 Logo 明暗错位
-
-    # 水印装饰
+    # 水印装饰（独立规则：不参与能力过滤，文本水印始终可用）
     decorations = []
     if page.chk_watermark.isChecked() and page.edit_watermark_text.text():
         decorations.append({
@@ -366,20 +457,20 @@ def collect_render_options(page, item):
         })
 
     metadata = RenderMetadata(
-        author=page.edit_author.text() or None,
-        location=location or None,
-        custom_text=page.edit_custom_text.text() or None,
-        lens_display_mode=lens_key,
-        lens_name_mode=page.combo_lens_name.currentData() or 'default',
-        timestamp_display_mode=ts_mode,
+        author=eff.author,
+        location=eff.location,
+        custom_text=eff.custom_text,
+        lens_display_mode=eff.lens_display_mode,
+        lens_name_mode=eff.lens_name_mode,
+        timestamp_display_mode=eff.timestamp_display_mode,
     )
     options = RenderOptions(
-        bg_fill_type=bg_key,
+        bg_fill_type=eff.bg_fill_type or BackgroundFillManager.DEFAULT_FILL,
         decorations=decorations or None,
-        logo_filename=logo_filename,
-        saturation_override=None if page.chk_enhance.isChecked() else 1.0,
+        logo_filename=eff.logo_filename,
+        saturation_override=eff.saturation_override,
         source_cache_key=item.cache_key,
         prepared_blur_cache=page._blur_lru,
         portrait_adaptation=page._get_portrait_adaptation(),
     )
-    return metadata, options, fw_key
+    return metadata, options, eff.font_weight or 'medium'

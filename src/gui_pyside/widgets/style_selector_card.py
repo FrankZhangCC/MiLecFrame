@@ -66,7 +66,7 @@ class StyleSelectorCard(ExpandGroupSettingCard):
     def refresh_styles(self, style_names: List[str], style_manager) -> None:
         """
         刷新样式列表
-        
+
         Args:
             style_names: 可用的样式名称列表
             style_manager: StyleManager 实例，用于获取缩略图路径
@@ -84,10 +84,18 @@ class StyleSelectorCard(ExpandGroupSettingCard):
         # 末尾弹簧（卡片不满时靠左对齐）
         self._h_layout.addStretch()
 
-        # 恢复选中态
+        if not style_names:
+            # 计划 §8.3：空列表必须真实表达——清除 current_style 残留，
+            # 不构造不存在的选择（旧实现残留旧样式名，导致 save_config
+            # 保存幽灵样式、生成路径用错误样式）
+            self._current_style = None
+            return
+
+        # 恢复选中态：仍存在的选择保持；否则选择首项（§8.3：非空列表
+        # 保留合法首选）
         if self._current_style and self._current_style in style_names:
             self._set_selected_card(self._current_style)
-        elif style_names:
+        else:
             self._set_selected_card(style_names[0])
 
     def _clear_cards(self) -> None:
